@@ -1,0 +1,29 @@
+{
+  "version": 5,
+  "configurePresets": [
+    {
+      "name": "linux-debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "linux-release",
+      "inherits": "linux-debug",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "linux-tidy",
+      "inherits": "linux-debug",
+      "cacheVariables": { "ENABLE_CLANG_TIDY": "ON" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "linux-debug", "configurePreset": "linux-debug" },
+    { "name": "linux-release", "configurePreset": "linux-release" },
+    { "name": "linux-tidy", "configurePreset": "linux-tidy" }
+  ],
+  "testPresets": [
+    { "name": "linux-debug", "configurePreset": "linux-debug", "output": { "outputOnFailure": true } }
+  ]
+}

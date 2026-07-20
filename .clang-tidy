@@ -1,0 +1,8 @@
+Checks: >
+  google-*,
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  -modernize-use-trailing-return-type
+WarningsAsErrors: ''
+HeaderFilterRegex: '(core|cli)/'
