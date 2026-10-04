@@ -3,6 +3,7 @@
 
 namespace ballistics {
 
+// Version of the ballistics engine, "MAJOR.MINOR.PATCH".
 const char* version();
 
 } // namespace ballistics

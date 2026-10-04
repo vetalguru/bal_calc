@@ -1,4 +1,4 @@
-add_executable(ballistics_cli main.cpp)
-target_link_libraries(ballistics_cli PRIVATE ballistics_core ballistics_warnings)
+add_executable(bal-cli main.cpp)
+target_link_libraries(bal-cli PRIVATE ballistics_core ballistics_storage ballistics_warnings)
 
-ballistics_enable_tidy(ballistics_cli)
+ballistics_enable_tidy(bal-cli)

@@ -2,6 +2,6 @@
 
 namespace ballistics {
 const char* version() {
-    return "0.1.0";
+    return BALLISTICS_VERSION;
 }
 } // namespace ballistics
