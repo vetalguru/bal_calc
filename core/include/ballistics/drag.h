@@ -45,6 +45,12 @@ private:
     std::vector<double> x_, a_, b_, c_, d_;
 };
 
+// A published BC valid around one velocity (e.g. Sierra's velocity bands).
+struct BcPoint {
+    double velocity_mps = 0.0;
+    double bc_lb_in2 = 0.0;
+};
+
 // Drag of a particular projectile. Retardation is
 //   a = rho * K(M) * v^2,   K = (pi / 8) * Cd_ref(M) / BC,
 // with BC in kg/m^2 (sectional density / form factor).
@@ -52,6 +58,12 @@ class DragModel final {
 public:
     // Published BC (lb/in^2) against a standard table.
     static DragModel FromBc(DragTableId table, double bc_lb_in2);
+
+    // Several BCs against one standard table, each at a velocity. The BC is
+    // interpolated linearly in Mach (velocities are converted at the
+    // standard 15 C speed of sound, 340.29 m/s) and held constant beyond
+    // the first/last point. One point is the same as FromBc.
+    static DragModel FromMultiBc(DragTableId table, std::vector<BcPoint> points);
 
     // Projectile-specific Cd(M) curve (e.g. Doppler-radar measured); the
     // BC is the sectional density m/d^2 divided by `form_factor`.

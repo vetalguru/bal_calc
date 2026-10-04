@@ -121,6 +121,47 @@ DragModel DragModel::FromBc(DragTableId table, double bc_lb_in2) {
     return m;
 }
 
+DragModel DragModel::FromMultiBc(DragTableId table, std::vector<BcPoint> points) {
+    if (points.empty()) {
+        throw std::invalid_argument("at least one BC point is required");
+    }
+    // Speed of sound the BC velocities refer to: dry air at 15 C.
+    constexpr double kReferenceSoundSpeed = 340.294;
+    std::vector<std::pair<double, double>> bc_by_mach;
+    for (const BcPoint& p : points) {
+        if (!(p.bc_lb_in2 > 0.0) || !(p.velocity_mps > 0.0)) {
+            throw std::invalid_argument("BC points need positive BC and velocity");
+        }
+        bc_by_mach.emplace_back(p.velocity_mps / kReferenceSoundSpeed, p.bc_lb_in2);
+    }
+    std::sort(bc_by_mach.begin(), bc_by_mach.end());
+    auto bc_at = [&](double mach) {
+        if (mach <= bc_by_mach.front().first) {
+            return bc_by_mach.front().second;
+        }
+        if (mach >= bc_by_mach.back().first) {
+            return bc_by_mach.back().second;
+        }
+        std::size_t i = 0;
+        while (bc_by_mach[i + 1].first < mach) {
+            ++i;
+        }
+        const auto& [m0, b0] = bc_by_mach[i];
+        const auto& [m1, b1] = bc_by_mach[i + 1];
+        return b0 + (b1 - b0) * (mach - m0) / (m1 - m0);
+    };
+
+    // Fold the BC into the curve: Cd_ref(M) / BC(M), with a unit BC.
+    std::vector<DragPoint> curve = StandardDragTable(table);
+    for (DragPoint& p : curve) {
+        p.cd /= bc_at(p.mach);
+    }
+    DragModel m;
+    m.curve_ = DragCurve(std::move(curve));
+    m.bc_kg_m2_ = units::BcToSi(1.0);
+    return m;
+}
+
 DragModel DragModel::FromCurve(std::vector<DragPoint> curve, double mass_kg, double diameter_m,
                                double form_factor) {
     if (!(mass_kg > 0.0) || !(diameter_m > 0.0) || !(form_factor > 0.0)) {
