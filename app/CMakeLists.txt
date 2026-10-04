@@ -22,6 +22,7 @@ set_target_properties(balcalc PROPERTIES
     QT_ANDROID_VERSION_CODE 1
     QT_ANDROID_MIN_SDK_VERSION 28
     QT_ANDROID_TARGET_SDK_VERSION 35
+    QT_ANDROID_COMPILE_SDK_VERSION 35
 )
 
 target_link_libraries(balcalc PRIVATE

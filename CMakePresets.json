@@ -48,6 +48,12 @@
         "QT_ANDROID_BUILD_ALL_ABIS": "OFF"
       },
       "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "android-arm64-debug",
+      "displayName": "Android arm64-v8a Debug (debug-signed APK, installable for testing)",
+      "inherits": "android-arm64",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     }
   ],
   "buildPresets": [
@@ -56,7 +62,8 @@
     { "name": "linux-tidy", "configurePreset": "linux-tidy" },
     { "name": "windows-msvc", "configurePreset": "windows-msvc", "configuration": "Debug" },
     { "name": "windows-msvc-release", "configurePreset": "windows-msvc", "configuration": "Release" },
-    { "name": "android-arm64", "configurePreset": "android-arm64", "targets": ["apk"] }
+    { "name": "android-arm64", "configurePreset": "android-arm64", "targets": ["apk"] },
+    { "name": "android-arm64-debug", "configurePreset": "android-arm64-debug", "targets": ["apk"] }
   ],
   "testPresets": [
     { "name": "linux-debug", "configurePreset": "linux-debug", "output": { "outputOnFailure": true } },
