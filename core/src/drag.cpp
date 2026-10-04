@@ -173,6 +173,15 @@ DragModel DragModel::FromCurve(std::vector<DragPoint> curve, double mass_kg, dou
     return m;
 }
 
+DragModel DragModel::Scaled(double factor) const {
+    if (!(factor > 0.0)) {
+        throw std::invalid_argument("drag scale must be positive");
+    }
+    DragModel m = *this;
+    m.bc_kg_m2_ /= factor;
+    return m;
+}
+
 double DragModel::Coefficient(double mach) const {
     return units::kPi / 8.0 * curve_.Cd(mach) / bc_kg_m2_;
 }

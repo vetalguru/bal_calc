@@ -153,14 +153,17 @@ Trajectory Fly(const Shot& shot, double max_slant_range_m, const SolverOptions& 
 struct ZeroResult {
     bool converged = false;
     double elevation_rad = 0.0; // bore elevation relative to the LOS
+    double windage_rad = 0.0;   // bore windage relative to the LOS
     int iterations = 0;
 };
 
-// Finds the bore elevation (relative to the LOS) that puts the impact on
-// the LOS at `zero_range_m`, offset by `offset_up_m` (positive = impact
-// above the aim point). The shot's own elevation is ignored.
+// Finds the bore elevation and windage (relative to the LOS) that put the
+// impact `offset_up_m` above and `offset_right_m` right of the aim point
+// at `zero_range_m`. Horizontal effects present at the zero range (spin
+// drift, wind, Coriolis) are absorbed into the windage, as when zeroing a
+// real rifle. The shot's own elevation and windage are ignored.
 ZeroResult FindZero(Shot shot, double zero_range_m, double offset_up_m = 0.0,
-                    const SolverOptions& options = {});
+                    const SolverOptions& options = {}, double offset_right_m = 0.0);
 
 } // namespace ballistics
 

@@ -1,5 +1,6 @@
 add_library(ballistics_storage STATIC
     src/database.cpp
+    src/solution.cpp
     src/repository.cpp
     src/schema.cpp
 )

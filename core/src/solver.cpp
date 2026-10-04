@@ -342,42 +342,64 @@ Trajectory Fly(const Shot& shot, double max_slant_range_m, const SolverOptions& 
 }
 
 ZeroResult FindZero(Shot shot, double zero_range_m, double offset_up_m,
-                    const SolverOptions& options) {
+                    const SolverOptions& options, double offset_right_m) {
     ZeroResult result;
-    auto miss = [&](double elevation) -> std::optional<double> {
+    shot.windage_rad = 0.0;
+    // Miss (up, right) at the zero range for the current angles.
+    auto miss = [&](double elevation) -> std::optional<TrajectoryPoint> {
         shot.elevation_rad = elevation;
-        const Trajectory traj = Fly(shot, zero_range_m + 1.0, options);
-        const auto pt = traj.AtSlantRange(zero_range_m);
-        if (!pt) {
-            return std::nullopt;
-        }
-        return pt->drop_m - offset_up_m;
+        return Fly(shot, zero_range_m + 1.0, options).AtSlantRange(zero_range_m);
     };
 
-    // Secant iteration; the first step uses d(drop)/d(elevation) ~ range.
-    double e0 = 0.0;
-    auto f0 = miss(e0);
-    if (!f0) {
-        return result;
-    }
-    double e1 = e0 - *f0 / zero_range_m;
-    for (result.iterations = 1; result.iterations <= 30; ++result.iterations) {
-        const auto f1 = miss(e1);
-        if (!f1) {
+    for (int pass = 0; pass < 3; ++pass) {
+        // Secant on elevation; the first step uses d(drop)/d(elevation) ~ range.
+        double e0 = shot.elevation_rad;
+        auto p0 = miss(e0);
+        if (!p0) {
             return result;
         }
-        if (std::fabs(*f1) < 1e-9) {
-            result.converged = true;
+        double f0 = p0->drop_m - offset_up_m;
+        bool elevation_ok = std::fabs(f0) < 1e-9;
+        double e1 = elevation_ok ? e0 : e0 - f0 / zero_range_m;
+        for (int i = 0; i < 30 && !elevation_ok; ++i) {
+            ++result.iterations;
+            const auto p1 = miss(e1);
+            if (!p1) {
+                return result;
+            }
+            const double f1 = p1->drop_m - offset_up_m;
+            if (std::fabs(f1) < 1e-9) {
+                elevation_ok = true;
+                break;
+            }
+            const double slope = (f1 - f0) / (e1 - e0);
+            const double e2 = slope != 0.0 ? e1 - f1 / slope : e1 - f1 / zero_range_m;
+            e0 = e1;
+            f0 = f1;
+            e1 = e2;
+        }
+        if (!elevation_ok) {
             result.elevation_rad = e1;
             return result;
         }
-        const double slope = (*f1 - *f0) / (e1 - e0);
-        const double e2 = slope != 0.0 ? e1 - *f1 / slope : e1 - *f1 / zero_range_m;
-        e0 = e1;
-        f0 = f1;
-        e1 = e2;
+        shot.elevation_rad = e1;
+
+        // Windage: the horizontal miss is linear in the bore windage.
+        const auto p = Fly(shot, zero_range_m + 1.0, options).AtSlantRange(zero_range_m);
+        if (!p) {
+            return result;
+        }
+        const double horizontal = p->windage_m - offset_right_m;
+        if (std::fabs(horizontal) < 1e-9) {
+            result.converged = true;
+            result.elevation_rad = shot.elevation_rad;
+            result.windage_rad = shot.windage_rad;
+            return result;
+        }
+        shot.windage_rad -= horizontal / zero_range_m;
     }
-    result.elevation_rad = e1;
+    result.elevation_rad = shot.elevation_rad;
+    result.windage_rad = shot.windage_rad;
     return result;
 }
 
