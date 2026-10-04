@@ -18,8 +18,13 @@ using sqlite_manager::Status;
 class Database final {
 public:
     // Opens (creating if missing) the database at `path`, enables foreign
-    // keys and a busy timeout. ":memory:" gives a throwaway database.
+    // keys and a busy timeout, and migrates the schema to the latest
+    // version. ":memory:" gives a throwaway database. A file written by a
+    // newer version of the app (higher schema version) is refused.
     Status Open(const std::string& path);
+
+    // Schema version this build creates and understands.
+    static std::int64_t LatestSchemaVersion();
 
     bool IsOpen() const { return conn_.IsOpen(); }
 
@@ -29,6 +34,8 @@ public:
     sqlite_manager::Connection& connection() { return conn_; }
 
 private:
+    Status Migrate();
+
     sqlite_manager::Connection conn_;
 };
 
