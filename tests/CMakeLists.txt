@@ -9,6 +9,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  # for future MSVC builds
 FetchContent_MakeAvailable(googletest)
 
 add_executable(core_tests
+    applogic_import_test.cpp
     applogic_library_test.cpp
     applogic_test.cpp
     physics_basics_test.cpp
@@ -30,6 +31,8 @@ target_link_libraries(core_tests PRIVATE
 ballistics_enable_tidy(core_tests)
 
 target_include_directories(core_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(core_tests PRIVATE
+    BALLISTICS_SEED_DIR="${PROJECT_SOURCE_DIR}/data/seed")
 
 if(TARGET bal_cli_lib)
     target_sources(core_tests PRIVATE cli_test.cpp)

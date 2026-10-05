@@ -20,6 +20,13 @@ TestCase {
     Component { id: tableComponent; TablePage {} }
     Component { id: mainComponent; Main {} }
 
+    function test_0_starterLibraryIsSeeded() {
+        // 69 cartridges + 55 radar curves + 38 published bullets.
+        compare(Backend.libraryBullets("").length, 162)
+        verify(Backend.libraryBullets("Lapua").length >= 50)
+        verify(Backend.seedReport.length > 0)
+    }
+
     function test_1_createProfileInEditor() {
         compare(Backend.profiles.length, 0)
         compare(Backend.solution.ok, false)
@@ -71,7 +78,7 @@ TestCase {
     function test_4_libraryBulletWithBands() {
         var editor = createTemporaryObject(bulletEditorComponent, testCase,
                                            { form: Backend.bulletForm(0), width: 900, height: 700 })
-        editor.form.name = "MatchKing 175 HPBT"
+        editor.form.name = "Test bullet 175 HPBT"
         editor.form.manufacturer = "Sierra"
         editor.form.caliber = ".308"
         editor.form.massGr = 175
@@ -81,7 +88,7 @@ TestCase {
         editor.banded = true
         editor.bands = [{ velocity: 869, bc: 0.505 }, { velocity: 701, bc: 0.496 }, { velocity: 457, bc: 0.485 }]
         editor.save()
-        var list = Backend.libraryBullets("matchking")
+        var list = Backend.libraryBullets("Test bullet")
         compare(list.length, 1)
         compare(list[0].bcBands, 3)
         compare(list[0].dragKind, "multi_bc")
@@ -89,7 +96,7 @@ TestCase {
 
     function test_5_profileUsesTheLibraryBullet() {
         var before = Backend.solution.elevation
-        var bullet = Backend.libraryBullets("matchking")[0]
+        var bullet = Backend.libraryBullets("Test bullet")[0]
         var form = Backend.profileFormWithBullet(Backend.profileForm(Backend.currentProfileId), bullet.id)
         compare(form.libraryBulletId, bullet.id)
         compare(Backend.saveProfile(form), "")
@@ -101,12 +108,13 @@ TestCase {
 
     function test_6_exportImportViaClipboard() {
         var id = Backend.currentProfileId
+        var bulletsBefore = Backend.libraryBullets("").length
         compare(Backend.copyProfileToClipboard(id), "")
         compare(Backend.importProfileFromClipboard(), "")
         compare(Backend.profiles.length, 2)
         verify(Backend.currentProfileId !== id)
         // The identical library bullet is reused, not duplicated.
-        compare(Backend.libraryBullets("").length, 1)
+        compare(Backend.libraryBullets("").length, bulletsBefore)
         verify(Backend.profileFileName(id).endsWith(".balcalc.json"))
     }
 

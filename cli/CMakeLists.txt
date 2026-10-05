@@ -2,7 +2,7 @@
 add_library(bal_cli_lib STATIC cli_app.cpp)
 target_include_directories(bal_cli_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(bal_cli_lib
-    PUBLIC ballistics_core ballistics_storage
+    PUBLIC ballistics_core ballistics_storage ballistics_applogic
     PRIVATE ballistics_warnings)
 ballistics_enable_tidy(bal_cli_lib)
 

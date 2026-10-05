@@ -4,20 +4,31 @@
 <context>
     <name>Backend</name>
     <message>
-        <location filename="../backend.cpp" line="344" />
-        <location filename="../backend.cpp" line="548" />
+        <location filename="../backend.cpp" line="350" />
+        <location filename="../backend.cpp" line="600" />
         <source>Create a profile to get a solution.</source>
         <translation>Создайте профиль, чтобы получить решение.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="456" />
+        <location filename="../backend.cpp" line="462" />
         <source>Cannot write %1: %2</source>
         <translation>Не удалось записать %1: %2</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="477" />
+        <location filename="../backend.cpp" line="495" />
+        <source>Starter library: %1 records imported.</source>
+        <translation>Стартовая библиотека: импортировано записей — %1.</translation>
+    </message>
+    <message>
+        <location filename="../backend.cpp" line="505" />
+        <location filename="../backend.cpp" line="529" />
         <source>Cannot read %1: %2</source>
         <translation>Не удалось прочитать %1: %2</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../backend.cpp" line="519" />
+        <source>%n file(s) imported.</source>
+        <translation><numerusform>Импортирован %n файл.</numerusform><numerusform>Импортировано %n файла.</numerusform><numerusform>Импортировано %n файлов.</numerusform></translation>
     </message>
 </context>
 <context>
@@ -277,57 +288,78 @@
 <context>
     <name>LibraryPage</name>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="40" />
+        <location filename="../qml/LibraryPage.qml" line="41" />
         <source>Back</source>
         <translation>Назад</translation>
     </message>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="45" />
+        <location filename="../qml/LibraryPage.qml" line="46" />
         <source>Choose a bullet</source>
         <translation>Выберите пулю</translation>
     </message>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="45" />
+        <location filename="../qml/LibraryPage.qml" line="46" />
         <source>Bullet library</source>
         <translation>Библиотека пуль</translation>
     </message>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="51" />
+        <location filename="../qml/LibraryPage.qml" line="52" />
+        <location filename="../qml/LibraryPage.qml" line="81" />
+        <source>Import</source>
+        <translation>Импорт</translation>
+    </message>
+    <message>
+        <location filename="../qml/LibraryPage.qml" line="57" />
         <source>New</source>
         <translation>Новый</translation>
     </message>
     <message>
         <location filename="../qml/LibraryPage.qml" line="66" />
+        <source>Import bullets, drag curves or reticles</source>
+        <translation>Импорт пуль, кривых сопротивления или сеток</translation>
+    </message>
+    <message>
+        <location filename="../qml/LibraryPage.qml" line="68" />
+        <source>Ballistic data (*.ammo *.drg *.reticle *.json)</source>
+        <translation>Баллистические данные (*.ammo *.drg *.reticle *.json)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LibraryPage.qml" line="68" />
+        <source>All files (*)</source>
+        <translation>Все файлы (*)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LibraryPage.qml" line="98" />
         <source>Search by name, maker or caliber</source>
         <translation>Поиск по названию, производителю или калибру</translation>
     </message>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="77" />
+        <location filename="../qml/LibraryPage.qml" line="109" />
         <source>Nothing found.</source>
         <translation>Ничего не найдено.</translation>
     </message>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="78" />
+        <location filename="../qml/LibraryPage.qml" line="110" />
         <source>The library is empty. Add bullets here to reuse them in several profiles.</source>
         <translation>Библиотека пуста. Добавьте пули, чтобы использовать их в нескольких профилях.</translation>
     </message>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="106" />
+        <location filename="../qml/LibraryPage.qml" line="138" />
         <source>%1 gr</source>
         <translation>%1 гран</translation>
     </message>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="107" />
+        <location filename="../qml/LibraryPage.qml" line="139" />
         <source>own drag curve</source>
         <translation>своя кривая сопротивления</translation>
     </message>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="109" />
+        <location filename="../qml/LibraryPage.qml" line="141" />
         <source>(%1 bands)</source>
         <translation>(%1 диап.)</translation>
     </message>
     <message>
-        <location filename="../qml/LibraryPage.qml" line="115" />
+        <location filename="../qml/LibraryPage.qml" line="147" />
         <source>Edit</source>
         <translation>Изменить</translation>
     </message>
@@ -335,82 +367,82 @@
 <context>
     <name>Logic</name>
     <message>
-        <location filename="../backend.cpp" line="41" />
+        <location filename="../backend.cpp" line="46" />
         <source>Enter a profile name.</source>
         <translation>Введите название профиля.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="42" />
+        <location filename="../backend.cpp" line="47" />
         <source>Muzzle velocity must be between 50 and 2000 m/s.</source>
         <translation>Начальная скорость должна быть от 50 до 2000 м/с.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="43" />
+        <location filename="../backend.cpp" line="48" />
         <source>Ballistic coefficient must be between 0 and 2.</source>
         <translation>Баллистический коэффициент должен быть от 0 до 2.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="44" />
+        <location filename="../backend.cpp" line="49" />
         <source>Enter the bullet weight.</source>
         <translation>Введите массу пули.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="45" />
+        <location filename="../backend.cpp" line="50" />
         <source>Bullet diameter must be between 0 and 1 inch.</source>
         <translation>Диаметр пули должен быть от 0 до 1 дюйма.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="46" />
+        <location filename="../backend.cpp" line="51" />
         <source>Bullet length and twist cannot be negative.</source>
         <translation>Длина пули и шаг нарезов не могут быть отрицательными.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="47" />
+        <location filename="../backend.cpp" line="52" />
         <source>Zero range must be between 10 and 1000 m.</source>
         <translation>Дистанция пристрелки должна быть от 10 до 1000 м.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="48" />
+        <location filename="../backend.cpp" line="53" />
         <source>Enter the scope click value.</source>
         <translation>Введите цену клика прицела.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="49" />
+        <location filename="../backend.cpp" line="54" />
         <source>Zero pressure must be between 300 and 1200 hPa.</source>
         <translation>Давление при пристрелке должно быть от 300 до 1200 гПа.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="50" />
+        <location filename="../backend.cpp" line="55" />
         <source>Humidity must be between 0 and 100 %.</source>
         <translation>Влажность должна быть от 0 до 100 %.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="51" />
+        <location filename="../backend.cpp" line="56" />
         <source>Enter a target range.</source>
         <translation>Введите дистанцию до цели.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="52" />
+        <location filename="../backend.cpp" line="57" />
         <source>The bullet does not reach this range.</source>
         <translation>Пуля не долетает до этой дистанции.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="53" />
+        <location filename="../backend.cpp" line="58" />
         <source>Check the table range and step.</source>
         <translation>Проверьте границы и шаг таблицы.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="54" />
+        <location filename="../backend.cpp" line="59" />
         <source>Enter the bullet name.</source>
         <translation>Введите название пули.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="55" />
+        <location filename="../backend.cpp" line="60" />
         <source>Each BC band needs a velocity and a BC between 0 and 2.</source>
         <translation>Для каждого диапазона нужны скорость и БК от 0 до 2.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="56" />
+        <location filename="../backend.cpp" line="61" />
         <source>This bullet is used by a cartridge and cannot be deleted.</source>
         <translation>Эту пулю использует патрон, её нельзя удалить.</translation>
     </message>
@@ -879,6 +911,11 @@
         <location filename="../qml/SettingsPage.qml" line="89" />
         <source>Point-mass trajectory model with Coriolis, spin drift and aerodynamic jump. Always confirm with live fire.</source>
         <translation>Модель материальной точки с учётом Кориолиса, деривации и аэродинамического скачка. Всегда проверяйте стрельбой.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="95" />
+        <source>Bundled data: cartridges and reticles from BallisticCalculator (LGPL-2.1), Lapua Doppler-radar drag curves, manufacturer-published BCs (Berger, Hornady, Sierra).</source>
+        <translation>Встроенные данные: патроны и сетки из BallisticCalculator (LGPL-2.1), радарные кривые сопротивления Lapua, опубликованные производителями БК (Berger, Hornady, Sierra).</translation>
     </message>
 </context>
 <context>

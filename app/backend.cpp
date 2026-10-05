@@ -5,13 +5,16 @@
 #include <QClipboard>
 #include <QCoreApplication>
 #include <QDir>
+#include <QDirIterator>
 #include <QFile>
+#include <QFileInfo>
 #include <QGuiApplication>
 #include <QLocale>
 #include <QQmlEngine>
 #include <QRegularExpression>
 #include <QStandardPaths>
 
+#include <ballistics/applogic/importers.h>
 #include <ballistics/applogic/library.h>
 #include <ballistics/applogic/profile_form.h>
 #include <ballistics/applogic/profile_io.h>
@@ -29,6 +32,8 @@ namespace {
 constexpr const char* kCurrentProfileKey = "ui.current_profile";
 constexpr const char* kAngleUnitKey = "ui.angle_unit";
 constexpr const char* kLanguageKey = "ui.language";
+// Bump when data/seed gains files; existing records are kept.
+constexpr int kSeedVersion = 1;
 constexpr const char* kTableFromKey = "ui.table.from_m";
 constexpr const char* kTableToKey = "ui.table.to_m";
 constexpr const char* kTableStepKey = "ui.table.step_m";
@@ -193,6 +198,7 @@ Backend::Backend(QObject* parent) : QObject(parent) {
         db_error_ = Q(s.error().message);
         return;
     }
+    SeedStarterLibrary();
     if (auto session = al::LoadSession(db_); session) {
         ApplySession(session.value());
     }
@@ -469,6 +475,52 @@ QString Backend::ImportJson(const std::string& json) {
     setCurrentProfileId(static_cast<int>(id.value()));
     recompute_timer_.start();
     return {};
+}
+
+void Backend::SeedStarterLibrary() {
+    std::vector<al::SeedFile> files;
+    QDirIterator it(QStringLiteral(":/seed"), QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        QFile f(it.next());
+        if (f.open(QIODevice::ReadOnly)) {
+            files.push_back({QFileInfo(f.fileName()).fileName().toStdString(), f.readAll().toStdString()});
+        }
+    }
+    auto report = al::SeedLibrary(db_, files, kSeedVersion);
+    if (!report) {
+        seed_report_ = Q(report.error().message);
+        return;
+    }
+    if (report.value().imported > 0) {
+        seed_report_ = tr("Starter library: %1 records imported.").arg(report.value().imported);
+    }
+}
+
+QString Backend::importFiles(const QList<QUrl>& files) {
+    int imported = 0;
+    QStringList problems;
+    for (const QUrl& url : files) {
+        QFile f(FilePath(url));
+        if (!f.open(QIODevice::ReadOnly)) {
+            problems << tr("Cannot read %1: %2").arg(url.toDisplayString(), f.errorString());
+            continue;
+        }
+        const QString name = QFileInfo(url.path()).fileName();
+        auto id = al::ImportFile(db_, name.toStdString(), f.readAll().toStdString());
+        if (id) {
+            ++imported;
+        } else {
+            problems << name + ": " + Tr(id.error().message);
+        }
+    }
+    ReloadProfiles();
+    emit libraryChanged();
+    recompute_timer_.start();
+    QString summary = tr("%n file(s) imported.", nullptr, imported);
+    if (!problems.isEmpty()) {
+        summary += "\n" + problems.join("\n");
+    }
+    return summary;
 }
 
 QString Backend::importProfile(const QUrl& file) {
