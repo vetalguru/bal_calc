@@ -127,7 +127,9 @@ Page {
                     c.push({ title: qsTr("Wind\n%1").arg(page.unitLabel), key: "windage", d: 2 })
                     if (page.table.hasScope)
                         c.push({ title: qsTr("Wind\nclicks"), key: "windageClicks", d: 0 })
-                    c.push({ title: qsTr("V\nm/s"), key: "velocity", d: 0 })
+                    // Phones with a scope: five angle columns are enough.
+                    if (page.width >= 420 || !page.table.hasScope)
+                        c.push({ title: qsTr("V\nm/s"), key: "velocity", d: 0 })
                     if (page.wide) {
                         c.push({ title: qsTr("Drop\ncm"), key: "dropCm", d: 1 })
                         c.push({ title: qsTr("Drift\ncm"), key: "windageCm", d: 1 })

@@ -85,6 +85,11 @@ Result<ProfileForm> LoadProfileForm(storage::Database& db, Id profile_id);
 // cartridge and bullet it owns, in one transaction. Returns the profile id.
 Result<Id> SaveProfileForm(storage::Database& db, const ProfileForm& form);
 
+// A ready-to-try profile: .308 Win, 1:10 twist, 0.1 MRAD scope, 100 m zero,
+// Sierra MatchKing 175 gr from the library when it is there (an own copy of
+// its published bands otherwise). Returns the new profile id.
+Result<Id> CreateSampleProfile(storage::Database& db, const std::string& name);
+
 // Deletes a profile and the records it owns (those no other profile uses).
 Status DeleteProfile(storage::Database& db, Id profile_id);
 

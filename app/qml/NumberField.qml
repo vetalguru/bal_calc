@@ -42,7 +42,7 @@ ColumnLayout {
         TextField {
             id: field
             Layout.fillWidth: true
-            Layout.minimumWidth: 70
+            Layout.minimumWidth: 52
             text: root.format(root.value)
             selectByMouse: true
             inputMethodHints: Qt.ImhFormattedNumbersOnly
@@ -69,7 +69,7 @@ ColumnLayout {
             visible: root.unit.length > 0
             text: root.unit
             opacity: 0.8
-            Layout.minimumWidth: 36
+            Layout.minimumWidth: implicitWidth
         }
     }
 }

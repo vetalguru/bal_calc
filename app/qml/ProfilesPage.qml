@@ -19,6 +19,15 @@ Page {
 
     signal profileChosen()
 
+    // Pops an inner page (editor, library, log); false when at the list.
+    function back() {
+        if (stack.depth > 1) {
+            stack.pop()
+            return true
+        }
+        return false
+    }
+
     function edit(id) {
         stack.push(editorComponent, { form: Backend.profileForm(id), stack: stack })
     }

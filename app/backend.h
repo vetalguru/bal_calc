@@ -89,6 +89,8 @@ public:
     // profile becomes current).
     Q_INVOKABLE QString saveProfile(const QVariantMap& form);
     Q_INVOKABLE QString deleteProfile(int id);
+    // Adds a ready-to-try sample profile and makes it current.
+    Q_INVOKABLE QString addSampleProfile();
 
     // Range card for the current profile and conditions over the table
     // span: {ok, error, hasScope, rows: [{rangeM, elevation, windage,

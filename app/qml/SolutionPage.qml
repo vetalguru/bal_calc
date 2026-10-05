@@ -150,12 +150,19 @@ Page {
                 color: Material.color(Material.Red)
                 font.pixelSize: 16
             }
-            Button {
+            RowLayout {
                 visible: Backend.profiles.length === 0
                 Layout.alignment: Qt.AlignHCenter
-                text: qsTr("Create a profile")
-                highlighted: true
-                onClicked: page.editProfiles()
+                spacing: 12
+                Button {
+                    text: qsTr("Create a profile")
+                    highlighted: true
+                    onClicked: page.editProfiles()
+                }
+                Button {
+                    text: qsTr("Try a sample")
+                    onClicked: Backend.addSampleProfile()
+                }
             }
 
             GridLayout {

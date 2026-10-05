@@ -143,6 +143,25 @@ TEST_F(AppLibrary, SwitchingFromOwnToLibraryBulletDropsTheOwnOne) {
     EXPECT_DOUBLE_EQ(Repository<BulletRecord>(db_).Get(lib).value()->bc.value(), 0.243);
 }
 
+TEST_F(AppLibrary, SampleProfileUsesTheLibrarySmkWhenPresent) {
+    // Empty library: the sample brings its own bullet.
+    const Id own = CreateSampleProfile(db_, "Sample A").value();
+    EXPECT_EQ(LoadProfileForm(db_, own).value().library_bullet_id, 0);
+
+    BulletForm smk;
+    smk.name = "MatchKing 175 gr HPBT #2275";
+    smk.mass_gr = 175;
+    smk.diameter_in = 0.308;
+    smk.drag_table = "G1";
+    smk.bands = {{869.0, 0.505}, {549.0, 0.496}};
+    const Id lib = SaveBulletForm(db_, smk).value();
+    const Id with_lib = CreateSampleProfile(db_, "Sample B").value();
+    EXPECT_EQ(LoadProfileForm(db_, with_lib).value().library_bullet_id, lib);
+    SessionConditions s;
+    s.target_range_m = 1000.0;
+    EXPECT_TRUE(Summarize(storage::LoadProfile(db_, with_lib).value(), s, AngleUnit::kMrad).ok);
+}
+
 TEST_F(AppLibrary, JsonRoundTripGivesTheSameSolution) {
     ProfileForm f = Form();
     f.zero_range_m = 200.0;
