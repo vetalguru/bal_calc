@@ -108,6 +108,11 @@ try {
     Push-Location $repo
     cmake --preset android-arm64
     if ($LASTEXITCODE -ne 0) { throw 'configure failed' }
+    # Ninja does not notice a changed key: drop the packaging stamp and the old
+    # outputs so androiddeployqt packages and signs again on every run.
+    $buildDir = Join-Path $repo 'build\android-arm64\app\android-build'
+    Remove-Item -Force -ErrorAction SilentlyContinue "$buildDir\balcalc.apk",
+        "$buildDir\build\outputs\apk\release\*.apk*", "$buildDir\build\outputs\bundle\release\*.aab"
     cmake --build --preset android-arm64
     if ($LASTEXITCODE -ne 0) { throw 'APK build failed' }
     if ($Aab) {
