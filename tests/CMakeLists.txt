@@ -9,6 +9,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  # for future MSVC builds
 FetchContent_MakeAvailable(googletest)
 
 add_executable(core_tests
+    applogic_test.cpp
     physics_basics_test.cpp
     physics_drag_models_test.cpp
     physics_effects_test.cpp
@@ -20,6 +21,7 @@ add_executable(core_tests
 target_link_libraries(core_tests PRIVATE
     ballistics_core
     ballistics_storage
+    ballistics_applogic
     GTest::gtest_main
     GTest::gmock
     ballistics_warnings
