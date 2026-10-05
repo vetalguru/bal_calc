@@ -18,7 +18,7 @@
 
 #include <ballistics/applogic/importers.h>
 #include <ballistics/applogic/library.h>
-#include <ballistics/applogic/profile_form.h>
+#include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/profile_io.h>
 #include <ballistics/applogic/reticle.h>
 #include <ballistics/atmosphere.h>
@@ -32,7 +32,9 @@ namespace bs = ballistics::storage;
 
 namespace {
 
-constexpr const char* kCurrentProfileKey = "ui.current_profile";
+constexpr const char* kCurrentProfileKey = "ui.current_profile"; // before v3: the selection
+constexpr const char* kCurrentRifleKey = "ui.current_rifle";
+constexpr const char* kCurrentCartridgeKey = "ui.current_cartridge";
 constexpr const char* kAngleUnitKey = "ui.angle_unit";
 constexpr const char* kLanguageKey = "ui.language";
 constexpr const char* kHoldModeKey = "ui.hold_mode";
@@ -47,7 +49,10 @@ QString Q(const std::string& s) { return QString::fromStdString(s); }
 // Messages produced by the toolkit-free layers, listed so lupdate picks
 // them up; shown through Tr().
 [[maybe_unused]] constexpr const char* kLogicMessages[] = {
-    QT_TRANSLATE_NOOP("Logic", "Enter a profile name."),
+    QT_TRANSLATE_NOOP("Logic", "Enter a rifle name."),
+    QT_TRANSLATE_NOOP("Logic", "Enter a cartridge name."),
+    QT_TRANSLATE_NOOP("Logic", "Sight height must be between 0 and 30 cm."),
+    QT_TRANSLATE_NOOP("Logic", "Point-of-impact shift must be within 100 cm."),
     QT_TRANSLATE_NOOP("Logic", "Muzzle velocity must be between 50 and 2000 m/s."),
     QT_TRANSLATE_NOOP("Logic", "Ballistic coefficient must be between 0 and 2."),
     QT_TRANSLATE_NOOP("Logic", "Enter the bullet weight."),
@@ -62,7 +67,7 @@ QString Q(const std::string& s) { return QString::fromStdString(s); }
     QT_TRANSLATE_NOOP("Logic", "Check the table range and step."),
     QT_TRANSLATE_NOOP("Logic", "Check the scope magnification range."),
     QT_TRANSLATE_NOOP("Logic", "Enter the bullet name."),
-    QT_TRANSLATE_NOOP("Logic", "Log at least one shot to true the profile."),
+    QT_TRANSLATE_NOOP("Logic", "Log at least one hit to true the rifle and cartridge."),
     QT_TRANSLATE_NOOP("Logic", "The bullet does not reach one of the logged ranges."),
     QT_TRANSLATE_NOOP("Logic", "Nothing to apply."),
     QT_TRANSLATE_NOOP("Logic", "Each BC band needs a velocity and a BC between 0 and 2."),
@@ -74,11 +79,11 @@ QString Tr(const std::string& message) {
     return QCoreApplication::translate("Logic", message.c_str());
 }
 std::string S(const QVariant& v) { return v.toString().toStdString(); }
+qlonglong I(al::Id id) { return static_cast<qlonglong>(id); }
 
-QVariantMap ToMap(const al::ProfileForm& f) {
+QVariantMap ToMap(const al::RifleForm& f) {
     return {
-        {"profileId", static_cast<qlonglong>(f.profile_id)},
-        {"libraryBulletId", static_cast<qlonglong>(f.library_bullet_id)},
+        {"rifleId", I(f.rifle_id)},
         {"name", Q(f.name)},
         {"caliber", Q(f.caliber)},
         {"sightHeightCm", f.sight_height_cm},
@@ -86,23 +91,12 @@ QVariantMap ToMap(const al::ProfileForm& f) {
         {"twistLeft", f.twist_left},
         {"clickUnits", Q(f.click_units)},
         {"clickValue", f.click_value},
-        {"reticleId", static_cast<qlonglong>(f.reticle_id)},
+        {"reticleId", I(f.reticle_id)},
         {"focalPlane", Q(f.focal_plane)},
         {"sfpReferenceMagnification", f.sfp_reference_magnification},
         {"minMagnification", f.min_magnification},
         {"maxMagnification", f.max_magnification},
-        {"bulletName", Q(f.bullet_name)},
-        {"dragTable", Q(f.drag_table)},
-        {"bc", f.bc},
-        {"massGr", f.mass_gr},
-        {"diameterIn", f.diameter_in},
-        {"lengthIn", f.length_in},
-        {"muzzleVelocity", f.muzzle_velocity_mps},
-        {"powderReferenceC", f.powder_reference_c},
-        {"powderSensitivity", f.powder_sensitivity_pct_per_c},
         {"zeroRangeM", f.zero_range_m},
-        {"zeroOffsetUpCm", f.zero_offset_up_cm},
-        {"zeroOffsetRightCm", f.zero_offset_right_cm},
         {"zeroTemperatureC", f.zero_temperature_c},
         {"zeroPressureHpa", f.zero_pressure_hpa},
         {"zeroAltitudeM", f.zero_altitude_m},
@@ -111,10 +105,9 @@ QVariantMap ToMap(const al::ProfileForm& f) {
     };
 }
 
-al::ProfileForm FromMap(const QVariantMap& m) {
-    al::ProfileForm f;
-    f.profile_id = m.value("profileId").toLongLong();
-    f.library_bullet_id = m.value("libraryBulletId").toLongLong();
+al::RifleForm RifleFromMap(const QVariantMap& m) {
+    al::RifleForm f;
+    f.rifle_id = m.value("rifleId").toLongLong();
     f.name = S(m.value("name"));
     f.caliber = S(m.value("caliber"));
     f.sight_height_cm = m.value("sightHeightCm").toDouble();
@@ -127,6 +120,41 @@ al::ProfileForm FromMap(const QVariantMap& m) {
     f.sfp_reference_magnification = m.value("sfpReferenceMagnification").toDouble();
     f.min_magnification = m.value("minMagnification").toDouble();
     f.max_magnification = m.value("maxMagnification").toDouble();
+    f.zero_range_m = m.value("zeroRangeM").toDouble();
+    f.zero_temperature_c = m.value("zeroTemperatureC").toDouble();
+    f.zero_pressure_hpa = m.value("zeroPressureHpa").toDouble();
+    f.zero_altitude_m = m.value("zeroAltitudeM").toDouble();
+    f.zero_humidity_pct = m.value("zeroHumidityPct").toDouble();
+    f.zero_powder_c = m.value("zeroPowderC").toDouble();
+    return f;
+}
+
+QVariantMap ToMap(const al::CartridgeForm& f) {
+    return {
+        {"cartridgeId", I(f.cartridge_id)},
+        {"copyOf", I(f.copy_of)},
+        {"libraryBulletId", I(f.library_bullet_id)},
+        {"name", Q(f.name)},
+        {"caliber", Q(f.caliber)},
+        {"bulletName", Q(f.bullet_name)},
+        {"dragTable", Q(f.drag_table)},
+        {"bc", f.bc},
+        {"massGr", f.mass_gr},
+        {"diameterIn", f.diameter_in},
+        {"lengthIn", f.length_in},
+        {"muzzleVelocity", f.muzzle_velocity_mps},
+        {"powderReferenceC", f.powder_reference_c},
+        {"powderSensitivity", f.powder_sensitivity_pct_per_c},
+    };
+}
+
+al::CartridgeForm CartridgeFromMap(const QVariantMap& m) {
+    al::CartridgeForm f;
+    f.cartridge_id = m.value("cartridgeId").toLongLong();
+    f.copy_of = m.value("copyOf").toLongLong();
+    f.library_bullet_id = m.value("libraryBulletId").toLongLong();
+    f.name = S(m.value("name"));
+    f.caliber = S(m.value("caliber"));
     f.bullet_name = S(m.value("bulletName"));
     f.drag_table = S(m.value("dragTable"));
     f.bc = m.value("bc").toDouble();
@@ -136,16 +164,27 @@ al::ProfileForm FromMap(const QVariantMap& m) {
     f.muzzle_velocity_mps = m.value("muzzleVelocity").toDouble();
     f.powder_reference_c = m.value("powderReferenceC").toDouble();
     f.powder_sensitivity_pct_per_c = m.value("powderSensitivity").toDouble();
-    f.zero_range_m = m.value("zeroRangeM").toDouble();
-    f.zero_offset_up_cm = m.value("zeroOffsetUpCm").toDouble();
-    f.zero_offset_right_cm = m.value("zeroOffsetRightCm").toDouble();
-    f.zero_temperature_c = m.value("zeroTemperatureC").toDouble();
-    f.zero_pressure_hpa = m.value("zeroPressureHpa").toDouble();
-    f.zero_altitude_m = m.value("zeroAltitudeM").toDouble();
-    f.zero_humidity_pct = m.value("zeroHumidityPct").toDouble();
-    f.zero_powder_c = m.value("zeroPowderC").toDouble();
     return f;
 }
+
+QVariantMap ToMap(const al::CartridgeSummary& c, bool matches) {
+    return {{"id", I(c.id)},
+            {"name", Q(c.name)},
+            {"caliber", Q(c.caliber)},
+            {"bulletName", Q(c.bullet_name)},
+            {"muzzleVelocity", c.muzzle_velocity_mps},
+            {"matches", matches}};
+}
+
+bool Contains(const QVariantList& list, int id) {
+    return std::any_of(list.begin(), list.end(),
+                       [id](const QVariant& v) { return v.toMap().value("id").toInt() == id; });
+}
+
+int FirstId(const QVariantList& list) {
+    return list.isEmpty() ? 0 : list.front().toMap().value("id").toInt();
+}
+
 
 QVariantMap ToMap(const al::BulletForm& f) {
     QVariantList bands;
@@ -246,17 +285,22 @@ Backend::Backend(QObject* parent) : QObject(parent) {
         bs::SetSetting(db_, kTableToKey, std::to_string(table_to_m_)).ok();
         bs::SetSetting(db_, kTableStepKey, std::to_string(table_step_m_)).ok();
     });
-    ReloadProfiles();
-    if (auto cur = bs::GetSetting(db_, kCurrentProfileKey); cur && cur.value()) {
-        current_profile_id_ = QString::fromStdString(*cur.value()).toInt();
+    const auto setting = [this](const char* key) {
+        auto v = bs::GetSetting(db_, key);
+        return v && v.value() ? QString::fromStdString(*v.value()).toInt() : 0;
+    };
+    current_rifle_id_ = setting(kCurrentRifleKey);
+    current_cartridge_id_ = setting(kCurrentCartridgeKey);
+    if (current_rifle_id_ == 0 && current_cartridge_id_ == 0) {
+        // Upgraded from a version with profiles: keep the profile chosen there.
+        if (auto p = bs::Repository<bs::ProfileRecord>(db_).Get(setting(kCurrentProfileKey));
+            p && p.value()) {
+            current_rifle_id_ = static_cast<int>(p.value()->rifle_id);
+            current_cartridge_id_ = static_cast<int>(p.value()->cartridge_id);
+        }
     }
-    bool found = false;
-    for (const QVariant& p : profiles_) {
-        found = found || p.toMap().value("id").toInt() == current_profile_id_;
-    }
-    if (!found) {
-        current_profile_id_ = profiles_.isEmpty() ? 0 : profiles_.front().toMap().value("id").toInt();
-    }
+    ReloadArmory();
+    UpdatePair();
     Recompute();
 }
 
@@ -264,14 +308,74 @@ QString Backend::engineVersion() const { return QString::fromLatin1(ballistics::
 
 QString Backend::sqliteVersion() const { return QString::fromLatin1(bs::SqliteVersion()); }
 
-void Backend::setCurrentProfileId(int id) {
-    if (id == current_profile_id_) {
+void Backend::setCurrentRifleId(int id) { Select(id, current_cartridge_id_); }
+
+void Backend::setCurrentCartridgeId(int id) { Select(current_rifle_id_, id); }
+
+void Backend::Select(int rifle_id, int cartridge_id) {
+    if (rifle_id == current_rifle_id_ && cartridge_id == current_cartridge_id_) {
         return;
     }
-    current_profile_id_ = id;
-    bs::SetSetting(db_, kCurrentProfileKey, std::to_string(id)).ok();
-    emit currentProfileIdChanged();
+    const bool rifle_changed = rifle_id != current_rifle_id_;
+    current_rifle_id_ = rifle_id;
+    current_cartridge_id_ = cartridge_id;
+    if (rifle_changed) {
+        ReloadArmory(); // cartridges of the new calibre first
+    }
+    UpdatePair();
+}
+
+void Backend::UpdatePair() {
+    if (!Contains(rifles_, current_rifle_id_)) {
+        current_rifle_id_ = FirstId(rifles_);
+    }
+    if (!Contains(cartridges_, current_cartridge_id_)) {
+        current_cartridge_id_ = FirstId(cartridges_);
+    }
+    bs::SetSetting(db_, kCurrentRifleKey, std::to_string(current_rifle_id_)).ok();
+    bs::SetSetting(db_, kCurrentCartridgeKey, std::to_string(current_cartridge_id_)).ok();
+    emit selectionChanged();
+
+    int pair = 0;
+    if (current_rifle_id_ != 0 && current_cartridge_id_ != 0) {
+        if (auto id = al::EnsureProfile(db_, current_rifle_id_, current_cartridge_id_)) {
+            pair = static_cast<int>(id.value());
+        }
+    }
+    if (pair != current_profile_id_) {
+        current_profile_id_ = pair;
+        last_truing_ = {};
+        emit currentProfileIdChanged();
+        emit shotsChanged();
+    }
     recompute_timer_.start();
+}
+
+QVariantMap Backend::currentPair() {
+    if (current_profile_id_ == 0) {
+        return {};
+    }
+    auto p = bs::LoadProfile(db_, current_profile_id_);
+    if (!p) {
+        return {};
+    }
+    return {{"rifleName", Q(p.value().rifle.name)},
+            {"cartridgeName", Q(p.value().cartridge.name)},
+            {"zeroRangeM", p.value().rifle.zero_range_m},
+            {"offsetUpCm", p.value().profile.zero_offset_up_m * 100.0},
+            {"offsetRightCm", p.value().profile.zero_offset_right_m * 100.0}};
+}
+
+QString Backend::setZeroOffset(double up_cm, double right_cm) {
+    if (current_profile_id_ == 0) {
+        return tr("Choose a rifle and a cartridge.");
+    }
+    if (auto s = al::SetZeroOffset(db_, current_profile_id_, up_cm, right_cm); !s) {
+        return Tr(s.error().message);
+    }
+    emit currentProfileIdChanged(); // currentPair changed
+    recompute_timer_.start();
+    return {};
 }
 
 void Backend::setAngleUnit(const QString& unit) {
@@ -324,7 +428,7 @@ QVariantList Backend::shots() {
 QString Backend::logShot(double range_m, double elevation, bool has_windage, double windage,
                          const QString& notes) {
     if (current_profile_id_ == 0) {
-        return tr("Create a profile to get a solution.");
+        return tr("Choose a rifle and a cartridge.");
     }
     const double unit_rad = angle_unit_ == "moa" ? ballistics::units::MoaToRad(1.0)
                                                   : ballistics::units::MradToRad(1.0);
@@ -449,58 +553,117 @@ void Backend::InstallTranslator() {
     });
 }
 
-void Backend::ReloadProfiles() {
-    profiles_.clear();
-    auto list = bs::Repository<bs::ProfileRecord>(db_).List();
-    if (list) {
-        for (const auto& p : list.value()) {
-            profiles_.push_back(QVariantMap{{"id", static_cast<int>(p.id)},
-                                            {"name", Q(p.name)},
-                                            {"zeroRangeM", p.zero_range_m}});
+void Backend::ReloadArmory() {
+    rifles_.clear();
+    std::string caliber;
+    if (auto list = al::ListRifles(db_)) {
+        for (const al::RifleSummary& r : list.value()) {
+            rifles_.push_back(
+                QVariantMap{{"id", I(r.id)}, {"name", Q(r.name)}, {"caliber", Q(r.caliber)}});
+            if (r.id == current_rifle_id_) {
+                caliber = r.caliber;
+            }
         }
     }
-    emit profilesChanged();
-}
-
-QVariantMap Backend::profileForm(int id) {
-    if (id == 0) {
-        return ToMap(al::ProfileForm{});
+    cartridges_.clear();
+    if (auto list = al::ListCartridges(db_, caliber)) {
+        for (const al::CartridgeSummary& c : list.value()) {
+            cartridges_.push_back(ToMap(c, al::SameCaliber(c.caliber, caliber)));
+        }
     }
-    auto f = al::LoadProfileForm(db_, id);
-    return f ? ToMap(f.value()) : ToMap(al::ProfileForm{});
+    emit armoryChanged();
 }
 
-QString Backend::saveProfile(const QVariantMap& form) {
-    auto id = al::SaveProfileForm(db_, FromMap(form));
+QVariantMap Backend::rifleForm(int id) {
+    if (id == 0) {
+        return ToMap(al::RifleForm{});
+    }
+    auto f = al::LoadRifleForm(db_, id);
+    return f ? ToMap(f.value()) : ToMap(al::RifleForm{});
+}
+
+QString Backend::saveRifle(const QVariantMap& form) {
+    auto id = al::SaveRifleForm(db_, RifleFromMap(form));
     if (!id) {
         return Tr(id.error().message);
     }
-    ReloadProfiles();
-    setCurrentProfileId(static_cast<int>(id.value()));
-    recompute_timer_.start();
+    current_rifle_id_ = 0; // force the cartridge order to follow the calibre
+    ReloadArmory();
+    Select(static_cast<int>(id.value()), current_cartridge_id_);
+    emit currentProfileIdChanged(); // zero range in currentPair
     return {};
+}
+
+QString Backend::deleteRifle(int id) {
+    if (auto s = al::DeleteRifle(db_, id); !s) {
+        return Tr(s.error().message);
+    }
+    ReloadArmory();
+    UpdatePair();
+    return {};
+}
+
+QVariantMap Backend::cartridgeForm(int id) {
+    if (id == 0) {
+        return ToMap(al::CartridgeForm{});
+    }
+    auto f = al::LoadCartridgeForm(db_, id);
+    return f ? ToMap(f.value()) : ToMap(al::CartridgeForm{});
+}
+
+QString Backend::saveCartridge(const QVariantMap& form) {
+    auto id = al::SaveCartridgeForm(db_, CartridgeFromMap(form));
+    if (!id) {
+        return Tr(id.error().message);
+    }
+    ReloadArmory();
+    Select(current_rifle_id_, static_cast<int>(id.value()));
+    emit currentProfileIdChanged(); // name in currentPair
+    recompute_timer_.start();       // V0 or bullet may have changed
+    return {};
+}
+
+QString Backend::deleteCartridge(int id) {
+    if (auto s = al::DeleteCartridge(db_, id); !s) {
+        return Tr(s.error().message);
+    }
+    ReloadArmory();
+    UpdatePair();
+    return {};
+}
+
+QVariantMap Backend::cartridgeFormWithBullet(const QVariantMap& form, int bullet_id) {
+    auto f = al::WithLibraryBullet(db_, CartridgeFromMap(form), bullet_id);
+    return f ? ToMap(f.value()) : form;
+}
+
+QVariantList Backend::libraryCartridges(const QString& filter) {
+    QVariantList out;
+    if (auto list = al::ListLibraryCartridges(db_, filter.toStdString())) {
+        for (const al::CartridgeSummary& c : list.value()) {
+            out.push_back(ToMap(c, false));
+        }
+    }
+    return out;
+}
+
+QVariantMap Backend::cartridgeFormFromLibrary(int id) {
+    auto f = al::CartridgeFromLibrary(db_, id);
+    return f ? ToMap(f.value()) : ToMap(al::CartridgeForm{});
 }
 
 QString Backend::addSampleProfile() {
-    auto id = al::CreateSampleProfile(db_, tr("Sample .308 Win / SMK 175").toStdString());
+    auto id = al::CreateSampleProfile(db_, tr("Sample .308 Win").toStdString(),
+                                      tr("Sample SMK 175 gr").toStdString());
     if (!id) {
         return Tr(id.error().message);
     }
-    ReloadProfiles();
-    setCurrentProfileId(static_cast<int>(id.value()));
-    recompute_timer_.start();
-    return {};
-}
-
-QString Backend::deleteProfile(int id) {
-    if (auto s = al::DeleteProfile(db_, id); !s) {
-        return Q(s.error().message);
+    auto p = bs::Repository<bs::ProfileRecord>(db_).Get(id.value());
+    if (p && p.value()) {
+        current_rifle_id_ = 0;
+        ReloadArmory();
+        Select(static_cast<int>(p.value()->rifle_id), static_cast<int>(p.value()->cartridge_id));
     }
-    ReloadProfiles();
-    if (id == current_profile_id_) {
-        setCurrentProfileId(profiles_.isEmpty() ? 0 : profiles_.front().toMap().value("id").toInt());
-    }
-    recompute_timer_.start();
     return {};
 }
 
@@ -508,7 +671,7 @@ QVariantMap Backend::Table(double from_m, double to_m, double step_m) {
     QVariantMap out;
     if (current_profile_id_ == 0) {
         out["ok"] = false;
-        out["error"] = tr("Create a profile to get a solution.");
+        out["error"] = tr("Choose a rifle and a cartridge.");
         return out;
     }
     auto p = bs::LoadProfile(db_, current_profile_id_);
@@ -555,11 +718,6 @@ QVariantMap Backend::trajectoryCurve(double max_range_m, int points) {
     return Table(0.0, max_range_m, max_range_m / points);
 }
 
-QVariantMap Backend::profileFormWithBullet(const QVariantMap& form, int bullet_id) {
-    auto f = al::WithLibraryBullet(db_, FromMap(form), bullet_id);
-    return f ? ToMap(f.value()) : form;
-}
-
 QVariantList Backend::libraryBullets(const QString& filter) {
     QVariantList out;
     auto list = al::ListLibraryBullets(db_, filter.toStdString());
@@ -595,6 +753,7 @@ QString Backend::saveBullet(const QVariantMap& form) {
     if (!id) {
         return Tr(id.error().message);
     }
+    ReloadArmory(); // cartridges show their bullet
     emit libraryChanged();
     recompute_timer_.start(); // a profile may use this bullet
     return {};
@@ -608,9 +767,10 @@ QString Backend::deleteBullet(int id) {
     return {};
 }
 
-QString Backend::profileFileName(int id) const {
-    for (const QVariant& p : profiles_) {
-        const QVariantMap m = p.toMap();
+QString Backend::exportFileName(const QString& kind, int id) const {
+    const QVariantList& list = kind == "rifle" ? rifles_ : cartridges_;
+    for (const QVariant& v : list) {
+        const QVariantMap m = v.toMap();
         if (m.value("id").toInt() == id) {
             QString name = m.value("name").toString();
             static const QRegularExpression kUnsafe(QStringLiteral("[\\\\/:*?\"<>|]+"));
@@ -618,11 +778,17 @@ QString Backend::profileFileName(int id) const {
             return name + QStringLiteral(".balcalc.json");
         }
     }
-    return QStringLiteral("profile.balcalc.json");
+    return kind + QStringLiteral(".balcalc.json");
 }
 
-QString Backend::exportProfile(int id, const QUrl& file) {
-    auto json = al::ExportProfileJson(db_, id);
+namespace {
+bs::Result<std::string> ExportJson(bs::Database& db, const QString& kind, int id) {
+    return kind == "rifle" ? al::ExportRifleJson(db, id) : al::ExportCartridgeJson(db, id);
+}
+} // namespace
+
+QString Backend::exportItem(const QString& kind, int id, const QUrl& file) {
+    auto json = ExportJson(db_, kind, id);
     if (!json) {
         return Q(json.error().message);
     }
@@ -634,15 +800,26 @@ QString Backend::exportProfile(int id, const QUrl& file) {
     return {};
 }
 
-QString Backend::ImportJson(const std::string& json) {
-    auto id = al::ImportProfileJson(db_, json);
-    if (!id) {
-        return Tr(id.error().message);
+QString Backend::copyItemToClipboard(const QString& kind, int id) {
+    auto json = ExportJson(db_, kind, id);
+    if (!json) {
+        return Q(json.error().message);
     }
-    ReloadProfiles();
+    QGuiApplication::clipboard()->setText(Q(json.value()));
+    return {};
+}
+
+QString Backend::ImportJson(const std::string& json) {
+    auto imported = al::ImportShareJson(db_, json);
+    if (!imported) {
+        return Tr(imported.error().message);
+    }
+    const al::Imported& im = imported.value();
+    current_rifle_id_ = 0;
+    ReloadArmory();
     emit libraryChanged();
-    setCurrentProfileId(static_cast<int>(id.value()));
-    recompute_timer_.start();
+    Select(im.rifle_id != 0 ? static_cast<int>(im.rifle_id) : FirstId(rifles_),
+           im.cartridge_id != 0 ? static_cast<int>(im.cartridge_id) : current_cartridge_id_);
     return {};
 }
 
@@ -682,9 +859,9 @@ QString Backend::importFiles(const QList<QUrl>& files) {
             problems << name + ": " + Tr(id.error().message);
         }
     }
-    ReloadProfiles();
+    ReloadArmory();
+    UpdatePair();
     emit libraryChanged();
-    recompute_timer_.start();
     QString summary = tr("%n file(s) imported.", nullptr, imported);
     if (!problems.isEmpty()) {
         summary += "\n" + problems.join("\n");
@@ -692,7 +869,7 @@ QString Backend::importFiles(const QList<QUrl>& files) {
     return summary;
 }
 
-QString Backend::importProfile(const QUrl& file) {
+QString Backend::importShared(const QUrl& file) {
     QFile f(FilePath(file));
     if (!f.open(QIODevice::ReadOnly)) {
         return tr("Cannot read %1: %2").arg(file.toDisplayString(), f.errorString());
@@ -700,16 +877,7 @@ QString Backend::importProfile(const QUrl& file) {
     return ImportJson(f.readAll().toStdString());
 }
 
-QString Backend::copyProfileToClipboard(int id) {
-    auto json = al::ExportProfileJson(db_, id);
-    if (!json) {
-        return Q(json.error().message);
-    }
-    QGuiApplication::clipboard()->setText(Q(json.value()));
-    return {};
-}
-
-QString Backend::importProfileFromClipboard() {
+QString Backend::importSharedFromClipboard() {
     return ImportJson(QGuiApplication::clipboard()->text().toStdString());
 }
 
@@ -804,7 +972,7 @@ void Backend::Recompute() {
     QVariantMap out;
     if (current_profile_id_ == 0) {
         out["ok"] = false;
-        out["error"] = tr("Create a profile to get a solution.");
+        out["error"] = tr("Choose a rifle and a cartridge.");
     } else if (auto p = bs::LoadProfile(db_, current_profile_id_); !p) {
         out["ok"] = false;
         out["error"] = Q(p.error().message);

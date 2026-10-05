@@ -14,8 +14,11 @@ qt_add_qml_module(balcalc_ui
         qml/NumberField.qml
         qml/SolutionPage.qml
         qml/ConditionsPage.qml
-        qml/ProfilesPage.qml
-        qml/ProfileEditor.qml
+        qml/ArmoryPage.qml
+        qml/RifleEditor.qml
+        qml/CartridgeEditor.qml
+        qml/CartridgeLibraryPage.qml
+        qml/FormGroup.qml
         qml/SettingsPage.qml
         qml/TablePage.qml
         qml/LibraryPage.qml

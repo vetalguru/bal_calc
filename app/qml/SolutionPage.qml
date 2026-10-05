@@ -40,29 +40,44 @@ Page {
             anchors.leftMargin: 12
             anchors.rightMargin: 12
 
-            Label {
-                text: qsTr("Profile")
-                opacity: 0.8
-            }
+            spacing: 8
             ComboBox {
-                id: profileBox
+                id: rifleBox
+                objectName: "rifleBox"
                 Layout.fillWidth: true
-                model: Backend.profiles
+                Layout.preferredWidth: 1
+                model: Backend.rifles
                 textRole: "name"
                 valueRole: "id"
                 enabled: count > 0
-                displayText: count > 0 ? currentText : qsTr("No profiles")
-                Component.onCompleted: currentIndex = indexOfValue(Backend.currentProfileId)
+                displayText: count > 0 ? currentText : qsTr("No rifles")
+                function sync() { currentIndex = indexOfValue(Backend.currentRifleId) }
+                Component.onCompleted: sync()
                 Connections {
                     target: Backend
-                    function onCurrentProfileIdChanged() {
-                        profileBox.currentIndex = profileBox.indexOfValue(Backend.currentProfileId)
-                    }
-                    function onProfilesChanged() {
-                        profileBox.currentIndex = profileBox.indexOfValue(Backend.currentProfileId)
-                    }
+                    function onSelectionChanged() { rifleBox.sync() }
+                    function onArmoryChanged() { rifleBox.sync() }
                 }
-                onActivated: Backend.currentProfileId = currentValue
+                onActivated: Backend.currentRifleId = currentValue
+            }
+            ComboBox {
+                id: cartridgeBox
+                objectName: "cartridgeBox"
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                model: Backend.cartridges
+                textRole: "name"
+                valueRole: "id"
+                enabled: count > 0
+                displayText: count > 0 ? currentText : qsTr("No cartridges")
+                function sync() { currentIndex = indexOfValue(Backend.currentCartridgeId) }
+                Component.onCompleted: sync()
+                Connections {
+                    target: Backend
+                    function onSelectionChanged() { cartridgeBox.sync() }
+                    function onArmoryChanged() { cartridgeBox.sync() }
+                }
+                onActivated: Backend.currentCartridgeId = currentValue
             }
         }
     }
@@ -150,17 +165,21 @@ Page {
                 color: Material.color(Material.Red)
                 font.pixelSize: 16
             }
-            RowLayout {
-                visible: Backend.profiles.length === 0
+            // Side by side, or stacked where two long labels do not fit.
+            GridLayout {
+                visible: Backend.rifles.length === 0 || Backend.cartridges.length === 0
                 Layout.alignment: Qt.AlignHCenter
-                spacing: 12
+                columns: page.width >= 420 ? 2 : 1
+                columnSpacing: 12
                 Button {
-                    text: qsTr("Create a profile")
+                    text: Backend.rifles.length === 0 ? qsTr("Add a rifle") : qsTr("Add a cartridge")
+                    Layout.fillWidth: true
                     highlighted: true
                     onClicked: page.editProfiles()
                 }
                 Button {
                     text: qsTr("Try a sample")
+                    Layout.fillWidth: true
                     onClicked: Backend.addSampleProfile()
                 }
             }
@@ -206,10 +225,10 @@ Page {
                     opacity: 0.7
                     text: (page.sol.velocityScale !== undefined &&
                            (page.sol.velocityScale !== 1 || page.sol.dragScale !== 1))
-                          ? qsTr("Trued profile: velocity ×%1, drag ×%2")
+                          ? qsTr("Trued: velocity ×%1, drag ×%2")
                                 .arg(Number(page.sol.velocityScale).toFixed(4))
                                 .arg(Number(page.sol.dragScale).toFixed(3))
-                          : qsTr("Not trued yet: log hits to true the profile.")
+                          : qsTr("Not trued yet: log hits to true this rifle and cartridge.")
                 }
                 Button {
                     text: qsTr("Log a hit")

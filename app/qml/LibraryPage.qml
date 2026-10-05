@@ -107,7 +107,7 @@ Page {
             wrapMode: Text.Wrap
             opacity: 0.7
             text: search.text.length > 0 ? qsTr("Nothing found.")
-                                         : qsTr("The library is empty. Add bullets here to reuse them in several profiles.")
+                                         : qsTr("The library is empty. Add bullets here to reuse them in several cartridges.")
         }
 
         ListView {

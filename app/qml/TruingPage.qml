@@ -6,8 +6,8 @@ import QtQuick.Controls.Material
 import QtQuick.Layouts
 import BalCalc
 
-// Shot log of the current profile and truing (fitting muzzle velocity and
-// drag to the corrections that hit).
+// Shot log of the current rifle + cartridge, its point-of-impact shift and
+// truing (fitting muzzle velocity and drag to the corrections that hit).
 Page {
     id: page
 
@@ -18,6 +18,8 @@ Page {
 
     property var shots: []
     property var result: null
+    readonly property var pair: Backend.currentPair
+    property string offsetError: ""
     readonly property string unitLabel: Backend.angleUnit === "moa" ? qsTr("MOA") : qsTr("MRAD")
 
     function reload() {
@@ -67,10 +69,75 @@ Page {
 
             Label {
                 Layout.fillWidth: true
-                Layout.margins: 12
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                Layout.topMargin: 12
+                font.pixelSize: 16
+                font.bold: true
+                elide: Text.ElideRight
+                text: page.pair.rifleName !== undefined
+                      ? page.pair.rifleName + " / " + page.pair.cartridgeName
+                      : qsTr("Choose a rifle and a cartridge.")
+            }
+
+            Label {
+                Layout.fillWidth: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
                 wrapMode: Text.Wrap
                 opacity: 0.8
-                text: qsTr("Log the elevation that actually hit, at several distances (ideally one close, one where the bullet is still fast, one far). Truing then adjusts the muzzle velocity and the drag of this profile so the calculator agrees with your rifle.")
+                text: qsTr("Log the elevation that actually hit, at several distances (ideally one close, one where the bullet is still fast, one far). Truing then adjusts the muzzle velocity and the drag for this rifle and cartridge so the calculator agrees with them.")
+            }
+
+            // Where this cartridge hits relative to the rifle's zero.
+            Pane {
+                visible: page.pair.rifleName !== undefined
+                Layout.fillWidth: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                Material.elevation: 1
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 8
+                    Label {
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        text: qsTr("Point of impact at the rifle's zero (%1 m) with this cartridge")
+                              .arg(Math.round(page.pair.zeroRangeM || 0))
+                        font.bold: true
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: page.width >= 560 ? 2 : 1
+                        columnSpacing: 16
+                        NumberField {
+                            id: offsetUp
+                            objectName: "offsetUp"
+                            Layout.fillWidth: true
+                            label: qsTr("Above the aim point")
+                            unit: qsTr("cm")
+                            value: page.pair.offsetUpCm || 0
+                            from: -100; to: 100
+                            onEdited: v => page.offsetError = Backend.setZeroOffset(v, offsetRight.value)
+                        }
+                        NumberField {
+                            id: offsetRight
+                            Layout.fillWidth: true
+                            label: qsTr("Right of the aim point")
+                            unit: qsTr("cm")
+                            value: page.pair.offsetRightCm || 0
+                            from: -100; to: 100
+                            onEdited: v => page.offsetError = Backend.setZeroOffset(offsetUp.value, v)
+                        }
+                    }
+                    Label {
+                        visible: page.offsetError.length > 0
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        text: page.offsetError
+                        color: Material.color(Material.Red)
+                    }
+                }
             }
 
             Label {
@@ -79,7 +146,7 @@ Page {
                 Layout.margins: 12
                 horizontalAlignment: Text.AlignHCenter
                 opacity: 0.6
-                text: qsTr("No shots logged for this profile yet.")
+                text: qsTr("No shots logged for this rifle and cartridge yet.")
             }
 
             // --- Shots -------------------------------------------------------
@@ -147,7 +214,7 @@ Page {
                 Layout.leftMargin: 12
                 Layout.rightMargin: 12
                 wrapMode: Text.Wrap
-                text: qsTr("The profile is trued: velocity ×%1, drag ×%2.")
+                text: qsTr("Trued: velocity ×%1, drag ×%2.")
                       .arg(page.fmt(Backend.solution.velocityScale, 4))
                       .arg(page.fmt(Backend.solution.dragScale, 3))
             }
@@ -206,7 +273,7 @@ Page {
                             }
                         }
                         Button {
-                            text: qsTr("Apply to the profile")
+                            text: qsTr("Apply")
                             highlighted: true
                             onClicked: {
                                 var err = Backend.applyTruing()
