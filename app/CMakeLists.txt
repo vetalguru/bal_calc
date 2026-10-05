@@ -1,18 +1,70 @@
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2)
-qt_standard_project_setup(REQUIRES 6.8)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 LinguistTools)
+qt_standard_project_setup(REQUIRES 6.8 I18N_TRANSLATED_LANGUAGES uk ru)
 
-qt_add_executable(balcalc WIN32 MACOSX_BUNDLE
-    main.cpp
-)
-
-qt_add_qml_module(balcalc
+# The UI (QML + Backend) is a static QML module so that both the app and
+# the UI tests (tests/ui) link the very same code.
+# Generated QML modules in one place, so qmllint and tools find them.
+set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
+qt_add_library(balcalc_ui STATIC)
+qt_add_qml_module(balcalc_ui
     URI BalCalc
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/NumberField.qml
+        qml/SolutionPage.qml
+        qml/ConditionsPage.qml
+        qml/ProfilesPage.qml
+        qml/ProfileEditor.qml
+        qml/SettingsPage.qml
+        qml/TablePage.qml
+        qml/LibraryPage.qml
+        qml/BulletEditor.qml
+        qml/SwitchRow.qml
+        qml/ReticleView.qml
+        qml/TruingPage.qml
+        qml/LogShotDialog.qml
     SOURCES
-        app_info.h
-        app_info.cpp
+        backend.h
+        backend.cpp
+)
+target_link_libraries(balcalc_ui PUBLIC
+    Qt6::Quick
+    Qt6::QuickControls2
+    Qt6::QuickDialogs2
+    ballistics_core
+    ballistics_storage
+    ballistics_applogic
+)
+
+# The starter library (data/seed) is compiled in and imported into a new
+# database on first start.
+file(GLOB_RECURSE seed_files CONFIGURE_DEPENDS
+    RELATIVE ${PROJECT_SOURCE_DIR}/data/seed
+    ${PROJECT_SOURCE_DIR}/data/seed/ammo/*.ammo
+    ${PROJECT_SOURCE_DIR}/data/seed/drg/*.drg
+    ${PROJECT_SOURCE_DIR}/data/seed/reticle/*.reticle
+    ${PROJECT_SOURCE_DIR}/data/seed/published_bullets.json)
+list(TRANSFORM seed_files PREPEND ${PROJECT_SOURCE_DIR}/data/seed/)
+qt_add_resources(balcalc_ui "seed"
+    PREFIX "/seed"
+    BASE ${PROJECT_SOURCE_DIR}/data/seed
+    FILES ${seed_files})
+
+qt_add_executable(balcalc WIN32 MACOSX_BUNDLE
+    main.cpp
+)
+target_link_libraries(balcalc PRIVATE balcalc_ui balcalc_uiplugin)
+
+# English is the source language; uk/ru are compiled into :/i18n/.
+# Refresh the .ts files after changing UI strings with:
+#   cmake --build <build dir> --target update_translations
+qt_add_translations(balcalc
+    SOURCE_TARGETS balcalc_ui balcalc
+    TS_FILE_DIR i18n
+    TS_FILE_BASE balcalc
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -no-obsolete
 )
 
 set_target_properties(balcalc PROPERTIES
@@ -25,12 +77,6 @@ set_target_properties(balcalc PROPERTIES
     QT_ANDROID_COMPILE_SDK_VERSION 35
 )
 
-target_link_libraries(balcalc PRIVATE
-    Qt6::Quick
-    Qt6::QuickControls2
-    ballistics_core
-    ballistics_storage
-)
 
 # Windows: copy the Qt runtime (DLLs, QML modules, plugins) next to the
 # executable after each build, so build/.../balcalc.exe runs on its own.
