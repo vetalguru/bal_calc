@@ -29,6 +29,7 @@ add_library(ballistics_applogic STATIC
     src/library.cpp
     src/profile_form.cpp
     src/profile_io.cpp
+    src/reticle.cpp
     src/session.cpp
 )
 target_include_directories(ballistics_applogic PUBLIC include)

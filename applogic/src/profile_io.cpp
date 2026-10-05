@@ -166,6 +166,8 @@ Result<std::string> ExportProfileJson(Database& db, Id profile_id) {
                         {"min_magnification", sr.min_magnification},
                         {"max_magnification", sr.max_magnification},
                         {"notes", sr.notes},
+                        {"focal_plane", sr.focal_plane},
+                        {"sfp_reference_magnification", sr.sfp_reference_magnification},
                         {"reticle", nullptr}};
         if (sr.reticle_id) {
             auto ret = Require<ReticleRecord>(db, *sr.reticle_id, "reticle");
@@ -326,6 +328,8 @@ Result<Id> ImportProfileJson(Database& db, const std::string& text) {
             s.min_magnification = js.value("min_magnification", 0.0);
             s.max_magnification = js.value("max_magnification", 0.0);
             s.notes = js.value("notes", "");
+            s.focal_plane = js.value("focal_plane", "ffp");
+            s.sfp_reference_magnification = js.value("sfp_reference_magnification", 0.0);
             if (js.contains("reticle") && !js.at("reticle").is_null()) {
                 const json& jt = js.at("reticle");
                 ReticleRecord t;

@@ -34,6 +34,7 @@ struct SessionConditions {
     std::optional<double> latitude_deg; // Coriolis on when set
     std::optional<double> azimuth_deg;
     double target_range_m = 300.0;
+    double magnification = 0.0; // current zoom (SFP holds), 0 = unknown
 };
 
 storage::ConditionsRecord ToConditions(const SessionConditions& s);

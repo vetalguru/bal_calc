@@ -4,29 +4,29 @@
 <context>
     <name>Backend</name>
     <message>
-        <location filename="../backend.cpp" line="350" />
-        <location filename="../backend.cpp" line="600" />
+        <location filename="../backend.cpp" line="389" />
+        <location filename="../backend.cpp" line="675" />
         <source>Create a profile to get a solution.</source>
         <translation>Створіть профіль, щоб отримати рішення.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="462" />
+        <location filename="../backend.cpp" line="501" />
         <source>Cannot write %1: %2</source>
         <translation>Не вдалося записати %1: %2</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="495" />
+        <location filename="../backend.cpp" line="534" />
         <source>Starter library: %1 records imported.</source>
         <translation>Стартова бібліотека: імпортовано записів — %1.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="505" />
-        <location filename="../backend.cpp" line="529" />
+        <location filename="../backend.cpp" line="544" />
+        <location filename="../backend.cpp" line="568" />
         <source>Cannot read %1: %2</source>
         <translation>Не вдалося прочитати %1: %2</translation>
     </message>
     <message numerus="yes">
-        <location filename="../backend.cpp" line="519" />
+        <location filename="../backend.cpp" line="558" />
         <source>%n file(s) imported.</source>
         <translation><numerusform>Імпортовано %n файл.</numerusform><numerusform>Імпортовано %n файли.</numerusform><numerusform>Імпортовано %n файлів.</numerusform></translation>
     </message>
@@ -367,82 +367,87 @@
 <context>
     <name>Logic</name>
     <message>
-        <location filename="../backend.cpp" line="46" />
+        <location filename="../backend.cpp" line="48" />
         <source>Enter a profile name.</source>
         <translation>Введіть назву профілю.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="47" />
+        <location filename="../backend.cpp" line="49" />
         <source>Muzzle velocity must be between 50 and 2000 m/s.</source>
         <translation>Початкова швидкість має бути від 50 до 2000 м/с.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="48" />
+        <location filename="../backend.cpp" line="50" />
         <source>Ballistic coefficient must be between 0 and 2.</source>
         <translation>Балістичний коефіцієнт має бути від 0 до 2.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="49" />
+        <location filename="../backend.cpp" line="51" />
         <source>Enter the bullet weight.</source>
         <translation>Введіть масу кулі.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="50" />
+        <location filename="../backend.cpp" line="52" />
         <source>Bullet diameter must be between 0 and 1 inch.</source>
         <translation>Діаметр кулі має бути від 0 до 1 дюйма.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="51" />
+        <location filename="../backend.cpp" line="53" />
         <source>Bullet length and twist cannot be negative.</source>
         <translation>Довжина кулі та крок нарізів не можуть бути від'ємними.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="52" />
+        <location filename="../backend.cpp" line="54" />
         <source>Zero range must be between 10 and 1000 m.</source>
         <translation>Дистанція пристрілки має бути від 10 до 1000 м.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="53" />
+        <location filename="../backend.cpp" line="55" />
         <source>Enter the scope click value.</source>
         <translation>Введіть ціну кліку прицілу.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="54" />
+        <location filename="../backend.cpp" line="56" />
         <source>Zero pressure must be between 300 and 1200 hPa.</source>
         <translation>Тиск при пристрілці має бути від 300 до 1200 гПа.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="55" />
+        <location filename="../backend.cpp" line="57" />
         <source>Humidity must be between 0 and 100 %.</source>
         <translation>Вологість має бути від 0 до 100 %.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="56" />
+        <location filename="../backend.cpp" line="58" />
         <source>Enter a target range.</source>
         <translation>Введіть дистанцію до цілі.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="57" />
+        <location filename="../backend.cpp" line="59" />
         <source>The bullet does not reach this range.</source>
         <translation>Куля не долітає до цієї дистанції.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="58" />
+        <location filename="../backend.cpp" line="60" />
         <source>Check the table range and step.</source>
         <translation>Перевірте межі та крок таблиці.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="59" />
+        <location filename="../backend.cpp" line="61" />
+        <source>Check the scope magnification range.</source>
+        <translation>Перевірте діапазон кратності прицілу.</translation>
+    </message>
+    <message>
+        <location filename="../backend.cpp" line="62" />
         <source>Enter the bullet name.</source>
         <translation>Введіть назву кулі.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="60" />
+        <location filename="../backend.cpp" line="63" />
         <source>Each BC band needs a velocity and a BC between 0 and 2.</source>
         <translation>Для кожного діапазону потрібні швидкість і БК від 0 до 2.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="61" />
+        <location filename="../backend.cpp" line="64" />
         <source>This bullet is used by a cartridge and cannot be deleted.</source>
         <translation>Цю кулю використовує патрон, її не можна видалити.</translation>
     </message>
@@ -550,7 +555,7 @@
     </message>
     <message>
         <location filename="../qml/ProfileEditor.qml" line="69" />
-        <location filename="../qml/ProfileEditor.qml" line="336" />
+        <location filename="../qml/ProfileEditor.qml" line="389" />
         <source>Save</source>
         <translation>Зберегти</translation>
     </message>
@@ -581,7 +586,7 @@
     </message>
     <message>
         <location filename="../qml/ProfileEditor.qml" line="115" />
-        <location filename="../qml/ProfileEditor.qml" line="291" />
+        <location filename="../qml/ProfileEditor.qml" line="344" />
         <source>cm</source>
         <translation>см</translation>
     </message>
@@ -592,8 +597,8 @@
     </message>
     <message>
         <location filename="../qml/ProfileEditor.qml" line="123" />
-        <location filename="../qml/ProfileEditor.qml" line="227" />
-        <location filename="../qml/ProfileEditor.qml" line="236" />
+        <location filename="../qml/ProfileEditor.qml" line="280" />
+        <location filename="../qml/ProfileEditor.qml" line="289" />
         <source>in</source>
         <translation>дюйм</translation>
     </message>
@@ -608,154 +613,194 @@
         <translation>Одиниці барабанів</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="151" />
+        <location filename="../qml/ProfileEditor.qml" line="152" />
+        <source>Reticle</source>
+        <translation>Сітка</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProfileEditor.qml" line="155" />
+        <source>None (plain crosshair)</source>
+        <translation>Немає (просте перехрестя)</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProfileEditor.qml" line="165" />
+        <source>Focal plane</source>
+        <translation>Фокальна площина</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProfileEditor.qml" line="169" />
+        <source>First (FFP)</source>
+        <translation>Перша (FFP)</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProfileEditor.qml" line="170" />
+        <source>Second (SFP)</source>
+        <translation>Друга (SFP)</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProfileEditor.qml" line="179" />
+        <source>Magnification from</source>
+        <translation>Кратність від</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProfileEditor.qml" line="187" />
+        <source>Magnification to</source>
+        <translation>Кратність до</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProfileEditor.qml" line="196" />
+        <source>SFP: marks are true at</source>
+        <translation>SFP: поділки точні на</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProfileEditor.qml" line="204" />
         <source>One click</source>
         <translation>Ціна кліку</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="161" />
+        <location filename="../qml/ProfileEditor.qml" line="214" />
         <source>Bullet</source>
         <translation>Куля</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="168" />
+        <location filename="../qml/ProfileEditor.qml" line="221" />
         <source>From the library: %1</source>
         <translation>З бібліотеки: %1</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="169" />
+        <location filename="../qml/ProfileEditor.qml" line="222" />
         <source>Own bullet of this profile</source>
         <translation>Власна куля цього профілю</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="172" />
+        <location filename="../qml/ProfileEditor.qml" line="225" />
         <source>Change</source>
         <translation>Змінити</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="172" />
+        <location filename="../qml/ProfileEditor.qml" line="225" />
         <source>From library</source>
         <translation>З бібліотеки</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="178" />
+        <location filename="../qml/ProfileEditor.qml" line="231" />
         <source>Edit as own</source>
         <translation>Редагувати як власну</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="191" />
+        <location filename="../qml/ProfileEditor.qml" line="244" />
         <source>Bullet, e.g. Sierra MatchKing 175 gr</source>
         <translation>Куля, напр. Sierra MatchKing 175 gr</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="200" />
+        <location filename="../qml/ProfileEditor.qml" line="253" />
         <source>Drag model</source>
         <translation>Закон опору</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="210" />
+        <location filename="../qml/ProfileEditor.qml" line="263" />
         <source>Ballistic coefficient</source>
         <translation>Балістичний коефіцієнт</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="218" />
+        <location filename="../qml/ProfileEditor.qml" line="271" />
         <source>Weight</source>
         <translation>Маса</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="219" />
+        <location filename="../qml/ProfileEditor.qml" line="272" />
         <source>gr</source>
         <translation>гран</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="226" />
+        <location filename="../qml/ProfileEditor.qml" line="279" />
         <source>Diameter</source>
         <translation>Діаметр</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="235" />
+        <location filename="../qml/ProfileEditor.qml" line="288" />
         <source>Length (for spin drift)</source>
         <translation>Довжина (для деривації)</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="246" />
+        <location filename="../qml/ProfileEditor.qml" line="299" />
         <source>Cartridge</source>
         <translation>Патрон</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="250" />
+        <location filename="../qml/ProfileEditor.qml" line="303" />
         <source>Muzzle velocity</source>
         <translation>Початкова швидкість</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="251" />
+        <location filename="../qml/ProfileEditor.qml" line="304" />
         <source>m/s</source>
         <translation>м/с</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="258" />
+        <location filename="../qml/ProfileEditor.qml" line="311" />
         <source>Measured at powder temperature</source>
         <translation>Виміряна при температурі пороху</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="259" />
-        <location filename="../qml/ProfileEditor.qml" line="299" />
+        <location filename="../qml/ProfileEditor.qml" line="312" />
+        <location filename="../qml/ProfileEditor.qml" line="352" />
         <source>°C</source>
         <translation>°C</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="266" />
+        <location filename="../qml/ProfileEditor.qml" line="319" />
         <source>Powder sensitivity</source>
         <translation>Термочутливість пороху</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="267" />
+        <location filename="../qml/ProfileEditor.qml" line="320" />
         <source>%/°C</source>
         <translation>%/°C</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="277" />
+        <location filename="../qml/ProfileEditor.qml" line="330" />
         <source>Zero</source>
         <translation>Пристрілка</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="281" />
+        <location filename="../qml/ProfileEditor.qml" line="334" />
         <source>Zero distance</source>
         <translation>Дистанція пристрілки</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="282" />
-        <location filename="../qml/ProfileEditor.qml" line="315" />
+        <location filename="../qml/ProfileEditor.qml" line="335" />
+        <location filename="../qml/ProfileEditor.qml" line="368" />
         <source>m</source>
         <translation>м</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="290" />
+        <location filename="../qml/ProfileEditor.qml" line="343" />
         <source>Impact above aim at zero</source>
         <translation>СТВ вище точки прицілювання</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="298" />
+        <location filename="../qml/ProfileEditor.qml" line="351" />
         <source>Temperature when zeroed</source>
         <translation>Температура при пристрілці</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="306" />
+        <location filename="../qml/ProfileEditor.qml" line="359" />
         <source>Station pressure when zeroed</source>
         <translation>Тиск при пристрілці</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="307" />
+        <location filename="../qml/ProfileEditor.qml" line="360" />
         <source>hPa</source>
         <translation>гПа</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="314" />
+        <location filename="../qml/ProfileEditor.qml" line="367" />
         <source>Altitude when zeroed</source>
         <translation>Висота при пристрілці</translation>
     </message>
     <message>
-        <location filename="../qml/ProfileEditor.qml" line="323" />
+        <location filename="../qml/ProfileEditor.qml" line="376" />
         <source>Humidity when zeroed</source>
         <translation>Вологість при пристрілці</translation>
     </message>
@@ -922,11 +967,13 @@
     <name>SolutionPage</name>
     <message>
         <location filename="../qml/SolutionPage.qml" line="22" />
+        <location filename="../qml/SolutionPage.qml" line="256" />
         <source>MOA</source>
         <translation>MOA</translation>
     </message>
     <message>
         <location filename="../qml/SolutionPage.qml" line="22" />
+        <location filename="../qml/SolutionPage.qml" line="256" />
         <source>MRAD</source>
         <translation>MRAD</translation>
     </message>
@@ -997,96 +1044,163 @@
         <translation>ВЛІВО</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="206" />
+        <location filename="../qml/SolutionPage.qml" line="219" />
+        <source>No reticle chosen: plain crosshair in MRAD</source>
+        <translation>Сітку не вибрано: просте перехрестя в MRAD</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="227" />
+        <source>Dial elevation, hold wind</source>
+        <translation>Вертикаль барабаном, вітер виносом</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="228" />
+        <source>Hold everything</source>
+        <translation>Усе виносом по сітці</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="229" />
+        <source>Dial everything</source>
+        <translation>Усе барабанами</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="241" />
+        <source>Turrets: %1 clicks %2, %3 clicks %4</source>
+        <translation>Барабани: %1 клік. %2, %3 клік. %4</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="243" />
+        <source>up</source>
+        <translation>вгору</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="243" />
+        <source>down</source>
+        <translation>вниз</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="245" />
+        <location filename="../qml/SolutionPage.qml" line="259" />
+        <source>right</source>
+        <translation>вправо</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="245" />
+        <location filename="../qml/SolutionPage.qml" line="259" />
+        <source>left</source>
+        <translation>вліво</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="254" />
+        <source>Put the target on the red mark: %1 %2 %3, %4 %2 %5 of the centre.</source>
+        <translation>Сумістіть ціль із червоною міткою: %1 %2 %3, %4 %2 %5 від центру.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="257" />
+        <source>below</source>
+        <translation>нижче</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="257" />
+        <source>above</source>
+        <translation>вище</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="266" />
+        <source>Magnification %1× (second focal plane: marks are true at the reference power)</source>
+        <translation>Кратність %1× (друга фокальна площина: поділки точні на опорній кратності)</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="300" />
         <source>Wind speed</source>
         <translation>Швидкість вітру</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="207" />
-        <location filename="../qml/SolutionPage.qml" line="262" />
-        <location filename="../qml/SolutionPage.qml" line="269" />
+        <location filename="../qml/SolutionPage.qml" line="301" />
+        <location filename="../qml/SolutionPage.qml" line="356" />
+        <location filename="../qml/SolutionPage.qml" line="363" />
         <source>m/s</source>
         <translation>м/с</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="231" />
+        <location filename="../qml/SolutionPage.qml" line="325" />
         <source>Wind from</source>
         <translation>Вітер звідки</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="238" />
+        <location filename="../qml/SolutionPage.qml" line="332" />
         <source>12 = from the target, 3 = from the right</source>
         <translation>12 = від цілі, 3 = справа</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="262" />
+        <location filename="../qml/SolutionPage.qml" line="356" />
         <source>Velocity</source>
         <translation>Швидкість</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="263" />
+        <location filename="../qml/SolutionPage.qml" line="357" />
         <source>Energy</source>
         <translation>Енергія</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="263" />
+        <location filename="../qml/SolutionPage.qml" line="357" />
         <source>J</source>
         <translation>Дж</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="264" />
+        <location filename="../qml/SolutionPage.qml" line="358" />
         <source>Time of flight</source>
         <translation>Час польоту</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="264" />
+        <location filename="../qml/SolutionPage.qml" line="358" />
         <source>s</source>
         <translation>с</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="265" />
+        <location filename="../qml/SolutionPage.qml" line="359" />
         <source>Mach</source>
         <translation>Мах</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="266" />
+        <location filename="../qml/SolutionPage.qml" line="360" />
         <source>Drop</source>
         <translation>Зниження</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="266" />
-        <location filename="../qml/SolutionPage.qml" line="267" />
-        <location filename="../qml/SolutionPage.qml" line="268" />
+        <location filename="../qml/SolutionPage.qml" line="360" />
+        <location filename="../qml/SolutionPage.qml" line="361" />
+        <location filename="../qml/SolutionPage.qml" line="362" />
         <source>cm</source>
         <translation>см</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="267" />
+        <location filename="../qml/SolutionPage.qml" line="361" />
         <source>Drift</source>
         <translation>Знос</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="268" />
+        <location filename="../qml/SolutionPage.qml" line="362" />
         <source>Spin drift</source>
         <translation>Деривація</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="269" />
+        <location filename="../qml/SolutionPage.qml" line="363" />
         <source>Muzzle velocity</source>
         <translation>Початкова швидкість</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="271" />
+        <location filename="../qml/SolutionPage.qml" line="365" />
         <source>Stability Sg</source>
         <translation>Стійкість Sg</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="286" />
+        <location filename="../qml/SolutionPage.qml" line="380" />
         <source>Subsonic at the target: expect larger dispersion.</source>
         <translation>На цілі куля дозвукова: очікуйте більшого розсіювання.</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="287" />
+        <location filename="../qml/SolutionPage.qml" line="381" />
         <source>Transonic from about %1 m.</source>
         <translation>Трансзвук приблизно з %1 м.</translation>
     </message>

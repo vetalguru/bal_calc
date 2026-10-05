@@ -377,7 +377,8 @@ const Table<ScopeRecord>& TableOf() {
                              Col("reticle_id", &R::reticle_id),
                              Col("min_magnification", &R::min_magnification),
                              Col("max_magnification", &R::max_magnification),
-                             Col("notes", &R::notes)},
+                             Col("notes", &R::notes), Col("focal_plane", &R::focal_plane),
+                             Col("sfp_reference_magnification", &R::sfp_reference_magnification)},
                             nullptr,
                             nullptr};
     return t;

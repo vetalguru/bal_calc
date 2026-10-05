@@ -97,7 +97,8 @@ Result<SessionConditions> LoadSession(storage::Database& db) {
                             {"humidity_pct", &s.humidity_pct},
                             {"look_angle_deg", &s.look_angle_deg},
                             {"cant_deg", &s.cant_deg},
-                            {"target_range_m", &s.target_range_m}};
+                            {"target_range_m", &s.target_range_m},
+                            {"magnification", &s.magnification}};
     for (const Field& f : fields) {
         auto v = get(f.key);
         if (!v) {
@@ -152,6 +153,7 @@ Status SaveSession(storage::Database& db, const SessionConditions& s) {
           {"look_angle_deg", Num(s.look_angle_deg)},
           {"cant_deg", Num(s.cant_deg)},
           {"target_range_m", Num(s.target_range_m)},
+          {"magnification", Num(s.magnification)},
           {"powder_c", opt(s.powder_c)},
           {"latitude_deg", opt(s.latitude_deg)},
           {"azimuth_deg", opt(s.azimuth_deg)},

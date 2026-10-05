@@ -11,6 +11,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(core_tests
     applogic_import_test.cpp
     applogic_library_test.cpp
+    applogic_reticle_test.cpp
     applogic_test.cpp
     physics_basics_test.cpp
     physics_drag_models_test.cpp
