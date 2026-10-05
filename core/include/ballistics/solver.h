@@ -12,25 +12,55 @@ namespace ballistics {
 
 inline constexpr double kStandardGravity = 9.80665; // m/s^2
 
+// Wind over a stretch of the range. Zones apply in order of
+// `until_range_m` (horizontal distance from the muzzle); the last zone
+// extends to infinity.
+struct WindZone {
+    double until_range_m = 0.0;
+    double speed_mps = 0.0;
+    // Direction the wind blows FROM, clockwise from the line of fire:
+    // 0 = from the target (headwind, 12 o'clock), pi/2 = from the right
+    // (3 o'clock), pi = from behind, 3pi/2 = from the left.
+    double from_rad = 0.0;
+    double vertical_mps = 0.0; // updraft positive
+};
+
 // Everything needed to fly one shot (SI units, angles in radians).
 //
 // Geometry: the muzzle is the origin. The line of sight (LOS) starts at
-// the sight, `sight_height_m` above the bore (perpendicular to the LOS),
-// and points `look_angle_rad` above the horizon (uphill positive). The
-// bore points `elevation_rad` above and `windage_rad` right of the LOS.
+// the sight, `sight_height_m` above the bore in the rifle's own "up"
+// (perpendicular to the LOS, rotated by `cant_rad`), and points
+// `look_angle_rad` above the horizon (uphill positive). The bore points
+// `elevation_rad` above and `windage_rad` right of the LOS, both in the
+// rifle's frame, so a canted rifle turns elevation partly into windage.
 struct Shot {
     DragModel drag;
     double muzzle_velocity_mps = 0.0;
-    double mass_kg = 0.0; // optional, only for energy output
+    double mass_kg = 0.0;           // energy output, spin effects
+    double bullet_diameter_m = 0.0; // spin effects
+    double bullet_length_m = 0.0;   // spin effects
+    // Barrel twist length, right-hand positive, left-hand negative,
+    // 0 = no spin effects.
+    double twist_m = 0.0;
 
     double sight_height_m = 0.0;
     double look_angle_rad = 0.0;
     double elevation_rad = 0.0;
     double windage_rad = 0.0;
+    double cant_rad = 0.0; // clockwise (top to the right) positive
 
     Atmosphere atmosphere;
     SoundSpeedModel sound_speed = SoundSpeedModel::kHumidAir;
     double gravity_mps2 = kStandardGravity;
+    std::vector<WindZone> winds;
+
+    // Earth rotation (Coriolis/Eotvos), off without a latitude. Without an
+    // azimuth only the horizontal (latitude) component is applied.
+    std::optional<double> latitude_rad;
+    std::optional<double> azimuth_rad; // bearing of the LOS, clockwise from north
+
+    bool spin_drift = true;        // needs twist, diameter, length, mass
+    bool aerodynamic_jump = true;  // likewise
 };
 
 struct SolverOptions {
@@ -60,7 +90,8 @@ struct TrajectoryPoint {
 
     double slant_range_m = 0.0; // distance along the LOS
     double drop_m = 0.0;        // offset from the LOS, up positive
-    double windage_m = 0.0;     // offset from the LOS, right positive
+    double windage_m = 0.0;     // offset from the LOS, right positive (incl. spin drift)
+    double spin_drift_m = 0.0;  // the spin-drift part of windage_m
 
     // Sight corrections to hit this point: dial/hold up and right are
     // positive, i.e. hold = -offset / slant range.
@@ -73,6 +104,10 @@ struct TrajectoryPoint {
 class Trajectory final {
 public:
     StopReason stop_reason() const { return stop_reason_; }
+    // Gyroscopic stability at the muzzle (Miller), 0 if not computed.
+    double stability() const { return stability_; }
+    // Vertical aerodynamic jump applied at the muzzle, rad.
+    double aerodynamic_jump_rad() const { return jump_rad_; }
     // Farthest LOS distance the flight covered.
     double max_slant_range_m() const;
     std::size_t step_count() const { return nodes_.empty() ? 0 : nodes_.size() - 1; }
@@ -104,6 +139,10 @@ private:
     Vec3 los_;       // unit vector along the LOS
     Vec3 los_up_;    // unit vector perpendicular to LOS, in the vertical plane
     double mass_kg_ = 0.0;
+    double stability_ = 0.0;
+    double twist_m_ = 0.0;
+    bool spin_drift_ = false;
+    double jump_rad_ = 0.0;
     AtmosphereModel air_{Atmosphere{}};
 };
 

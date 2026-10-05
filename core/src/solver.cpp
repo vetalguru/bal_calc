@@ -1,8 +1,9 @@
 #include <ballistics/solver.h>
 
 #include <algorithm>
-#include <array>
 #include <cmath>
+
+#include <ballistics/effects.h>
 
 namespace ballistics {
 
@@ -16,25 +17,70 @@ struct State {
 State operator+(const State& s, const State& d) { return {s.p + d.p, s.v + d.v}; }
 State operator*(double k, const State& s) { return {k * s.p, k * s.v}; }
 
-// Right-hand side of the point-mass equations of motion.
+// Air velocity of a wind zone in the shooter's frame.
+Vec3 WindVector(const WindZone& w) {
+    return {-w.speed_mps * std::cos(w.from_rad), w.vertical_mps, -w.speed_mps * std::sin(w.from_rad)};
+}
+
+// Earth's rotation vector in the shooter's frame (x towards the LOS
+// azimuth, y up, z right). Without an azimuth only the local vertical
+// component - the one behind horizontal drift - is kept.
+Vec3 EarthRotation(const Shot& shot) {
+    if (!shot.latitude_rad) {
+        return {};
+    }
+    const double lat = *shot.latitude_rad;
+    if (!shot.azimuth_rad) {
+        return {0.0, kEarthAngularVelocity * std::sin(lat), 0.0};
+    }
+    const double az = *shot.azimuth_rad;
+    return {kEarthAngularVelocity * std::cos(lat) * std::cos(az),
+            kEarthAngularVelocity * std::sin(lat),
+            -kEarthAngularVelocity * std::cos(lat) * std::sin(az)};
+}
+
+// Right-hand side of the point-mass equations of motion: gravity, drag
+// against the moving air, Coriolis.
 class Dynamics {
 public:
-    Dynamics(const Shot& shot, const AtmosphereModel& air) : shot_(shot), air_(air) {}
+    Dynamics(const Shot& shot, const AtmosphereModel& air) : shot_(shot), air_(air) {
+        for (const WindZone& w : shot.winds) {
+            zones_.push_back({w.until_range_m, WindVector(w)});
+        }
+        std::stable_sort(zones_.begin(), zones_.end(),
+                         [](const Zone& a, const Zone& b) { return a.until < b.until; });
+        omega2_ = 2.0 * EarthRotation(shot);
+    }
+
+    Vec3 Wind(double x) const {
+        for (const Zone& z : zones_) {
+            if (x < z.until) {
+                return z.air;
+            }
+        }
+        return zones_.empty() ? Vec3{} : zones_.back().air;
+    }
 
     Vec3 Acceleration(const State& s) const {
         const AirState air = air_.At(shot_.atmosphere.altitude_m + s.p.y);
-        const Vec3& v_air = s.v; // air at rest (wind is added in a later phase)
+        const Vec3 v_air = s.v - Wind(s.p.x);
         const double speed = v_air.Norm();
         const double mach = speed / air.speed_of_sound_mps;
         const double k = air.density_kg_m3 * shot_.drag.Coefficient(mach) * speed;
-        return Vec3{0.0, -shot_.gravity_mps2, 0.0} - k * v_air;
+        return Vec3{0.0, -shot_.gravity_mps2, 0.0} - k * v_air - Cross(omega2_, s.v);
     }
 
     State Derivative(const State& s) const { return {s.v, Acceleration(s)}; }
 
 private:
+    struct Zone {
+        double until;
+        Vec3 air;
+    };
     const Shot& shot_;
     const AtmosphereModel& air_;
+    std::vector<Zone> zones_;
+    Vec3 omega2_;
 };
 
 // Dormand-Prince 5(4) tableau (the system is autonomous, so the c_i
@@ -101,7 +147,10 @@ TrajectoryPoint Trajectory::MakePoint(double t, const Vec3& p, const Vec3& v) co
     const Vec3 rel = p - sight_;
     pt.slant_range_m = Dot(rel, los_);
     pt.drop_m = Dot(rel, los_up_);
-    pt.windage_m = rel.z;
+    if (spin_drift_) {
+        pt.spin_drift_m = LitzSpinDrift(stability_, t, twist_m_);
+    }
+    pt.windage_m = rel.z + pt.spin_drift_m;
     if (pt.slant_range_m > 0.0) {
         pt.hold_elevation_rad = std::atan2(-pt.drop_m, pt.slant_range_m);
         pt.hold_windage_rad = std::atan2(-pt.windage_m, pt.slant_range_m);
@@ -202,15 +251,45 @@ Trajectory Fly(const Shot& shot, double max_slant_range_m, const SolverOptions& 
     traj.mass_kg_ = shot.mass_kg;
     traj.air_ = AtmosphereModel(shot.atmosphere, shot.sound_speed);
 
+    // LOS frame: forward, up (vertical plane), right.
     const double cl = std::cos(shot.look_angle_rad);
     const double sl = std::sin(shot.look_angle_rad);
-    traj.los_ = {cl, sl, 0.0};
-    traj.los_up_ = {-sl, cl, 0.0};
-    traj.sight_ = shot.sight_height_m * traj.los_up_;
+    const Vec3 forward{cl, sl, 0.0};
+    const Vec3 up{-sl, cl, 0.0};
+    const Vec3 right{0.0, 0.0, 1.0};
+    traj.los_ = forward;
+    traj.los_up_ = up;
 
-    const double bore_up = shot.look_angle_rad + shot.elevation_rad;
+    // Rifle frame: rotated about the LOS by the cant (top to the right).
+    const double cc = std::cos(shot.cant_rad);
+    const double sc = std::sin(shot.cant_rad);
+    const Vec3 rifle_up = cc * up + sc * right;
+    const Vec3 rifle_right = cc * right - sc * up;
+    traj.sight_ = shot.sight_height_m * rifle_up;
+
+    // Spin: stability at the muzzle, crosswind jump from the first zone.
+    traj.twist_m_ = shot.twist_m;
+    traj.stability_ =
+        MillerStability(shot.mass_kg, shot.bullet_diameter_m, shot.bullet_length_m, shot.twist_m,
+                        shot.muzzle_velocity_mps, shot.atmosphere.temperature_k,
+                        shot.atmosphere.pressure_pa);
+    traj.spin_drift_ = shot.spin_drift && traj.stability_ > 0.0;
+    if (shot.aerodynamic_jump && traj.stability_ > 0.0 && !shot.winds.empty()) {
+        const WindZone* first = &shot.winds.front();
+        for (const WindZone& w : shot.winds) {
+            if (w.until_range_m < first->until_range_m) {
+                first = &w;
+            }
+        }
+        traj.jump_rad_ = AerodynamicJump(traj.stability_, shot.bullet_length_m,
+                                         shot.bullet_diameter_m, shot.twist_m,
+                                         first->speed_mps * std::sin(first->from_rad));
+    }
+
+    const double elevation = shot.elevation_rad + traj.jump_rad_;
     const double cw = std::cos(shot.windage_rad);
-    const Vec3 bore{std::cos(bore_up) * cw, std::sin(bore_up) * cw, std::sin(shot.windage_rad)};
+    const Vec3 bore = (std::cos(elevation) * cw) * forward + (std::sin(elevation) * cw) * rifle_up +
+                      std::sin(shot.windage_rad) * rifle_right;
 
     const Dynamics dyn(shot, traj.air_);
     State y{Vec3{}, shot.muzzle_velocity_mps * bore};

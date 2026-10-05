@@ -3,6 +3,8 @@
 #include <ballistics/solver.h>
 #include <ballistics/units.h>
 
+#include "reference/reference_setup.h"
+
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -33,53 +35,9 @@ const std::vector<Case>& Cases() {
     return cases;
 }
 
-struct Cartridge {
-    const char* name;
-    DragTableId table;
-    double bc, grains, v0_mps, sight_cm, zero_m;
-};
+using reference::CartridgeNamed;
 
-// Must match CARTRIDGES in generate_reference.py.
-constexpr Cartridge kCartridges[] = {
-    {"308_175smk_g7", DragTableId::kG7, 0.243, 175.0, 800.0, 5.0, 100.0},
-    {"65cm_140eldm_g7", DragTableId::kG7, 0.326, 140.0, 823.0, 4.5, 100.0},
-    {"338lm_300hybrid_g7", DragTableId::kG7, 0.419, 300.0, 838.0, 5.5, 100.0},
-    {"50bmg_750amax_g1", DragTableId::kG1, 1.050, 750.0, 860.0, 7.0, 100.0},
-    {"556_m855_g1", DragTableId::kG1, 0.304, 62.0, 930.0, 6.5, 100.0},
-};
-
-// Must match ATMOSPHERES in generate_reference.py.
-Atmosphere AtmosphereNamed(const std::string& name) {
-    if (name == "mountain_cold_humid") {
-        return {1500.0, units::HpaToPa(850.0), units::CToK(-10.0), 0.5};
-    }
-    if (name == "hot_humid") {
-        return {200.0, units::HpaToPa(990.0), units::CToK(35.0), 0.9};
-    }
-    return {0.0, units::HpaToPa(1013.25), units::CToK(15.0), 0.0};
-}
-
-const Cartridge& CartridgeNamed(std::string_view name) {
-    for (const auto& c : kCartridges) {
-        if (name == c.name) {
-            return c;
-        }
-    }
-    ADD_FAILURE() << "unknown cartridge " << name;
-    return kCartridges[0];
-}
-
-Shot MakeShot(const Case& c) {
-    const Cartridge& cart = CartridgeNamed(c.cartridge);
-    Shot shot;
-    shot.drag = DragModel::FromBc(cart.table, cart.bc);
-    shot.muzzle_velocity_mps = cart.v0_mps;
-    shot.mass_kg = units::GrainToKg(cart.grains);
-    shot.sight_height_m = cart.sight_cm / 100.0;
-    shot.atmosphere = AtmosphereNamed(c.atmosphere);
-    shot.sound_speed = SoundSpeedModel::kDryAir; // as in the reference
-    return shot;
-}
+Shot MakeShot(const Case& c) { return reference::MakeShot(c.cartridge, c.atmosphere); }
 
 std::string CaseName(const Case& c) {
     return std::string(c.cartridge) + "/" + c.atmosphere + "/look" +
