@@ -1,5 +1,7 @@
 #include "backend.h"
 
+#include <algorithm>
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QLocale>
@@ -21,6 +23,9 @@ namespace {
 constexpr const char* kCurrentProfileKey = "ui.current_profile";
 constexpr const char* kAngleUnitKey = "ui.angle_unit";
 constexpr const char* kLanguageKey = "ui.language";
+constexpr const char* kTableFromKey = "ui.table.from_m";
+constexpr const char* kTableToKey = "ui.table.to_m";
+constexpr const char* kTableStepKey = "ui.table.step_m";
 
 QString Q(const std::string& s) { return QString::fromStdString(s); }
 
@@ -39,6 +44,7 @@ QString Q(const std::string& s) { return QString::fromStdString(s); }
     QT_TRANSLATE_NOOP("Logic", "Humidity must be between 0 and 100 %."),
     QT_TRANSLATE_NOOP("Logic", "Enter a target range."),
     QT_TRANSLATE_NOOP("Logic", "The bullet does not reach this range."),
+    QT_TRANSLATE_NOOP("Logic", "Check the table range and step."),
 };
 
 // A message from applogic/storage in the UI language (unknown ones as is).
@@ -142,6 +148,22 @@ Backend::Backend(QObject* parent) : QObject(parent) {
         language_ = Q(*lang.value());
     }
     InstallTranslator();
+    for (const auto& [key, value] : {std::pair{kTableFromKey, &table_from_m_},
+                                     std::pair{kTableToKey, &table_to_m_},
+                                     std::pair{kTableStepKey, &table_step_m_}}) {
+        if (auto v = bs::GetSetting(db_, key); v && v.value()) {
+            bool ok = false;
+            const double d = QString::fromStdString(*v.value()).toDouble(&ok);
+            if (ok) {
+                *value = d;
+            }
+        }
+    }
+    connect(this, &Backend::tableSpecChanged, this, [this] {
+        bs::SetSetting(db_, kTableFromKey, std::to_string(table_from_m_)).ok();
+        bs::SetSetting(db_, kTableToKey, std::to_string(table_to_m_)).ok();
+        bs::SetSetting(db_, kTableStepKey, std::to_string(table_step_m_)).ok();
+    });
     ReloadProfiles();
     if (auto cur = bs::GetSetting(db_, kCurrentProfileKey); cur && cur.value()) {
         current_profile_id_ = QString::fromStdString(*cur.value()).toInt();
@@ -258,6 +280,49 @@ QString Backend::deleteProfile(int id) {
     }
     recompute_timer_.start();
     return {};
+}
+
+QVariantMap Backend::Table(double from_m, double to_m, double step_m) {
+    QVariantMap out;
+    if (current_profile_id_ == 0) {
+        out["ok"] = false;
+        out["error"] = tr("Create a profile to get a solution.");
+        return out;
+    }
+    auto p = bs::LoadProfile(db_, current_profile_id_);
+    if (!p) {
+        out["ok"] = false;
+        out["error"] = Q(p.error().message);
+        return out;
+    }
+    const auto unit = angle_unit_ == "moa" ? al::AngleUnit::kMoa : al::AngleUnit::kMrad;
+    const al::RangeTable t = al::BuildRangeTable(p.value(), Session(), unit, from_m, to_m, step_m);
+    QVariantList rows;
+    for (const al::RangeRow& r : t.rows) {
+        rows.push_back(QVariantMap{{"rangeM", r.range_m},
+                                   {"elevation", r.elevation},
+                                   {"windage", r.windage},
+                                   {"elevationClicks", r.elevation_clicks},
+                                   {"windageClicks", r.windage_clicks},
+                                   {"dropCm", r.drop_cm},
+                                   {"windageCm", r.windage_cm},
+                                   {"velocity", r.velocity_mps},
+                                   {"mach", r.mach},
+                                   {"energy", r.energy_j},
+                                   {"time", r.time_s}});
+    }
+    out["ok"] = t.ok;
+    out["error"] = Tr(t.error);
+    out["hasScope"] = p.value().scope.has_value();
+    out["rows"] = rows;
+    return out;
+}
+
+QVariantMap Backend::rangeTable() { return Table(table_from_m_, table_to_m_, table_step_m_); }
+
+QVariantMap Backend::trajectoryCurve(double max_range_m, int points) {
+    points = std::clamp(points, 10, 1000);
+    return Table(0.0, max_range_m, max_range_m / points);
 }
 
 double Backend::stationPressure(double qnh_hpa, double altitude_m) const {

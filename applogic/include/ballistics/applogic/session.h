@@ -74,6 +74,32 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
 
 double FromRad(double rad, AngleUnit unit);
 
+// One line of the range card.
+struct RangeRow {
+    double range_m = 0.0;
+    double elevation = 0.0; // in the chosen angle unit, up positive
+    double windage = 0.0;   // right positive
+    double elevation_clicks = 0.0;
+    double windage_clicks = 0.0;
+    double drop_cm = 0.0;
+    double windage_cm = 0.0;
+    double velocity_mps = 0.0;
+    double mach = 0.0;
+    double energy_j = 0.0;
+    double time_s = 0.0;
+};
+
+struct RangeTable {
+    bool ok = false;
+    std::string error;
+    std::vector<RangeRow> rows; // stops early where the bullet stops
+};
+
+// Range card from `from_m` to `to_m` every `step_m` (one flight). The
+// target range of `s` is ignored.
+RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionConditions& s,
+                           AngleUnit unit, double from_m, double to_m, double step_m);
+
 } // namespace ballistics::applogic
 
 #endif // BALLISTICS_APPLOGIC_SESSION_H

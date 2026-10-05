@@ -23,9 +23,11 @@ ApplicationWindow {
     // Desktop and tablets get a side rail, phones a bottom tab bar.
     readonly property bool wide: width >= 840
     property int page: 0
+    property alias tableTab: tablePage.tab
 
     readonly property var pages: [
         { title: qsTr("Solution"), short: qsTr("Solve") },
+        { title: qsTr("Range table"), short: qsTr("Table") },
         { title: qsTr("Conditions"), short: qsTr("Air") },
         { title: qsTr("Profiles"), short: qsTr("Rifles") },
         { title: qsTr("Settings"), short: qsTr("More") }
@@ -76,7 +78,11 @@ ApplicationWindow {
             currentIndex: win.page
 
             SolutionPage {
-                onEditProfiles: win.page = 2
+                onEditProfiles: win.page = 3
+            }
+            TablePage {
+                id: tablePage
+                onRangeChosen: win.page = 0
             }
             ConditionsPage {}
             ProfilesPage {

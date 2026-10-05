@@ -179,5 +179,47 @@ TEST_F(AppLogic, SummaryAtTarget) {
     EXPECT_FALSE(Summarize(p, s, AngleUnit::kMrad).ok);
 }
 
+TEST_F(AppLogic, RangeTableMatchesSummary) {
+    const Id id = SaveProfileForm(db_, SampleForm()).value();
+    const storage::LoadedProfile p = storage::LoadProfile(db_, id).value();
+    SessionConditions s;
+    s.temperature_c = 10.0; // the profile's zero conditions
+    s.pressure_hpa = 990.0;
+    s.powder_c = 15.0; // zero_powder_c of the form
+    s.winds = {{3.0, 90.0, 0.0}};
+    const RangeTable t = BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 100.0);
+    ASSERT_TRUE(t.ok) << t.error;
+    ASSERT_EQ(t.rows.size(), 11U);
+    EXPECT_DOUBLE_EQ(t.rows[0].range_m, 0.0);
+    EXPECT_DOUBLE_EQ(t.rows[0].elevation, 0.0); // no hold at the muzzle
+    for (std::size_t i = 2; i < t.rows.size(); ++i) {
+        EXPECT_GT(t.rows[i].elevation, t.rows[i - 1].elevation);
+        EXPECT_LT(t.rows[i].velocity_mps, t.rows[i - 1].velocity_mps);
+        EXPECT_GT(t.rows[i].time_s, t.rows[i - 1].time_s);
+    }
+    // Zeroed at 100 m in this air. (The crosswind above adds ~0.08 MRAD
+    // of aerodynamic jump, so check without it.)
+    SessionConditions calm = s;
+    calm.winds.clear();
+    EXPECT_NEAR(BuildRangeTable(p, calm, AngleUnit::kMrad, 100.0, 100.0, 1.0).rows.at(0).drop_cm,
+                0.0, 0.01);
+    EXPECT_LT(t.rows[1].drop_cm, -0.5); // wind from the right: jump low
+
+    // Same numbers as the single-target summary.
+    s.target_range_m = 700.0;
+    const SolutionSummary one = Summarize(p, s, AngleUnit::kMrad);
+    EXPECT_NEAR(t.rows[7].elevation, one.elevation, 1e-9);
+    EXPECT_NEAR(t.rows[7].windage, one.windage, 1e-9);
+    EXPECT_DOUBLE_EQ(t.rows[7].elevation_clicks, one.elevation_clicks);
+}
+
+TEST_F(AppLogic, RangeTableRejectsBadSpec) {
+    const Id id = SaveProfileForm(db_, SampleForm()).value();
+    const storage::LoadedProfile p = storage::LoadProfile(db_, id).value();
+    EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 0.0, 1000.0, 0.0).ok);
+    EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 500.0, 100.0, 50.0).ok);
+    EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 0.0, 3000.0, 1.0).ok); // > 2000 rows
+}
+
 } // namespace
 } // namespace ballistics::applogic

@@ -17,10 +17,11 @@ int main(int argc, char* argv[]) {
     QCommandLineParser args;
     args.addHelpOption();
     const QCommandLineOption screenshot("screenshot", "Save the window to FILE and quit.", "FILE");
-    const QCommandLineOption page("page", "Page to show: 0 solution, 1 conditions, 2 profiles, 3 settings.",
+    const QCommandLineOption page("page", "Page to show: 0 solution, 1 table, 2 conditions, 3 profiles, 4 settings.",
                                   "N", "0");
+    const QCommandLineOption tab("tab", "Tab of the table page: 0 table, 1 chart.", "N", "0");
     const QCommandLineOption size("size", "Window size WxH.", "WxH");
-    args.addOptions({screenshot, page, size});
+    args.addOptions({screenshot, page, tab, size});
     args.process(app);
 
     QQmlApplicationEngine engine;
@@ -35,6 +36,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         window->setProperty("page", args.value(page).toInt());
+        window->setProperty("tableTab", args.value(tab).toInt());
         const QStringList wh = args.value(size).split('x');
         if (wh.size() == 2) {
             window->resize(wh[0].toInt(), wh[1].toInt());
