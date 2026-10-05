@@ -49,6 +49,11 @@ class Backend : public QObject {
     Q_PROPERTY(double azimuthDeg MEMBER azimuth_deg_ NOTIFY conditionsChanged)
     Q_PROPERTY(double targetRangeM MEMBER target_range_m_ NOTIFY conditionsChanged)
 
+    // Range card span (persisted).
+    Q_PROPERTY(double tableFromM MEMBER table_from_m_ NOTIFY tableSpecChanged)
+    Q_PROPERTY(double tableToM MEMBER table_to_m_ NOTIFY tableSpecChanged)
+    Q_PROPERTY(double tableStepM MEMBER table_step_m_ NOTIFY tableSpecChanged)
+
     // Result for the current profile and conditions; keys as in
     // applogic::SolutionSummary (camelCase) plus "ok" and "error".
     Q_PROPERTY(QVariantMap solution READ solution NOTIFY solutionChanged)
@@ -78,6 +83,15 @@ public:
     Q_INVOKABLE QString saveProfile(const QVariantMap& form);
     Q_INVOKABLE QString deleteProfile(int id);
 
+    // Range card for the current profile and conditions over the table
+    // span: {ok, error, hasScope, rows: [{rangeM, elevation, windage,
+    // elevationClicks, windageClicks, dropCm, windageCm, velocity, mach,
+    // energy, time}]}.
+    Q_INVOKABLE QVariantMap rangeTable();
+    // Trajectory samples for the chart: {ok, error, rows: [...]} as above,
+    // `points` samples from the muzzle to `max_range_m`.
+    Q_INVOKABLE QVariantMap trajectoryCurve(double max_range_m, int points);
+
     // Station pressure from sea-level pressure (QNH) at an altitude, hPa.
     Q_INVOKABLE double stationPressure(double qnh_hpa, double altitude_m) const;
 
@@ -88,9 +102,11 @@ signals:
     void languageChanged();
     void conditionsChanged();
     void solutionChanged();
+    void tableSpecChanged();
 
 private:
     void ReloadProfiles();
+    QVariantMap Table(double from_m, double to_m, double step_m);
     void InstallTranslator();
     void Recompute();
     ballistics::applogic::SessionConditions Session() const;
@@ -123,6 +139,9 @@ private:
     bool use_azimuth_ = false;
     double azimuth_deg_ = 0.0;
     double target_range_m_ = 300.0;
+    double table_from_m_ = 100.0;
+    double table_to_m_ = 1000.0;
+    double table_step_m_ = 50.0;
 };
 
 #endif // BALCALC_BACKEND_H

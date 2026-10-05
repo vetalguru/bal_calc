@@ -16,6 +16,7 @@ qt_add_qml_module(balcalc
         qml/ProfilesPage.qml
         qml/ProfileEditor.qml
         qml/SettingsPage.qml
+        qml/TablePage.qml
         qml/SwitchRow.qml
     SOURCES
         backend.h

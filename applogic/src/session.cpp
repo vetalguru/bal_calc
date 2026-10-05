@@ -215,4 +215,48 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
     return out;
 }
 
+RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionConditions& s,
+                           AngleUnit unit, double from_m, double to_m, double step_m) {
+    RangeTable table;
+    if (!(step_m > 0.0) || from_m < 0.0 || to_m < from_m || (to_m - from_m) / step_m > 2000.0) {
+        table.error = "Check the table range and step.";
+        return table;
+    }
+    auto sol = storage::Solve(profile, ToConditions(s), to_m + 1.0);
+    if (!sol) {
+        table.error = sol.error().message;
+        return table;
+    }
+    const Trajectory& traj = sol.value().trajectory;
+    const auto count = static_cast<long>(std::floor((to_m - from_m) / step_m + 1e-9));
+    for (long k = 0; k <= count; ++k) {
+        const double r = from_m + static_cast<double>(k) * step_m;
+        const auto pt = traj.AtSlantRange(r);
+        if (!pt) {
+            break;
+        }
+        RangeRow row;
+        row.range_m = r;
+        if (r > 0.0) {
+            row.elevation = FromRad(pt->hold_elevation_rad, unit);
+            row.windage = FromRad(pt->hold_windage_rad, unit);
+            if (profile.scope) {
+                row.elevation_clicks =
+                    storage::ToClicks(pt->hold_elevation_rad, profile.scope->click_vertical_rad);
+                row.windage_clicks =
+                    storage::ToClicks(pt->hold_windage_rad, profile.scope->click_horizontal_rad);
+            }
+        }
+        row.drop_cm = pt->drop_m * 100.0;
+        row.windage_cm = pt->windage_m * 100.0;
+        row.velocity_mps = pt->speed_mps;
+        row.mach = pt->mach;
+        row.energy_j = pt->energy_j;
+        row.time_s = pt->time_s;
+        table.rows.push_back(row);
+    }
+    table.ok = true;
+    return table;
+}
+
 } // namespace ballistics::applogic
