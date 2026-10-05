@@ -4,6 +4,21 @@ Requirements: Qt 6.9.2 with the `android_arm64_v8a` kit, Android SDK
 (platform 35, build-tools 35), NDK r26b (26.1.10909125), JDK 17, with
 `ANDROID_SDK_ROOT`, `ANDROID_NDK_ROOT` and `JAVA_HOME` set.
 
+## Quick way: `tools/android-release.ps1`
+
+```powershell
+.\tools\android-release.ps1 -Setup     # once: create the key (or point to an existing one)
+.\tools\android-release.ps1            # signed APK, signature checked
+.\tools\android-release.ps1 -Install   # ... and install on the phone over adb
+.\tools\android-release.ps1 -Aab       # ... plus the Google Play bundle
+```
+
+The script keeps its settings in `%APPDATA%\BalCalc\android-signing.json`:
+keystore path, alias and the password encrypted with Windows DPAPI (only your
+Windows account on this PC can decrypt it). Nothing goes into the repository.
+Back up the keystore file and remember its password: an app update must be
+signed with the same key. The manual steps below do the same by hand.
+
 ## 1. Create your signing key (once)
 
 Keep the keystore and its passwords outside the repository and back them up:
