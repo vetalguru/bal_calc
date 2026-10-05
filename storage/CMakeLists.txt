@@ -1,5 +1,7 @@
 add_library(ballistics_storage STATIC
     src/database.cpp
+    src/repository.cpp
+    src/schema.cpp
 )
 target_include_directories(ballistics_storage PUBLIC include)
 
