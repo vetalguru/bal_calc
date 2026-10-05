@@ -10,6 +10,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(core_tests
     physics_basics_test.cpp
+    physics_drag_models_test.cpp
     physics_effects_test.cpp
     physics_reference_test.cpp
     smoke_test.cpp
