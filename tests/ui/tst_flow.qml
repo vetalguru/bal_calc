@@ -19,6 +19,7 @@ TestCase {
     Component { id: bulletEditorComponent; BulletEditor {} }
     Component { id: tableComponent; TablePage {} }
     Component { id: mainComponent; Main {} }
+    Component { id: truingComponent; TruingPage {} }
 
     function test_0_starterLibraryIsSeeded() {
         // 69 cartridges + 55 radar curves + 38 published bullets.
@@ -133,6 +134,28 @@ TestCase {
         compare(s.dialElevationClicks, s.elevationClicks)
         verify(Math.abs(s.targetY) <= 0.05) // only the click remainder is held
         Backend.holdMode = "hold"
+    }
+
+    function test_7b_logHitsAndTrue() {
+        Backend.holdMode = "dial_elevation"
+        // Pretend the rifle needs 4 % more elevation than predicted at two ranges.
+        var ranges = [500, 900]
+        for (var i = 0; i < ranges.length; ++i) {
+            Backend.targetRangeM = ranges[i]
+            tryVerify(function() { return Backend.solution.ok && Backend.solution.rangeM === ranges[i] })
+            compare(Backend.logShot(ranges[i], Backend.solution.elevation * 1.04, false, 0, "test"), "")
+        }
+        compare(Backend.shots().length, 2)
+        var page = createTemporaryObject(truingComponent, testCase, { width: 900, height: 700 })
+        compare(page.shots.length, 2)
+        var r = Backend.computeTruing()
+        verify(r.ok, r.error)
+        verify(r.rmsAfter < r.rmsBefore / 3)
+        verify(r.velocityAfter < r.velocityBefore) // more drop = slower bullet
+        compare(Backend.applyTruing(), "")
+        tryVerify(function() { return Backend.solution.ok && Backend.solution.velocityScale < 1 })
+        compare(Backend.resetTruing(), "")
+        tryVerify(function() { return Backend.solution.velocityScale === 1 })
     }
 
     function test_8_mainWindowLoadsAllPages() {

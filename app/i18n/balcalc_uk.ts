@@ -4,29 +4,30 @@
 <context>
     <name>Backend</name>
     <message>
-        <location filename="../backend.cpp" line="389" />
-        <location filename="../backend.cpp" line="675" />
+        <location filename="../backend.cpp" line="325" />
+        <location filename="../backend.cpp" line="498" />
+        <location filename="../backend.cpp" line="784" />
         <source>Create a profile to get a solution.</source>
         <translation>Створіть профіль, щоб отримати рішення.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="501" />
+        <location filename="../backend.cpp" line="610" />
         <source>Cannot write %1: %2</source>
         <translation>Не вдалося записати %1: %2</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="534" />
+        <location filename="../backend.cpp" line="643" />
         <source>Starter library: %1 records imported.</source>
         <translation>Стартова бібліотека: імпортовано записів — %1.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="544" />
-        <location filename="../backend.cpp" line="568" />
+        <location filename="../backend.cpp" line="653" />
+        <location filename="../backend.cpp" line="677" />
         <source>Cannot read %1: %2</source>
         <translation>Не вдалося прочитати %1: %2</translation>
     </message>
     <message numerus="yes">
-        <location filename="../backend.cpp" line="558" />
+        <location filename="../backend.cpp" line="667" />
         <source>%n file(s) imported.</source>
         <translation><numerusform>Імпортовано %n файл.</numerusform><numerusform>Імпортовано %n файли.</numerusform><numerusform>Імпортовано %n файлів.</numerusform></translation>
     </message>
@@ -365,6 +366,61 @@
     </message>
 </context>
 <context>
+    <name>LogShotDialog</name>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="30" />
+        <source>Log a hit</source>
+        <translation>Записати влучання</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="48" />
+        <source>Current air, powder temperature and shot angle are saved with it.</source>
+        <translation>Разом із ним зберігаються поточні повітря, температура пороху та кут місця.</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="52" />
+        <source>Distance</source>
+        <translation>Дистанція</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="53" />
+        <source>m</source>
+        <translation>м</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="61" />
+        <source>Elevation that hit (up +)</source>
+        <translation>Вертикаль, що влучила (вгору +)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="62" />
+        <location filename="../qml/LogShotDialog.qml" line="77" />
+        <source>MOA</source>
+        <translation>MOA</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="62" />
+        <location filename="../qml/LogShotDialog.qml" line="77" />
+        <source>MRAD</source>
+        <translation>MRAD</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="69" />
+        <source>Also log the windage that hit</source>
+        <translation>Записати також горизонталь</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="76" />
+        <source>Windage that hit (right +)</source>
+        <translation>Горизонталь, що влучила (вправо +)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogShotDialog.qml" line="86" />
+        <source>Notes (group size, light, wind)</source>
+        <translation>Нотатки (купчастість, освітлення, вітер)</translation>
+    </message>
+</context>
+<context>
     <name>Logic</name>
     <message>
         <location filename="../backend.cpp" line="48" />
@@ -443,11 +499,26 @@
     </message>
     <message>
         <location filename="../backend.cpp" line="63" />
+        <source>Log at least one shot to true the profile.</source>
+        <translation>Запишіть хоча б один постріл, щоб уточнити профіль.</translation>
+    </message>
+    <message>
+        <location filename="../backend.cpp" line="64" />
+        <source>The bullet does not reach one of the logged ranges.</source>
+        <translation>Куля не долітає до однієї із записаних дистанцій.</translation>
+    </message>
+    <message>
+        <location filename="../backend.cpp" line="65" />
+        <source>Nothing to apply.</source>
+        <translation>Немає чого застосувати.</translation>
+    </message>
+    <message>
+        <location filename="../backend.cpp" line="66" />
         <source>Each BC band needs a velocity and a BC between 0 and 2.</source>
         <translation>Для кожного діапазону потрібні швидкість і БК від 0 до 2.</translation>
     </message>
     <message>
-        <location filename="../backend.cpp" line="64" />
+        <location filename="../backend.cpp" line="67" />
         <source>This bullet is used by a cartridge and cannot be deleted.</source>
         <translation>Цю кулю використовує патрон, її не можна видалити.</translation>
     </message>
@@ -834,7 +905,7 @@
     </message>
     <message>
         <location filename="../qml/ProfilesPage.qml" line="71" />
-        <location filename="../qml/ProfilesPage.qml" line="181" />
+        <location filename="../qml/ProfilesPage.qml" line="195" />
         <source>Profile imported.</source>
         <translation>Профіль імпортовано.</translation>
     </message>
@@ -860,52 +931,57 @@
     </message>
     <message>
         <location filename="../qml/ProfilesPage.qml" line="130" />
+        <source>Shot log and truing</source>
+        <translation>Журнал пострілів і уточнення</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProfilesPage.qml" line="137" />
         <source>Export to file…</source>
         <translation>Експорт у файл…</translation>
     </message>
     <message>
-        <location filename="../qml/ProfilesPage.qml" line="138" />
+        <location filename="../qml/ProfilesPage.qml" line="145" />
         <source>Copy to clipboard</source>
         <translation>Копіювати в буфер обміну</translation>
     </message>
     <message>
-        <location filename="../qml/ProfilesPage.qml" line="140" />
+        <location filename="../qml/ProfilesPage.qml" line="147" />
         <source>Profile copied. Paste it into a message or a file.</source>
         <translation>Профіль скопійовано. Вставте його в повідомлення або файл.</translation>
     </message>
     <message>
-        <location filename="../qml/ProfilesPage.qml" line="143" />
+        <location filename="../qml/ProfilesPage.qml" line="150" />
         <source>Delete</source>
         <translation>Видалити</translation>
     </message>
     <message>
-        <location filename="../qml/ProfilesPage.qml" line="178" />
+        <location filename="../qml/ProfilesPage.qml" line="192" />
         <source>Import profile</source>
         <translation>Імпорт профілю</translation>
     </message>
     <message>
-        <location filename="../qml/ProfilesPage.qml" line="180" />
-        <location filename="../qml/ProfilesPage.qml" line="190" />
+        <location filename="../qml/ProfilesPage.qml" line="194" />
+        <location filename="../qml/ProfilesPage.qml" line="204" />
         <source>BalCalc profiles (*.json)</source>
         <translation>Профілі BalCalc (*.json)</translation>
     </message>
     <message>
-        <location filename="../qml/ProfilesPage.qml" line="180" />
+        <location filename="../qml/ProfilesPage.qml" line="194" />
         <source>All files (*)</source>
         <translation>Усі файли (*)</translation>
     </message>
     <message>
-        <location filename="../qml/ProfilesPage.qml" line="187" />
+        <location filename="../qml/ProfilesPage.qml" line="201" />
         <source>Export profile</source>
         <translation>Експорт профілю</translation>
     </message>
     <message>
-        <location filename="../qml/ProfilesPage.qml" line="191" />
+        <location filename="../qml/ProfilesPage.qml" line="205" />
         <source>Profile saved.</source>
         <translation>Профіль збережено.</translation>
     </message>
     <message>
-        <location filename="../qml/ProfilesPage.qml" line="200" />
+        <location filename="../qml/ProfilesPage.qml" line="214" />
         <source>Delete profile?</source>
         <translation>Видалити профіль?</translation>
     </message>
@@ -967,13 +1043,13 @@
     <name>SolutionPage</name>
     <message>
         <location filename="../qml/SolutionPage.qml" line="22" />
-        <location filename="../qml/SolutionPage.qml" line="256" />
+        <location filename="../qml/SolutionPage.qml" line="278" />
         <source>MOA</source>
         <translation>MOA</translation>
     </message>
     <message>
         <location filename="../qml/SolutionPage.qml" line="22" />
-        <location filename="../qml/SolutionPage.qml" line="256" />
+        <location filename="../qml/SolutionPage.qml" line="278" />
         <source>MRAD</source>
         <translation>MRAD</translation>
     </message>
@@ -1044,163 +1120,178 @@
         <translation>ВЛІВО</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="219" />
+        <location filename="../qml/SolutionPage.qml" line="202" />
+        <source>Trued profile: velocity ×%1, drag ×%2</source>
+        <translation>Профіль уточнено: швидкість ×%1, опір ×%2</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="205" />
+        <source>Not trued yet: log hits to true the profile.</source>
+        <translation>Ще не уточнено: записуйте влучання, щоб уточнити профіль.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="208" />
+        <source>Log a hit</source>
+        <translation>Записати влучання</translation>
+    </message>
+    <message>
+        <location filename="../qml/SolutionPage.qml" line="241" />
         <source>No reticle chosen: plain crosshair in MRAD</source>
         <translation>Сітку не вибрано: просте перехрестя в MRAD</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="227" />
+        <location filename="../qml/SolutionPage.qml" line="249" />
         <source>Dial elevation, hold wind</source>
         <translation>Вертикаль барабаном, вітер виносом</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="228" />
+        <location filename="../qml/SolutionPage.qml" line="250" />
         <source>Hold everything</source>
         <translation>Усе виносом по сітці</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="229" />
+        <location filename="../qml/SolutionPage.qml" line="251" />
         <source>Dial everything</source>
         <translation>Усе барабанами</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="241" />
+        <location filename="../qml/SolutionPage.qml" line="263" />
         <source>Turrets: %1 clicks %2, %3 clicks %4</source>
         <translation>Барабани: %1 клік. %2, %3 клік. %4</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="243" />
+        <location filename="../qml/SolutionPage.qml" line="265" />
         <source>up</source>
         <translation>вгору</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="243" />
+        <location filename="../qml/SolutionPage.qml" line="265" />
         <source>down</source>
         <translation>вниз</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="245" />
-        <location filename="../qml/SolutionPage.qml" line="259" />
+        <location filename="../qml/SolutionPage.qml" line="267" />
+        <location filename="../qml/SolutionPage.qml" line="281" />
         <source>right</source>
         <translation>вправо</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="245" />
-        <location filename="../qml/SolutionPage.qml" line="259" />
+        <location filename="../qml/SolutionPage.qml" line="267" />
+        <location filename="../qml/SolutionPage.qml" line="281" />
         <source>left</source>
         <translation>вліво</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="254" />
+        <location filename="../qml/SolutionPage.qml" line="276" />
         <source>Put the target on the red mark: %1 %2 %3, %4 %2 %5 of the centre.</source>
         <translation>Сумістіть ціль із червоною міткою: %1 %2 %3, %4 %2 %5 від центру.</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="257" />
+        <location filename="../qml/SolutionPage.qml" line="279" />
         <source>below</source>
         <translation>нижче</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="257" />
+        <location filename="../qml/SolutionPage.qml" line="279" />
         <source>above</source>
         <translation>вище</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="266" />
+        <location filename="../qml/SolutionPage.qml" line="288" />
         <source>Magnification %1× (second focal plane: marks are true at the reference power)</source>
         <translation>Кратність %1× (друга фокальна площина: поділки точні на опорній кратності)</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="300" />
+        <location filename="../qml/SolutionPage.qml" line="322" />
         <source>Wind speed</source>
         <translation>Швидкість вітру</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="301" />
-        <location filename="../qml/SolutionPage.qml" line="356" />
-        <location filename="../qml/SolutionPage.qml" line="363" />
+        <location filename="../qml/SolutionPage.qml" line="323" />
+        <location filename="../qml/SolutionPage.qml" line="378" />
+        <location filename="../qml/SolutionPage.qml" line="385" />
         <source>m/s</source>
         <translation>м/с</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="325" />
+        <location filename="../qml/SolutionPage.qml" line="347" />
         <source>Wind from</source>
         <translation>Вітер звідки</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="332" />
+        <location filename="../qml/SolutionPage.qml" line="354" />
         <source>12 = from the target, 3 = from the right</source>
         <translation>12 = від цілі, 3 = справа</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="356" />
+        <location filename="../qml/SolutionPage.qml" line="378" />
         <source>Velocity</source>
         <translation>Швидкість</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="357" />
+        <location filename="../qml/SolutionPage.qml" line="379" />
         <source>Energy</source>
         <translation>Енергія</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="357" />
+        <location filename="../qml/SolutionPage.qml" line="379" />
         <source>J</source>
         <translation>Дж</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="358" />
+        <location filename="../qml/SolutionPage.qml" line="380" />
         <source>Time of flight</source>
         <translation>Час польоту</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="358" />
+        <location filename="../qml/SolutionPage.qml" line="380" />
         <source>s</source>
         <translation>с</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="359" />
+        <location filename="../qml/SolutionPage.qml" line="381" />
         <source>Mach</source>
         <translation>Мах</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="360" />
+        <location filename="../qml/SolutionPage.qml" line="382" />
         <source>Drop</source>
         <translation>Зниження</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="360" />
-        <location filename="../qml/SolutionPage.qml" line="361" />
-        <location filename="../qml/SolutionPage.qml" line="362" />
+        <location filename="../qml/SolutionPage.qml" line="382" />
+        <location filename="../qml/SolutionPage.qml" line="383" />
+        <location filename="../qml/SolutionPage.qml" line="384" />
         <source>cm</source>
         <translation>см</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="361" />
+        <location filename="../qml/SolutionPage.qml" line="383" />
         <source>Drift</source>
         <translation>Знос</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="362" />
+        <location filename="../qml/SolutionPage.qml" line="384" />
         <source>Spin drift</source>
         <translation>Деривація</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="363" />
+        <location filename="../qml/SolutionPage.qml" line="385" />
         <source>Muzzle velocity</source>
         <translation>Початкова швидкість</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="365" />
+        <location filename="../qml/SolutionPage.qml" line="387" />
         <source>Stability Sg</source>
         <translation>Стійкість Sg</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="380" />
+        <location filename="../qml/SolutionPage.qml" line="402" />
         <source>Subsonic at the target: expect larger dispersion.</source>
         <translation>На цілі куля дозвукова: очікуйте більшого розсіювання.</translation>
     </message>
     <message>
-        <location filename="../qml/SolutionPage.qml" line="381" />
+        <location filename="../qml/SolutionPage.qml" line="403" />
         <source>Transonic from about %1 m.</source>
         <translation>Трансзвук приблизно з %1 м.</translation>
     </message>
@@ -1349,6 +1440,99 @@ s</source>
         <location filename="../qml/TablePage.qml" line="304" />
         <source>drift (right +)</source>
         <translation>знос (вправо +)</translation>
+    </message>
+</context>
+<context>
+    <name>TruingPage</name>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="21" />
+        <source>MOA</source>
+        <translation>MOA</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="21" />
+        <source>MRAD</source>
+        <translation>MRAD</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="45" />
+        <source>Back</source>
+        <translation>Назад</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="47" />
+        <source>Shot log and truing</source>
+        <translation>Журнал пострілів і уточнення</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="53" />
+        <source>Log a hit</source>
+        <translation>Записати влучання</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="73" />
+        <source>Log the elevation that actually hit, at several distances (ideally one close, one where the bullet is still fast, one far). Truing then adjusts the muzzle velocity and the drag of this profile so the calculator agrees with your rifle.</source>
+        <translation>Записуйте вертикаль, з якою реально влучили, на кількох дистанціях (бажано близькій, середній і дальній). Уточнення підбере початкову швидкість і опір цього профілю, щоб розрахунок збігався з вашою гвинтівкою.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="82" />
+        <source>No shots logged for this profile yet.</source>
+        <translation>Для цього профілю ще немає записаних пострілів.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="102" />
+        <source>%1 m: hit at %2 %3</source>
+        <translation>%1 м: влучання при %2 %3</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="110" />
+        <source>predicted %1</source>
+        <translation>прогноз %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="129" />
+        <source>Calculate truing</source>
+        <translation>Розрахувати уточнення</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="135" />
+        <source>Reset truing</source>
+        <translation>Скинути уточнення</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="150" />
+        <source>The profile is trued: velocity ×%1, drag ×%2.</source>
+        <translation>Профіль уточнено: швидкість ×%1, опір ×%2.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="181" />
+        <source>Muzzle velocity %1 → %2 m/s</source>
+        <translation>Початкова швидкість %1 → %2 м/с</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="187" />
+        <source>Drag ×%1</source>
+        <translation>Опір ×%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="188" />
+        <source>Drag unchanged: log shots at more different distances to fit it.</source>
+        <translation>Опір не змінено: щоб його підібрати, запишіть постріли на більш різних дистанціях.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="195" />
+        <source>Average miss %1 → %2 %3</source>
+        <translation>Середній промах %1 → %2 %3</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="203" />
+        <source>%1 m: hit %2, was %3, now %4</source>
+        <translation>%1 м: влучання %2, було %3, стало %4</translation>
+    </message>
+    <message>
+        <location filename="../qml/TruingPage.qml" line="209" />
+        <source>Apply to the profile</source>
+        <translation>Застосувати до профілю</translation>
     </message>
 </context>
 </TS>

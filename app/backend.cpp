@@ -60,6 +60,9 @@ QString Q(const std::string& s) { return QString::fromStdString(s); }
     QT_TRANSLATE_NOOP("Logic", "Check the table range and step."),
     QT_TRANSLATE_NOOP("Logic", "Check the scope magnification range."),
     QT_TRANSLATE_NOOP("Logic", "Enter the bullet name."),
+    QT_TRANSLATE_NOOP("Logic", "Log at least one shot to true the profile."),
+    QT_TRANSLATE_NOOP("Logic", "The bullet does not reach one of the logged ranges."),
+    QT_TRANSLATE_NOOP("Logic", "Nothing to apply."),
     QT_TRANSLATE_NOOP("Logic", "Each BC band needs a velocity and a BC between 0 and 2."),
     QT_TRANSLATE_NOOP("Logic", "This bullet is used by a cartridge and cannot be deleted."),
 };
@@ -287,6 +290,112 @@ void Backend::setHoldMode(const QString& mode) {
     bs::SetSetting(db_, kHoldModeKey, hold_mode_.toStdString()).ok();
     emit holdModeChanged();
     recompute_timer_.start();
+}
+
+QVariantList Backend::shots() {
+    QVariantList out;
+    if (current_profile_id_ == 0) {
+        return out;
+    }
+    auto list = al::ListShots(db_, current_profile_id_);
+    if (!list) {
+        return out;
+    }
+    const auto unit = angle_unit_ == "moa" ? al::AngleUnit::kMoa : al::AngleUnit::kMrad;
+    for (const auto& d : list.value()) {
+        out.push_back(QVariantMap{
+            {"id", static_cast<qlonglong>(d.id)},
+            {"rangeM", d.range_m},
+            {"observed", al::FromRad(d.observed_elevation_rad, unit)},
+            {"predicted", d.predicted_elevation_rad ? al::FromRad(*d.predicted_elevation_rad, unit)
+                                                    : QVariant()},
+            {"hasWindage", d.observed_windage_rad.has_value()},
+            {"observedWindage", al::FromRad(d.observed_windage_rad.value_or(0.0), unit)},
+            {"shotAt", Q(d.shot_at)},
+            {"used", d.use_for_truing},
+            {"notes", Q(d.notes)},
+            {"temperatureC", ballistics::units::KToC(d.atmosphere.temperature_k)}});
+    }
+    return out;
+}
+
+QString Backend::logShot(double range_m, double elevation, bool has_windage, double windage,
+                         const QString& notes) {
+    if (current_profile_id_ == 0) {
+        return tr("Create a profile to get a solution.");
+    }
+    const double unit_rad = angle_unit_ == "moa" ? ballistics::units::MoaToRad(1.0)
+                                                  : ballistics::units::MradToRad(1.0);
+    std::optional<double> wind;
+    if (has_windage) {
+        wind = windage * unit_rad;
+    }
+    al::SessionConditions s = Session();
+    auto id = al::LogShot(db_, current_profile_id_, s, range_m, elevation * unit_rad, wind,
+                          notes.toStdString());
+    if (!id) {
+        return Tr(id.error().message);
+    }
+    emit shotsChanged();
+    return {};
+}
+
+QString Backend::deleteShot(int id) {
+    if (auto s = al::DeleteShot(db_, id); !s) {
+        return Q(s.error().message);
+    }
+    emit shotsChanged();
+    return {};
+}
+
+QString Backend::setShotUsed(int id, bool used) {
+    if (auto s = al::SetShotUsedForTruing(db_, id, used); !s) {
+        return Q(s.error().message);
+    }
+    emit shotsChanged();
+    return {};
+}
+
+QVariantMap Backend::computeTruing() {
+    last_truing_ = al::ComputeTruing(db_, current_profile_id_);
+    const al::TruingResult& r = last_truing_;
+    const auto unit = angle_unit_ == "moa" ? al::AngleUnit::kMoa : al::AngleUnit::kMrad;
+    QVariantList points;
+    for (const auto& p : r.points) {
+        points.push_back(QVariantMap{{"rangeM", p.range_m},
+                                     {"observed", al::FromRad(p.observed_rad, unit)},
+                                     {"before", al::FromRad(p.predicted_before_rad, unit)},
+                                     {"after", al::FromRad(p.predicted_after_rad, unit)}});
+    }
+    return {{"ok", r.ok},
+            {"error", Tr(r.error)},
+            {"velocityScale", r.velocity_scale},
+            {"dragScale", r.drag_scale},
+            {"dragFitted", r.drag_fitted},
+            {"rmsBefore", al::FromRad(r.rms_before_rad, unit)},
+            {"rmsAfter", al::FromRad(r.rms_after_rad, unit)},
+            {"velocityBefore", r.muzzle_velocity_before_mps},
+            {"velocityAfter", r.muzzle_velocity_after_mps},
+            {"points", points}};
+}
+
+QString Backend::applyTruing() {
+    if (auto s = al::ApplyTruing(db_, current_profile_id_, last_truing_); !s) {
+        return Tr(s.error().message);
+    }
+    last_truing_ = {};
+    emit shotsChanged();
+    recompute_timer_.start();
+    return {};
+}
+
+QString Backend::resetTruing() {
+    if (auto s = al::ResetTruing(db_, current_profile_id_); !s) {
+        return Tr(s.error().message);
+    }
+    emit shotsChanged();
+    recompute_timer_.start();
+    return {};
 }
 
 QVariantList Backend::reticles() {
@@ -695,6 +804,8 @@ void Backend::Recompute() {
                {"mach", r.mach},
                {"muzzleVelocity", r.muzzle_velocity_mps},
                {"stability", r.stability},
+               {"velocityScale", p.value().profile.velocity_scale},
+               {"dragScale", p.value().profile.drag_scale},
                {"spinDriftCm", r.spin_drift_cm},
                {"subsonic", r.subsonic},
                {"transonicRangeM", r.transonic_range_m}};

@@ -127,6 +127,13 @@ Page {
                                 id: rowMenu
                                 y: moreButton.height
                                 MenuItem {
+                                    text: qsTr("Shot log and truing")
+                                    onTriggered: {
+                                        Backend.currentProfileId = row.modelData.id
+                                        stack.push(truingComponent)
+                                    }
+                                }
+                                MenuItem {
                                     text: qsTr("Export to file…")
                                     onTriggered: {
                                         exportDialog.profileId = row.modelData.id
@@ -163,6 +170,13 @@ Page {
         id: editorComponent
         ProfileEditor {
             onDone: stack.pop()
+        }
+    }
+
+    Component {
+        id: truingComponent
+        TruingPage {
+            onClosed: stack.pop()
         }
     }
 
