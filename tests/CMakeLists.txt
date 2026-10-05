@@ -9,6 +9,8 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  # for future MSVC builds
 FetchContent_MakeAvailable(googletest)
 
 add_executable(core_tests
+    physics_basics_test.cpp
+    physics_reference_test.cpp
     smoke_test.cpp
     storage_database_test.cpp
 )
@@ -20,6 +22,8 @@ target_link_libraries(core_tests PRIVATE
     ballistics_warnings
 )
 ballistics_enable_tidy(core_tests)
+
+target_include_directories(core_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(GoogleTest)
 # PRE_TEST: list tests when ctest runs, not at build time, so a build
