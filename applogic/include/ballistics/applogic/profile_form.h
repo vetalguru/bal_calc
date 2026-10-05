@@ -39,7 +39,10 @@ struct ProfileForm {
     std::string click_units = kClickMrad;
     double click_value = 0.1;
 
-    // Bullet
+    // Bullet. With `library_bullet_id` set the profile uses that library
+    // bullet as is (the fields below only display it); with 0 the fields
+    // describe the profile's own bullet.
+    Id library_bullet_id = 0;
     std::string bullet_name;
     std::string drag_table = "G7";
     double bc = 0.0;
@@ -66,6 +69,9 @@ struct ProfileForm {
 // Problems a user must fix before saving, as a readable sentence; empty if
 // the form is complete.
 std::string Validate(const ProfileForm& form);
+
+// The form with a library bullet chosen (fields filled for display).
+Result<ProfileForm> WithLibraryBullet(storage::Database& db, ProfileForm form, Id bullet_id);
 
 // Loads a stored profile into a form.
 Result<ProfileForm> LoadProfileForm(storage::Database& db, Id profile_id);

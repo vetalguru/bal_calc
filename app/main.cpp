@@ -4,6 +4,10 @@
 #include <QQuickStyle>
 #include <QQuickWindow>
 #include <QTimer>
+#include <QtQml/QQmlExtensionPlugin>
+
+// The UI lives in the static QML module BalCalc (balcalc_ui).
+Q_IMPORT_QML_PLUGIN(BalCalcPlugin)
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);

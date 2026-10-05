@@ -17,7 +17,20 @@ Page {
 
     // Field values, keys as Backend.profileForm() returns them.
     property var form: ({})
+    // The stack this editor was pushed on (to open the bullet library).
+    property StackView stack
     signal done()
+
+    readonly property bool fromLibrary: (form.libraryBulletId || 0) > 0
+
+    function chooseBullet() {
+        page.forceActiveFocus()
+        var library = page.stack.push(libraryComponent, { stack: page.stack, picker: true })
+        library.picked.connect(function(id) {
+            page.form = Backend.profileFormWithBullet(page.form, id)
+            page.stack.pop()
+        })
+    }
 
     readonly property bool wide: width >= 640
     readonly property var clickUnits: [
@@ -146,13 +159,41 @@ Page {
 
             Group {
                 title: qsTr("Bullet")
+                RowLayout {
+                    Layout.fillWidth: true
+                    Label {
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        opacity: 0.8
+                        text: page.fromLibrary ? qsTr("From the library: %1").arg(page.form.bulletName)
+                                               : qsTr("Own bullet of this profile")
+                    }
+                    Button {
+                        text: page.fromLibrary ? qsTr("Change") : qsTr("From library")
+                        flat: true
+                        onClicked: page.chooseBullet()
+                    }
+                    Button {
+                        visible: page.fromLibrary
+                        text: qsTr("Edit as own")
+                        flat: true
+                        onClicked: {
+                            var f = page.form
+                            f.libraryBulletId = 0
+                            page.form = f
+                            page.formChanged()
+                        }
+                    }
+                }
                 TextField {
                     Layout.fillWidth: true
+                    enabled: !page.fromLibrary
                     placeholderText: qsTr("Bullet, e.g. Sierra MatchKing 175 gr")
                     text: page.form.bulletName || ""
                     onTextEdited: page.form.bulletName = text
                 }
                 Grid2 {
+                    enabled: !page.fromLibrary
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 2
@@ -296,6 +337,13 @@ Page {
                 highlighted: true
                 onClicked: page.save()
             }
+        }
+    }
+
+    Component {
+        id: libraryComponent
+        LibraryPage {
+            onClosed: page.stack.pop()
         }
     }
 

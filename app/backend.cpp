@@ -2,13 +2,19 @@
 
 #include <algorithm>
 
+#include <QClipboard>
 #include <QCoreApplication>
 #include <QDir>
+#include <QFile>
+#include <QGuiApplication>
 #include <QLocale>
 #include <QQmlEngine>
+#include <QRegularExpression>
 #include <QStandardPaths>
 
+#include <ballistics/applogic/library.h>
 #include <ballistics/applogic/profile_form.h>
+#include <ballistics/applogic/profile_io.h>
 #include <ballistics/atmosphere.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
@@ -45,6 +51,9 @@ QString Q(const std::string& s) { return QString::fromStdString(s); }
     QT_TRANSLATE_NOOP("Logic", "Enter a target range."),
     QT_TRANSLATE_NOOP("Logic", "The bullet does not reach this range."),
     QT_TRANSLATE_NOOP("Logic", "Check the table range and step."),
+    QT_TRANSLATE_NOOP("Logic", "Enter the bullet name."),
+    QT_TRANSLATE_NOOP("Logic", "Each BC band needs a velocity and a BC between 0 and 2."),
+    QT_TRANSLATE_NOOP("Logic", "This bullet is used by a cartridge and cannot be deleted."),
 };
 
 // A message from applogic/storage in the UI language (unknown ones as is).
@@ -56,6 +65,7 @@ std::string S(const QVariant& v) { return v.toString().toStdString(); }
 QVariantMap ToMap(const al::ProfileForm& f) {
     return {
         {"profileId", static_cast<qlonglong>(f.profile_id)},
+        {"libraryBulletId", static_cast<qlonglong>(f.library_bullet_id)},
         {"name", Q(f.name)},
         {"caliber", Q(f.caliber)},
         {"sightHeightCm", f.sight_height_cm},
@@ -86,6 +96,7 @@ QVariantMap ToMap(const al::ProfileForm& f) {
 al::ProfileForm FromMap(const QVariantMap& m) {
     al::ProfileForm f;
     f.profile_id = m.value("profileId").toLongLong();
+    f.library_bullet_id = m.value("libraryBulletId").toLongLong();
     f.name = S(m.value("name"));
     f.caliber = S(m.value("caliber"));
     f.sight_height_cm = m.value("sightHeightCm").toDouble();
@@ -112,6 +123,50 @@ al::ProfileForm FromMap(const QVariantMap& m) {
     f.zero_powder_c = m.value("zeroPowderC").toDouble();
     return f;
 }
+
+QVariantMap ToMap(const al::BulletForm& f) {
+    QVariantList bands;
+    for (const al::BcBand& b : f.bands) {
+        bands.push_back(QVariantMap{{"velocity", b.velocity_mps}, {"bc", b.bc}});
+    }
+    return {{"id", static_cast<qlonglong>(f.id)},
+            {"name", Q(f.name)},
+            {"manufacturer", Q(f.manufacturer)},
+            {"caliber", Q(f.caliber)},
+            {"massGr", f.mass_gr},
+            {"diameterIn", f.diameter_in},
+            {"lengthIn", f.length_in},
+            {"dragTable", Q(f.drag_table)},
+            {"bc", f.bc},
+            {"bands", bands},
+            {"notes", Q(f.notes)},
+            {"source", Q(f.source)},
+            {"hasCustomCurve", f.has_custom_curve}};
+}
+
+al::BulletForm BulletFromMap(const QVariantMap& m) {
+    al::BulletForm f;
+    f.id = m.value("id").toLongLong();
+    f.name = S(m.value("name"));
+    f.manufacturer = S(m.value("manufacturer"));
+    f.caliber = S(m.value("caliber"));
+    f.mass_gr = m.value("massGr").toDouble();
+    f.diameter_in = m.value("diameterIn").toDouble();
+    f.length_in = m.value("lengthIn").toDouble();
+    f.drag_table = S(m.value("dragTable"));
+    f.bc = m.value("bc").toDouble();
+    for (const QVariant& v : m.value("bands").toList()) {
+        const QVariantMap b = v.toMap();
+        f.bands.push_back({b.value("velocity").toDouble(), b.value("bc").toDouble()});
+    }
+    f.notes = S(m.value("notes"));
+    f.source = m.contains("source") ? S(m.value("source")) : std::string(al::kSourceLibrary);
+    f.has_custom_curve = m.value("hasCustomCurve").toBool();
+    return f;
+}
+
+// QFile understands both local paths and Android content:// URLs.
+QString FilePath(const QUrl& url) { return url.isLocalFile() ? url.toLocalFile() : url.toString(); }
 
 } // namespace
 
@@ -323,6 +378,118 @@ QVariantMap Backend::rangeTable() { return Table(table_from_m_, table_to_m_, tab
 QVariantMap Backend::trajectoryCurve(double max_range_m, int points) {
     points = std::clamp(points, 10, 1000);
     return Table(0.0, max_range_m, max_range_m / points);
+}
+
+QVariantMap Backend::profileFormWithBullet(const QVariantMap& form, int bullet_id) {
+    auto f = al::WithLibraryBullet(db_, FromMap(form), bullet_id);
+    return f ? ToMap(f.value()) : form;
+}
+
+QVariantList Backend::libraryBullets(const QString& filter) {
+    QVariantList out;
+    auto list = al::ListLibraryBullets(db_, filter.toStdString());
+    if (!list) {
+        return out;
+    }
+    for (const al::BulletSummary& b : list.value()) {
+        out.push_back(QVariantMap{{"id", static_cast<qlonglong>(b.id)},
+                                  {"name", Q(b.name)},
+                                  {"manufacturer", Q(b.manufacturer)},
+                                  {"caliber", Q(b.caliber)},
+                                  {"massGr", b.mass_gr},
+                                  {"diameterIn", b.diameter_in},
+                                  {"dragKind", Q(b.drag_kind)},
+                                  {"dragTable", Q(b.drag_table)},
+                                  {"bc", b.bc},
+                                  {"bcBands", b.bc_bands},
+                                  {"source", Q(b.source)}});
+    }
+    return out;
+}
+
+QVariantMap Backend::bulletForm(int id) {
+    if (id == 0) {
+        return ToMap(al::BulletForm{});
+    }
+    auto f = al::LoadBulletForm(db_, id);
+    return f ? ToMap(f.value()) : ToMap(al::BulletForm{});
+}
+
+QString Backend::saveBullet(const QVariantMap& form) {
+    auto id = al::SaveBulletForm(db_, BulletFromMap(form));
+    if (!id) {
+        return Tr(id.error().message);
+    }
+    emit libraryChanged();
+    recompute_timer_.start(); // a profile may use this bullet
+    return {};
+}
+
+QString Backend::deleteBullet(int id) {
+    if (auto s = al::DeleteBullet(db_, id); !s) {
+        return Tr(s.error().message);
+    }
+    emit libraryChanged();
+    return {};
+}
+
+QString Backend::profileFileName(int id) const {
+    for (const QVariant& p : profiles_) {
+        const QVariantMap m = p.toMap();
+        if (m.value("id").toInt() == id) {
+            QString name = m.value("name").toString();
+            static const QRegularExpression kUnsafe(QStringLiteral("[\\\\/:*?\"<>|]+"));
+            name.replace(kUnsafe, QStringLiteral("_"));
+            return name + QStringLiteral(".balcalc.json");
+        }
+    }
+    return QStringLiteral("profile.balcalc.json");
+}
+
+QString Backend::exportProfile(int id, const QUrl& file) {
+    auto json = al::ExportProfileJson(db_, id);
+    if (!json) {
+        return Q(json.error().message);
+    }
+    QFile f(FilePath(file));
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        return tr("Cannot write %1: %2").arg(file.toDisplayString(), f.errorString());
+    }
+    f.write(QByteArray::fromStdString(json.value()));
+    return {};
+}
+
+QString Backend::ImportJson(const std::string& json) {
+    auto id = al::ImportProfileJson(db_, json);
+    if (!id) {
+        return Tr(id.error().message);
+    }
+    ReloadProfiles();
+    emit libraryChanged();
+    setCurrentProfileId(static_cast<int>(id.value()));
+    recompute_timer_.start();
+    return {};
+}
+
+QString Backend::importProfile(const QUrl& file) {
+    QFile f(FilePath(file));
+    if (!f.open(QIODevice::ReadOnly)) {
+        return tr("Cannot read %1: %2").arg(file.toDisplayString(), f.errorString());
+    }
+    return ImportJson(f.readAll().toStdString());
+}
+
+QString Backend::copyProfileToClipboard(int id) {
+    auto json = al::ExportProfileJson(db_, id);
+    if (!json) {
+        return Q(json.error().message);
+    }
+    QGuiApplication::clipboard()->setText(Q(json.value()));
+    return {};
+}
+
+QString Backend::importProfileFromClipboard() {
+    return ImportJson(QGuiApplication::clipboard()->text().toStdString());
 }
 
 double Backend::stationPressure(double qnh_hpa, double altitude_m) const {
