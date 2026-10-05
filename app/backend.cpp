@@ -121,9 +121,13 @@ Backend::Backend(QObject* parent) : QObject(parent) {
         save_timer_.start();
     });
 
-    const QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir().mkpath(dir);
-    db_path_ = QDir(dir).filePath("balcalc.db");
+    // BALCALC_DB points the app at another database file (tests, demos).
+    db_path_ = qEnvironmentVariable("BALCALC_DB");
+    if (db_path_.isEmpty()) {
+        const QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        QDir().mkpath(dir);
+        db_path_ = QDir(dir).filePath("balcalc.db");
+    }
     if (auto s = db_.Open(db_path_.toStdString()); !s) {
         db_error_ = Q(s.error().message);
         return;
