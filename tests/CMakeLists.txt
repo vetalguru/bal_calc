@@ -8,9 +8,13 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  # for future MSVC builds
 FetchContent_MakeAvailable(googletest)
 
-add_executable(core_tests smoke_test.cpp)
+add_executable(core_tests
+    smoke_test.cpp
+    storage_database_test.cpp
+)
 target_link_libraries(core_tests PRIVATE
     ballistics_core
+    ballistics_storage
     GTest::gtest_main
     GTest::gmock
     ballistics_warnings
@@ -18,4 +22,6 @@ target_link_libraries(core_tests PRIVATE
 ballistics_enable_tidy(core_tests)
 
 include(GoogleTest)
-gtest_discover_tests(core_tests)
+# PRE_TEST: list tests when ctest runs, not at build time, so a build
+# never needs to execute the test binary (cross builds, locked-down hosts).
+gtest_discover_tests(core_tests DISCOVERY_MODE PRE_TEST)

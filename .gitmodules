@@ -1,0 +1,3 @@
+[submodule "third_party/sqlite_manager"]
+	path = third_party/sqlite_manager
+	url = https://github.com/vetalguru/sqlite_manager.git
