@@ -70,6 +70,9 @@ public:
     static DragModel FromCurve(std::vector<DragPoint> curve, double mass_kg, double diameter_m,
                                double form_factor = 1.0);
 
+    // The same model with all drag multiplied by `factor` (truing).
+    DragModel Scaled(double factor) const;
+
     // K(M) in m^2/kg; multiply by density and v^2 for the deceleration.
     double Coefficient(double mach) const;
 

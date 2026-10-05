@@ -15,6 +15,7 @@ add_executable(core_tests
     physics_reference_test.cpp
     smoke_test.cpp
     storage_database_test.cpp
+    storage_solution_test.cpp
 )
 target_link_libraries(core_tests PRIVATE
     ballistics_core
@@ -26,6 +27,11 @@ target_link_libraries(core_tests PRIVATE
 ballistics_enable_tidy(core_tests)
 
 target_include_directories(core_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+if(TARGET bal_cli_lib)
+    target_sources(core_tests PRIVATE cli_test.cpp)
+    target_link_libraries(core_tests PRIVATE bal_cli_lib)
+endif()
 
 include(GoogleTest)
 # PRE_TEST: list tests when ctest runs, not at build time, so a build
