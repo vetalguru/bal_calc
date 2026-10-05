@@ -74,6 +74,25 @@ TEST(CliRun, QuickRejectsBadInput) {
     EXPECT_EQ(RunCli({"quick", "--bc", "0.3", "--v0", "800", "--drag", "G42"}, out, err), 1);
 }
 
+TEST(CliRun, ImportAndSeed) {
+    const auto db =
+        (std::filesystem::temp_directory_path() / "balcalc_cli_import.db").string();
+    std::filesystem::remove(db);
+    const std::string seed = BALLISTICS_SEED_DIR;
+    std::string out, err;
+    ASSERT_EQ(RunCli({"--db", db, "import", seed + "/reticle/mildot.reticle",
+                      seed + "/ammo/7.5x55 GP11.ammo"},
+                     out, err),
+              0)
+        << err;
+    EXPECT_NE(out.find("imported"), std::string::npos);
+    EXPECT_EQ(RunCli({"--db", db, "import", seed + "/README.md"}, out, err), 1);
+    ASSERT_EQ(RunCli({"--db", db, "seed", seed}, out, err), 0) << err;
+    EXPECT_NE(out.find(" imported, "), std::string::npos);
+    EXPECT_EQ(RunCli({"version", "extra"}, out, err), 2);
+    std::filesystem::remove(db);
+}
+
 TEST(CliRun, DemoProfileTable) {
     const auto db =
         (std::filesystem::temp_directory_path() / "balcalc_cli_test.db").string();

@@ -34,6 +34,20 @@ target_link_libraries(balcalc_ui PUBLIC
     ballistics_applogic
 )
 
+# The starter library (data/seed) is compiled in and imported into a new
+# database on first start.
+file(GLOB_RECURSE seed_files CONFIGURE_DEPENDS
+    RELATIVE ${PROJECT_SOURCE_DIR}/data/seed
+    ${PROJECT_SOURCE_DIR}/data/seed/ammo/*.ammo
+    ${PROJECT_SOURCE_DIR}/data/seed/drg/*.drg
+    ${PROJECT_SOURCE_DIR}/data/seed/reticle/*.reticle
+    ${PROJECT_SOURCE_DIR}/data/seed/published_bullets.json)
+list(TRANSFORM seed_files PREPEND ${PROJECT_SOURCE_DIR}/data/seed/)
+qt_add_resources(balcalc_ui "seed"
+    PREFIX "/seed"
+    BASE ${PROJECT_SOURCE_DIR}/data/seed
+    FILES ${seed_files})
+
 qt_add_executable(balcalc WIN32 MACOSX_BUNDLE
     main.cpp
 )

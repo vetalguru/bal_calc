@@ -92,6 +92,19 @@ Page {
                         opacity: 0.8
                     }
                     Label {
+                        text: qsTr("Bundled data: cartridges and reticles from BallisticCalculator (LGPL-2.1), Lapua Doppler-radar drag curves, manufacturer-published BCs (Berger, Hornady, Sierra).")
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
+                        opacity: 0.8
+                    }
+                    Label {
+                        visible: Backend.seedReport.length > 0
+                        text: Backend.seedReport
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
+                        opacity: 0.6
+                    }
+                    Label {
                         text: Backend.databasePath
                         wrapMode: Text.WrapAnywhere
                         Layout.fillWidth: true

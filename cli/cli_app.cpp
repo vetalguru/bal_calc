@@ -9,6 +9,11 @@
 #include <string>
 #include <vector>
 
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+
+#include <ballistics/applogic/importers.h>
 #include <ballistics/atmosphere.h>
 #include <ballistics/effects.h>
 #include <ballistics/solver.h>
@@ -36,6 +41,8 @@ Commands:
   version                 engine and SQLite versions
   demo                    add a demo profile (.308 M118LR, 100 m zero) to --db
   profiles                list the profiles in --db
+  import FILE...          import .ammo/.drg/.reticle/.json files into --db
+  seed DIR                import the starter library (data/seed) into --db
   table --profile ID      range card for a stored profile
   quick                   range card without a database:
       --bc BC --drag G1|G7|...  --v0 M/S  [--mass-gr GR --diam-in IN --len-in IN]
@@ -54,6 +61,7 @@ Output:
 // Command line split into flags and repeated --wind values.
 struct Args {
     std::string command;
+    std::vector<std::string> files; // positional arguments after the command
     std::map<std::string, std::string> opts;
     std::vector<std::string> winds;
     bool csv = false;
@@ -79,8 +87,7 @@ bool ParseArgs(const std::vector<std::string>& in, Args& a, std::ostream& err) {
         } else if (a.command.empty()) {
             a.command = s;
         } else {
-            err << "unexpected argument: " << s << "\n";
-            return false;
+            a.files.push_back(s);
         }
     }
     return true;
@@ -443,6 +450,97 @@ int CmdDemo(const Args& a, std::ostream& out, std::ostream& err) {
     return 0;
 }
 
+std::string ReadFile(const std::filesystem::path& path, bool& ok) {
+    std::ifstream in(path, std::ios::binary);
+    ok = static_cast<bool>(in);
+    std::ostringstream text;
+    text << in.rdbuf();
+    return text.str();
+}
+
+bool OpenDb(const Args& a, bs::Database& db, std::ostream& err) {
+    const auto db_path = a.opts.find("db");
+    if (db_path == a.opts.end()) {
+        err << a.command << " needs --db FILE\n";
+        return false;
+    }
+    if (auto s = db.Open(db_path->second); !s) {
+        err << "cannot open " << db_path->second << ": " << s.error().message << "\n";
+        return false;
+    }
+    return true;
+}
+
+int CmdImport(const Args& a, std::ostream& out, std::ostream& err) {
+    if (a.files.empty()) {
+        err << "import needs at least one FILE\n";
+        return 2;
+    }
+    bs::Database db;
+    if (!OpenDb(a, db, err)) {
+        return 1;
+    }
+    int failed = 0;
+    for (const std::string& file : a.files) {
+        bool ok = false;
+        const std::string content = ReadFile(file, ok);
+        if (!ok) {
+            err << file << ": cannot read\n";
+            ++failed;
+            continue;
+        }
+        const auto id = ballistics::applogic::ImportFile(
+            db, std::filesystem::path(file).filename().string(), content);
+        if (id) {
+            out << file << ": imported (id " << id.value() << ")\n";
+        } else {
+            err << file << ": " << id.error().message << "\n";
+            ++failed;
+        }
+    }
+    return failed == 0 ? 0 : 1;
+}
+
+int CmdSeed(const Args& a, std::ostream& out, std::ostream& err) {
+    if (a.files.size() != 1) {
+        err << "seed needs the data/seed directory\n";
+        return 2;
+    }
+    bs::Database db;
+    if (!OpenDb(a, db, err)) {
+        return 1;
+    }
+    std::vector<ballistics::applogic::SeedFile> files;
+    std::error_code ec;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(a.files[0], ec)) {
+        const auto ext = entry.path().extension().string();
+        if (!entry.is_regular_file() ||
+            (ext != ".ammo" && ext != ".drg" && ext != ".reticle" && ext != ".json")) {
+            continue;
+        }
+        bool ok = false;
+        std::string content = ReadFile(entry.path(), ok);
+        if (ok) {
+            files.push_back({entry.path().filename().string(), std::move(content)});
+        }
+    }
+    if (ec || files.empty()) {
+        err << a.files[0] << ": no data files found\n";
+        return 1;
+    }
+    // A version above any the app uses: re-run always, existing records are kept.
+    const auto report = ballistics::applogic::SeedLibrary(db, files, 1000000);
+    if (!report) {
+        err << report.error().message << "\n";
+        return 1;
+    }
+    out << report.value().imported << " imported, " << report.value().skipped << " skipped\n";
+    for (const std::string& p : report.value().problems) {
+        err << p << "\n";
+    }
+    return 0;
+}
+
 } // namespace
 
 bool ParseWind(const std::string& text, WindSpec& wind) {
@@ -484,6 +582,10 @@ int Run(const std::vector<std::string>& args, std::ostream& out, std::ostream& e
         out << kUsage;
         return a.command.empty() ? 2 : 0;
     }
+    if (!a.files.empty() && a.command != "import" && a.command != "seed") {
+        err << "unexpected argument: " << a.files.front() << "\n" << kUsage;
+        return 2;
+    }
     if (a.command == "version") {
         out << "ballistics " << ballistics::version() << " (SQLite "
             << bs::SqliteVersion() << ")\n";
@@ -500,6 +602,12 @@ int Run(const std::vector<std::string>& args, std::ostream& out, std::ostream& e
     }
     if (a.command == "demo") {
         return CmdDemo(a, out, err);
+    }
+    if (a.command == "import") {
+        return CmdImport(a, out, err);
+    }
+    if (a.command == "seed") {
+        return CmdSeed(a, out, err);
     }
     err << "unknown command: " << a.command << "\n" << kUsage;
     return 2;

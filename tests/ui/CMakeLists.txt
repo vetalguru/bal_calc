@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS QuickTest)
+find_package(Qt6 REQUIRED COMPONENTS QuickTest Quick QuickControls2 QuickDialogs2)
 
 qt_add_executable(ui_tests tst_ui.cpp)
 set_target_properties(ui_tests PROPERTIES AUTOMOC ON)

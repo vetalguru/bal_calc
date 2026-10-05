@@ -110,6 +110,14 @@ public:
     Q_INVOKABLE QString importProfile(const QUrl& file);
     Q_INVOKABLE QString copyProfileToClipboard(int id);
     Q_INVOKABLE QString importProfileFromClipboard();
+
+    // Imports data files (.ammo, .drg, .reticle, profile or bullet-list
+    // .json); returns a summary such as "3 imported" plus any problems.
+    Q_INVOKABLE QString importFiles(const QList<QUrl>& files);
+
+    // Starter library import result, for the About screen.
+    Q_PROPERTY(QString seedReport READ seedReport CONSTANT)
+    QString seedReport() const { return seed_report_; }
     // Suggested file name for a profile export.
     Q_INVOKABLE QString profileFileName(int id) const;
 
@@ -130,6 +138,7 @@ private:
     void ReloadProfiles();
     QVariantMap Table(double from_m, double to_m, double step_m);
     QString ImportJson(const std::string& json);
+    void SeedStarterLibrary();
     void InstallTranslator();
     void Recompute();
     ballistics::applogic::SessionConditions Session() const;
@@ -144,6 +153,7 @@ private:
     QString language_;
     QTranslator translator_;
     QVariantMap solution_;
+    QString seed_report_;
     QTimer recompute_timer_;
     QTimer save_timer_;
 

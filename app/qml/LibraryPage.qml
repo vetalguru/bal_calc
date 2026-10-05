@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import BalCalc
 
@@ -48,10 +49,41 @@ Page {
                 Layout.fillWidth: true
             }
             Button {
+                text: qsTr("Import")
+                flat: true
+                onClicked: importDialog.open()
+            }
+            Button {
                 text: qsTr("New")
                 highlighted: true
                 onClicked: page.edit(0)
             }
+        }
+    }
+
+    FileDialog {
+        id: importDialog
+        title: qsTr("Import bullets, drag curves or reticles")
+        fileMode: FileDialog.OpenFiles
+        nameFilters: [qsTr("Ballistic data (*.ammo *.drg *.reticle *.json)"), qsTr("All files (*)")]
+        onAccepted: {
+            importResult.text = Backend.importFiles(selectedFiles)
+            importResult.open()
+        }
+    }
+
+    Dialog {
+        id: importResult
+        property alias text: resultLabel.text
+        anchors.centerIn: parent
+        width: Math.min(page.width - 32, 520)
+        modal: true
+        title: qsTr("Import")
+        standardButtons: Dialog.Ok
+        Label {
+            id: resultLabel
+            width: parent.width
+            wrapMode: Text.Wrap
         }
     }
 
