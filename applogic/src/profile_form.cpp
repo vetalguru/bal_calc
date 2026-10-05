@@ -326,6 +326,31 @@ Result<Id> SaveProfileForm(Database& db, const ProfileForm& f) {
     return p.id;
 }
 
+Result<Id> CreateSampleProfile(Database& db, const std::string& name) {
+    ProfileForm f;
+    f.name = name;
+    f.caliber = ".308 Win";
+    f.sight_height_cm = 5.0;
+    f.twist_in = 10.0;
+    f.click_units = kClickMrad;
+    f.click_value = 0.1;
+    f.bullet_name = "Sierra MatchKing 175 gr HPBT";
+    f.drag_table = "G7";
+    f.bc = 0.243;
+    f.mass_gr = 175.0;
+    f.diameter_in = 0.308;
+    f.length_in = 1.24;
+    f.muzzle_velocity_mps = 790.0;
+    f.powder_sensitivity_pct_per_c = 0.08;
+    f.zero_range_m = 100.0;
+    if (auto lib = ListLibraryBullets(db, "MatchKing 175 gr HPBT"); lib && !lib.value().empty()) {
+        if (auto with = WithLibraryBullet(db, f, lib.value().front().id)) {
+            f = std::move(with).value();
+        }
+    }
+    return SaveProfileForm(db, f);
+}
+
 Status DeleteProfile(Database& db, Id profile_id) {
     auto p = Require<ProfileRecord>(db, profile_id, "profile");
     if (!p) {

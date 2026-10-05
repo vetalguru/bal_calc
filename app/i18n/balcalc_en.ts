@@ -4,7 +4,7 @@
 <context>
     <name>Backend</name>
     <message numerus="yes">
-        <location filename="../../../../app/backend.cpp" line="667"/>
+        <location filename="../../../../app/backend.cpp" line="688"/>
         <source>%n file(s) imported.</source>
         <translation type="unfinished">
             <numerusform></numerusform>

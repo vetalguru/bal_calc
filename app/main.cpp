@@ -1,5 +1,6 @@
 #include <QCommandLineParser>
 #include <QGuiApplication>
+#include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QQuickWindow>
@@ -14,6 +15,7 @@ int main(int argc, char* argv[]) {
     QGuiApplication::setOrganizationName("vetalguru");
     QGuiApplication::setApplicationName("BalCalc");
     QQuickStyle::setStyle("Material");
+    QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/balcalc.png")));
 
     // Testing aids: render a page and save it as an image, then quit.
     // Pair with QT_QPA_PLATFORM=offscreen for headless runs, and

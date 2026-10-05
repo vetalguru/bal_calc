@@ -25,6 +25,26 @@ ApplicationWindow {
     property int page: 0
     property alias tableTab: tablePage.tab
 
+    // Back (Android key, Esc): close an inner page first, then return to the
+    // solution, then leave.
+    function handleBack() {
+        if (win.page === 3 && profilesPage.back())
+            return true
+        if (win.page !== 0) {
+            win.page = 0
+            return true
+        }
+        return false
+    }
+    onClosing: close => {
+        if (Qt.platform.os === "android" && win.handleBack())
+            close.accepted = false
+    }
+    Shortcut {
+        sequences: [StandardKey.Back]
+        onActivated: win.handleBack()
+    }
+
     readonly property var pages: [
         { title: qsTr("Solution"), short: qsTr("Solve") },
         { title: qsTr("Range table"), short: qsTr("Table") },
@@ -86,6 +106,7 @@ ApplicationWindow {
             }
             ConditionsPage {}
             ProfilesPage {
+                id: profilesPage
                 onProfileChosen: win.page = 0
             }
             SettingsPage {}
@@ -104,6 +125,10 @@ ApplicationWindow {
                 id: tab
                 required property var modelData
                 text: tab.modelData.short
+                // Five tabs on a 360 dp phone: keep whole words visible.
+                font.pixelSize: 12
+                leftPadding: 2
+                rightPadding: 2
             }
         }
     }

@@ -4,8 +4,10 @@
 
 #include <QClipboard>
 #include <QCoreApplication>
+#include <QDebug>
 #include <QDir>
 #include <QDirIterator>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
 #include <QGuiApplication>
@@ -479,6 +481,17 @@ QString Backend::saveProfile(const QVariantMap& form) {
     return {};
 }
 
+QString Backend::addSampleProfile() {
+    auto id = al::CreateSampleProfile(db_, tr("Sample .308 Win / SMK 175").toStdString());
+    if (!id) {
+        return Tr(id.error().message);
+    }
+    ReloadProfiles();
+    setCurrentProfileId(static_cast<int>(id.value()));
+    recompute_timer_.start();
+    return {};
+}
+
 QString Backend::deleteProfile(int id) {
     if (auto s = al::DeleteProfile(db_, id); !s) {
         return Q(s.error().message);
@@ -527,7 +540,15 @@ QVariantMap Backend::Table(double from_m, double to_m, double step_m) {
     return out;
 }
 
-QVariantMap Backend::rangeTable() { return Table(table_from_m_, table_to_m_, table_step_m_); }
+QVariantMap Backend::rangeTable() {
+    QElapsedTimer timer;
+    timer.start();
+    QVariantMap t = Table(table_from_m_, table_to_m_, table_step_m_);
+    t["computeMs"] = static_cast<double>(timer.nsecsElapsed()) / 1e6;
+    qInfo().noquote() << "balcalc: range table" << t["rows"].toList().size() << "rows in"
+                      << t["computeMs"].toDouble() << "ms";
+    return t;
+}
 
 QVariantMap Backend::trajectoryCurve(double max_range_m, int points) {
     points = std::clamp(points, 10, 1000);
@@ -778,6 +799,8 @@ void Backend::AddReticle(const bs::LoadedProfile& p, const al::SolutionSummary& 
 }
 
 void Backend::Recompute() {
+    QElapsedTimer timer;
+    timer.start();
     QVariantMap out;
     if (current_profile_id_ == 0) {
         out["ok"] = false;
@@ -811,6 +834,8 @@ void Backend::Recompute() {
                {"transonicRangeM", r.transonic_range_m}};
         AddReticle(p.value(), r, out);
     }
+    out["computeMs"] = static_cast<double>(timer.nsecsElapsed()) / 1e6;
+    qInfo().noquote() << "balcalc: solution in" << out["computeMs"].toDouble() << "ms";
     solution_ = out;
     emit solutionChanged();
 }

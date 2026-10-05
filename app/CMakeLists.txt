@@ -51,9 +51,17 @@ qt_add_resources(balcalc_ui "seed"
     BASE ${PROJECT_SOURCE_DIR}/data/seed
     FILES ${seed_files})
 
+qt_add_resources(balcalc_ui "icons"
+    PREFIX "/icons"
+    BASE ${CMAKE_CURRENT_SOURCE_DIR}/icons
+    FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/balcalc.png)
+
 qt_add_executable(balcalc WIN32 MACOSX_BUNDLE
     main.cpp
 )
+if(WIN32)
+    target_sources(balcalc PRIVATE balcalc.rc) # exe icon
+endif()
 target_link_libraries(balcalc PRIVATE balcalc_ui balcalc_uiplugin)
 
 # English is the source language; uk/ru are compiled into :/i18n/.
@@ -75,7 +83,17 @@ set_target_properties(balcalc PROPERTIES
     QT_ANDROID_MIN_SDK_VERSION 28
     QT_ANDROID_TARGET_SDK_VERSION 35
     QT_ANDROID_COMPILE_SDK_VERSION 35
+    QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
+    QT_ANDROID_APP_ICON "@mipmap/ic_launcher"
 )
+
+# Release APK/AAB signing from the environment (never from the source tree):
+#   QT_ANDROID_KEYSTORE_PATH, QT_ANDROID_KEYSTORE_ALIAS,
+#   QT_ANDROID_KEYSTORE_STORE_PASS, QT_ANDROID_KEYSTORE_KEY_PASS
+if(ANDROID AND DEFINED ENV{QT_ANDROID_KEYSTORE_PATH})
+    set(QT_ANDROID_SIGN_APK ON CACHE BOOL "" FORCE)
+    set(QT_ANDROID_SIGN_AAB ON CACHE BOOL "" FORCE)
+endif()
 
 
 # Windows: copy the Qt runtime (DLLs, QML modules, plugins) next to the
