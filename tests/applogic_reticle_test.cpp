@@ -102,13 +102,18 @@ TEST(Reticle, VersionOneDatabaseIsUpgraded) {
                                  "PRAGMA user_version = 1;")
                         .ok());
     }
-    storage::Database db;
-    ASSERT_TRUE(db.Open(path).ok());
-    EXPECT_EQ(db.SchemaVersion().value(), storage::Database::LatestSchemaVersion());
-    const auto scopes = storage::Repository<storage::ScopeRecord>(db).List().value();
-    ASSERT_EQ(scopes.size(), 1U);
-    EXPECT_EQ(scopes[0].focal_plane, "ffp"); // default for existing scopes
-    std::filesystem::remove(path);
+    {
+        storage::Database db;
+        ASSERT_TRUE(db.Open(path).ok());
+        EXPECT_EQ(db.SchemaVersion().value(), storage::Database::LatestSchemaVersion());
+        const auto scopes = storage::Repository<storage::ScopeRecord>(db).List().value();
+        ASSERT_EQ(scopes.size(), 1U);
+        EXPECT_EQ(scopes[0].focal_plane, "ffp"); // default for existing scopes
+    }
+    // Closed first: Windows cannot delete a file that is still open.
+    std::error_code ec;
+    std::filesystem::remove(path, ec);
+    EXPECT_FALSE(ec) << ec.message();
 }
 
 } // namespace

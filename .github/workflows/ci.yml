@@ -130,11 +130,12 @@ jobs:
       - name: Remember the host Qt
         run: echo "QT_HOST_PATH=$QT_ROOT_DIR" >> "$GITHUB_ENV"
 
+      # Qt 6.7+ publishes Android packages for the "all_os" host.
       - name: Install Qt (Android)
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
-          host: linux
+          host: all_os
           target: android
           arch: android_arm64_v8a
           cache: true
