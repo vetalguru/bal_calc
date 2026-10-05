@@ -5,6 +5,7 @@
 #include <QString>
 #include <QTimer>
 #include <QTranslator>
+#include <QUrl>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtQml/qqmlregistration.h>
@@ -92,6 +93,26 @@ public:
     // `points` samples from the muzzle to `max_range_m`.
     Q_INVOKABLE QVariantMap trajectoryCurve(double max_range_m, int points);
 
+    // The form with a library bullet chosen for it.
+    Q_INVOKABLE QVariantMap profileFormWithBullet(const QVariantMap& form, int bullet_id);
+
+    // Bullet library: summaries matching `filter`, one bullet as a form
+    // (keys: camelCase BulletForm fields, bands as [{velocity, bc}]), save
+    // and delete returning an error message or "".
+    Q_INVOKABLE QVariantList libraryBullets(const QString& filter);
+    Q_INVOKABLE QVariantMap bulletForm(int id);
+    Q_INVOKABLE QString saveBullet(const QVariantMap& form);
+    Q_INVOKABLE QString deleteBullet(int id);
+
+    // Profile files (JSON): error message or "" on success. Import makes
+    // the new profile current.
+    Q_INVOKABLE QString exportProfile(int id, const QUrl& file);
+    Q_INVOKABLE QString importProfile(const QUrl& file);
+    Q_INVOKABLE QString copyProfileToClipboard(int id);
+    Q_INVOKABLE QString importProfileFromClipboard();
+    // Suggested file name for a profile export.
+    Q_INVOKABLE QString profileFileName(int id) const;
+
     // Station pressure from sea-level pressure (QNH) at an altitude, hPa.
     Q_INVOKABLE double stationPressure(double qnh_hpa, double altitude_m) const;
 
@@ -103,10 +124,12 @@ signals:
     void conditionsChanged();
     void solutionChanged();
     void tableSpecChanged();
+    void libraryChanged();
 
 private:
     void ReloadProfiles();
     QVariantMap Table(double from_m, double to_m, double step_m);
+    QString ImportJson(const std::string& json);
     void InstallTranslator();
     void Recompute();
     ballistics::applogic::SessionConditions Session() const;

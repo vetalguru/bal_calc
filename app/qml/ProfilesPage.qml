@@ -3,10 +3,12 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import BalCalc
 
-// Rifle + ammunition profiles: list, choose, create, edit, delete.
+// Rifle + ammunition profiles: list, choose, create, edit, delete, share;
+// entry point to the bullet library.
 Page {
     id: page
 
@@ -18,7 +20,16 @@ Page {
     signal profileChosen()
 
     function edit(id) {
-        stack.push(editorComponent, { form: Backend.profileForm(id) })
+        stack.push(editorComponent, { form: Backend.profileForm(id), stack: stack })
+    }
+
+    function notify(error, success) {
+        var text = error.length > 0 ? error : success
+        if (text.length === 0)
+            return
+        toast.text = text
+        toast.error = error.length > 0
+        toast.open()
     }
 
     StackView {
@@ -34,7 +45,32 @@ Page {
                     Label {
                         text: qsTr("Profiles")
                         font.pixelSize: 18
+                        elide: Text.ElideRight
                         Layout.fillWidth: true
+                    }
+                    Button {
+                        text: qsTr("Bullets")
+                        flat: true
+                        onClicked: stack.push(libraryComponent, { stack: stack })
+                    }
+                    Button {
+                        id: importButton
+                        text: qsTr("Import")
+                        flat: true
+                        onClicked: importMenu.open()
+                        Menu {
+                            id: importMenu
+                            y: importButton.height
+                            MenuItem {
+                                text: qsTr("From file…")
+                                onTriggered: importDialog.open()
+                            }
+                            MenuItem {
+                                text: qsTr("From clipboard")
+                                onTriggered: page.notify(Backend.importProfileFromClipboard(),
+                                                         qsTr("Profile imported."))
+                            }
+                        }
                     }
                     Button {
                         text: qsTr("New")
@@ -83,12 +119,34 @@ Page {
                             onClicked: page.edit(row.modelData.id)
                         }
                         Button {
-                            text: qsTr("Delete")
+                            id: moreButton
+                            text: "⋮"
                             flat: true
-                            onClicked: {
-                                confirmDelete.profileId = row.modelData.id
-                                confirmDelete.profileName = row.modelData.name
-                                confirmDelete.open()
+                            onClicked: rowMenu.open()
+                            Menu {
+                                id: rowMenu
+                                y: moreButton.height
+                                MenuItem {
+                                    text: qsTr("Export to file…")
+                                    onTriggered: {
+                                        exportDialog.profileId = row.modelData.id
+                                        exportDialog.selectedFile = Backend.profileFileName(row.modelData.id)
+                                        exportDialog.open()
+                                    }
+                                }
+                                MenuItem {
+                                    text: qsTr("Copy to clipboard")
+                                    onTriggered: page.notify(Backend.copyProfileToClipboard(row.modelData.id),
+                                                             qsTr("Profile copied. Paste it into a message or a file."))
+                                }
+                                MenuItem {
+                                    text: qsTr("Delete")
+                                    onTriggered: {
+                                        confirmDelete.profileId = row.modelData.id
+                                        confirmDelete.profileName = row.modelData.name
+                                        confirmDelete.open()
+                                    }
+                                }
                             }
                         }
                     }
@@ -108,6 +166,31 @@ Page {
         }
     }
 
+    Component {
+        id: libraryComponent
+        LibraryPage {
+            onClosed: stack.pop()
+        }
+    }
+
+    FileDialog {
+        id: importDialog
+        title: qsTr("Import profile")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [qsTr("BalCalc profiles (*.json)"), qsTr("All files (*)")]
+        onAccepted: page.notify(Backend.importProfile(selectedFile), qsTr("Profile imported."))
+    }
+
+    FileDialog {
+        id: exportDialog
+        property int profileId: 0
+        title: qsTr("Export profile")
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "json"
+        nameFilters: [qsTr("BalCalc profiles (*.json)")]
+        onAccepted: page.notify(Backend.exportProfile(profileId, selectedFile), qsTr("Profile saved."))
+    }
+
     Dialog {
         id: confirmDelete
         property int profileId: 0
@@ -117,10 +200,32 @@ Page {
         title: qsTr("Delete profile?")
         standardButtons: Dialog.Yes | Dialog.No
         Label { text: confirmDelete.profileName }
-        onAccepted: {
-            var err = Backend.deleteProfile(confirmDelete.profileId)
-            if (err.length > 0)
-                console.warn(err)
+        onAccepted: page.notify(Backend.deleteProfile(confirmDelete.profileId), "")
+    }
+
+    Popup {
+        id: toast
+        property string text
+        property bool error: false
+        x: (page.width - width) / 2
+        y: page.height - height - 24
+        width: Math.min(page.width - 32, 480)
+        padding: 12
+        closePolicy: Popup.CloseOnPressOutside
+        onOpened: hideTimer.restart()
+        Timer {
+            id: hideTimer
+            interval: 3500
+            onTriggered: toast.close()
+        }
+        background: Rectangle {
+            radius: 6
+            color: toast.error ? Material.color(Material.Red, Material.Shade700) : "#323232"
+        }
+        contentItem: Label {
+            text: toast.text
+            color: "white"
+            wrapMode: Text.Wrap
         }
     }
 }

@@ -5,6 +5,7 @@
 
 #include <sqlite_manager/transaction.h>
 
+#include <ballistics/applogic/library.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/units.h>
 
@@ -70,14 +71,16 @@ std::string Validate(const ProfileForm& f) {
     if (!(f.muzzle_velocity_mps > 50.0 && f.muzzle_velocity_mps < 2000.0)) {
         return "Muzzle velocity must be between 50 and 2000 m/s.";
     }
-    if (!(f.bc > 0.0 && f.bc < 2.0)) {
-        return "Ballistic coefficient must be between 0 and 2.";
-    }
-    if (!(f.mass_gr > 0.0)) {
-        return "Enter the bullet weight.";
-    }
-    if (!(f.diameter_in > 0.0 && f.diameter_in < 1.0)) {
-        return "Bullet diameter must be between 0 and 1 inch.";
+    if (f.library_bullet_id == 0) {
+        if (!(f.bc > 0.0 && f.bc < 2.0)) {
+            return "Ballistic coefficient must be between 0 and 2.";
+        }
+        if (!(f.mass_gr > 0.0)) {
+            return "Enter the bullet weight.";
+        }
+        if (!(f.diameter_in > 0.0 && f.diameter_in < 1.0)) {
+            return "Bullet diameter must be between 0 and 1 inch.";
+        }
     }
     if (f.length_in < 0.0 || f.twist_in < 0.0) {
         return "Bullet length and twist cannot be negative.";
@@ -95,6 +98,25 @@ std::string Validate(const ProfileForm& f) {
         return "Humidity must be between 0 and 100 %.";
     }
     return {};
+}
+
+Result<ProfileForm> WithLibraryBullet(Database& db, ProfileForm f, Id bullet_id) {
+    auto b = Require<BulletRecord>(db, bullet_id, "bullet");
+    if (!b) {
+        return b.error();
+    }
+    const BulletRecord& r = b.value();
+    f.library_bullet_id = r.id;
+    f.bullet_name = r.name;
+    f.drag_table = r.drag_table;
+    f.bc = r.bc ? *r.bc : (r.bc_bands.empty() ? 0.0 : r.bc_bands.front().bc_lb_in2);
+    f.mass_gr = units::KgToGrain(r.mass_kg);
+    f.diameter_in = units::MToInch(r.diameter_m);
+    f.length_in = units::MToInch(r.length_m);
+    if (f.caliber.empty()) {
+        f.caliber = r.caliber;
+    }
+    return f;
 }
 
 Result<ProfileForm> LoadProfileForm(Database& db, Id profile_id) {
@@ -135,6 +157,7 @@ Result<ProfileForm> LoadProfileForm(Database& db, Id profile_id) {
         f.click_units = scope.value().click_units;
         f.click_value = RadToClick(f.click_units, scope.value().click_vertical_rad);
     }
+    f.library_bullet_id = b.source == kSourceUser ? 0 : b.id;
     f.bullet_name = b.name;
     f.drag_table = b.drag_table;
     if (b.bc) {
@@ -203,22 +226,37 @@ Result<Id> SaveProfileForm(Database& db, const ProfileForm& f) {
         }
     }
 
-    b.name = f.bullet_name.empty() ? f.name : f.bullet_name;
-    b.caliber = f.caliber;
-    b.diameter_m = units::InchToM(f.diameter_in);
-    b.mass_kg = units::GrainToKg(f.mass_gr);
-    b.length_m = units::InchToM(f.length_in);
-    // The form edits a single BC; other drag descriptions (bands, curves)
-    // are edited in the bullet library and kept as they are here.
-    if (b.drag_kind == storage::kDragKindBc) {
-        b.drag_table = f.drag_table;
-        b.bc = f.bc;
-    }
-    if (b.source.empty()) {
-        b.source = "user";
-    }
-    if (auto id = Repository<BulletRecord>(db).Save(b); !id) {
-        return id.error();
+    const Id previous_bullet = b.id;
+    if (f.library_bullet_id != 0) {
+        // Use the library bullet untouched.
+        auto lib = Require<BulletRecord>(db, f.library_bullet_id, "bullet");
+        if (!lib) {
+            return lib.error();
+        }
+        b = std::move(lib).value();
+    } else {
+        if (b.source != kSourceUser) {
+            // Detached from a library bullet: start the profile's own copy.
+            b.id = 0;
+            b.source = kSourceUser;
+            b.drag_kind = storage::kDragKindBc;
+            b.bc_bands.clear();
+            b.curve_id.reset();
+        }
+        b.name = f.bullet_name.empty() ? f.name : f.bullet_name;
+        b.caliber = f.caliber;
+        b.diameter_m = units::InchToM(f.diameter_in);
+        b.mass_kg = units::GrainToKg(f.mass_gr);
+        b.length_m = units::InchToM(f.length_in);
+        // The form edits a single BC; bands and curves of the profile's own
+        // bullet are kept as they are.
+        if (b.drag_kind == storage::kDragKindBc) {
+            b.drag_table = f.drag_table;
+            b.bc = f.bc;
+        }
+        if (auto id = Repository<BulletRecord>(db).Save(b); !id) {
+            return id.error();
+        }
     }
 
     c.name = f.name;
@@ -259,6 +297,15 @@ Result<Id> SaveProfileForm(Database& db, const ProfileForm& f) {
         return id.error();
     }
 
+    // A private bullet the profile no longer uses goes away (kept if
+    // anything else still references it).
+    if (previous_bullet != 0 && previous_bullet != b.id) {
+        auto old_bullet = Repository<BulletRecord>(db).Get(previous_bullet);
+        if (old_bullet && old_bullet.value() && old_bullet.value()->source == kSourceUser) {
+            Repository<BulletRecord>(db).Remove(previous_bullet).ok();
+        }
+    }
+
     if (Status st = txn.value().Commit(); !st) {
         return st.error();
     }
@@ -282,7 +329,11 @@ Status DeleteProfile(Database& db, Id profile_id) {
     }
     if (Repository<CartridgeRecord>(db).Remove(p.value().cartridge_id).ok() && cart &&
         cart.value()) {
-        Repository<BulletRecord>(db).Remove(cart.value()->bullet_id).ok();
+        // Only the profile's private bullet; library bullets stay.
+        auto bullet = Repository<BulletRecord>(db).Get(cart.value()->bullet_id);
+        if (bullet && bullet.value() && bullet.value()->source == kSourceUser) {
+            Repository<BulletRecord>(db).Remove(cart.value()->bullet_id).ok();
+        }
     }
     return sqlite_manager::Ok();
 }

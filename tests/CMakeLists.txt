@@ -9,6 +9,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  # for future MSVC builds
 FetchContent_MakeAvailable(googletest)
 
 add_executable(core_tests
+    applogic_library_test.cpp
     applogic_test.cpp
     physics_basics_test.cpp
     physics_drag_models_test.cpp
@@ -39,3 +40,8 @@ include(GoogleTest)
 # PRE_TEST: list tests when ctest runs, not at build time, so a build
 # never needs to execute the test binary (cross builds, locked-down hosts).
 gtest_discover_tests(core_tests DISCOVERY_MODE PRE_TEST)
+
+# UI tests (Qt Quick Test) against the same QML module the app uses.
+if(TARGET balcalc_ui)
+    add_subdirectory(ui)
+endif()

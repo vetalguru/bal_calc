@@ -31,6 +31,7 @@ Page {
     }
 
     onVisibleChanged: reload()
+    Component.onCompleted: reload()
     Connections {
         target: Backend
         function onSolutionChanged() { page.reload() }
