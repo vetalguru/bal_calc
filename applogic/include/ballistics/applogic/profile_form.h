@@ -38,6 +38,11 @@ struct ProfileForm {
     // Scope
     std::string click_units = kClickMrad;
     double click_value = 0.1;
+    Id reticle_id = 0;              // 0 = none
+    std::string focal_plane = "ffp"; // "ffp" | "sfp"
+    double sfp_reference_magnification = 0.0;
+    double min_magnification = 0.0;
+    double max_magnification = 0.0;
 
     // Bullet. With `library_bullet_id` set the profile uses that library
     // bullet as is (the fields below only display it); with 0 the fields

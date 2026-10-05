@@ -188,6 +188,100 @@ Page {
                 }
             }
 
+            // --- Reticle ---------------------------------------------------
+            Pane {
+                visible: page.sol.ok === true
+                Layout.fillWidth: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                Material.elevation: 1
+
+                GridLayout {
+                    anchors.fill: parent
+                    columns: page.width >= 640 ? 2 : 1
+                    columnSpacing: 16
+                    rowSpacing: 8
+
+                    ReticleView {
+                        Layout.preferredWidth: Math.min(360, page.width - 48)
+                        Layout.preferredHeight: Layout.preferredWidth
+                        Layout.alignment: Qt.AlignHCenter
+                        definition: page.sol.hasReticle ? page.sol.reticleDefinition : ""
+                        targetX: page.sol.targetX || 0
+                        targetY: page.sol.targetY || 0
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+                        Label {
+                            text: page.sol.hasReticle ? page.sol.reticleName
+                                                      : qsTr("No reticle chosen: plain crosshair in MRAD")
+                            font.bold: true
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
+                        }
+                        ComboBox {
+                            Layout.fillWidth: true
+                            model: [
+                                { value: "dial_elevation", text: qsTr("Dial elevation, hold wind") },
+                                { value: "hold", text: qsTr("Hold everything") },
+                                { value: "dial", text: qsTr("Dial everything") }
+                            ]
+                            textRole: "text"
+                            valueRole: "value"
+                            Component.onCompleted: currentIndex = Math.max(0, indexOfValue(Backend.holdMode))
+                            onActivated: Backend.holdMode = currentValue
+                        }
+                        Label {
+                            visible: (page.sol.dialElevationClicks || 0) !== 0 || (page.sol.dialWindageClicks || 0) !== 0
+                            Layout.fillWidth: true
+                            wrapMode: Text.Wrap
+                            font.pixelSize: 16
+                            text: qsTr("Turrets: %1 clicks %2, %3 clicks %4")
+                                  .arg(Math.abs(page.sol.dialElevationClicks || 0))
+                                  .arg((page.sol.dialElevationClicks || 0) >= 0 ? qsTr("up") : qsTr("down"))
+                                  .arg(Math.abs(page.sol.dialWindageClicks || 0))
+                                  .arg((page.sol.dialWindageClicks || 0) >= 0 ? qsTr("right") : qsTr("left"))
+                        }
+                        Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.Wrap
+                            font.pixelSize: 16
+                            // Reticle marks are counted in the reticle's own units.
+                            readonly property bool moa: page.sol.hasReticle === true && page.sol.reticleUnits === "moa"
+                            readonly property real perUnit: moa ? 0.29088821 : 1.0 // mrad per unit
+                            text: qsTr("Put the target on the red mark: %1 %2 %3, %4 %2 %5 of the centre.")
+                                  .arg(page.fmt(Math.abs(page.sol.targetY || 0) / perUnit, 2))
+                                  .arg(moa ? qsTr("MOA") : qsTr("MRAD"))
+                                  .arg((page.sol.targetY || 0) <= 0 ? qsTr("below") : qsTr("above"))
+                                  .arg(page.fmt(Math.abs(page.sol.targetX || 0) / perUnit, 2))
+                                  .arg((page.sol.targetX || 0) <= 0 ? qsTr("left") : qsTr("right"))
+                        }
+                        ColumnLayout {
+                            visible: page.sol.focalPlane === "sfp" && page.sol.maxMagnification > page.sol.minMagnification
+                            Layout.fillWidth: true
+                            spacing: 0
+                            Label {
+                                text: qsTr("Magnification %1× (second focal plane: marks are true at the reference power)")
+                                      .arg(Number(page.sol.magnification || 0).toFixed(1))
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                                opacity: 0.8
+                            }
+                            Slider {
+                                Layout.fillWidth: true
+                                from: page.sol.minMagnification || 1
+                                to: page.sol.maxMagnification || 1
+                                stepSize: 0.5
+                                value: page.sol.magnification || to
+                                onMoved: Backend.magnification = value
+                            }
+                        }
+                    }
+                }
+            }
+
             // --- Quick wind ----------------------------------------------
             Pane {
                 Layout.fillWidth: true

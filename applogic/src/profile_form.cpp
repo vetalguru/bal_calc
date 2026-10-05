@@ -91,6 +91,10 @@ std::string Validate(const ProfileForm& f) {
     if (!(ClickToRad(f.click_units, f.click_value) > 0.0)) {
         return "Enter the scope click value.";
     }
+    if (f.min_magnification < 0.0 || f.max_magnification < 0.0 ||
+        (f.max_magnification > 0.0 && f.min_magnification > f.max_magnification)) {
+        return "Check the scope magnification range.";
+    }
     if (!(f.zero_pressure_hpa > 300.0 && f.zero_pressure_hpa < 1200.0)) {
         return "Zero pressure must be between 300 and 1200 hPa.";
     }
@@ -156,6 +160,11 @@ Result<ProfileForm> LoadProfileForm(Database& db, Id profile_id) {
         }
         f.click_units = scope.value().click_units;
         f.click_value = RadToClick(f.click_units, scope.value().click_vertical_rad);
+        f.reticle_id = scope.value().reticle_id.value_or(0);
+        f.focal_plane = scope.value().focal_plane;
+        f.sfp_reference_magnification = scope.value().sfp_reference_magnification;
+        f.min_magnification = scope.value().min_magnification;
+        f.max_magnification = scope.value().max_magnification;
     }
     f.library_bullet_id = b.source == kSourceUser ? 0 : b.id;
     f.bullet_name = b.name;
@@ -279,6 +288,11 @@ Result<Id> SaveProfileForm(Database& db, const ProfileForm& f) {
     s.name = s.name.empty() ? f.name : s.name;
     s.click_units = f.click_units;
     s.click_vertical_rad = s.click_horizontal_rad = ClickToRad(f.click_units, f.click_value);
+    s.reticle_id = f.reticle_id != 0 ? std::optional<Id>(f.reticle_id) : std::nullopt;
+    s.focal_plane = f.focal_plane == "sfp" ? "sfp" : "ffp";
+    s.sfp_reference_magnification = f.sfp_reference_magnification;
+    s.min_magnification = f.min_magnification;
+    s.max_magnification = f.max_magnification;
     if (auto id = Repository<ScopeRecord>(db).Save(s); !id) {
         return id.error();
     }

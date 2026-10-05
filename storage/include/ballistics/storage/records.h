@@ -93,6 +93,10 @@ struct ScopeRecord {
     double min_magnification = 0.0;
     double max_magnification = 0.0;
     std::string notes;
+    // Second focal plane reticles subtend their nominal values only at
+    // `sfp_reference_magnification` (usually the maximum).
+    std::string focal_plane = "ffp"; // "ffp" | "sfp"
+    double sfp_reference_magnification = 0.0;
 };
 
 struct ProfileRecord {

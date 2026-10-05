@@ -172,6 +172,13 @@ CREATE TABLE dope_log (
 );
 CREATE INDEX dope_log_by_profile ON dope_log(profile_id, range_m);
 )sql"},
+        // v2: focal plane per scope (the same reticle exists in FFP and SFP
+        // scopes); for SFP the magnification its marks are true at.
+        {2, R"sql(
+ALTER TABLE scope ADD COLUMN focal_plane TEXT NOT NULL DEFAULT 'ffp'
+    CHECK (focal_plane IN ('ffp', 'sfp'));
+ALTER TABLE scope ADD COLUMN sfp_reference_magnification REAL NOT NULL DEFAULT 0;
+)sql"},
     };
     return migrations;
 }

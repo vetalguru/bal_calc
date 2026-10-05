@@ -118,7 +118,24 @@ TestCase {
         verify(Backend.profileFileName(id).endsWith(".balcalc.json"))
     }
 
-    function test_7_mainWindowLoadsAllPages() {
+    function test_7_holdModes() {
+        Backend.targetRangeM = 700
+        Backend.holdMode = "hold"
+        tryVerify(function() { return Backend.solution.ok && Backend.solution.holdMode === "hold" })
+        var s = Backend.solution
+        compare(s.dialElevationClicks, 0)
+        fuzzyCompare(s.targetY, -s.elevation, 1e-9) // MRAD, FFP
+        fuzzyCompare(s.targetX, -s.windage, 1e-9)
+
+        Backend.holdMode = "dial_elevation"
+        tryVerify(function() { return Backend.solution.holdMode === "dial_elevation" })
+        s = Backend.solution
+        compare(s.dialElevationClicks, s.elevationClicks)
+        verify(Math.abs(s.targetY) <= 0.05) // only the click remainder is held
+        Backend.holdMode = "hold"
+    }
+
+    function test_8_mainWindowLoadsAllPages() {
         var win = createTemporaryObject(mainComponent, testCase)
         verify(win)
         for (var p = 0; p < 5; ++p) {

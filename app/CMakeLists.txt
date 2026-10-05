@@ -21,6 +21,7 @@ qt_add_qml_module(balcalc_ui
         qml/LibraryPage.qml
         qml/BulletEditor.qml
         qml/SwitchRow.qml
+        qml/ReticleView.qml
     SOURCES
         backend.h
         backend.cpp

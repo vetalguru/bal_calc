@@ -49,6 +49,9 @@ class Backend : public QObject {
     Q_PROPERTY(bool useAzimuth MEMBER use_azimuth_ NOTIFY conditionsChanged)
     Q_PROPERTY(double azimuthDeg MEMBER azimuth_deg_ NOTIFY conditionsChanged)
     Q_PROPERTY(double targetRangeM MEMBER target_range_m_ NOTIFY conditionsChanged)
+    Q_PROPERTY(double magnification MEMBER magnification_ NOTIFY conditionsChanged)
+    // "dial_elevation" | "hold" | "dial" (persisted).
+    Q_PROPERTY(QString holdMode READ holdMode WRITE setHoldMode NOTIFY holdModeChanged)
 
     // Range card span (persisted).
     Q_PROPERTY(double tableFromM MEMBER table_from_m_ NOTIFY tableSpecChanged)
@@ -72,6 +75,8 @@ public:
     void setCurrentProfileId(int id);
     QString angleUnit() const { return angle_unit_; }
     void setAngleUnit(const QString& unit);
+    QString holdMode() const { return hold_mode_; }
+    void setHoldMode(const QString& mode);
     QString language() const { return language_; }
     void setLanguage(const QString& language);
     QVariantMap solution() const { return solution_; }
@@ -92,6 +97,9 @@ public:
     // Trajectory samples for the chart: {ok, error, rows: [...]} as above,
     // `points` samples from the muzzle to `max_range_m`.
     Q_INVOKABLE QVariantMap trajectoryCurve(double max_range_m, int points);
+
+    // Reticles in the library: [{id, name, units}].
+    Q_INVOKABLE QVariantList reticles();
 
     // The form with a library bullet chosen for it.
     Q_INVOKABLE QVariantMap profileFormWithBullet(const QVariantMap& form, int bullet_id);
@@ -129,6 +137,7 @@ signals:
     void currentProfileIdChanged();
     void angleUnitChanged();
     void languageChanged();
+    void holdModeChanged();
     void conditionsChanged();
     void solutionChanged();
     void tableSpecChanged();
@@ -141,6 +150,8 @@ private:
     void SeedStarterLibrary();
     void InstallTranslator();
     void Recompute();
+    void AddReticle(const ballistics::storage::LoadedProfile& p,
+                    const ballistics::applogic::SolutionSummary& r, QVariantMap& out);
     ballistics::applogic::SessionConditions Session() const;
     void ApplySession(const ballistics::applogic::SessionConditions& s);
 
@@ -172,6 +183,8 @@ private:
     bool use_azimuth_ = false;
     double azimuth_deg_ = 0.0;
     double target_range_m_ = 300.0;
+    double magnification_ = 0.0;
+    QString hold_mode_ = QStringLiteral("dial_elevation");
     double table_from_m_ = 100.0;
     double table_to_m_ = 1000.0;
     double table_step_m_ = 50.0;

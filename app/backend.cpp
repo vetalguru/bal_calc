@@ -18,6 +18,7 @@
 #include <ballistics/applogic/library.h>
 #include <ballistics/applogic/profile_form.h>
 #include <ballistics/applogic/profile_io.h>
+#include <ballistics/applogic/reticle.h>
 #include <ballistics/atmosphere.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
@@ -32,6 +33,7 @@ namespace {
 constexpr const char* kCurrentProfileKey = "ui.current_profile";
 constexpr const char* kAngleUnitKey = "ui.angle_unit";
 constexpr const char* kLanguageKey = "ui.language";
+constexpr const char* kHoldModeKey = "ui.hold_mode";
 // Bump when data/seed gains files; existing records are kept.
 constexpr int kSeedVersion = 1;
 constexpr const char* kTableFromKey = "ui.table.from_m";
@@ -56,6 +58,7 @@ QString Q(const std::string& s) { return QString::fromStdString(s); }
     QT_TRANSLATE_NOOP("Logic", "Enter a target range."),
     QT_TRANSLATE_NOOP("Logic", "The bullet does not reach this range."),
     QT_TRANSLATE_NOOP("Logic", "Check the table range and step."),
+    QT_TRANSLATE_NOOP("Logic", "Check the scope magnification range."),
     QT_TRANSLATE_NOOP("Logic", "Enter the bullet name."),
     QT_TRANSLATE_NOOP("Logic", "Each BC band needs a velocity and a BC between 0 and 2."),
     QT_TRANSLATE_NOOP("Logic", "This bullet is used by a cartridge and cannot be deleted."),
@@ -78,6 +81,11 @@ QVariantMap ToMap(const al::ProfileForm& f) {
         {"twistLeft", f.twist_left},
         {"clickUnits", Q(f.click_units)},
         {"clickValue", f.click_value},
+        {"reticleId", static_cast<qlonglong>(f.reticle_id)},
+        {"focalPlane", Q(f.focal_plane)},
+        {"sfpReferenceMagnification", f.sfp_reference_magnification},
+        {"minMagnification", f.min_magnification},
+        {"maxMagnification", f.max_magnification},
         {"bulletName", Q(f.bullet_name)},
         {"dragTable", Q(f.drag_table)},
         {"bc", f.bc},
@@ -109,6 +117,11 @@ al::ProfileForm FromMap(const QVariantMap& m) {
     f.twist_left = m.value("twistLeft").toBool();
     f.click_units = S(m.value("clickUnits"));
     f.click_value = m.value("clickValue").toDouble();
+    f.reticle_id = m.value("reticleId").toLongLong();
+    f.focal_plane = m.contains("focalPlane") ? S(m.value("focalPlane")) : std::string("ffp");
+    f.sfp_reference_magnification = m.value("sfpReferenceMagnification").toDouble();
+    f.min_magnification = m.value("minMagnification").toDouble();
+    f.max_magnification = m.value("maxMagnification").toDouble();
     f.bullet_name = S(m.value("bulletName"));
     f.drag_table = S(m.value("dragTable"));
     f.bc = m.value("bc").toDouble();
@@ -205,6 +218,9 @@ Backend::Backend(QObject* parent) : QObject(parent) {
     if (auto unit = bs::GetSetting(db_, kAngleUnitKey); unit && unit.value()) {
         angle_unit_ = Q(*unit.value());
     }
+    if (auto mode = bs::GetSetting(db_, kHoldModeKey); mode && mode.value()) {
+        hold_mode_ = Q(*mode.value());
+    }
     if (auto lang = bs::GetSetting(db_, kLanguageKey); lang && lang.value()) {
         language_ = Q(*lang.value());
     }
@@ -261,6 +277,29 @@ void Backend::setAngleUnit(const QString& unit) {
     bs::SetSetting(db_, kAngleUnitKey, unit.toStdString()).ok();
     emit angleUnitChanged();
     recompute_timer_.start();
+}
+
+void Backend::setHoldMode(const QString& mode) {
+    if (mode == hold_mode_) {
+        return;
+    }
+    hold_mode_ = QString::fromLatin1(al::ToString(al::HoldModeFromString(mode.toStdString())));
+    bs::SetSetting(db_, kHoldModeKey, hold_mode_.toStdString()).ok();
+    emit holdModeChanged();
+    recompute_timer_.start();
+}
+
+QVariantList Backend::reticles() {
+    QVariantList out;
+    auto list = bs::Repository<bs::ReticleRecord>(db_).List();
+    if (list) {
+        for (const auto& r : list.value()) {
+            out.push_back(QVariantMap{{"id", static_cast<qlonglong>(r.id)},
+                                      {"name", Q(r.name)},
+                                      {"units", Q(r.units)}});
+        }
+    }
+    return out;
 }
 
 void Backend::setLanguage(const QString& language) {
@@ -569,6 +608,7 @@ al::SessionConditions Backend::Session() const {
         }
     }
     s.target_range_m = target_range_m_;
+    s.magnification = magnification_;
     return s;
 }
 
@@ -590,7 +630,42 @@ void Backend::ApplySession(const al::SessionConditions& s) {
     use_azimuth_ = s.azimuth_deg.has_value();
     azimuth_deg_ = s.azimuth_deg.value_or(azimuth_deg_);
     target_range_m_ = s.target_range_m;
+    magnification_ = s.magnification;
     emit conditionsChanged();
+}
+
+void Backend::AddReticle(const bs::LoadedProfile& p, const al::SolutionSummary& r,
+                         QVariantMap& out) {
+    out["hasReticle"] = false;
+    if (!r.ok || !p.scope) {
+        return;
+    }
+    const bs::ScopeRecord& scope = *p.scope;
+    const double unit_rad = angle_unit_ == "moa" ? ballistics::units::MoaToRad(1.0)
+                                                  : ballistics::units::MradToRad(1.0);
+    const double magnification = magnification_ > 0.0 ? magnification_ : scope.max_magnification;
+    const al::ReticleHold hold =
+        al::ComputeReticleHold(r.elevation * unit_rad, r.windage * unit_rad, scope, magnification,
+                               al::HoldModeFromString(hold_mode_.toStdString()));
+    out["holdMode"] = hold_mode_;
+    out["dialElevationClicks"] = hold.dial_elevation_clicks;
+    out["dialWindageClicks"] = hold.dial_windage_clicks;
+    out["targetX"] = hold.target_x;
+    out["targetY"] = hold.target_y;
+    out["subtensionScale"] = hold.scale;
+    out["focalPlane"] = Q(scope.focal_plane);
+    out["minMagnification"] = scope.min_magnification;
+    out["maxMagnification"] = scope.max_magnification;
+    out["magnification"] = magnification;
+    if (scope.reticle_id) {
+        auto ret = bs::Repository<bs::ReticleRecord>(db_).Get(*scope.reticle_id);
+        if (ret && ret.value()) {
+            out["hasReticle"] = true;
+            out["reticleName"] = Q(ret.value()->name);
+            out["reticleUnits"] = Q(ret.value()->units);
+            out["reticleDefinition"] = Q(ret.value()->definition);
+        }
+    }
 }
 
 void Backend::Recompute() {
@@ -623,6 +698,7 @@ void Backend::Recompute() {
                {"spinDriftCm", r.spin_drift_cm},
                {"subsonic", r.subsonic},
                {"transonicRangeM", r.transonic_range_m}};
+        AddReticle(p.value(), r, out);
     }
     solution_ = out;
     emit solutionChanged();

@@ -146,6 +146,59 @@ Page {
                             onActivated: page.form.clickUnits = currentValue
                         }
                     }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Label { text: qsTr("Reticle"); font.pixelSize: 12; opacity: 0.7 }
+                        ComboBox {
+                            Layout.fillWidth: true
+                            model: [{ id: 0, name: qsTr("None (plain crosshair)") }].concat(Backend.reticles())
+                            textRole: "name"
+                            valueRole: "id"
+                            Component.onCompleted: currentIndex = Math.max(0, indexOfValue(page.form.reticleId || 0))
+                            onActivated: page.form.reticleId = currentValue
+                        }
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Label { text: qsTr("Focal plane"); font.pixelSize: 12; opacity: 0.7 }
+                        ComboBox {
+                            id: focalPlaneBox
+                            Layout.fillWidth: true
+                            model: [{ value: "ffp", text: qsTr("First (FFP)") },
+                                    { value: "sfp", text: qsTr("Second (SFP)") }]
+                            textRole: "text"
+                            valueRole: "value"
+                            Component.onCompleted: currentIndex = Math.max(0, indexOfValue(page.form.focalPlane || "ffp"))
+                            onActivated: page.form.focalPlane = currentValue
+                        }
+                    }
+                    NumberField {
+                        Layout.fillWidth: true
+                        label: qsTr("Magnification from")
+                        unit: "×"
+                        value: page.form.minMagnification
+                        from: 0; to: 100
+                        onEdited: v => page.form.minMagnification = v
+                    }
+                    NumberField {
+                        Layout.fillWidth: true
+                        label: qsTr("Magnification to")
+                        unit: "×"
+                        value: page.form.maxMagnification
+                        from: 0; to: 100
+                        onEdited: v => page.form.maxMagnification = v
+                    }
+                    NumberField {
+                        visible: focalPlaneBox.currentValue === "sfp"
+                        Layout.fillWidth: true
+                        label: qsTr("SFP: marks are true at")
+                        unit: "×"
+                        value: page.form.sfpReferenceMagnification
+                        from: 0; to: 100
+                        onEdited: v => page.form.sfpReferenceMagnification = v
+                    }
                     NumberField {
                         Layout.fillWidth: true
                         label: qsTr("One click")
