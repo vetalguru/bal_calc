@@ -111,3 +111,15 @@ if(WIN32)
             VERBATIM)
     endif()
 endif()
+
+# Windows install: bin/balcalc.exe with the Qt libraries next to it and
+# QML modules / plugins beside bin/ (Qt's deploy layout, bin/qt.conf
+# points at them); packaged by cmake/Packaging.cmake.
+if(WIN32)
+    install(TARGETS balcalc RUNTIME DESTINATION bin)
+    qt_generate_deploy_qml_app_script(
+        TARGET balcalc
+        OUTPUT_SCRIPT balcalc_deploy_script
+        NO_TRANSLATIONS)
+    install(SCRIPT ${balcalc_deploy_script})
+endif()

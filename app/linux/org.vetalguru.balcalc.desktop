@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=BalCalc
+GenericName=Ballistic calculator
+GenericName[uk]=Балістичний калькулятор
+GenericName[ru]=Баллистический калькулятор
+Comment=Firing solutions, range cards and reticle holds out to 2500 m
+Comment[uk]=Поправки, таблиці дистанцій і винос по сітці до 2500 м
+Comment[ru]=Поправки, таблицы дистанций и вынос по сетке до 2500 м
+Exec=balcalc
+Icon=org.vetalguru.balcalc
+Terminal=false
+Categories=Science;Engineering;
+Keywords=ballistics;rifle;trajectory;MRAD;MOA;

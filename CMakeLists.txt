@@ -54,3 +54,9 @@ if(BALLISTICS_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+# Install rules and desktop packages (.deb, Windows ZIP/installer).
+if(NOT ANDROID)
+    list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+    include(Packaging)
+endif()
