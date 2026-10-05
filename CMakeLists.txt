@@ -40,6 +40,7 @@ add_subdirectory(third_party/sqlite_manager EXCLUDE_FROM_ALL)
 
 add_subdirectory(core)
 add_subdirectory(storage)
+add_subdirectory(applogic)
 
 if(BALLISTICS_BUILD_CLI)
     add_subdirectory(cli)

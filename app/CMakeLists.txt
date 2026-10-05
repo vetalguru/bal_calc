@@ -1,5 +1,5 @@
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2)
-qt_standard_project_setup(REQUIRES 6.8)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 LinguistTools)
+qt_standard_project_setup(REQUIRES 6.8 I18N_TRANSLATED_LANGUAGES uk ru)
 
 qt_add_executable(balcalc WIN32 MACOSX_BUNDLE
     main.cpp
@@ -10,9 +10,26 @@ qt_add_qml_module(balcalc
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/NumberField.qml
+        qml/SolutionPage.qml
+        qml/ConditionsPage.qml
+        qml/ProfilesPage.qml
+        qml/ProfileEditor.qml
+        qml/SettingsPage.qml
+        qml/SwitchRow.qml
     SOURCES
-        app_info.h
-        app_info.cpp
+        backend.h
+        backend.cpp
+)
+
+# English is the source language; uk/ru are compiled into :/i18n/.
+# Refresh the .ts files after changing UI strings with:
+#   cmake --build <build dir> --target update_translations
+qt_add_translations(balcalc
+    TS_FILE_DIR i18n
+    TS_FILE_BASE balcalc
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -no-obsolete
 )
 
 set_target_properties(balcalc PROPERTIES
@@ -30,6 +47,7 @@ target_link_libraries(balcalc PRIVATE
     Qt6::QuickControls2
     ballistics_core
     ballistics_storage
+    ballistics_applogic
 )
 
 # Windows: copy the Qt runtime (DLLs, QML modules, plugins) next to the

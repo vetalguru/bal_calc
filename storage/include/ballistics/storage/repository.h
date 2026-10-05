@@ -16,7 +16,8 @@ namespace ballistics::storage {
 //   RifleRecord r{.name = "AI AX308", ...};
 //   if (auto id = rifles.Save(r); !id) { /* id.error() */ }   // r.id is set
 //
-// Saving a record also replaces its child rows, in one transaction.
+// Saving a record also replaces its child rows, in one transaction (the
+// caller's, if one is open).
 template <typename T>
 class Repository final {
 public:

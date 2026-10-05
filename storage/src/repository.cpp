@@ -520,9 +520,26 @@ Result<Id> Repository<T>::Save(T& record) {
         sql = "UPDATE " + std::string(t.name) + " SET " + sets + " WHERE id = :id";
     }
 
-    auto txn = Transaction::Begin(db_.connection());
-    if (!txn) {
-        return txn.error();
+    // On failure the record keeps the id it came with.
+    struct IdGuard {
+        T& r;
+        Id original;
+        bool done = false;
+        ~IdGuard() {
+            if (!done) {
+                r.id = original;
+            }
+        }
+    } guard{record, record.id};
+
+    // Join the caller's transaction if there is one (SQLite does not nest).
+    Transaction txn;
+    if (!db_.connection().InTransaction()) {
+        auto begun = Transaction::Begin(db_.connection());
+        if (!begun) {
+            return begun.error();
+        }
+        txn = std::move(begun).value();
     }
     auto st = Statement::Prepare(db_.connection(), sql);
     if (!st) {
@@ -552,9 +569,12 @@ Result<Id> Repository<T>::Save(T& record) {
             return s.error();
         }
     }
-    if (Status s = txn.value().Commit(); !s) {
-        return s.error();
+    if (txn.IsActive()) {
+        if (Status s = txn.Commit(); !s) {
+            return s.error();
+        }
     }
+    guard.done = true;
     return record.id;
 }
 
