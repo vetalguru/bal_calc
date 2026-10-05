@@ -188,6 +188,28 @@ Page {
                 }
             }
 
+            RowLayout {
+                visible: page.sol.ok === true
+                Layout.fillWidth: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                Label {
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    opacity: 0.7
+                    text: (page.sol.velocityScale !== undefined &&
+                           (page.sol.velocityScale !== 1 || page.sol.dragScale !== 1))
+                          ? qsTr("Trued profile: velocity ×%1, drag ×%2")
+                                .arg(Number(page.sol.velocityScale).toFixed(4))
+                                .arg(Number(page.sol.dragScale).toFixed(3))
+                          : qsTr("Not trued yet: log hits to true the profile.")
+                }
+                Button {
+                    text: qsTr("Log a hit")
+                    onClicked: logDialog.openFor(Backend.targetRangeM, page.sol.elevation || 0)
+                }
+            }
+
             // --- Reticle ---------------------------------------------------
             Pane {
                 visible: page.sol.ok === true
@@ -384,6 +406,8 @@ Page {
             Item { Layout.preferredHeight: 16 }
         }
     }
+
+    LogShotDialog { id: logDialog }
 
     component CorrectionTile: Pane {
         id: tile

@@ -11,6 +11,7 @@
 #include <QtQml/qqmlregistration.h>
 
 #include <ballistics/applogic/session.h>
+#include <ballistics/applogic/truing.h>
 #include <ballistics/storage/database.h>
 
 // The app's single QML-facing object: the database, the profile list, the
@@ -98,6 +99,23 @@ public:
     // `points` samples from the muzzle to `max_range_m`.
     Q_INVOKABLE QVariantMap trajectoryCurve(double max_range_m, int points);
 
+    // Shot log of the current profile: [{id, rangeM, observed, predicted,
+    // observedWindage, hasWindage, shotAt, used, notes, temperatureC}],
+    // angles in the current angle unit.
+    Q_INVOKABLE QVariantList shots();
+    // Logs a hit at the current conditions; angles in the current unit.
+    Q_INVOKABLE QString logShot(double range_m, double elevation, bool has_windage, double windage,
+                                const QString& notes);
+    Q_INVOKABLE QString deleteShot(int id);
+    Q_INVOKABLE QString setShotUsed(int id, bool used);
+    // Fits the current profile: {ok, error, velocityScale, dragScale,
+    // dragFitted, rmsBefore, rmsAfter, velocityBefore, velocityAfter,
+    // points: [{rangeM, observed, before, after}]} (angles in the unit).
+    Q_INVOKABLE QVariantMap computeTruing();
+    // Applies the last computeTruing() result / resets the scales to 1.
+    Q_INVOKABLE QString applyTruing();
+    Q_INVOKABLE QString resetTruing();
+
     // Reticles in the library: [{id, name, units}].
     Q_INVOKABLE QVariantList reticles();
 
@@ -142,6 +160,7 @@ signals:
     void solutionChanged();
     void tableSpecChanged();
     void libraryChanged();
+    void shotsChanged();
 
 private:
     void ReloadProfiles();
@@ -165,6 +184,7 @@ private:
     QTranslator translator_;
     QVariantMap solution_;
     QString seed_report_;
+    ballistics::applogic::TruingResult last_truing_;
     QTimer recompute_timer_;
     QTimer save_timer_;
 
