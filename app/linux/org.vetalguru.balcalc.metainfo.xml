@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.vetalguru.balcalc</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <name>BalCalc</name>
+  <summary>Ballistic calculator for small arms out to 2500 m</summary>
+  <description>
+    <p>
+      Point-mass trajectory solver with Coriolis, spin drift, aerodynamic jump,
+      multi-BC and Doppler-radar drag curves, reticle holds, range tables and
+      truing from logged shots.
+    </p>
+  </description>
+  <developer id="io.github.vetalguru">
+    <name>vetalguru</name>
+  </developer>
+  <launchable type="desktop-id">org.vetalguru.balcalc.desktop</launchable>
+  <url type="homepage">https://github.com/vetalguru/bal_calc</url>
+  <content_rating type="oars-1.1"/>
+</component>
