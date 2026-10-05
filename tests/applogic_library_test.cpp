@@ -1,5 +1,5 @@
 #include <ballistics/applogic/library.h>
-#include <ballistics/applogic/profile_form.h>
+#include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/profile_io.h>
 #include <ballistics/applogic/session.h>
 #include <ballistics/storage/repository.h>
@@ -33,12 +33,10 @@ protected:
         return id.value();
     }
 
-    ProfileForm Form() {
-        ProfileForm f;
-        f.name = "AX308";
+    CartridgeForm Cartridge() {
+        CartridgeForm f;
+        f.name = "AX308 load";
         f.caliber = ".308";
-        f.sight_height_cm = 5.0;
-        f.twist_in = 10.0;
         f.bullet_name = "own";
         f.bc = 0.25;
         f.mass_gr = 168.0;
@@ -46,6 +44,17 @@ protected:
         f.length_in = 1.2;
         f.muzzle_velocity_mps = 800.0;
         return f;
+    }
+
+    Id Rifle(double zero_range_m = 100.0, double zero_temperature_c = 15.0) {
+        RifleForm f;
+        f.name = "AX308";
+        f.caliber = ".308";
+        f.sight_height_cm = 5.0;
+        f.twist_in = 10.0;
+        f.zero_range_m = zero_range_m;
+        f.zero_temperature_c = zero_temperature_c;
+        return SaveRifleForm(db_, f).value();
     }
 
     storage::Database db_;
@@ -95,58 +104,60 @@ TEST_F(AppLibrary, ValidationMessages) {
     EXPECT_NE(Validate(b).find("band"), std::string::npos);
 }
 
-TEST_F(AppLibrary, ProfilesHideTheirOwnBulletsFromTheLibrary) {
-    ASSERT_TRUE(SaveProfileForm(db_, Form()).ok());
+TEST_F(AppLibrary, CartridgesHideTheirOwnBulletsFromTheLibrary) {
+    ASSERT_TRUE(SaveCartridgeForm(db_, Cartridge()).ok());
     EXPECT_TRUE(ListLibraryBullets(db_).value().empty());
 }
 
-TEST_F(AppLibrary, ProfileUsesLibraryBulletWithoutChangingIt) {
+TEST_F(AppLibrary, CartridgeUsesLibraryBulletWithoutChangingIt) {
     const Id lib = AddLibraryBullet("SMK 175", 0.243);
-    ProfileForm f = WithLibraryBullet(db_, Form(), lib).value();
+    CartridgeForm f = WithLibraryBullet(db_, Cartridge(), lib).value();
     EXPECT_EQ(f.library_bullet_id, lib);
     EXPECT_DOUBLE_EQ(f.bc, 0.243);
     EXPECT_NEAR(f.mass_gr, 175.0, 1e-9);
-    f.bc = 0.9; // ignored: library bullets are not edited from a profile
-    const Id pid = SaveProfileForm(db_, f).value();
+    f.bc = 0.9; // ignored: library bullets are not edited from a cartridge
+    const Id cid = SaveCartridgeForm(db_, f).value();
 
-    const auto loaded = LoadProfileForm(db_, pid).value();
-    EXPECT_EQ(loaded.library_bullet_id, lib);
+    EXPECT_EQ(LoadCartridgeForm(db_, cid).value().library_bullet_id, lib);
     EXPECT_DOUBLE_EQ(Repository<BulletRecord>(db_).Get(lib).value()->bc.value(), 0.243);
     EXPECT_EQ(Repository<BulletRecord>(db_).List().value().size(), 1U);
 
-    // Library bullets survive profile deletion and refuse deletion in use.
-    const Id pid2 = SaveProfileForm(db_, WithLibraryBullet(db_, Form(), lib).value()).value();
+    // Library bullets survive cartridge deletion and refuse deletion in use.
+    CartridgeForm g = WithLibraryBullet(db_, Cartridge(), lib).value();
+    g.name = "second";
+    const Id cid2 = SaveCartridgeForm(db_, g).value();
     EXPECT_FALSE(DeleteBullet(db_, lib).ok());
-    ASSERT_TRUE(DeleteProfile(db_, pid).ok());
-    ASSERT_TRUE(DeleteProfile(db_, pid2).ok());
+    ASSERT_TRUE(DeleteCartridge(db_, cid).ok());
+    ASSERT_TRUE(DeleteCartridge(db_, cid2).ok());
     EXPECT_TRUE(Repository<BulletRecord>(db_).Get(lib).value().has_value());
     EXPECT_TRUE(DeleteBullet(db_, lib).ok());
 }
 
 TEST_F(AppLibrary, SwitchingFromOwnToLibraryBulletDropsTheOwnOne) {
-    const Id pid = SaveProfileForm(db_, Form()).value();
+    const Id cid = SaveCartridgeForm(db_, Cartridge()).value();
     EXPECT_EQ(Repository<BulletRecord>(db_).List().value().size(), 1U);
     const Id lib = AddLibraryBullet("SMK 175", 0.243);
-    ProfileForm f = LoadProfileForm(db_, pid).value();
+    CartridgeForm f = LoadCartridgeForm(db_, cid).value();
     f = WithLibraryBullet(db_, f, lib).value();
-    ASSERT_TRUE(SaveProfileForm(db_, f).ok());
+    ASSERT_TRUE(SaveCartridgeForm(db_, f).ok());
     const auto bullets = Repository<BulletRecord>(db_).List().value();
     ASSERT_EQ(bullets.size(), 1U);
     EXPECT_EQ(bullets[0].id, lib);
 
     // Detaching makes a private copy and leaves the library bullet alone.
-    f = LoadProfileForm(db_, pid).value();
+    f = LoadCartridgeForm(db_, cid).value();
     f.library_bullet_id = 0;
     f.bc = 0.26;
-    ASSERT_TRUE(SaveProfileForm(db_, f).ok());
+    ASSERT_TRUE(SaveCartridgeForm(db_, f).ok());
     EXPECT_EQ(Repository<BulletRecord>(db_).List().value().size(), 2U);
     EXPECT_DOUBLE_EQ(Repository<BulletRecord>(db_).Get(lib).value()->bc.value(), 0.243);
 }
 
 TEST_F(AppLibrary, SampleProfileUsesTheLibrarySmkWhenPresent) {
     // Empty library: the sample brings its own bullet.
-    const Id own = CreateSampleProfile(db_, "Sample A").value();
-    EXPECT_EQ(LoadProfileForm(db_, own).value().library_bullet_id, 0);
+    const Id own = CreateSampleProfile(db_, "Rifle A", "Load A").value();
+    const auto own_p = storage::LoadProfile(db_, own).value();
+    EXPECT_EQ(LoadCartridgeForm(db_, own_p.cartridge.id).value().library_bullet_id, 0);
 
     BulletForm smk;
     smk.name = "MatchKing 175 gr HPBT #2275";
@@ -155,53 +166,91 @@ TEST_F(AppLibrary, SampleProfileUsesTheLibrarySmkWhenPresent) {
     smk.drag_table = "G1";
     smk.bands = {{869.0, 0.505}, {549.0, 0.496}};
     const Id lib = SaveBulletForm(db_, smk).value();
-    const Id with_lib = CreateSampleProfile(db_, "Sample B").value();
-    EXPECT_EQ(LoadProfileForm(db_, with_lib).value().library_bullet_id, lib);
+    const Id with_lib = CreateSampleProfile(db_, "Rifle B", "Load B").value();
+    const auto p = storage::LoadProfile(db_, with_lib).value();
+    EXPECT_EQ(p.bullet.id, lib);
     SessionConditions s;
     s.target_range_m = 1000.0;
-    EXPECT_TRUE(Summarize(storage::LoadProfile(db_, with_lib).value(), s, AngleUnit::kMrad).ok);
+    EXPECT_TRUE(Summarize(p, s, AngleUnit::kMrad).ok);
 }
 
-TEST_F(AppLibrary, JsonRoundTripGivesTheSameSolution) {
-    ProfileForm f = Form();
-    f.zero_range_m = 200.0;
-    f.zero_temperature_c = -3.0;
-    const Id pid = SaveProfileForm(db_, f).value();
-    const std::string json = ExportProfileJson(db_, pid).value();
-    EXPECT_NE(json.find("\"format\": \"balcalc-profile\""), std::string::npos);
+TEST_F(AppLibrary, RifleAndCartridgeJsonRoundTripGivesTheSameSolution) {
+    const Id rifle = Rifle(200.0, -3.0);
+    const Id cartridge = SaveCartridgeForm(db_, Cartridge()).value();
+    const std::string rifle_json = ExportRifleJson(db_, rifle).value();
+    const std::string cart_json = ExportCartridgeJson(db_, cartridge).value();
+    EXPECT_NE(rifle_json.find("\"format\": \"balcalc-rifle\""), std::string::npos);
+    EXPECT_NE(cart_json.find("\"format\": \"balcalc-cartridge\""), std::string::npos);
 
-    const Id copy = ImportProfileJson(db_, json).value();
-    EXPECT_NE(copy, pid);
-    const auto a = LoadProfileForm(db_, pid).value();
-    const auto b = LoadProfileForm(db_, copy).value();
-    EXPECT_EQ(b.name, "AX308 (2)");
-    EXPECT_DOUBLE_EQ(b.zero_range_m, 200.0);
-    EXPECT_NEAR(b.zero_temperature_c, -3.0, 1e-9);
+    const Imported r = ImportShareJson(db_, rifle_json).value();
+    const Imported c = ImportShareJson(db_, cart_json).value();
+    EXPECT_NE(r.rifle_id, 0);
+    EXPECT_EQ(r.cartridge_id, 0);
+    EXPECT_EQ(c.rifle_id, 0);
+    EXPECT_NE(c.cartridge_id, 0);
+    EXPECT_EQ(r.profile_id, 0);
+    const RifleForm copy = LoadRifleForm(db_, r.rifle_id).value();
+    EXPECT_EQ(copy.name, "AX308 (2)");
+    EXPECT_DOUBLE_EQ(copy.zero_range_m, 200.0);
+    EXPECT_NEAR(copy.zero_temperature_c, -3.0, 1e-9);
+    EXPECT_EQ(LoadCartridgeForm(db_, c.cartridge_id).value().name, "AX308 load (2)");
 
     SessionConditions s;
     s.target_range_m = 900.0;
-    const auto sa = Summarize(storage::LoadProfile(db_, pid).value(), s, AngleUnit::kMrad);
-    const auto sb = Summarize(storage::LoadProfile(db_, copy).value(), s, AngleUnit::kMrad);
+    const auto sa = Summarize(
+        storage::LoadProfile(db_, EnsureProfile(db_, rifle, cartridge).value()).value(), s,
+        AngleUnit::kMrad);
+    const auto sb = Summarize(
+        storage::LoadProfile(db_, EnsureProfile(db_, r.rifle_id, c.cartridge_id).value()).value(),
+        s, AngleUnit::kMrad);
     ASSERT_TRUE(sa.ok && sb.ok);
     EXPECT_DOUBLE_EQ(sa.elevation, sb.elevation);
     EXPECT_DOUBLE_EQ(sa.windage, sb.windage);
-    EXPECT_EQ(a.click_units, b.click_units);
+}
+
+TEST_F(AppLibrary, LegacyProfileFileImportsAsRifleCartridgeAndPair) {
+    // A file exported by version 0.1 (one "profile" per rifle + cartridge).
+    const Imported im = ImportShareJson(db_, R"({
+      "format": "balcalc-profile", "version": 1,
+      "profile": {"name": "Old", "zero_range_m": 300.0, "zero_offset_up_m": 0.01,
+                  "zero_offset_right_m": 0.0, "zero_powder_temp_k": 280.0,
+                  "zero_atmosphere": {"altitude_m": 100.0, "pressure_pa": 98000.0,
+                                      "temperature_k": 280.0, "humidity": 0.5},
+                  "velocity_scale": 1.02, "drag_scale": 0.97},
+      "rifle": {"name": "Old rifle", "caliber": ".308 Win", "sight_height_m": 0.05,
+                "twist_m": 0.254},
+      "scope": {"name": "s", "click_units": "mrad", "click_vertical_rad": 0.0001,
+                "click_horizontal_rad": 0.0001, "reticle": null},
+      "cartridge": {"name": "Old load", "muzzle_velocity_mps": 800.0},
+      "bullet": {"name": "b", "caliber": ".308", "diameter_m": 0.0078, "mass_kg": 0.0113,
+                 "drag_kind": "bc", "drag_table": "G7", "bc": 0.25}})")
+                              .value();
+    ASSERT_NE(im.profile_id, 0);
+    const auto p = storage::LoadProfile(db_, im.profile_id).value();
+    EXPECT_EQ(p.rifle.name, "Old rifle");
+    EXPECT_DOUBLE_EQ(p.rifle.zero_range_m, 300.0);
+    EXPECT_DOUBLE_EQ(p.rifle.zero_powder_temp_k, 280.0);
+    EXPECT_DOUBLE_EQ(p.rifle.zero_atmosphere.pressure_pa, 98000.0);
+    ASSERT_TRUE(p.scope.has_value());
+    EXPECT_EQ(p.cartridge.caliber, ".308 Win"); // taken from the rifle
+    EXPECT_DOUBLE_EQ(p.profile.zero_offset_up_m, 0.01);
+    EXPECT_DOUBLE_EQ(p.profile.velocity_scale, 1.02);
+    EXPECT_DOUBLE_EQ(p.profile.drag_scale, 0.97);
 }
 
 TEST_F(AppLibrary, ImportReusesIdenticalLibraryBullet) {
     const Id lib = AddLibraryBullet("SMK 175", 0.243);
-    const Id pid = SaveProfileForm(db_, WithLibraryBullet(db_, Form(), lib).value()).value();
-    const std::string json = ExportProfileJson(db_, pid).value();
-    ASSERT_TRUE(ImportProfileJson(db_, json).ok());
+    const Id cid = SaveCartridgeForm(db_, WithLibraryBullet(db_, Cartridge(), lib).value()).value();
+    ASSERT_TRUE(ImportShareJson(db_, ExportCartridgeJson(db_, cid).value()).ok());
     EXPECT_EQ(Repository<BulletRecord>(db_).List().value().size(), 1U);
 }
 
 TEST_F(AppLibrary, ImportRejectsGarbageAndRollsBack) {
-    EXPECT_FALSE(ImportProfileJson(db_, "not json").ok());
-    EXPECT_FALSE(ImportProfileJson(db_, R"({"format":"other"})").ok());
-    EXPECT_FALSE(ImportProfileJson(db_, R"({"format":"balcalc-profile","version":99})").ok());
+    EXPECT_FALSE(ImportShareJson(db_, "not json").ok());
+    EXPECT_FALSE(ImportShareJson(db_, R"({"format":"other"})").ok());
+    EXPECT_FALSE(ImportShareJson(db_, R"({"format":"balcalc-rifle","version":99})").ok());
     // Valid header, bullet fine, cartridge missing: nothing is left behind.
-    const auto r = ImportProfileJson(db_, R"({"format":"balcalc-profile","version":1,
+    const auto r = ImportShareJson(db_, R"({"format":"balcalc-cartridge","version":1,
         "bullet":{"name":"b","diameter_m":0.0078,"mass_kg":0.011,"drag_kind":"bc","bc":0.3}})");
     EXPECT_FALSE(r.ok());
     EXPECT_TRUE(Repository<BulletRecord>(db_).List().value().empty());

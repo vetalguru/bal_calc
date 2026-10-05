@@ -100,7 +100,16 @@ TEST(CliRun, DemoProfileTable) {
     std::string out, err;
     ASSERT_EQ(RunCli({"--db", db, "demo"}, out, err), 0) << err;
     ASSERT_EQ(RunCli({"--db", db, "profiles"}, out, err), 0) << err;
-    EXPECT_NE(out.find("M24 / M118LR (demo)"), std::string::npos);
+    EXPECT_NE(out.find("M24 (demo) / M118LR (demo)"), std::string::npos);
+    ASSERT_EQ(RunCli({"--db", db, "rifles"}, out, err), 0) << err;
+    EXPECT_NE(out.find("M24 (demo)  .308  (zero 100 m)"), std::string::npos) << out;
+    ASSERT_EQ(RunCli({"--db", db, "cartridges"}, out, err), 0) << err;
+    EXPECT_NE(out.find("M118LR (demo)  .308  790 m/s"), std::string::npos) << out;
+    ASSERT_EQ(RunCli({"--db", db, "table", "--rifle", "1", "--cartridge", "1", "--to", "800"},
+                     out, err),
+              0)
+        << err;
+    EXPECT_NE(out.find("M24 (demo) / M118LR (demo)"), std::string::npos);
     ASSERT_EQ(RunCli({"--db", db, "table", "--profile", "1", "--to", "800", "--temp", "-5",
                       "--alt", "400", "--humidity", "60", "--units", "moa"},
                      out, err),

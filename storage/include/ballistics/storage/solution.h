@@ -34,11 +34,11 @@ double MuzzleVelocity(const CartridgeRecord& cartridge, double powder_temp_k,
 
 struct Solution {
     Shot shot;          // as fired: conditions applied, zero angles set
-    ZeroResult zero;    // bore angles found at the profile's zero conditions
+    ZeroResult zero;    // bore angles found at the rifle's zero conditions
     Trajectory trajectory;
 };
 
-// Zeroes the rifle at the profile's zero range and conditions (level,
+// Zeroes the rifle at its zero range and conditions (level,
 // still air), then flies the shot in `conditions` out to `max_range_m`
 // along the LOS.
 Result<Solution> Solve(const LoadedProfile& p, const ConditionsRecord& conditions,

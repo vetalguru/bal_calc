@@ -179,6 +179,49 @@ ALTER TABLE scope ADD COLUMN focal_plane TEXT NOT NULL DEFAULT 'ffp'
     CHECK (focal_plane IN ('ffp', 'sfp'));
 ALTER TABLE scope ADD COLUMN sfp_reference_magnification REAL NOT NULL DEFAULT 0;
 )sql"},
+        // v3: rifles and cartridges become independent. The scope and the
+        // zero move from the profile to the rifle; a profile is now a
+        // rifle + cartridge pair (point-of-impact shift, truing, shot log).
+        // Until v2 every profile owned its rifle and cartridge, so each
+        // rifle takes the values of its (only) profile. profile.scope_id
+        // stays as an unused column: SQLite cannot drop a foreign key.
+        {3, R"sql(
+ALTER TABLE rifle ADD COLUMN scope_id INTEGER REFERENCES scope(id) ON DELETE SET NULL;
+ALTER TABLE rifle ADD COLUMN zero_range_m REAL NOT NULL DEFAULT 100 CHECK (zero_range_m > 0);
+ALTER TABLE rifle ADD COLUMN zero_altitude_m REAL NOT NULL DEFAULT 0;
+ALTER TABLE rifle ADD COLUMN zero_pressure_pa REAL NOT NULL DEFAULT 101325;
+ALTER TABLE rifle ADD COLUMN zero_temperature_k REAL NOT NULL DEFAULT 288.15;
+ALTER TABLE rifle ADD COLUMN zero_humidity REAL NOT NULL DEFAULT 0;
+ALTER TABLE rifle ADD COLUMN zero_powder_temp_k REAL NOT NULL DEFAULT 288.15;
+ALTER TABLE cartridge ADD COLUMN caliber TEXT NOT NULL DEFAULT '';
+
+UPDATE rifle SET
+    scope_id           = p.scope_id,
+    zero_range_m       = p.zero_range_m,
+    zero_altitude_m    = p.zero_altitude_m,
+    zero_pressure_pa   = p.zero_pressure_pa,
+    zero_temperature_k = p.zero_temperature_k,
+    zero_humidity      = p.zero_humidity,
+    zero_powder_temp_k = p.zero_powder_temp_k
+FROM (SELECT * FROM profile WHERE id IN (SELECT min(id) FROM profile GROUP BY rifle_id)) AS p
+WHERE p.rifle_id = rifle.id;
+
+UPDATE cartridge SET caliber = COALESCE(
+    (SELECT r.caliber FROM profile p JOIN rifle r ON r.id = p.rifle_id
+      WHERE p.cartridge_id = cartridge.id AND r.caliber <> '' ORDER BY p.id LIMIT 1),
+    (SELECT b.caliber FROM bullet b WHERE b.id = cartridge.bullet_id),
+    '');
+
+UPDATE profile SET scope_id = NULL;
+ALTER TABLE profile DROP COLUMN zero_range_m;
+ALTER TABLE profile DROP COLUMN zero_altitude_m;
+ALTER TABLE profile DROP COLUMN zero_pressure_pa;
+ALTER TABLE profile DROP COLUMN zero_temperature_k;
+ALTER TABLE profile DROP COLUMN zero_humidity;
+ALTER TABLE profile DROP COLUMN zero_powder_temp_k;
+CREATE UNIQUE INDEX profile_by_pair ON profile(rifle_id, cartridge_id);
+CREATE INDEX profile_by_cartridge ON profile(cartridge_id);
+)sql"},
     };
     return migrations;
 }

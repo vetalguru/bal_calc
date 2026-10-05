@@ -1,5 +1,5 @@
 // Truing: the fitted scales reproduce the corrections that hit.
-#include <ballistics/applogic/profile_form.h>
+#include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/truing.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
@@ -17,18 +17,21 @@ class Truing : public ::testing::Test {
 protected:
     void SetUp() override {
         ASSERT_TRUE(db_.Open(":memory:").ok());
-        ProfileForm f;
-        f.name = "Truing test";
-        f.sight_height_cm = 5.0;
-        f.twist_in = 10.0;
-        f.bullet_name = "SMK 175";
-        f.drag_table = "G7";
-        f.bc = 0.243;
-        f.mass_gr = 175.0;
-        f.diameter_in = 0.308;
-        f.length_in = 1.24;
-        f.muzzle_velocity_mps = 800.0;
-        profile_ = SaveProfileForm(db_, f).value();
+        RifleForm r;
+        r.name = "Truing test";
+        r.sight_height_cm = 5.0;
+        r.twist_in = 10.0;
+        CartridgeForm c;
+        c.name = "Truing test";
+        c.bullet_name = "SMK 175";
+        c.drag_table = "G7";
+        c.bc = 0.243;
+        c.mass_gr = 175.0;
+        c.diameter_in = 0.308;
+        c.length_in = 1.24;
+        c.muzzle_velocity_mps = 800.0;
+        profile_ = EnsureProfile(db_, SaveRifleForm(db_, r).value(), SaveCartridgeForm(db_, c).value())
+                       .value();
     }
 
     // The correction the rifle "really" needs: same profile, other scales.

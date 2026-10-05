@@ -58,8 +58,8 @@ Result<LoadedProfile> LoadProfile(Database& db, Id profile_id) {
         }
         p.rifle = std::move(r).value();
     }
-    if (p.profile.scope_id) {
-        auto r = Require<ScopeRecord>(db, *p.profile.scope_id, "scope");
+    if (p.rifle.scope_id) {
+        auto r = Require<ScopeRecord>(db, *p.rifle.scope_id, "scope");
         if (!r) {
             return r.error();
         }
@@ -137,19 +137,20 @@ Result<Solution> Solve(const LoadedProfile& p, const ConditionsRecord& condition
     base.twist_m = p.rifle.twist_m;
     base.sight_height_m = p.rifle.sight_height_m;
 
-    // Zero: the profile's zero conditions, level, still air.
+    // Zero: the rifle's zero conditions, level, still air; the cartridge may
+    // hit off the rifle's zero by the profile's offsets.
     Shot zero_shot = base;
-    zero_shot.atmosphere = p.profile.zero_atmosphere;
+    zero_shot.atmosphere = p.rifle.zero_atmosphere;
     zero_shot.muzzle_velocity_mps =
-        MuzzleVelocity(p.cartridge, p.profile.zero_powder_temp_k, p.profile.velocity_scale);
+        MuzzleVelocity(p.cartridge, p.rifle.zero_powder_temp_k, p.profile.velocity_scale);
     if (conditions.latitude_rad) {
         zero_shot.gravity_mps2 =
             LocalGravity(*conditions.latitude_rad, zero_shot.atmosphere.altitude_m);
     }
-    const ZeroResult zero = FindZero(zero_shot, p.profile.zero_range_m, p.profile.zero_offset_up_m,
+    const ZeroResult zero = FindZero(zero_shot, p.rifle.zero_range_m, p.profile.zero_offset_up_m,
                                      options, p.profile.zero_offset_right_m);
     if (!zero.converged) {
-        return DataError("could not zero at " + std::to_string(p.profile.zero_range_m) + " m");
+        return DataError("could not zero at " + std::to_string(p.rifle.zero_range_m) + " m");
     }
 
     Shot shot = base;
