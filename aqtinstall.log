@@ -1,4 +1,0 @@
-2026-10-05 18:04:47,437 - aqt.helper - DEBUG - helper 21704 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/all_os/android/qt6_692/qt6_692_x86/Updates.xml.sha256
-2026-10-05 18:04:49,002 - aqt.helper - DEBUG - helper 21704 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/all_os/android/qt6_692/qt6_692_x86_64/Updates.xml.sha256
-2026-10-05 18:04:50,620 - aqt.helper - DEBUG - helper 21704 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/all_os/android/qt6_692/qt6_692_arm64_v8a/Updates.xml.sha256
-2026-10-05 18:04:52,199 - aqt.helper - DEBUG - helper 21704 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/all_os/android/qt6_692/qt6_692_armv7/Updates.xml.sha256
