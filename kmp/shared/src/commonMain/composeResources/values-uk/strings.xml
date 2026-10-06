@@ -425,4 +425,13 @@
     <string name="library_rifle_line">Крок нарізів 1:%1$s″ · ствол %2$s″</string>
     <string name="library_scope_line">%1$s–%2$s× %3$s · клік %4$s %5$s</string>
     <string name="library_note">Так, як публікує виробник: звірте крок нарізів і ціну кліку зі своєю гвинтівкою та прицілом.</string>
+    <string name="qr_show">QR-код</string>
+    <string name="qr_part">Частина %1$s з %2$s</string>
+    <string name="qr_hint">На іншому телефоні: Зброя і набої → Імпорт → QR-код. Покажіть усі частини.</string>
+    <string name="qr_import_title">Імпорт із QR-коду</string>
+    <string name="qr_import_hint">Скануйте код; гвинтівка із сіткою може складатися з кількох частин, у будь-якому порядку.</string>
+    <string name="qr_scan">Сканувати камерою</string>
+    <string name="qr_picture">З картинки</string>
+    <string name="qr_progress">Прочитано частин: %1$s з %2$s — скануйте наступну.</string>
+    <string name="qr_not_found">QR-код BalCalc не знайдено.</string>
 </resources>

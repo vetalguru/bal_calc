@@ -455,4 +455,13 @@
     <string name="library_rifle_line">Twist 1:%1$s in · barrel %2$s in</string>
     <string name="library_scope_line">%1$s–%2$s× %3$s · click %4$s %5$s</string>
     <string name="library_note">As the maker publishes it: check the twist and the click value against your rifle and scope.</string>
+    <string name="qr_show">QR code</string>
+    <string name="qr_part">Part %1$s of %2$s</string>
+    <string name="qr_hint">On the other phone: Rifles and cartridges → Import → QR code. Show every part.</string>
+    <string name="qr_import_title">Import from QR code</string>
+    <string name="qr_import_hint">Scan the code; a rifle with a reticle may come in several parts, in any order.</string>
+    <string name="qr_scan">Scan with the camera</string>
+    <string name="qr_picture">From a picture</string>
+    <string name="qr_progress">%1$s of %2$s parts read: scan the next one.</string>
+    <string name="qr_not_found">No BalCalc QR code found.</string>
 </resources>

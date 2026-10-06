@@ -34,10 +34,13 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
+            implementation(libs.zxing.core)
+            implementation(libs.zxing.android.embedded) // camera scanning, asks for the camera then
         }
         getByName("desktopMain") {
             dependencies {
                 implementation(libs.kotlinx.coroutines.swing)
+                implementation(libs.zxing.core)
             }
         }
         getByName("desktopTest") {

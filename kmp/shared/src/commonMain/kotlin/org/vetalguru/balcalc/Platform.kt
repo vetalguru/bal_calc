@@ -17,6 +17,12 @@ interface Platform {
 
     /** Asks for a picture (a target photo); its bytes, or null when cancelled. */
     suspend fun openImage(): ByteArray? = null
+
+    /** Whether [scanQr] has a camera to use. */
+    val canScanQr: Boolean get() = false
+
+    /** One QR code read by the camera (asking for it first); null when cancelled. */
+    suspend fun scanQr(): String? = null
 }
 
 /** The system Back action (Android key or gesture); nothing on desktops. */
