@@ -78,6 +78,7 @@ constexpr const char* kCurrentCartridgeKey = "ui.current_cartridge";
 constexpr const char* kAngleUnitKey = "ui.angle_unit";
 constexpr const char* kLanguageKey = "ui.language";
 constexpr std::size_t kMaxExtraWindZones = 2; // three wind zones in all
+constexpr const char* kTargetSpeedUnitKey = "ui.target_speed_unit";
 constexpr const char* kHoldModeKey = "ui.hold_mode";
 constexpr const char* kTableFromKey = "ui.table.from_m";
 constexpr const char* kTableToKey = "ui.table.to_m";
@@ -267,7 +268,9 @@ json ToJson(const al::RangeTable& t, bool has_scope) {
                         {"velocity", r.velocity_mps},
                         {"mach", r.mach},
                         {"energy", r.energy_j},
-                        {"time", r.time_s}});
+                        {"time", r.time_s},
+                        {"lead", r.lead},
+                        {"leadClicks", r.lead_clicks}});
     }
     return {{"ok", t.ok}, {"error", t.error}, {"hasScope", has_scope}, {"rows", rows}};
 }
@@ -315,6 +318,9 @@ struct Api::Impl {
     double wind_until_m = 0.0;       // end of the first zone when there are more
     std::vector<al::WindInput> wind_zones; // the zones after the first, in order
     double wind_gust_mps = 0.0;
+    double target_speed_mps = 0.0;
+    double target_heading_deg = 90.0;
+    std::string target_speed_unit = "kmh"; // how the app shows it: "kmh" or "mps"
     double look_angle_deg = 0.0;
     double cant_deg = 0.0;
     bool coriolis = false;
@@ -356,6 +362,7 @@ struct Api::Impl {
         angle_unit = Setting(kAngleUnitKey).value_or(angle_unit);
         hold_mode = Setting(kHoldModeKey).value_or(hold_mode);
         language = Setting(kLanguageKey).value_or(language);
+        target_speed_unit = Setting(kTargetSpeedUnitKey).value_or(target_speed_unit);
         for (const auto& [key, value] : {std::pair{kTableFromKey, &table_from_m},
                                          std::pair{kTableToKey, &table_to_m},
                                          std::pair{kTableStepKey, &table_step_m}}) {
@@ -391,6 +398,8 @@ struct Api::Impl {
             s.winds.push_back(w);
         }
         s.wind_gust_mps = wind_gust_mps;
+        s.target_speed_mps = target_speed_mps;
+        s.target_heading_deg = target_heading_deg;
         s.look_angle_deg = look_angle_deg;
         s.cant_deg = cant_deg;
         if (coriolis) {
@@ -423,6 +432,8 @@ struct Api::Impl {
         }
         wind_zones.assign(s.winds.size() > 1 ? s.winds.begin() + 1 : s.winds.end(), s.winds.end());
         wind_gust_mps = s.wind_gust_mps;
+        target_speed_mps = s.target_speed_mps;
+        target_heading_deg = s.target_heading_deg;
         look_angle_deg = s.look_angle_deg;
         cant_deg = s.cant_deg;
         coriolis = s.latitude_deg.has_value();
@@ -451,7 +462,10 @@ struct Api::Impl {
                 {"targetHeightCm", target_height_cm},
                 {"windUntilM", wind_until_m},
                 {"windZones", ZonesJson()},
-                {"windGustMps", wind_gust_mps}};
+                {"windGustMps", wind_gust_mps},
+                {"targetSpeedMps", target_speed_mps},
+                {"targetHeadingDeg", target_heading_deg},
+                {"targetSpeedUnit", target_speed_unit}};
     }
 
     json ZonesJson() const {
@@ -488,6 +502,12 @@ struct Api::Impl {
         num("targetHeightCm", target_height_cm);
         num("windUntilM", wind_until_m);
         num("windGustMps", wind_gust_mps);
+        num("targetSpeedMps", target_speed_mps);
+        num("targetHeadingDeg", target_heading_deg);
+        if (const std::string u = Str(a, "targetSpeedUnit"); (u == "kmh" || u == "mps") && u != target_speed_unit) {
+            target_speed_unit = u;
+            Put(kTargetSpeedUnitKey, u);
+        }
         if (a.contains("windZones") && a.at("windZones").is_array()) {
             wind_zones.clear();
             for (const json& z : a.at("windZones")) {
@@ -691,7 +711,16 @@ struct Api::Impl {
                    {"hasGust", r.has_gust},
                    {"gustWindage", r.gust_windage},
                    {"gustWindageClicks", r.gust_windage_clicks},
-                   {"gustWindageCm", r.gust_windage_cm}};
+                   {"gustWindageCm", r.gust_windage_cm},
+                   {"hasLead", r.has_lead},
+                   {"lead", r.lead},
+                   {"leadClicks", r.lead_clicks},
+                   {"leadCm", r.lead_cm},
+                   {"leadTotalWindage", r.lead_total_windage},
+                   {"leadTotalWindageClicks", r.lead_total_windage_clicks},
+                   {"leadRangeM", r.lead_range_m},
+                   {"leadElevation", r.lead_elevation},
+                   {"leadElevationClicks", r.lead_elevation_clicks}};
             json warnings = json::array();
             for (const al::Warning& w : r.warnings) {
                 warnings.push_back({{"code", w.code}, {"value", w.value}});

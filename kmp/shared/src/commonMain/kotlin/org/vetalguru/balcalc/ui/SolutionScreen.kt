@@ -161,6 +161,8 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
                     ),
                 )
 
+                MovingTargetCard(model, sol, unit)
+
                 if (sol.ok) Details(sol, st.conditions.targetHeightCm, wide)
             }
         }

@@ -118,6 +118,8 @@ private fun RangeCard(table: RangeTable, moa: Boolean, targetM: Double, onRow: (
         "mach" to stringResource(Res.string.col_mach),
         "energy" to stringResource(Res.string.col_energy),
         "time" to stringResource(Res.string.col_time),
+        "lead" to stringResource(Res.string.col_lead, unit),
+        "leadClicks" to stringResource(Res.string.col_lead_clicks),
     )
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 720.dp
@@ -127,8 +129,12 @@ private fun RangeCard(table: RangeTable, moa: Boolean, targetM: Double, onRow: (
             if (table.hasScope) add(TableCol(titles.getValue("elevClicks"), 0, true) { it.elevationClicks })
             add(TableCol(titles.getValue("wind"), 2, true) { it.windage })
             if (table.hasScope) add(TableCol(titles.getValue("windClicks"), 0, true) { it.windageClicks })
+            // A moving target: its lead (instead of the velocity on a phone).
+            val lead = table.rows.any { it.lead != 0.0 }
+            if (lead) add(TableCol(titles.getValue("lead"), 2, true) { it.lead })
+            if (lead && table.hasScope && wide) add(TableCol(titles.getValue("leadClicks"), 0, true) { it.leadClicks })
             // Phones with a scope: five angle columns are enough.
-            if (maxWidth >= 420.dp || !table.hasScope) add(TableCol(titles.getValue("v"), 0, false) { it.velocity })
+            if ((maxWidth >= 420.dp && (!lead || wide)) || !table.hasScope) add(TableCol(titles.getValue("v"), 0, false) { it.velocity })
             if (wide) {
                 add(TableCol(titles.getValue("drop"), 1, false) { it.dropCm })
                 add(TableCol(titles.getValue("drift"), 1, false) { it.windageCm })

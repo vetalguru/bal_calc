@@ -318,4 +318,22 @@
     <string name="add_zone">Add a zone</string>
     <string name="remove_zone">Remove</string>
     <string name="quick_zone_note">Zone 1 of %1$s, up to %2$s m: the others are on the Air page.</string>
+    <string name="moving_target">Moving target</string>
+    <string name="target_speed">Target speed</string>
+    <string name="unit_kmh">km/h</string>
+    <string name="moves_left">← To the left</string>
+    <string name="moves_right">To the right →</string>
+    <string name="target_angle">Angle to the line of fire (90 = straight across)</string>
+    <string name="lead_value">Lead: %1$s</string>
+    <string name="lead_moves">The target moves %1$s m during the flight.</string>
+    <string name="lead_total">Windage with the lead: %1$s</string>
+    <string name="lead_meet">The bullet meets it at %1$s m: elevation %2$s.</string>
+    <string name="col_lead">Lead\n%1$s</string>
+    <string name="col_lead_clicks">Lead\nclicks</string>
+    <string name="stopwatch">Stopwatch</string>
+    <string name="stopwatch_hint">Start when the target passes a mark, stop at the next one.</string>
+    <string name="stopwatch_distance">Between the marks</string>
+    <string name="stopwatch_start">Start</string>
+    <string name="stopwatch_stop">Stop</string>
+    <string name="stopwatch_result">%1$s s: %2$s</string>
 </resources>

@@ -324,6 +324,42 @@ class FlowTest {
     }
 
     @Test
+    fun movingTarget() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(500)
+        assertTrue(!exists("lead"))
+
+        // 15 km/h to the right (the default direction): lead to the right.
+        onNodeWithTag("targetSpeed").performScrollTo()
+        type("targetSpeed", "15")
+        waitUntil(timeoutMillis = 10_000) { exists("lead") && shown("lead").contains("RIGHT") }
+        onNodeWithTag("movesLeft").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("lead").contains("LEFT") }
+        onNodeWithTag("movingTarget").performScrollTo()
+        shotOf("movingTarget", "moving-target")
+
+        // The stopwatch: 5 m in about half a second is about 36 km/h.
+        onNodeWithTag("stopwatch").performScrollTo().performClick()
+        waitUntil { exists("stopwatchDistance") }
+        type("stopwatchDistance", "5")
+        onNodeWithTag("stopwatchToggle").performClick()
+        Thread.sleep(500)
+        onNodeWithTag("stopwatchToggle").performClick()
+        waitUntil { exists("stopwatchResult") }
+        onNodeWithTag("stopwatchApply").performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("stopwatchToggle") }
+        val kmh = shown("targetSpeed").toDouble()
+        assertTrue(kmh in 15.0..40.0, "speed $kmh")
+
+        // The range card gets a lead column.
+        onNodeWithTag("navTable").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("rangeTable") }
+        assertTrue(hasText("Lead", substring = true))
+        shot("table-lead")
+        db.delete()
+    }
+
+    @Test
     fun libraryBulletAndSettings() = runDesktopComposeUiTest(400, 820) {
         val db = startWithSample()
         val before = elevation()
