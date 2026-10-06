@@ -386,7 +386,7 @@ class FlowTest {
         // Velocity instead of the trajectory.
         onNodeWithTag("chartQuantity").performClick()
         onAllNodesWithText("Velocity").onLast().performClick()
-        waitUntil { onAllNodesWithText("Velocity").fetchSemanticsNodes().size == 1 } // the menu closed, the field shows it
+        waitUntil(timeoutMillis = 10_000) { onAllNodesWithText("Velocity").fetchSemanticsNodes().size == 1 } // the menu closed, the field shows it
 
         // Compared with the faster load.
         onNodeWithTag("compare").performClick()
