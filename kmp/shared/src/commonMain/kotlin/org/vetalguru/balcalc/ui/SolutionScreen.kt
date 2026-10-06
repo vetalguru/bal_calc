@@ -302,12 +302,13 @@ private fun Corrections(sol: Solution, unit: String, gustMps: Double, wide: Bool
         )
     }
     if (wide) {
-        Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Tagged with the range it was solved for, so tests can wait for it.
+        Row(Modifier.padding(horizontal = 12.dp).testTag("solvedFor:${sol.rangeM.roundToInt()}"), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             elevation(Modifier.weight(1f))
             windage(Modifier.weight(1f))
         }
     } else {
-        Column(Modifier.padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(horizontal = 12.dp).testTag("solvedFor:${sol.rangeM.roundToInt()}"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             elevation(Modifier.fillMaxWidth())
             windage(Modifier.fillMaxWidth())
         }
