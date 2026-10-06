@@ -51,8 +51,6 @@
     <string name="spin_drift">Деривація</string>
     <string name="muzzle_velocity">Початкова швидкість</string>
     <string name="stability">Стійкість Sg</string>
-    <string name="subsonic_at_target">На цілі куля дозвукова: очікуйте більшого розсіювання.</string>
-    <string name="transonic_from">Трансзвук приблизно з %1$s м.</string>
     <string name="atmosphere">Атмосфера</string>
     <string name="temperature">Температура</string>
     <string name="altitude">Висота над рівнем моря</string>
@@ -267,4 +265,18 @@
     <string name="core_21">Немає чого застосувати.</string>
     <string name="core_22">Для кожного діапазону потрібні швидкість і БК від 0 до 2.</string>
     <string name="core_23">Цю кулю використовує набій, її не можна видалити.</string>
+    <string name="warn_unstable">Куля нестійка (Sg %1$s): може перекидатися. Потрібен швидший крок нарізів або коротша куля.</string>
+    <string name="warn_low_stability">Стійкість на межі (Sg %1$s, менше 1.3): BC падає, купчастість гіршає.</string>
+    <string name="warn_subsonic">На цілі куля дозвукова (Мах %1$s): очікуйте більшого розсіювання.</string>
+    <string name="warn_transonic">На цілі трансзвук (Мах %1$s): поправки менш певні.</string>
+    <string name="warn_zero_temperature">Повітря на %1$s °C відрізняється від умов пристрілки: перевірте пострілом.</string>
+    <string name="warn_zero_pressure">Тиск на %1$s гПа відрізняється від умов пристрілки: перевірте пострілом.</string>
+    <string name="warn_stale_weather">Погоду введено %1$s год тому: оновіть її.</string>
+    <string name="apex">Найбільше перевищення</string>
+    <string name="apex_value">%1$s см на %2$s м</string>
+    <string name="point_blank">Прямий постріл, ціль %1$s см</string>
+    <string name="density_altitude">Висота за густиною</string>
+    <string name="enter_density_altitude">Вводжу висоту за густиною замість тиску</string>
+    <string name="target_section">Ціль</string>
+    <string name="target_height">Висота цілі (для прямого пострілу)</string>
 </resources>

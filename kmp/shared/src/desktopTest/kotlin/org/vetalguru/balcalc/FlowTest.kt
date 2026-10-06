@@ -263,6 +263,32 @@ class FlowTest {
     }
 
     @Test
+    fun warningsAndDensityAltitude() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        assertTrue(!exists("warnings")) // the sample at its zero air: nothing to warn about
+
+        // Much warmer than the zero: a warning on the solution screen.
+        onNodeWithTag("navConditions").performClick()
+        waitUntil { exists("temperature") }
+        type("temperature", "35")
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("warning_zeroTemperature") }
+        shot("warnings")
+        val warm = elevation()
+
+        // Density altitude instead of pressure: thinner air, less elevation.
+        onNodeWithTag("navConditions").performClick()
+        waitUntil { exists("useDensityAltitude") }
+        onNodeWithTag("useDensityAltitude").performClick()
+        waitUntil { exists("densityAltitude") }
+        type("densityAltitude", "3000")
+        shot("conditions-density-altitude")
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && elevation() < warm }
+        db.delete()
+    }
+
+    @Test
     fun libraryBulletAndSettings() = runDesktopComposeUiTest(400, 820) {
         val db = startWithSample()
         val before = elevation()

@@ -1,5 +1,6 @@
 #include <ballistics/applogic/session.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <sstream>
@@ -7,6 +8,7 @@
 
 #include <sqlite_manager/transaction.h>
 
+#include <ballistics/analysis.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/units.h>
 
@@ -64,6 +66,10 @@ storage::ConditionsRecord ToConditions(const SessionConditions& s) {
     storage::ConditionsRecord c;
     c.atmosphere = {s.altitude_m, s.pressure_hpa * 100.0, units::CToK(s.temperature_c),
                     s.humidity_pct / 100.0};
+    if (s.density_altitude_m) {
+        c.atmosphere.pressure_pa = StationPressureFromDensityAltitude(
+            *s.density_altitude_m, c.atmosphere.temperature_k, c.atmosphere.humidity);
+    }
     if (s.powder_c) {
         c.powder_temp_k = units::CToK(*s.powder_c);
     }
@@ -98,7 +104,9 @@ Result<SessionConditions> LoadSession(storage::Database& db) {
                             {"look_angle_deg", &s.look_angle_deg},
                             {"cant_deg", &s.cant_deg},
                             {"target_range_m", &s.target_range_m},
-                            {"magnification", &s.magnification}};
+                            {"magnification", &s.magnification},
+                            {"target_height_cm", &s.target_height_cm},
+                            {"weather_at", &s.weather_at_unix}};
     for (const Field& f : fields) {
         auto v = get(f.key);
         if (!v) {
@@ -115,7 +123,8 @@ Result<SessionConditions> LoadSession(storage::Database& db) {
     };
     const OptField opts[] = {{"powder_c", &s.powder_c},
                              {"latitude_deg", &s.latitude_deg},
-                             {"azimuth_deg", &s.azimuth_deg}};
+                             {"azimuth_deg", &s.azimuth_deg},
+                             {"density_altitude_m", &s.density_altitude_m}};
     for (const OptField& f : opts) {
         auto v = get(f.key);
         if (!v) {
@@ -157,6 +166,9 @@ Status SaveSession(storage::Database& db, const SessionConditions& s) {
           {"powder_c", opt(s.powder_c)},
           {"latitude_deg", opt(s.latitude_deg)},
           {"azimuth_deg", opt(s.azimuth_deg)},
+          {"density_altitude_m", opt(s.density_altitude_m)},
+          {"target_height_cm", Num(s.target_height_cm)},
+          {"weather_at", Num(s.weather_at_unix)},
           {"winds", WindsToText(s.winds)}}) {
         if (Status st = set(key, value); !st) {
             return st;
@@ -170,14 +182,18 @@ double FromRad(double rad, AngleUnit unit) {
 }
 
 SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionConditions& s,
-                          AngleUnit unit) {
+                          AngleUnit unit, double now_unix) {
     SolutionSummary out;
     out.range_m = s.target_range_m;
     if (!(s.target_range_m > 0.0)) {
         out.error = "Enter a target range.";
         return out;
     }
-    auto sol = storage::Solve(profile, ToConditions(s), s.target_range_m + 1.0);
+    // Far enough for the point-blank range of a big target, too.
+    constexpr double kPointBlankReachM = 1000.0;
+    const storage::ConditionsRecord conditions = ToConditions(s);
+    auto sol = storage::Solve(profile, conditions,
+                              std::max(s.target_range_m, kPointBlankReachM) + 1.0);
     if (!sol) {
         out.error = sol.error().message;
         return out;
@@ -212,6 +228,43 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
         if (q && q->mach < 1.2) {
             out.transonic_range_m = r;
             break;
+        }
+    }
+
+    const Apex apex = MaxOrdinate(traj, s.target_range_m);
+    out.apex_cm = apex.height_m * 100.0;
+    out.apex_range_m = apex.slant_range_m;
+    if (const auto pbr = PointBlankRange(traj, s.target_height_cm / 200.0, kPointBlankReachM)) {
+        out.point_blank_near_m = pbr->near_m;
+        out.point_blank_far_m = pbr->far_m;
+    }
+    const Atmosphere& air = conditions.atmosphere;
+    out.density_altitude_m = DensityAltitude(air);
+    out.pressure_hpa = air.pressure_pa / 100.0;
+
+    if (out.stability > 0.0 && out.stability < 1.0) {
+        out.warnings.push_back({kWarnUnstable, out.stability});
+    } else if (out.stability > 0.0 && out.stability < kMarginalStability) {
+        out.warnings.push_back({kWarnLowStability, out.stability});
+    }
+    if (pt->mach < 1.0) {
+        out.warnings.push_back({kWarnSubsonic, pt->mach});
+    } else if (pt->mach < 1.2) {
+        out.warnings.push_back({kWarnTransonic, pt->mach});
+    }
+    const Atmosphere& zero = profile.rifle.zero_atmosphere;
+    const double dt = air.temperature_k - zero.temperature_k;
+    if (std::abs(dt) > kZeroTemperatureLimitC) {
+        out.warnings.push_back({kWarnZeroTemperature, dt});
+    }
+    const double dp = (air.pressure_pa - zero.pressure_pa) / 100.0;
+    if (std::abs(dp) > kZeroPressureLimitHpa) {
+        out.warnings.push_back({kWarnZeroPressure, dp});
+    }
+    if (now_unix > 0.0 && s.weather_at_unix > 0.0) {
+        const double hours = (now_unix - s.weather_at_unix) / 3600.0;
+        if (hours > kStaleWeatherHours) {
+            out.warnings.push_back({kWarnStaleWeather, hours});
         }
     }
     return out;

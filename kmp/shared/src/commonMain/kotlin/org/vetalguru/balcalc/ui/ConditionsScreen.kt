@@ -18,6 +18,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.testTag
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
@@ -66,7 +68,14 @@ fun ConditionsScreen(model: AppModel) {
                         )
                     },
                     { m ->
-                        NumberField(
+                        if (c.useDensityAltitude) {
+                            NumberField(
+                                stringResource(Res.string.density_altitude), c.densityAltitudeM,
+                                { v -> model.updateConditions { it.copy(densityAltitudeM = v) } },
+                                m, stringResource(Res.string.unit_m), decimals = 0, from = -2000.0, to = 8000.0,
+                                tag = "densityAltitude",
+                            )
+                        } else NumberField(
                             stringResource(if (qnhMode) Res.string.pressure_qnh else Res.string.pressure_station),
                             if (qnhMode) qnh else c.pressureHpa,
                             { v ->
@@ -88,10 +97,29 @@ fun ConditionsScreen(model: AppModel) {
                         )
                     },
                 )
-                SwitchRow(stringResource(Res.string.enter_qnh), qnhMode, { qnhMode = it })
-                if (qnhMode) {
+                SwitchRow(
+                    stringResource(Res.string.enter_density_altitude), c.useDensityAltitude,
+                    { on ->
+                        // Start from the density altitude of the air as it is now.
+                        val da = model.solution.densityAltitudeM
+                        model.updateConditions {
+                            if (on && model.solution.ok) it.copy(useDensityAltitude = true, densityAltitudeM = da.roundToInt().toDouble())
+                            else it.copy(useDensityAltitude = on)
+                        }
+                    },
+                    modifier = Modifier.testTag("useDensityAltitude"),
+                )
+                if (!c.useDensityAltitude) SwitchRow(stringResource(Res.string.enter_qnh), qnhMode, { qnhMode = it })
+                val sol = model.solution
+                if (sol.ok && (qnhMode || c.useDensityAltitude)) {
                     Text(
-                        stringResource(Res.string.station_pressure_is, c.pressureHpa.fixed(1)),
+                        stringResource(Res.string.station_pressure_is, sol.pressureHpa.fixed(1)),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (sol.ok && !c.useDensityAltitude) {
+                    Text(
+                        stringResource(Res.string.density_altitude) + ": " + sol.densityAltitudeM.roundToInt() + " " + stringResource(Res.string.unit_m),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -148,6 +176,15 @@ fun ConditionsScreen(model: AppModel) {
                             m, deg, from = -45.0, to = 45.0,
                         )
                     },
+                )
+            }
+
+            Section(stringResource(Res.string.target_section)) {
+                NumberField(
+                    stringResource(Res.string.target_height), c.targetHeightCm,
+                    { v -> model.updateConditions { it.copy(targetHeightCm = v) } },
+                    unit = stringResource(Res.string.unit_cm), decimals = 0, from = 1.0, to = 300.0,
+                    tag = "targetHeight",
                 )
             }
 
