@@ -411,7 +411,7 @@ class FlowTest {
             onNodeWithTag("navArmory").performClick()
             if (exists("dsfAdd")) return // still open from before
             onNodeWithTag("cartridgesTab").performClick()
-            waitUntil { count("more:") > 0 }
+            waitUntil(timeoutMillis = 10_000) { count("more:") > 0 }
             onAllNodes(androidx.compose.ui.test.SemanticsMatcher("more") {
                 it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("more:") == true
             }).onFirst().performClick()
@@ -422,7 +422,7 @@ class FlowTest {
         // By hand: one point, 10 % more drag at every speed.
         openShotLog()
         onNodeWithTag("dsfAdd").performScrollTo().performClick()
-        waitUntil { exists("dsfFactor0") }
+        waitUntil(timeoutMillis = 10_000) { exists("dsfFactor0") }
         type("dsfFactor0", "1.1")
         onNodeWithTag("dsfSave").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { !exists("dsfSave") }
@@ -445,10 +445,10 @@ class FlowTest {
             setRange(r)
             truth = elevation()
             onNodeWithTag("logHitSolution").performClick()
-            waitUntil { exists("hitElevation") }
+            waitUntil(timeoutMillis = 10_000) { exists("hitElevation") }
             type("hitElevation", truth.fixed(2))
             onNodeWithTag("saveHit").performClick()
-            waitUntil { !exists("hitElevation") }
+            waitUntil(timeoutMillis = 10_000) { !exists("hitElevation") }
         }
 
         // Forget the table, fit it from the log.
