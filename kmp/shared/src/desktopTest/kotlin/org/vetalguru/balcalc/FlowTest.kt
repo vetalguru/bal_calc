@@ -289,6 +289,41 @@ class FlowTest {
     }
 
     @Test
+    fun windZonesAndGust() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(800)
+        val calm = shown("windage")
+        assertTrue(!exists("windageGust"))
+
+        // Gusts of 6 m/s: the windage tile shows the second correction.
+        onNodeWithTag("navConditions").performClick()
+        waitUntil { exists("windGust") }
+        onNodeWithTag("windGust").performScrollTo()
+        type("windGust", "6")
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("windageGust") }
+        shot("wind-gust")
+
+        // Calm near the shooter, 8 m/s further out, then a third zone.
+        onNodeWithTag("navConditions").performClick()
+        waitUntil { exists("windZonesOn") }
+        onNodeWithTag("windZonesOn").performScrollTo().performClick()
+        waitUntil { exists("zoneSpeed1") }
+        onNodeWithTag("zoneSpeed1").performScrollTo()
+        type("zoneSpeed1", "8")
+        onNodeWithTag("addZone").performScrollTo().performClick()
+        waitUntil { exists("zoneSpeed2") }
+        onNodeWithTag("zoneSpeed2").performScrollTo()
+        shot("wind-zones")
+        assertTrue(!exists("addZone")) // three zones in all
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("windage") && shown("windage") != calm }
+        onNodeWithTag("quickWind").performScrollTo()
+        assertTrue(hasText("Zone 1 of 3", substring = true))
+        db.delete()
+    }
+
+    @Test
     fun libraryBulletAndSettings() = runDesktopComposeUiTest(400, 820) {
         val db = startWithSample()
         val before = elevation()
@@ -361,9 +396,9 @@ class FlowTest {
         db.delete()
     }
 
-    private fun ComposeUiTest.hasText(text: String): Boolean {
+    private fun ComposeUiTest.hasText(text: String, substring: Boolean = false): Boolean {
         announce()
-        return onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+        return onAllNodesWithText(text, substring = substring).fetchSemanticsNodes().isNotEmpty()
     }
 
     private fun ComposeUiTest.chooseLanguage(name: String) {

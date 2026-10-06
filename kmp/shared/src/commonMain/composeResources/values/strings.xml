@@ -309,4 +309,13 @@
     <string name="enter_density_altitude">I enter density altitude instead of pressure</string>
     <string name="target_section">Target</string>
     <string name="target_height">Target height (for the point-blank range)</string>
+    <string name="wind_gust">Gusts: second speed (0 = none)</string>
+    <string name="gust_windage">At %1$s m/s: %2$s</string>
+    <string name="wind_zones_on">The wind differs along the range (zones)</string>
+    <string name="zone_title">Zone %1$s</string>
+    <string name="zone_until">Up to</string>
+    <string name="zone_to_end">to the end of the range</string>
+    <string name="add_zone">Add a zone</string>
+    <string name="remove_zone">Remove</string>
+    <string name="quick_zone_note">Zone 1 of %1$s, up to %2$s m: the others are on the Air page.</string>
 </resources>

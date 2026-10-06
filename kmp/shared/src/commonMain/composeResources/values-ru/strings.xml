@@ -279,4 +279,13 @@
     <string name="enter_density_altitude">Ввожу плотностную высоту вместо давления</string>
     <string name="target_section">Цель</string>
     <string name="target_height">Высота цели (для прямого выстрела)</string>
+    <string name="wind_gust">Порывы: вторая скорость (0 = нет)</string>
+    <string name="gust_windage">При %1$s м/с: %2$s</string>
+    <string name="wind_zones_on">Ветер разный вдоль дистанции (зоны)</string>
+    <string name="zone_title">Зона %1$s</string>
+    <string name="zone_until">До</string>
+    <string name="zone_to_end">до конца дистанции</string>
+    <string name="add_zone">Добавить зону</string>
+    <string name="remove_zone">Убрать</string>
+    <string name="quick_zone_note">Зона 1 из %1$s, до %2$s м: остальные — на странице «Условия».</string>
 </resources>

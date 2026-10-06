@@ -130,7 +130,7 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
                 }
 
                 if (sol.ok) {
-                    Corrections(sol, unit, wide)
+                    Corrections(sol, unit, st.conditions.windGustMps, wide)
                     Warnings(sol.warnings)
                     Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(
@@ -154,6 +154,11 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
                     fromDeg = st.conditions.windFromDeg,
                     onSpeed = { v -> model.updateConditions { it.copy(windSpeed = v) } },
                     onDirection = { d -> model.updateConditions { it.copy(windFromDeg = d) } },
+                    zoneNote = if (st.conditions.windZones.isEmpty()) "" else stringResource(
+                        Res.string.quick_zone_note,
+                        st.conditions.windZones.size + 1,
+                        st.conditions.windUntilM.roundToInt(),
+                    ),
                 )
 
                 if (sol.ok) Details(sol, st.conditions.targetHeightCm, wide)
@@ -258,7 +263,7 @@ private fun EmptyActions(wide: Boolean, addLabel: String, onAdd: () -> Unit, onS
 }
 
 @Composable
-private fun Corrections(sol: Solution, unit: String, wide: Boolean) {
+private fun Corrections(sol: Solution, unit: String, gustMps: Double, wide: Boolean) {
     val elevation: @Composable (Modifier) -> Unit = { m ->
         CorrectionTile(
             title = stringResource(Res.string.elevation),
@@ -283,6 +288,17 @@ private fun Corrections(sol: Solution, unit: String, wide: Boolean) {
             clicks = if (sol.hasScope) stringResource(Res.string.clicks, abs(sol.windageClicks).roundToInt()) else "",
             tag = "windage",
             modifier = m,
+            extra = if (sol.hasGust) {
+                val side = when {
+                    abs(sol.gustWindage) < 0.005 -> ""
+                    sol.gustWindage > 0 -> " " + stringResource(Res.string.right)
+                    else -> " " + stringResource(Res.string.left)
+                }
+                val clicks = if (sol.hasScope) ", " + stringResource(Res.string.clicks, abs(sol.gustWindageClicks).roundToInt()) else ""
+                stringResource(Res.string.gust_windage, gustMps.fixed(1), "${abs(sol.gustWindage).fixed(2)} $unit$side$clicks")
+            } else {
+                ""
+            },
         )
     }
     if (wide) {
@@ -307,6 +323,7 @@ private fun CorrectionTile(
     clicks: String,
     tag: String,
     modifier: Modifier,
+    extra: String = "",
 ) {
     Card(modifier, elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)) {
         Column(Modifier.padding(16.dp)) {
@@ -320,6 +337,9 @@ private fun CorrectionTile(
                 Text(unit, fontSize = 18.sp, modifier = Modifier.padding(bottom = 12.dp))
             }
             if (clicks.isNotEmpty()) Text(clicks, fontSize = 18.sp)
+            if (extra.isNotEmpty()) {
+                Text(extra, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.testTag("${tag}Gust"))
+            }
         }
     }
 }
@@ -400,7 +420,13 @@ private fun ReticleCard(model: AppModel, sol: Solution, wide: Boolean) {
 }
 
 @Composable
-private fun QuickWind(speed: Double, fromDeg: Double, onSpeed: (Double) -> Unit, onDirection: (Double) -> Unit) {
+private fun QuickWind(
+    speed: Double,
+    fromDeg: Double,
+    onSpeed: (Double) -> Unit,
+    onDirection: (Double) -> Unit,
+    zoneNote: String = "",
+) {
     Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("quickWind")) {
         // The dial on the left, everything else in the rest of the width. The
         // dial is a third of the card (84..112 dp), so a 320 dp phone, a
@@ -437,6 +463,9 @@ private fun QuickWind(speed: Double, fromDeg: Double, onSpeed: (Double) -> Unit,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    if (zoneNote.isNotEmpty()) {
+                        Text(zoneNote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                    }
                 }
             }
         }

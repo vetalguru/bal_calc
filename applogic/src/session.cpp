@@ -106,6 +106,7 @@ Result<SessionConditions> LoadSession(storage::Database& db) {
                             {"target_range_m", &s.target_range_m},
                             {"magnification", &s.magnification},
                             {"target_height_cm", &s.target_height_cm},
+                            {"wind_gust_mps", &s.wind_gust_mps},
                             {"weather_at", &s.weather_at_unix}};
     for (const Field& f : fields) {
         auto v = get(f.key);
@@ -168,6 +169,7 @@ Status SaveSession(storage::Database& db, const SessionConditions& s) {
           {"azimuth_deg", opt(s.azimuth_deg)},
           {"density_altitude_m", opt(s.density_altitude_m)},
           {"target_height_cm", Num(s.target_height_cm)},
+          {"wind_gust_mps", Num(s.wind_gust_mps)},
           {"weather_at", Num(s.weather_at_unix)},
           {"winds", WindsToText(s.winds)}}) {
         if (Status st = set(key, value); !st) {
@@ -228,6 +230,28 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
         if (q && q->mach < 1.2) {
             out.transonic_range_m = r;
             break;
+        }
+    }
+
+    if (s.wind_gust_mps > 0.0) {
+        // The same shot with the second speed in the nearest zone (a still
+        // shooter's zone becomes a zone to the end of the range).
+        SessionConditions gust = s;
+        if (gust.winds.empty()) {
+            gust.winds.push_back({0.0, 90.0, 0.0});
+        }
+        gust.winds.front().speed_mps = s.wind_gust_mps;
+        gust.wind_gust_mps = 0.0;
+        if (auto g = storage::Solve(profile, ToConditions(gust), s.target_range_m + 1.0)) {
+            if (const auto gp = g.value().trajectory.AtSlantRange(s.target_range_m)) {
+                out.has_gust = true;
+                out.gust_windage = FromRad(gp->hold_windage_rad, unit);
+                out.gust_windage_cm = gp->windage_m * 100.0;
+                if (profile.scope) {
+                    out.gust_windage_clicks =
+                        storage::ToClicks(gp->hold_windage_rad, profile.scope->click_horizontal_rad);
+                }
+            }
         }
     }
 

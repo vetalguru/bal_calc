@@ -48,7 +48,14 @@ data class Conditions(
     val useDensityAltitude: Boolean = false,
     val densityAltitudeM: Double = 0.0,
     val targetHeightCm: Double = 20.0,
+    val windUntilM: Double = 0.0,
+    val windZones: List<WindZoneIn> = emptyList(),
+    val windGustMps: Double = 0.0,
 )
+
+/** A wind zone after the first: up to `untilM` (the last one: to the end). */
+@Serializable
+data class WindZoneIn(val speedMps: Double = 0.0, val fromDeg: Double = 90.0, val untilM: Double = 0.0)
 
 @Serializable
 data class AppState(
@@ -100,6 +107,10 @@ data class Solution(
     val densityAltitudeM: Double = 0.0,
     val pressureHpa: Double = 0.0,
     val warnings: List<Warning> = emptyList(),
+    val hasGust: Boolean = false,
+    val gustWindage: Double = 0.0,
+    val gustWindageClicks: Double = 0.0,
+    val gustWindageCm: Double = 0.0,
     // Reticle hold (present with a scope).
     val hasReticle: Boolean = false,
     val holdMode: String = "",
