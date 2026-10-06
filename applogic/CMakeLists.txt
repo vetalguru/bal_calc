@@ -23,7 +23,7 @@ add_library(ballistics_tinyxml2 STATIC ${tinyxml2_SOURCE_DIR}/tinyxml2.cpp)
 target_include_directories(ballistics_tinyxml2 SYSTEM PUBLIC ${tinyxml2_SOURCE_DIR})
 
 # Toolkit-free logic behind the app screens (forms, session, summaries),
-# so it builds and is unit-tested everywhere; the Qt app adapts it to QML.
+# so it builds and is unit-tested everywhere; bridge/ serves it to the app.
 add_library(ballistics_applogic STATIC
     src/importers.cpp
     src/library.cpp

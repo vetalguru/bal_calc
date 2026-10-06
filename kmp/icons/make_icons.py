@@ -3,12 +3,12 @@
     pip install pillow
     python make_icons.py
 
-Outputs (next to this script and in ../android/res):
+Outputs (next to this script and in ../androidApp/src/main/res):
   balcalc.png (512), balcalc.ico (16-256)          - Linux / Windows
-  android/res/mipmap-*/ic_launcher(_round).png      - legacy launcher icons
-  android/res/mipmap-*/ic_launcher_foreground.png   - adaptive icon layer
-  android/res/mipmap-anydpi-v26/ic_launcher*.xml    - adaptive icon
-  android/res/values/ic_launcher_background.xml     - adaptive background
+  androidApp/src/main/res/mipmap-*/ic_launcher(_round).png      - legacy launcher icons
+  androidApp/src/main/res/mipmap-*/ic_launcher_foreground.png   - adaptive icon layer
+  androidApp/src/main/res/mipmap-anydpi-v26/ic_launcher*.xml    - adaptive icon
+  androidApp/src/main/res/values/ic_launcher_background.xml     - adaptive background
 """
 
 import math
@@ -17,7 +17,7 @@ import pathlib
 from PIL import Image, ImageDraw
 
 HERE = pathlib.Path(__file__).resolve().parent
-RES = HERE.parent / "android" / "res"
+RES = HERE.parent / "androidApp" / "src" / "main" / "res"
 
 BACKGROUND = (38, 50, 56)      # Material blue grey 900
 TRAJECTORY = (255, 152, 0)     # Material orange 500
