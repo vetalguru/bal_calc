@@ -27,3 +27,9 @@ Thumbs.db
 
 # aqtinstall (Qt installer) log
 aqtinstall.log
+
+# Gradle / Kotlin (kmp/)
+.gradle/
+.kotlin/
+local.properties
+.cxx/

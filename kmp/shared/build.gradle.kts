@@ -1,0 +1,55 @@
+plugins {
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kmp.library)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.compose.multiplatform)
+}
+
+kotlin {
+    jvmToolchain(17)
+
+    android {
+        namespace = "org.vetalguru.balcalc.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+    jvm("desktop")
+
+    sourceSets {
+        commonMain.dependencies {
+            api(libs.compose.runtime)
+            api(libs.compose.foundation)
+            api(libs.compose.ui)
+            api(libs.compose.material3)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
+        }
+        getByName("desktopMain") {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.swing)
+            }
+        }
+        getByName("desktopTest") {
+            dependencies {
+                implementation(libs.compose.ui.test)
+                implementation(compose.desktop.currentOs)
+            }
+        }
+    }
+}
+
+// UI tests drive the real core: libbalcalc_jni and the starter library from
+// the desktop app's staged resources.
+tasks.named<Test>("desktopTest") {
+    val resources = project(":desktopApp").layout.buildDirectory.dir("mergedResources")
+    dependsOn(":desktopApp:mergedResources")
+    environment("BALCALC_RESOURCES", resources.get().asFile.path)
+    systemProperty("balcalc.screenshots", layout.buildDirectory.dir("screenshots").get().asFile.path)
+}
