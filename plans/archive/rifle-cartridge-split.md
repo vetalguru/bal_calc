@@ -1,6 +1,6 @@
 # Отдельные профили оружия и патронов
 
-Статус: выполнено, ждёт мерджа (допущения A1–A8 подтверждены 2026-10-05).
+Статус: **выполнено, смерджено 2026-10-06** (PR #22; допущения A1–A8 подтверждены 2026-10-05).
 Ветка: `rifle-cartridge-split` (от master после мерджа #21), один PR.
 
 ## Проблема
@@ -79,7 +79,7 @@
 | 2 applogic | ✅ armory, profile_io (rifle/cartridge + legacy) |
 | 3 Backend/CLI | ✅ |
 | 4 QML | ✅ ArmoryPage, RifleEditor, CartridgeEditor, uk/ru |
-| 5 Выпуск | 🔄 PR, CI |
+| 5 Выпуск | ✅ PR #22, CI зелёный (Ubuntu, Windows, Android); release-APK на телефоне пользователя |
 
 ## Отклонения от плана
 
