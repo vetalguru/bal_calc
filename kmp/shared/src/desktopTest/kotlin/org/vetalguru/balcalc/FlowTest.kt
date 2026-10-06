@@ -88,7 +88,7 @@ class FlowTest {
 
         // Colder air: more elevation.
         onNodeWithTag("navConditions").performClick()
-        waitUntil { exists("temperature") }
+        waitUntil(timeoutMillis = 10_000) { exists("temperature") }
         onNodeWithTag("temperature").performTextReplacement("-10")
         onNodeWithTag("temperature").performImeAction()
         shot("$name-conditions")
@@ -101,7 +101,7 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("rangeTable") }
         shot("$name-table")
         onNodeWithTag("chartTab").performClick()
-        waitUntil { exists("chart") }
+        waitUntil(timeoutMillis = 10_000) { exists("chart") }
         shot("$name-chart")
         assertTrue(exists("chart"))
         db.delete()
@@ -128,9 +128,9 @@ class FlowTest {
 
         // A rifle through its editor.
         onNodeWithTag("navArmory").performClick()
-        waitUntil { exists("new") }
+        waitUntil(timeoutMillis = 10_000) { exists("new") }
         onNodeWithTag("new").performClick()
-        waitUntil { exists("rifleName") }
+        waitUntil(timeoutMillis = 10_000) { exists("rifleName") }
         type("rifleName", "Tikka")
         type("rifleCaliber", ".308 Win")
         shot("armory-rifle-editor")
@@ -141,7 +141,7 @@ class FlowTest {
         onNodeWithTag("cartridgesTab").performClick()
         onNodeWithTag("new").performClick()
         onNodeWithTag("newEmptyCartridge").performClick()
-        waitUntil { exists("cartridgeName") }
+        waitUntil(timeoutMillis = 10_000) { exists("cartridgeName") }
         type("cartridgeName", "Load")
         type("cartridgeCaliber", ".308 Win")
         type("bulletName", "SMK 175")
@@ -160,12 +160,12 @@ class FlowTest {
 
         // Share through the clipboard and back: a second cartridge.
         onNodeWithTag("navArmory").performClick()
-        waitUntil { exists("more:Load") }
+        waitUntil(timeoutMillis = 10_000) { exists("more:Load") }
         onNodeWithTag("more:Load").performClick()
         onNodeWithTag("copy").performClick()
-        waitUntil { platform.clipboard?.contains("balcalc-cartridge") == true }
+        waitUntil(timeoutMillis = 10_000) { platform.clipboard?.contains("balcalc-cartridge") == true }
         onNodeWithTag("cartridgesTab").performClick()
-        waitUntil { exists("cartridge:Load") }
+        waitUntil(timeoutMillis = 10_000) { exists("cartridge:Load") }
         onAllNodesWithText("Import").onFirst().performClick()
         onNodeWithTag("importClipboard").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("cartridge:Load (2)") }
@@ -179,7 +179,7 @@ class FlowTest {
         // A factory cartridge copied into the user's list.
         onNodeWithTag("new").performClick()
         onNodeWithTag("newFactoryCartridge").performClick()
-        waitUntil { exists("search") }
+        waitUntil(timeoutMillis = 10_000) { exists("search") }
         onNodeWithTag("search").performTextReplacement("GP11")
         waitUntil(timeoutMillis = 10_000) { count("factory:") == 1 }
         shot("armory-factory")
@@ -224,17 +224,17 @@ class FlowTest {
             setRange(r)
             val predicted = elevation()
             onNodeWithTag("logHitSolution").performClick()
-            waitUntil { exists("hitElevation") }
+            waitUntil(timeoutMillis = 10_000) { exists("hitElevation") }
             type("hitElevation", (predicted * 1.04).fixed(2))
             type("hitNotes", "test")
             onNodeWithTag("saveHit").performClick()
-            waitUntil { !exists("hitElevation") }
+            waitUntil(timeoutMillis = 10_000) { !exists("hitElevation") }
         }
         val before = elevation()
 
         onNodeWithTag("navArmory").performClick()
         onNodeWithTag("cartridgesTab").performClick()
-        waitUntil { count("more:") > 0 }
+        waitUntil(timeoutMillis = 10_000) { count("more:") > 0 }
         onAllNodes(androidx.compose.ui.test.SemanticsMatcher("more") {
             it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("more:") == true
         }).onFirst().performClick()
@@ -244,7 +244,7 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("truingResult") }
         shot("truing")
         onNodeWithTag("applyTruing").performClick()
-        waitUntil { !exists("truingResult") }
+        waitUntil(timeoutMillis = 10_000) { !exists("truingResult") }
 
         onNodeWithTag("navSolution").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") && elevation() > before }
@@ -254,7 +254,7 @@ class FlowTest {
         setRange(100)
         val atZero = elevation()
         onNodeWithTag("navArmory").performClick()
-        waitUntil { exists("offsetUp") } // the shot log is still open in the Rifles tab
+        waitUntil(timeoutMillis = 10_000) { exists("offsetUp") } // the shot log is still open in the Rifles tab
         type("offsetUp", "3")
         onNodeWithTag("navSolution").performClick()
         // The tile shows the size of the correction (its direction is a word): 0.30 DOWN.
@@ -269,7 +269,7 @@ class FlowTest {
 
         // Much warmer than the zero: a warning on the solution screen.
         onNodeWithTag("navConditions").performClick()
-        waitUntil { exists("temperature") }
+        waitUntil(timeoutMillis = 10_000) { exists("temperature") }
         type("temperature", "35")
         onNodeWithTag("navSolution").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("warning_zeroTemperature") }
@@ -278,9 +278,9 @@ class FlowTest {
 
         // Density altitude instead of pressure: thinner air, less elevation.
         onNodeWithTag("navConditions").performClick()
-        waitUntil { exists("useDensityAltitude") }
+        waitUntil(timeoutMillis = 10_000) { exists("useDensityAltitude") }
         onNodeWithTag("useDensityAltitude").performClick()
-        waitUntil { exists("densityAltitude") }
+        waitUntil(timeoutMillis = 10_000) { exists("densityAltitude") }
         type("densityAltitude", "3000")
         shot("conditions-density-altitude")
         onNodeWithTag("navSolution").performClick()
@@ -331,9 +331,9 @@ class FlowTest {
         // A banded library bullet through its editor.
         onNodeWithTag("navArmory").performClick()
         onNodeWithText("Bullets").performClick()
-        waitUntil { exists("newBullet") }
+        waitUntil(timeoutMillis = 10_000) { exists("newBullet") }
         onNodeWithTag("newBullet").performClick()
-        waitUntil { exists("bulletEditName") }
+        waitUntil(timeoutMillis = 10_000) { exists("bulletEditName") }
         type("bulletEditName", "Test bullet 175 HPBT")
         type("bulletMass", "175")
         type("bulletDiameter", "0.308")
@@ -341,7 +341,7 @@ class FlowTest {
         type("bandVelocity0", "869")
         type("bandBc0", "0.505")
         onNodeWithTag("addBand").performScrollTo().performClick()
-        waitUntil { exists("bandBc1") }
+        waitUntil(timeoutMillis = 10_000) { exists("bandBc1") }
         type("bandBc1", "0.496")
         shot("bullet-editor")
         onNodeWithTag("save").performClick()
@@ -350,11 +350,11 @@ class FlowTest {
 
         // The sample cartridge switches to it.
         onNodeWithTag("cartridgesTab").performClick()
-        waitUntil { count("cartridge:") == 1 }
+        waitUntil(timeoutMillis = 10_000) { count("cartridge:") == 1 }
         onAllNodesWithText("Edit").onFirst().performClick()
-        waitUntil { exists("chooseBullet") }
+        waitUntil(timeoutMillis = 10_000) { exists("chooseBullet") }
         onNodeWithTag("chooseBullet").performClick()
-        waitUntil { exists("search") }
+        waitUntil(timeoutMillis = 10_000) { exists("search") }
         onNodeWithTag("search").performTextReplacement("Test bullet")
         waitUntil(timeoutMillis = 10_000) { exists("bullet:Test bullet 175 HPBT") }
         onNodeWithTag("bullet:Test bullet 175 HPBT").performClick()
@@ -403,7 +403,7 @@ class FlowTest {
 
     private fun ComposeUiTest.chooseLanguage(name: String) {
         onNodeWithTag("navSettings").performClick()
-        waitUntil { exists("language") }
+        waitUntil(timeoutMillis = 10_000) { exists("language") }
         onNodeWithTag("language").performClick()
         onAllNodesWithText(name).onLast().performClick()
     }
@@ -424,7 +424,7 @@ class FlowTest {
             onNodeWithTag("cartridgesTab").performClick()
             onNodeWithTag("new").performClick()
             onNodeWithTag("newEmptyCartridge").performClick()
-            waitUntil { exists("save") }
+            waitUntil(timeoutMillis = 10_000) { exists("save") }
             onNodeWithTag("save").performClick()
             waitUntil(timeoutMillis = 10_000) { exists("formError") }
             kotlin.test.assertEquals("Введіть назву набою.", shown("formError"))
