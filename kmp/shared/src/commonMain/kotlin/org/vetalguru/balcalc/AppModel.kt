@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -62,7 +64,24 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     /** The last failure of an action, for a snackbar; the screen clears it. */
     var message by mutableStateOf<String?>(null)
 
-    private var solutionJob: Job? = null
+    // Solution requests, conflated: one fetch at a time, and one more after
+    // the last request. A fetch reads the core as it is, so the solution
+    // shown is never older than the last change, whichever thread asks.
+    private val solutionRequests = Channel<Unit>(Channel.CONFLATED)
+
+    init {
+        scope.launch {
+            for (request in solutionRequests) {
+                try {
+                    solution = api.get("solution")
+                    revision++
+                } catch (e: Exception) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
+                    message = e.message
+                }
+            }
+        }
+    }
 
     fun start(startup: suspend Api.() -> Unit) = act {
         api.startup()
@@ -82,12 +101,15 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     }
 
     private fun recompute() {
-        solutionJob?.cancel()
-        solutionJob = act {
-            solution = api.get("solution")
-            revision++
-        }
+        solutionRequests.trySend(Unit)
     }
+
+    /**
+     * Runs a change in the model's scope: it completes (and refreshes the
+     * solution) even if the screen that asked is gone meanwhile, e.g. a tab
+     * switched right after Save.
+     */
+    private suspend fun <T> detached(block: suspend () -> T): T = scope.async { block() }.await()
 
     fun updateConditions(change: (Conditions) -> Conditions) {
         val c = change(state.conditions)
@@ -152,23 +174,27 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     suspend fun saveCartridge(form: CartridgeForm): String? = saveForm("saveCartridge", formArgs(form))
     suspend fun saveBullet(form: BulletForm): String? = saveForm("saveBullet", formArgs(form))
 
-    private suspend fun saveForm(method: String, args: JsonObject): String? = try {
-        api.call(method, args)
-        state = api.get("state")
-        recompute()
-        null
-    } catch (e: ApiException) {
-        e.message
+    private suspend fun saveForm(method: String, args: JsonObject): String? = detached {
+        try {
+            api.call(method, args)
+            state = api.get("state")
+            recompute()
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
     }
 
     fun deleteRifle(id: Long) = act { state = api.get("deleteRifle", id(id)); recompute() }
     fun deleteCartridge(id: Long) = act { state = api.get("deleteCartridge", id(id)); recompute() }
-    suspend fun deleteBullet(id: Long): String? = try {
-        api.call("deleteBullet", id(id))
-        recompute() // lists reload on the revision
-        null
-    } catch (e: ApiException) {
-        e.message
+    suspend fun deleteBullet(id: Long): String? = detached {
+        try {
+            api.call("deleteBullet", id(id))
+            recompute() // lists reload on the revision
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
     }
 
     /** A rifle or cartridge as a file: (JSON, suggested file name). */
@@ -179,7 +205,7 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
         })
 
     /** A shared rifle/cartridge (or old profile) file; what it brought becomes current. */
-    suspend fun importShared(text: String) {
+    suspend fun importShared(text: String) = detached {
         state = api.get("importShared", buildJsonObject { put("text", text) })
         recompute()
     }
@@ -193,18 +219,20 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     suspend fun shots(): List<Shot> = api.get("shots")
 
     /** Angles in the current unit; returns the core's error or null. */
-    suspend fun logShot(rangeM: Double, elevation: Double, windage: Double?, notes: String): String? = try {
-        api.call("logShot", buildJsonObject {
-            put("rangeM", rangeM)
-            put("elevation", elevation)
-            put("hasWindage", windage != null)
-            put("windage", windage ?: 0.0)
-            put("notes", notes)
-        })
-        shotsRevision++
-        null
-    } catch (e: ApiException) {
-        e.message
+    suspend fun logShot(rangeM: Double, elevation: Double, windage: Double?, notes: String): String? = detached {
+        try {
+            api.call("logShot", buildJsonObject {
+                put("rangeM", rangeM)
+                put("elevation", elevation)
+                put("hasWindage", windage != null)
+                put("windage", windage ?: 0.0)
+                put("notes", notes)
+            })
+            shotsRevision++
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
     }
 
     fun deleteShot(id: Long) = act { api.call("deleteShot", id(id)); shotsRevision++ }
@@ -219,13 +247,15 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
 
     suspend fun computeTruing(): TruingResult = api.get("computeTruing")
 
-    suspend fun applyTruing(): String? = try {
-        api.call("applyTruing")
-        shotsRevision++
-        recompute()
-        null
-    } catch (e: ApiException) {
-        e.message
+    suspend fun applyTruing(): String? = detached {
+        try {
+            api.call("applyTruing")
+            shotsRevision++
+            recompute()
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
     }
 
     fun resetTruing() = act { api.call("resetTruing"); shotsRevision++; recompute() }
@@ -252,22 +282,24 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     fun resetDsf() = act { api.call("resetDsf"); recompute() }
 
     /** Where this cartridge hits at the rifle's zero; returns the core's error or null. */
-    suspend fun setZeroOffset(upCm: Double, rightCm: Double): String? = try {
-        api.call("setZeroOffset", buildJsonObject {
-            put("upCm", upCm)
-            put("rightCm", rightCm)
-        })
-        state = api.get("state")
-        recompute()
-        null
-    } catch (e: ApiException) {
-        e.message
+    suspend fun setZeroOffset(upCm: Double, rightCm: Double): String? = detached {
+        try {
+            api.call("setZeroOffset", buildJsonObject {
+                put("upCm", upCm)
+                put("rightCm", rightCm)
+            })
+            state = api.get("state")
+            recompute()
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
     }
 
     // ---- Files, settings, about -------------------------------------------
 
     /** .ammo / .drg / .reticle / bullet-list / rifle / cartridge files into the library. */
-    suspend fun importFiles(files: List<NamedText>): ImportReport {
+    suspend fun importFiles(files: List<NamedText>): ImportReport = detached {
         val report: ImportReport = api.get("importFiles", buildJsonObject {
             putJsonArray("files") {
                 files.forEach { f ->
@@ -280,7 +312,7 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
         })
         state = api.get("state")
         recompute()
-        return report
+        report
     }
 
     suspend fun info(): Info = api.get("info")
