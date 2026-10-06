@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Density
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.vetalguru.balcalc.core.Api
@@ -219,6 +220,33 @@ class FlowTest {
         // The corrections must be the ones for this range, not the last.
         waitUntil(timeoutMillis = 10_000) { exists("solvedFor:$m") && shown("range") == m.toString() }
         waitForIdle()
+    }
+
+    @Test
+    fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(650)
+        val far = elevation()
+
+        onNodeWithTag("situations").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("saveSituation") }
+        onNodeWithTag("saveSituation").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("situationError") }
+        assertEquals("Enter a name for the situation.", shown("situationError"))
+        onNodeWithTag("situationName").performTextReplacement("Match")
+        onNodeWithTag("saveSituation").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("applySituation:Match") }
+        shot("situations")
+        onAllNodesWithText("Close").onFirst().performClick()
+
+        setRange(200)
+        onNodeWithTag("situations").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("applySituation:Match") }
+        onNodeWithTag("applySituation:Match").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("solvedFor:650") && !exists("saveSituation") }
+        waitForIdle()
+        assertEquals(far, elevation())
+        db.delete()
     }
 
     @Test

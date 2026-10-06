@@ -406,4 +406,15 @@
     <string name="group_zero_hint">Стреляли на дистанции пристрелки (%1$s м): СТП — это куда бьёт этот патрон.</string>
     <string name="group_wez">Кучность для «Попадания»: %1$s MOA (5 выстрелов)</string>
     <string name="group_saved">Сохранено.</string>
+    <string name="core_32">Введите название ситуации.</string>
+    <string name="core_33">Нет ситуации с таким названием.</string>
+    <string name="core_34">Винтовка или патрон этой ситуации удалены.</string>
+    <string name="situations">Ситуации</string>
+    <string name="situations_hint">Ситуация хранит винтовку, патрон, режим поправок и все условия: соревнования, охота или пристрелка — в одно касание.</string>
+    <string name="situations_empty">Сохранённых ситуаций пока нет.</string>
+    <string name="situation_name">Название</string>
+    <string name="situation_save">Сохранить текущую</string>
+    <string name="situation_line">%1$s · %2$s · %3$s м</string>
+    <string name="situation_missing">Винтовка или патрон удалены</string>
+    <string name="close">Закрыть</string>
 </resources>

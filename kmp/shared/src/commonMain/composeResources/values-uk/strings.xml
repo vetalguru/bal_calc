@@ -406,4 +406,15 @@
     <string name="group_zero_hint">Стріляли на дистанції пристрілки (%1$s м): СТП — це куди б'є цей патрон.</string>
     <string name="group_wez">Купчастість для «Влучання»: %1$s MOA (5 пострілів)</string>
     <string name="group_saved">Збережено.</string>
+    <string name="core_32">Введіть назву ситуації.</string>
+    <string name="core_33">Немає ситуації з такою назвою.</string>
+    <string name="core_34">Гвинтівку або патрон цієї ситуації видалено.</string>
+    <string name="situations">Ситуації</string>
+    <string name="situations_hint">Ситуація зберігає гвинтівку, патрон, режим поправок і всі умови: змагання, полювання чи пристрілка — в один дотик.</string>
+    <string name="situations_empty">Збережених ситуацій ще немає.</string>
+    <string name="situation_name">Назва</string>
+    <string name="situation_save">Зберегти поточну</string>
+    <string name="situation_line">%1$s · %2$s · %3$s м</string>
+    <string name="situation_missing">Гвинтівку або патрон видалено</string>
+    <string name="close">Закрити</string>
 </resources>
