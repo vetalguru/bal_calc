@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <utility>
+#include <vector>
 
 namespace ballistics::applogic {
 namespace {
@@ -484,6 +486,134 @@ TEST_F(AppLogic, SessionKeepsTheNewFields) {
     s.density_altitude_m.reset();
     ASSERT_TRUE(SaveSession(db_, s).ok());
     EXPECT_FALSE(LoadSession(db_).value().density_altitude_m.has_value());
+}
+
+TEST_F(AppLogic, ThreeEqualZonesAreOneWind) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    SessionConditions one = AtZero(900.0);
+    one.winds = {{5.0, 60.0, 0.0}};
+    SessionConditions three = one;
+    three.winds = {{5.0, 60.0, 300.0}, {5.0, 60.0, 600.0}, {5.0, 60.0, 0.0}};
+    const SolutionSummary a = Summarize(p, one, AngleUnit::kMrad);
+    const SolutionSummary b = Summarize(p, three, AngleUnit::kMrad);
+    ASSERT_TRUE(a.ok && b.ok);
+    EXPECT_NEAR(a.windage, b.windage, 1e-9);
+    EXPECT_NEAR(a.elevation, b.elevation, 1e-9);
+}
+
+TEST_F(AppLogic, ZonesWeighByWhereTheWindBlows) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    auto windage = [&](std::vector<WindInput> winds) {
+        SessionConditions s = AtZero(900.0);
+        s.winds = std::move(winds);
+        return Summarize(p, s, AngleUnit::kMrad).windage;
+    };
+    const double everywhere = windage({{5.0, 90.0, 0.0}});
+    const double near = windage({{5.0, 90.0, 450.0}, {0.0, 90.0, 0.0}});
+    const double far = windage({{0.0, 90.0, 450.0}, {5.0, 90.0, 0.0}});
+    // Both halves push right; the near wind has longer to act on the bullet.
+    EXPECT_GT(near, 0.0);
+    EXPECT_GT(far, 0.0);
+    EXPECT_GT(near, far);
+    // Nearly linear in the wind; spin drift is in each of them once.
+    const double calm = windage({});
+    EXPECT_NEAR(near + far - calm, everywhere, 0.02 * (everywhere - calm));
+    // Opposite winds in the two halves nearly cancel.
+    EXPECT_LT(std::abs(windage({{5.0, 90.0, 450.0}, {5.0, 270.0, 0.0}}) - calm),
+              0.5 * (everywhere - calm));
+}
+
+TEST_F(AppLogic, WindBracketIsTheSecondSpeed) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    SessionConditions s = AtZero(700.0);
+    s.winds = {{3.0, 90.0, 300.0}, {2.0, 45.0, 0.0}};
+    s.wind_gust_mps = 6.0;
+    const SolutionSummary r = Summarize(p, s, AngleUnit::kMrad);
+    ASSERT_TRUE(r.ok && r.has_gust);
+    SessionConditions strong = s;
+    strong.winds.front().speed_mps = 6.0;
+    strong.wind_gust_mps = 0.0;
+    const SolutionSummary g = Summarize(p, strong, AngleUnit::kMrad);
+    EXPECT_FALSE(g.has_gust);
+    EXPECT_NEAR(r.gust_windage, g.windage, 1e-9);
+    EXPECT_NEAR(r.gust_windage_clicks, g.windage_clicks, 1e-9);
+    EXPECT_NEAR(r.gust_windage_cm, g.windage_cm, 1e-9);
+    EXPECT_GT(r.gust_windage, r.windage);
+
+    // No wind at all: the gust blows from the right.
+    SessionConditions calm = AtZero(700.0);
+    calm.wind_gust_mps = 4.0;
+    EXPECT_GT(Summarize(p, calm, AngleUnit::kMrad).gust_windage, 0.1);
+    EXPECT_TRUE(LoadSession(db_).value().wind_gust_mps == 0.0);
+    ASSERT_TRUE(SaveSession(db_, s).ok());
+    EXPECT_DOUBLE_EQ(LoadSession(db_).value().wind_gust_mps, 6.0);
+}
+
+TEST_F(AppLogic, MovingTargetLead) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    SessionConditions s = AtZero(500.0);
+    s.winds = {{3.0, 90.0, 0.0}};
+    const SolutionSummary still = Summarize(p, s, AngleUnit::kMrad);
+    EXPECT_FALSE(still.has_lead);
+
+    s.target_speed_mps = 4.0; // a walking... running man, to the right
+    s.target_heading_deg = 90.0;
+    const SolutionSummary r = Summarize(p, s, AngleUnit::kMrad);
+    ASSERT_TRUE(r.ok && r.has_lead);
+    EXPECT_NEAR(r.lead, units::RadToMrad(std::atan2(4.0 * r.time_s, 500.0)), 1e-9);
+    EXPECT_NEAR(r.lead_cm, 400.0 * r.time_s, 1e-9);
+    EXPECT_NEAR(r.lead_total_windage, r.windage + r.lead, 1e-9);
+    EXPECT_NEAR(r.lead_range_m, 500.0, 1e-9);
+    EXPECT_NEAR(r.lead_elevation, r.elevation, 1e-9);
+    EXPECT_NEAR(r.lead_clicks, std::round(units::RadToMoa(r.lead * 1e-3) * 4.0), 1e-9); // 1/4 MOA
+
+    s.target_heading_deg = 270.0; // to the left
+    EXPECT_NEAR(Summarize(p, s, AngleUnit::kMrad).lead, -r.lead, 1e-9);
+
+    s.target_heading_deg = 0.0; // straight away: no lead, a longer shot
+    const SolutionSummary away = Summarize(p, s, AngleUnit::kMrad);
+    EXPECT_NEAR(away.lead, 0.0, 1e-9);
+    EXPECT_GT(away.lead_range_m, 502.0);
+    EXPECT_GT(away.lead_elevation, away.elevation);
+
+    // The range card has the same lead at the same range.
+    s.target_heading_deg = 90.0;
+    const RangeTable t = BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 100.0);
+    ASSERT_TRUE(t.ok);
+    EXPECT_DOUBLE_EQ(t.rows.front().lead, 0.0);
+    EXPECT_NEAR(t.rows[5].lead, r.lead, 1e-9);
+    EXPECT_GT(t.rows[10].lead, t.rows[5].lead); // flight time grows faster than range
+
+    ASSERT_TRUE(SaveSession(db_, s).ok());
+    EXPECT_DOUBLE_EQ(LoadSession(db_).value().target_speed_mps, 4.0);
+}
+
+TEST_F(AppLogic, RangeRowsCarryTheParts) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    SessionConditions s = AtZero(800.0);
+    const RangeTable plain = BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 200.0);
+    ASSERT_TRUE(plain.ok);
+    for (const RangeRow& r : plain.rows) {
+        EXPECT_DOUBLE_EQ(r.coriolis_drift_cm, 0.0);
+        EXPECT_DOUBLE_EQ(r.coriolis_lift_cm, 0.0);
+        EXPECT_DOUBLE_EQ(r.lead_cm, 0.0);
+    }
+    EXPECT_NEAR(plain.rows[4].spin_drift_cm, Summarize(p, s, AngleUnit::kMrad).spin_drift_cm, 1e-9);
+
+    // Northern hemisphere, firing east: drift to the right, Eotvos lift.
+    s.latitude_deg = 50.0;
+    s.azimuth_deg = 90.0;
+    s.target_speed_mps = 3.0;
+    const RangeTable t = BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 200.0);
+    ASSERT_TRUE(t.ok);
+    const RangeRow& far = t.rows.back();
+    EXPECT_GT(far.coriolis_drift_cm, 2.0);
+    EXPECT_GT(far.coriolis_lift_cm, 2.0);
+    EXPECT_NEAR(far.windage_cm - plain.rows.back().windage_cm, far.coriolis_drift_cm, 1e-6);
+    EXPECT_NEAR(far.lead_cm, 300.0 * far.time_s, 1e-6);
+    s.azimuth_deg = 270.0; // west: it sinks
+    EXPECT_LT(BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 200.0).rows.back().coriolis_lift_cm,
+              -2.0);
 }
 
 } // namespace

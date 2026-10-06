@@ -98,7 +98,7 @@ fun TableScreen(model: AppModel, onRangeChosen: () -> Unit) {
                 model.setTargetRange(r)
                 onRangeChosen()
             }
-            else -> TrajectoryChart(curve, st.conditions.targetRangeM, Modifier.fillMaxSize().padding(8.dp))
+            else -> ChartPanel(model, curve, max(st.tableToM, st.conditions.targetRangeM), Modifier.fillMaxSize())
         }
     }
 }
@@ -118,6 +118,8 @@ private fun RangeCard(table: RangeTable, moa: Boolean, targetM: Double, onRow: (
         "mach" to stringResource(Res.string.col_mach),
         "energy" to stringResource(Res.string.col_energy),
         "time" to stringResource(Res.string.col_time),
+        "lead" to stringResource(Res.string.col_lead, unit),
+        "leadClicks" to stringResource(Res.string.col_lead_clicks),
     )
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 720.dp
@@ -127,8 +129,12 @@ private fun RangeCard(table: RangeTable, moa: Boolean, targetM: Double, onRow: (
             if (table.hasScope) add(TableCol(titles.getValue("elevClicks"), 0, true) { it.elevationClicks })
             add(TableCol(titles.getValue("wind"), 2, true) { it.windage })
             if (table.hasScope) add(TableCol(titles.getValue("windClicks"), 0, true) { it.windageClicks })
+            // A moving target: its lead (instead of the velocity on a phone).
+            val lead = table.rows.any { it.lead != 0.0 }
+            if (lead) add(TableCol(titles.getValue("lead"), 2, true) { it.lead })
+            if (lead && table.hasScope && wide) add(TableCol(titles.getValue("leadClicks"), 0, true) { it.leadClicks })
             // Phones with a scope: five angle columns are enough.
-            if (maxWidth >= 420.dp || !table.hasScope) add(TableCol(titles.getValue("v"), 0, false) { it.velocity })
+            if ((maxWidth >= 420.dp && (!lead || wide)) || !table.hasScope) add(TableCol(titles.getValue("v"), 0, false) { it.velocity })
             if (wide) {
                 add(TableCol(titles.getValue("drop"), 1, false) { it.dropCm })
                 add(TableCol(titles.getValue("drift"), 1, false) { it.windageCm })
@@ -190,85 +196,3 @@ private fun RangeCard(table: RangeTable, moa: Boolean, targetM: Double, onRow: (
     }
 }
 
-/** Height over the line of sight and drift along the range, with the target marked. */
-@Composable
-private fun TrajectoryChart(curve: RangeTable, targetM: Double, modifier: Modifier) {
-    val rows = if (curve.ok) curve.rows else emptyList()
-    val measurer = rememberTextMeasurer()
-    val fg = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
-    val labelM = stringResource(Res.string.unit_m)
-    val labelCm = stringResource(Res.string.unit_cm)
-    val labelRange = stringResource(Res.string.chart_range)
-    val legendHeight = stringResource(Res.string.chart_height)
-    val legendDrift = stringResource(Res.string.chart_drift)
-    val style = TextStyle(fontSize = 12.sp, color = fg)
-    Canvas(modifier.testTag("chart")) {
-        if (rows.size < 2) return@Canvas
-        val maxR = rows.last().rangeM
-        var minY = 0.0
-        var maxY = 0.0
-        rows.forEach {
-            minY = min(minY, min(it.dropCm, it.windageCm))
-            maxY = max(maxY, max(it.dropCm, it.windageCm))
-        }
-        val meters = maxY - minY > 300
-        val scale = if (meters) 0.01 else 1.0
-        val pad = (maxY - minY) * 0.08 + 1
-        minY -= pad
-        maxY += pad
-
-        val left = 56.dp.toPx()
-        val right = size.width - 12.dp.toPx()
-        val top = 12.dp.toPx()
-        val bottom = size.height - 36.dp.toPx()
-        fun x(r: Double) = (left + (right - left) * r / maxR).toFloat()
-        fun y(v: Double) = (top + (bottom - top) * (maxY - v) / (maxY - minY)).toFloat()
-        fun label(text: String, at: Offset, color: Color = fg) =
-            drawText(measurer, text, at, style.copy(color = color))
-
-        val grid = fg.copy(alpha = 0.15f)
-        val stepR = if (maxR > 1500) 250.0 else if (maxR > 600) 100.0 else 50.0
-        var r = 0.0
-        var lastLabelEnd = -1f
-        while (r <= maxR + 1e-6) {
-            drawLine(grid, Offset(x(r), top), Offset(x(r), bottom))
-            // Centred under its line; skipped where it would overlap or overflow.
-            val text = measurer.measure(r.roundToInt().toString(), style)
-            val at = x(r) - text.size.width / 2f
-            if (at > lastLabelEnd + 4f && at + text.size.width <= size.width) {
-                drawText(text, topLeft = Offset(at, bottom + 4f))
-                lastLabelEnd = at + text.size.width
-            }
-            r += stepR
-        }
-        val spanY = (maxY - minY) * scale
-        var stepY = 10.0.pow(floor(log10(spanY / 5)))
-        if (spanY / stepY > 10) stepY *= 2
-        var yv = ceil(minY * scale / stepY) * stepY
-        while (yv <= maxY * scale) {
-            drawLine(grid, Offset(left, y(yv / scale)), Offset(right, y(yv / scale)))
-            label(yv.fixed(if (stepY < 1) 1 else 0), Offset(4f, y(yv / scale) - 8f))
-            yv += stepY
-        }
-        label(if (meters) labelM else labelCm, Offset(4f, 0f))
-        label(labelRange, Offset(right - 70f, bottom + 18f))
-
-        // Line of sight and target.
-        drawLine(fg.copy(alpha = 0.6f), Offset(x(0.0), y(0.0)), Offset(x(maxR), y(0.0)),
-            pathEffect = PathEffect.dashPathEffect(floatArrayOf(18f, 12f)))
-        if (targetM <= maxR) drawLine(accent, Offset(x(targetM), top), Offset(x(targetM), bottom))
-
-        fun curveOf(value: (TableRow) -> Double, color: Color) {
-            val p = Path()
-            rows.forEachIndexed { i, row ->
-                if (i == 0) p.moveTo(x(row.rangeM), y(value(row))) else p.lineTo(x(row.rangeM), y(value(row)))
-            }
-            drawPath(p, color, style = Stroke(width = 2.5.dp.toPx()))
-        }
-        curveOf({ it.windageCm }, DriftColor)
-        curveOf({ it.dropCm }, Transonic)
-        label("● $legendHeight", Offset(left + 8f, top + 4f), Transonic)
-        label("● $legendDrift", Offset(left + 8f, top + 22f), DriftColor)
-    }
-}

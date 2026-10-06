@@ -39,7 +39,15 @@ struct SessionConditions {
     // temperature and the humidity.
     std::optional<double> density_altitude_m;
     double target_height_cm = 20.0; // for the point-blank range
+    // Wind bracket: a second speed of the first (nearest) wind zone, e.g.
+    // the gusts; 0 = off. The solution then gives the windage for both.
+    double wind_gust_mps = 0.0;
     double weather_at_unix = 0.0;   // when the air was last entered, 0 = unknown
+    // A moving target: its speed and where it heads, like the wind but the
+    // way it goes: 0 = away, 90 = to the right across the line of fire,
+    // 180 = toward the shooter, 270 = to the left. Speed 0 = standing.
+    double target_speed_mps = 0.0;
+    double target_heading_deg = 90.0;
 };
 
 storage::ConditionsRecord ToConditions(const SessionConditions& s);
@@ -104,6 +112,23 @@ struct SolutionSummary {
     double point_blank_far_m = 0.0;
     double density_altitude_m = 0.0;
     double pressure_hpa = 0.0; // station pressure used (follows a typed density altitude)
+    // Windage with the second wind speed (has_gust when it is set).
+    bool has_gust = false;
+    double gust_windage = 0.0;
+    double gust_windage_clicks = 0.0;
+    double gust_windage_cm = 0.0;
+    // A moving target (has_lead): the extra aim in the direction it moves,
+    // the windage with it, and where the bullet meets the target (its
+    // elevation, when the target comes closer or goes away meanwhile).
+    bool has_lead = false;
+    double lead = 0.0; // right positive, like windage
+    double lead_clicks = 0.0;
+    double lead_cm = 0.0; // how far the target moves during the flight
+    double lead_total_windage = 0.0;
+    double lead_total_windage_clicks = 0.0;
+    double lead_range_m = 0.0;
+    double lead_elevation = 0.0;
+    double lead_elevation_clicks = 0.0;
     std::vector<Warning> warnings;
 };
 
@@ -126,6 +151,14 @@ struct RangeRow {
     double mach = 0.0;
     double energy_j = 0.0;
     double time_s = 0.0;
+    double lead = 0.0; // for a moving target (see SessionConditions), 0 otherwise
+    double lead_clicks = 0.0;
+    double lead_cm = 0.0;           // how far the target moves meanwhile
+    double spin_drift_cm = 0.0;     // the spin-drift part of windage_cm
+    // Earth rotation (with a latitude): its part of the drift (Coriolis)
+    // and of the height (Eotvos, with an azimuth), against the same zero.
+    double coriolis_drift_cm = 0.0;
+    double coriolis_lift_cm = 0.0;
 };
 
 struct RangeTable {

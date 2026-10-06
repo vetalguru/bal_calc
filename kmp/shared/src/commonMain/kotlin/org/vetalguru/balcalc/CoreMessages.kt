@@ -35,6 +35,10 @@ private val coreMessages: Map<String, StringResource> = mapOf(
     "Nothing to apply." to Res.string.core_21,
     "Each BC band needs a velocity and a BC between 0 and 2." to Res.string.core_22,
     "This bullet is used by a cartridge and cannot be deleted." to Res.string.core_23,
+    "Log hits where the bullet is slower than Mach 1.3 at the target." to Res.string.core_24,
+    "Each DSF point needs a Mach between 0 and 5 and a factor between 0.5 and 2." to Res.string.core_25,
+    "Two DSF points have the same Mach." to Res.string.core_26,
+    "The DSF alone cannot explain these hits: true the velocity and drag first." to Res.string.core_27,
 )
 
 /** A message from the core in the app's language (unknown ones as they are). */

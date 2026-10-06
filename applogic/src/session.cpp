@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include <sqlite_manager/transaction.h>
 
@@ -60,6 +61,17 @@ std::vector<WindInput> WindsFromText(const std::string& text) {
     return winds;
 }
 
+// Speeds of a moving target across the line of fire (right positive) and
+// along it (away positive).
+std::pair<double, double> TargetVelocity(const SessionConditions& s) {
+    const double h = units::DegToRad(s.target_heading_deg);
+    return {s.target_speed_mps * std::sin(h), s.target_speed_mps * std::cos(h)};
+}
+
+// How much further than the range a target going away can take the
+// bullet: 5 s of its motion.
+double LeadReachM(const SessionConditions& s) { return std::max(0.0, s.target_speed_mps) * 5.0; }
+
 } // namespace
 
 storage::ConditionsRecord ToConditions(const SessionConditions& s) {
@@ -106,6 +118,9 @@ Result<SessionConditions> LoadSession(storage::Database& db) {
                             {"target_range_m", &s.target_range_m},
                             {"magnification", &s.magnification},
                             {"target_height_cm", &s.target_height_cm},
+                            {"wind_gust_mps", &s.wind_gust_mps},
+                            {"target_speed_mps", &s.target_speed_mps},
+                            {"target_heading_deg", &s.target_heading_deg},
                             {"weather_at", &s.weather_at_unix}};
     for (const Field& f : fields) {
         auto v = get(f.key);
@@ -168,6 +183,9 @@ Status SaveSession(storage::Database& db, const SessionConditions& s) {
           {"azimuth_deg", opt(s.azimuth_deg)},
           {"density_altitude_m", opt(s.density_altitude_m)},
           {"target_height_cm", Num(s.target_height_cm)},
+          {"wind_gust_mps", Num(s.wind_gust_mps)},
+          {"target_speed_mps", Num(s.target_speed_mps)},
+          {"target_heading_deg", Num(s.target_heading_deg)},
           {"weather_at", Num(s.weather_at_unix)},
           {"winds", WindsToText(s.winds)}}) {
         if (Status st = set(key, value); !st) {
@@ -193,7 +211,7 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
     constexpr double kPointBlankReachM = 1000.0;
     const storage::ConditionsRecord conditions = ToConditions(s);
     auto sol = storage::Solve(profile, conditions,
-                              std::max(s.target_range_m, kPointBlankReachM) + 1.0);
+                              std::max(s.target_range_m + LeadReachM(s), kPointBlankReachM) + 1.0);
     if (!sol) {
         out.error = sol.error().message;
         return out;
@@ -228,6 +246,50 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
         if (q && q->mach < 1.2) {
             out.transonic_range_m = r;
             break;
+        }
+    }
+
+    if (s.wind_gust_mps > 0.0) {
+        // The same shot with the second speed in the nearest zone (a still
+        // shooter's zone becomes a zone to the end of the range).
+        SessionConditions gust = s;
+        if (gust.winds.empty()) {
+            gust.winds.push_back({0.0, 90.0, 0.0});
+        }
+        gust.winds.front().speed_mps = s.wind_gust_mps;
+        gust.wind_gust_mps = 0.0;
+        if (auto g = storage::Solve(profile, ToConditions(gust), s.target_range_m + 1.0)) {
+            if (const auto gp = g.value().trajectory.AtSlantRange(s.target_range_m)) {
+                out.has_gust = true;
+                out.gust_windage = FromRad(gp->hold_windage_rad, unit);
+                out.gust_windage_cm = gp->windage_m * 100.0;
+                if (profile.scope) {
+                    out.gust_windage_clicks =
+                        storage::ToClicks(gp->hold_windage_rad, profile.scope->click_horizontal_rad);
+                }
+            }
+        }
+    }
+
+    if (s.target_speed_mps > 0.0) {
+        const auto [crossing, radial] = TargetVelocity(s);
+        const auto lead = MovingTargetLead(traj, s.target_range_m, crossing, radial);
+        const auto meet = lead ? traj.AtSlantRange(lead->range_m) : std::nullopt;
+        if (meet) {
+            out.has_lead = true;
+            out.lead = FromRad(lead->hold_rad, unit);
+            out.lead_cm = lead->lateral_m * 100.0;
+            out.lead_range_m = lead->range_m;
+            const double total = meet->hold_windage_rad + lead->hold_rad;
+            out.lead_total_windage = FromRad(total, unit);
+            out.lead_elevation = FromRad(meet->hold_elevation_rad, unit);
+            if (profile.scope) {
+                const double h = profile.scope->click_horizontal_rad;
+                out.lead_clicks = storage::ToClicks(lead->hold_rad, h);
+                out.lead_total_windage_clicks = storage::ToClicks(total, h);
+                out.lead_elevation_clicks =
+                    storage::ToClicks(meet->hold_elevation_rad, profile.scope->click_vertical_rad);
+            }
         }
     }
 
@@ -277,12 +339,23 @@ RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionC
         table.error = "Check the table range and step.";
         return table;
     }
-    auto sol = storage::Solve(profile, ToConditions(s), to_m + 1.0);
+    auto sol = storage::Solve(profile, ToConditions(s), to_m + LeadReachM(s) + 1.0);
+    const auto [crossing, radial] = TargetVelocity(s);
     if (!sol) {
         table.error = sol.error().message;
         return table;
     }
     const Trajectory& traj = sol.value().trajectory;
+    // Earth rotation on its own: the same shot without it.
+    std::optional<storage::Solution> still;
+    if (s.latitude_deg) {
+        SessionConditions no_rotation = s;
+        no_rotation.latitude_deg.reset();
+        no_rotation.azimuth_deg.reset();
+        if (auto r = storage::Solve(profile, ToConditions(no_rotation), to_m + LeadReachM(s) + 1.0)) {
+            still = std::move(r.value());
+        }
+    }
     const auto count = static_cast<long>(std::floor((to_m - from_m) / step_m + 1e-9));
     for (long k = 0; k <= count; ++k) {
         const double r = from_m + static_cast<double>(k) * step_m;
@@ -308,6 +381,23 @@ RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionC
         row.mach = pt->mach;
         row.energy_j = pt->energy_j;
         row.time_s = pt->time_s;
+        row.spin_drift_cm = pt->spin_drift_m * 100.0;
+        if (still) {
+            if (const auto q = still->trajectory.AtSlantRange(r)) {
+                row.coriolis_drift_cm = (pt->windage_m - q->windage_m) * 100.0;
+                row.coriolis_lift_cm = (pt->drop_m - q->drop_m) * 100.0;
+            }
+        }
+        if (s.target_speed_mps > 0.0 && r > 0.0) {
+            if (const auto lead = MovingTargetLead(traj, r, crossing, radial)) {
+                row.lead = FromRad(lead->hold_rad, unit);
+                row.lead_cm = lead->lateral_m * 100.0;
+                if (profile.scope) {
+                    row.lead_clicks =
+                        storage::ToClicks(lead->hold_rad, profile.scope->click_horizontal_rad);
+                }
+            }
+        }
         table.rows.push_back(row);
     }
     table.ok = true;

@@ -12,6 +12,10 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -290,6 +294,181 @@ class FlowTest {
     }
 
     @Test
+    fun windZonesAndGust() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(800)
+        val calm = shown("windage")
+        assertTrue(!exists("windageGust"))
+
+        // Gusts of 6 m/s: the windage tile shows the second correction.
+        onNodeWithTag("navConditions").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("windGust") }
+        onNodeWithTag("windGust").performScrollTo()
+        type("windGust", "6")
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("windageGust") }
+        shot("wind-gust")
+
+        // Calm near the shooter, 8 m/s further out, then a third zone.
+        onNodeWithTag("navConditions").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("windZonesOn") }
+        onNodeWithTag("windZonesOn").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("zoneSpeed1") }
+        onNodeWithTag("zoneSpeed1").performScrollTo()
+        type("zoneSpeed1", "8")
+        onNodeWithTag("addZone").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("zoneSpeed2") }
+        onNodeWithTag("zoneSpeed2").performScrollTo()
+        shot("wind-zones")
+        assertTrue(!exists("addZone")) // three zones in all
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("windage") && shown("windage") != calm }
+        onNodeWithTag("quickWind").performScrollTo()
+        assertTrue(hasText("Zone 1 of 3", substring = true))
+        db.delete()
+    }
+
+    @Test
+    fun movingTarget() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(500)
+        assertTrue(!exists("lead"))
+
+        // 15 km/h to the right (the default direction): lead to the right.
+        onNodeWithTag("targetSpeed").performScrollTo()
+        type("targetSpeed", "15")
+        waitUntil(timeoutMillis = 10_000) { exists("lead") && shown("lead").contains("RIGHT") }
+        onNodeWithTag("movesLeft").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("lead").contains("LEFT") }
+        onNodeWithTag("movingTarget").performScrollTo()
+        shotOf("movingTarget", "moving-target")
+
+        // The stopwatch: 5 m in about half a second is about 36 km/h.
+        onNodeWithTag("stopwatch").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("stopwatchDistance") }
+        type("stopwatchDistance", "5")
+        onNodeWithTag("stopwatchToggle").performClick()
+        Thread.sleep(500)
+        onNodeWithTag("stopwatchToggle").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("stopwatchResult") }
+        onNodeWithTag("stopwatchApply").performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("stopwatchToggle") }
+        val kmh = shown("targetSpeed").toDouble()
+        assertTrue(kmh in 15.0..40.0, "speed $kmh")
+
+        // The range card gets a lead column.
+        onNodeWithTag("navTable").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("rangeTable") }
+        assertTrue(hasText("Lead", substring = true))
+        shot("table-lead")
+        db.delete()
+    }
+
+    @Test
+    fun chartsAndCompare() = runDesktopComposeUiTest(1100, 760) {
+        val db = startWithSample()
+        // A second, faster load of the sample cartridge (through the core, as
+        // the cartridge editor would); the sample stays chosen.
+        val api = testApi!!
+        kotlinx.coroutines.runBlocking {
+            val st = api.call("state") as JsonObject
+            val rifle = st.getValue("currentRifleId")
+            val first = st.getValue("currentCartridgeId")
+            val form = api.call("cartridgeForm", buildJsonObject { put("id", first) }) as JsonObject
+            val hot = JsonObject(form + ("cartridgeId" to JsonPrimitive(0)) + ("name" to JsonPrimitive("Hot load")) + ("muzzleVelocity" to JsonPrimitive(850.0)))
+            api.call("saveCartridge", buildJsonObject { put("form", hot) })
+            api.call("select", buildJsonObject { put("rifleId", rifle); put("cartridgeId", first) })
+        }
+        onNodeWithTag("navTable").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("chartTab") }
+        onNodeWithTag("chartTab").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("chart") }
+
+        // Velocity instead of the trajectory.
+        onNodeWithTag("chartQuantity").performClick()
+        onAllNodesWithText("Velocity").onLast().performClick()
+        waitUntil(timeoutMillis = 10_000) { onAllNodesWithText("Velocity").fetchSemanticsNodes().size == 1 } // the menu closed, the field shows it
+
+        // Compared with the faster load.
+        onNodeWithTag("compare").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("compareCartridge") && hasText("Hot load") }
+        onNodeWithTag("compareAdd").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("compared0") }
+        assertTrue(hasText("Hot load", substring = true))
+        shot("chart-compare")
+
+        // Removing it leaves one line.
+        onNodeWithTag("compared0").performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("compared0") }
+        db.delete()
+    }
+
+    @Test
+    fun dsfByHandAndFromTheLog() = runDesktopComposeUiTest(1100, 1000) {
+        val db = startWithSample()
+        setRange(1300)
+        val plain = elevation()
+        fun openShotLog() {
+            onNodeWithTag("navArmory").performClick()
+            if (exists("dsfAdd")) return // still open from before
+            onNodeWithTag("cartridgesTab").performClick()
+            waitUntil(timeoutMillis = 10_000) { count("more:") > 0 }
+            onAllNodes(androidx.compose.ui.test.SemanticsMatcher("more") {
+                it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("more:") == true
+            }).onFirst().performClick()
+            onNodeWithTag("shotLog").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("dsfAdd") }
+        }
+
+        // By hand: one point, 10 % more drag at every speed.
+        openShotLog()
+        onNodeWithTag("dsfAdd").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("dsfFactor0") }
+        type("dsfFactor0", "1.1")
+        onNodeWithTag("dsfSave").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("dsfSave") }
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && elevation() > plain + 0.3 }
+
+        // The bullet "really" has more drag in the transonic part (set through
+        // the core); log the hits it makes.
+        val api = testApi!!
+        kotlinx.coroutines.runBlocking {
+            api.call("setDsf", buildJsonObject {
+                put("points", kotlinx.serialization.json.buildJsonArray {
+                    add(buildJsonObject { put("mach", 1.4); put("factor", 1.0) })
+                    add(buildJsonObject { put("mach", 0.9); put("factor", 1.12) })
+                })
+            })
+        }
+        var truth = 0.0
+        for (r in listOf(900, 1100, 1300)) {
+            setRange(r)
+            truth = elevation()
+            onNodeWithTag("logHitSolution").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("hitElevation") }
+            type("hitElevation", truth.fixed(2))
+            onNodeWithTag("saveHit").performClick()
+            waitUntil(timeoutMillis = 10_000) { !exists("hitElevation") }
+        }
+
+        // Forget the table, fit it from the log.
+        openShotLog()
+        onNodeWithTag("dsfReset").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("dsfNone") }
+        onNodeWithTag("dsfFit").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 20_000) { exists("dsfFitPoints") }
+        onNodeWithTag("dsfFitPoints").performScrollTo()
+        shot("dsf")
+        onNodeWithTag("dsfApply").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("dsfFitPoints") }
+
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && kotlin.math.abs(elevation() - truth) <= 0.03 }
+        db.delete()
+    }
+
+    @Test
     fun libraryBulletAndSettings() = runDesktopComposeUiTest(400, 820) {
         val db = startWithSample()
         val before = elevation()
@@ -362,9 +541,9 @@ class FlowTest {
         db.delete()
     }
 
-    private fun ComposeUiTest.hasText(text: String): Boolean {
+    private fun ComposeUiTest.hasText(text: String, substring: Boolean = false): Boolean {
         announce()
-        return onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+        return onAllNodesWithText(text, substring = substring).fetchSemanticsNodes().isNotEmpty()
     }
 
     private fun ComposeUiTest.chooseLanguage(name: String) {

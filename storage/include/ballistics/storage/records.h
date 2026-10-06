@@ -118,6 +118,7 @@ struct ProfileRecord {
     double zero_offset_right_m = 0.0;
     double velocity_scale = 1.0; // truing
     double drag_scale = 1.0;     // truing
+    std::vector<DsfPoint> dsf;   // truing of the transonic part, by Mach (empty = none)
     std::string created_at;      // set by the database
     std::optional<std::string> last_used_at;
 };

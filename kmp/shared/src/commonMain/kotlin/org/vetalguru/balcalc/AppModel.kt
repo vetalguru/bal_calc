@@ -22,6 +22,9 @@ import kotlinx.serialization.json.putJsonArray
 import org.vetalguru.balcalc.core.ImportReport
 import org.vetalguru.balcalc.core.Info
 import org.vetalguru.balcalc.core.NamedText
+import org.vetalguru.balcalc.core.PairOption
+import org.vetalguru.balcalc.core.DsfPointIn
+import org.vetalguru.balcalc.core.DsfResult
 import org.vetalguru.balcalc.core.SeedReport
 import org.vetalguru.balcalc.core.Shot
 import org.vetalguru.balcalc.core.TruingResult
@@ -257,6 +260,29 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
 
     fun resetTruing() = act { api.call("resetTruing"); shotsRevision++; recompute() }
 
+    suspend fun computeDsf(): DsfResult = api.get("computeDsf")
+
+    /** Applies the last fitted DSF table, or sets `points`; returns the core's error or null. */
+    suspend fun applyDsf(points: List<DsfPointIn>? = null): String? = detached {
+        try {
+            if (points == null) {
+                api.call("applyDsf")
+            } else {
+                api.call("setDsf", buildJsonObject {
+                    put("points", kotlinx.serialization.json.buildJsonArray {
+                        points.forEach { p -> add(buildJsonObject { put("mach", p.mach); put("factor", p.factor) }) }
+                    })
+                })
+            }
+            recompute()
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
+    }
+
+    fun resetDsf() = act { api.call("resetDsf"); recompute() }
+
     /** Where this cartridge hits at the rifle's zero; returns the core's error or null. */
     suspend fun setZeroOffset(upCm: Double, rightCm: Double): String? = detached {
         try {
@@ -307,6 +333,23 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
             put("maxRangeM", maxRangeM)
             put("points", points)
         })
+
+    /** Curves of other rifle + cartridge pairs in the current conditions. */
+    suspend fun compareCurves(maxRangeM: Double, points: Int, pairs: List<Pair<Long, Long>>): List<RangeTable> =
+        api.get("compareCurves", buildJsonObject {
+            put("maxRangeM", maxRangeM)
+            put("points", points)
+            put("pairs", kotlinx.serialization.json.buildJsonArray {
+                pairs.forEach { (rifle, cartridge) ->
+                    add(buildJsonObject {
+                        put("rifleId", rifle)
+                        put("cartridgeId", cartridge)
+                    })
+                }
+            })
+        })
+
+    suspend fun pairOptions(): List<PairOption> = api.get("pairOptions")
 
     suspend fun stationPressure(qnhHpa: Double, altitudeM: Double): Double =
         api.call("stationPressure", buildJsonObject {

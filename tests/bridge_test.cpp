@@ -95,6 +95,114 @@ TEST_F(Bridge, ConditionsAndSettingsChangeTheSolution) {
     EXPECT_GT(Ok("solution").at("windage").get<double>(), 0.5);
 }
 
+TEST_F(Bridge, WindZonesAndGust) {
+    Sample();
+    Ok("setConditions", {{"targetRangeM", 800}, {"windSpeed", 0}, {"windFromDeg", 270}});
+    const double still = Ok("solution").at("windage").get<double>(); // spin drift only
+    EXPECT_FALSE(Ok("solution").at("hasGust").get<bool>());
+
+    // Calm here, wind from the right further out, more of it at the end.
+    const json zones = json::array({{{"speedMps", 4}, {"fromDeg", 90}, {"untilM", 600}},
+                                    {{"speedMps", 6}, {"fromDeg", 90}, {"untilM", 0}},
+                                    {{"speedMps", 9}, {"fromDeg", 90}, {"untilM", 0}}});
+    const json c = Ok("setConditions", {{"windUntilM", 300}, {"windZones", zones}});
+    ASSERT_EQ(c.at("windZones").size(), 2u); // three zones in all
+    EXPECT_EQ(c.at("windUntilM"), 300.0);
+    EXPECT_EQ(c.at("windFromDeg"), 270.0); // a calm zone keeps its direction
+    const double zoned = Ok("solution").at("windage").get<double>();
+    EXPECT_GT(zoned, still + 0.1);
+
+    // A gust in the first zone (from the left): the bracket goes the other way.
+    Ok("setConditions", {{"windGustMps", 8}});
+    const json sol = Ok("solution");
+    EXPECT_TRUE(sol.at("hasGust").get<bool>());
+    EXPECT_LT(sol.at("gustWindage").get<double>(), zoned);
+
+    // Back to one wind.
+    EXPECT_TRUE(Ok("setConditions", {{"windZones", json::array()}}).at("windZones").empty());
+}
+
+TEST_F(Bridge, MovingTarget) {
+    Sample();
+    EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "kmh");
+    EXPECT_FALSE(Ok("solution").at("hasLead").get<bool>());
+    Ok("setConditions", {{"targetSpeedMps", 5}, {"targetHeadingDeg", 270}, {"targetSpeedUnit", "mps"}});
+    const json sol = Ok("solution");
+    ASSERT_TRUE(sol.at("hasLead").get<bool>());
+    EXPECT_LT(sol.at("lead").get<double>(), -1.0); // to the left, ~5 mrad at 300 m
+    EXPECT_NEAR(sol.at("leadCm").get<double>(), -500.0 * sol.at("time").get<double>(), 1e-6);
+    const json table = Ok("rangeTable");
+    EXPECT_LT(table.at("rows").back().at("lead").get<double>(), sol.at("lead").get<double>());
+    EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mps");
+}
+
+TEST_F(Bridge, CompareCurves) {
+    Sample();
+    const json st = Ok("state");
+    const auto rifle = st.at("currentRifleId").get<int>();
+    const auto first = st.at("currentCartridgeId").get<int>();
+    json form = Ok("cartridgeForm", {{"id", first}});
+    form["cartridgeId"] = 0;
+    form["name"] = "Hot load";
+    form["muzzleVelocity"] = 850.0;
+    const auto hot = Ok("saveCartridge", {{"form", form}}).at("id").get<int>();
+    const auto chosen = Ok("state").at("currentCartridgeId").get<int>(); // saving selects it
+
+    const json options = Ok("pairOptions");
+    ASSERT_EQ(options.size(), 1u);
+    EXPECT_EQ(options[0].at("cartridges").size(), 2u);
+
+    const json curves = Ok("compareCurves", {{"maxRangeM", 1000}, {"points", 10},
+        {"pairs", json::array({{{"rifleId", rifle}, {"cartridgeId", first}},
+                               {{"rifleId", rifle}, {"cartridgeId", hot}},
+                               {{"rifleId", 999}, {"cartridgeId", hot}}})}});
+    ASSERT_EQ(curves.size(), 3u);
+    ASSERT_TRUE(curves[0].at("ok").get<bool>());
+    ASSERT_TRUE(curves[1].at("ok").get<bool>());
+    EXPECT_EQ(curves[1].at("label"), "Rifle · Hot load");
+    EXPECT_EQ(curves[0].at("rows").size(), 11u);
+    const json& slow = curves[0].at("rows").back();
+    const json& fast = curves[1].at("rows").back();
+    EXPECT_GT(fast.at("velocity").get<double>(), slow.at("velocity").get<double>() + 10.0);
+    EXPECT_GT(fast.at("dropCm").get<double>(), slow.at("dropCm").get<double>()); // less drop
+    EXPECT_FALSE(curves[2].at("ok").get<bool>());
+    EXPECT_FALSE(curves[2].at("error").get<std::string>().empty());
+    // The current choice is untouched.
+    EXPECT_EQ(Ok("state").at("currentCartridgeId"), chosen);
+}
+
+TEST_F(Bridge, DsfTable) {
+    Sample();
+    EXPECT_TRUE(Ok("solution").at("dsf").empty());
+    EXPECT_FALSE(Ok("computeDsf").at("ok").get<bool>()); // no shots yet
+    EXPECT_EQ(Fails("applyDsf"), "Nothing to apply.");
+
+    Ok("setConditions", {{"targetRangeM", 1300}});
+    const double before = Ok("solution").at("elevation").get<double>();
+    Ok("setDsf", {{"points", json::array({{{"mach", 1.4}, {"factor", 1.0}}, {{"mach", 0.9}, {"factor", 1.15}}})}});
+    const json sol = Ok("solution");
+    ASSERT_EQ(sol.at("dsf").size(), 2u);
+    EXPECT_DOUBLE_EQ(sol.at("dsf")[0].at("mach").get<double>(), 0.9);
+    EXPECT_GT(sol.at("elevation").get<double>(), before + 0.05);
+    EXPECT_EQ(Fails("setDsf", {{"points", json::array({{{"mach", 1.0}, {"factor", 3.0}}})}}),
+              "Each DSF point needs a Mach between 0 and 5 and a factor between 0.5 and 2.");
+
+    // Shots in the transonic part give a table to apply.
+    Ok("resetDsf");
+    EXPECT_TRUE(Ok("solution").at("dsf").empty());
+    for (int range : {900, 1100, 1300}) {
+        Ok("setConditions", {{"targetRangeM", range}});
+        const double predicted = Ok("solution").at("elevation").get<double>();
+        const double more = range == 900 ? 1.0 : 1.03; // transonic: 3 % more drop
+        Ok("logShot", {{"rangeM", range}, {"elevation", predicted * more}});
+    }
+    const json fit = Ok("computeDsf");
+    ASSERT_TRUE(fit.at("ok").get<bool>()) << fit.dump();
+    EXPECT_EQ(fit.at("shots").size(), 3u);
+    Ok("applyDsf");
+    EXPECT_EQ(Ok("solution").at("dsf").size(), fit.at("points").size());
+}
+
 TEST_F(Bridge, DensityAltitudeAndWarnings) {
     Sample();
     json sol = Ok("solution");

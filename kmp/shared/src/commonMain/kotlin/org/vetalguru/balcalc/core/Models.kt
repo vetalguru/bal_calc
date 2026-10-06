@@ -48,7 +48,17 @@ data class Conditions(
     val useDensityAltitude: Boolean = false,
     val densityAltitudeM: Double = 0.0,
     val targetHeightCm: Double = 20.0,
+    val windUntilM: Double = 0.0,
+    val windZones: List<WindZoneIn> = emptyList(),
+    val windGustMps: Double = 0.0,
+    val targetSpeedMps: Double = 0.0,
+    val targetHeadingDeg: Double = 90.0,
+    val targetSpeedUnit: String = "kmh",
 )
+
+/** A wind zone after the first: up to `untilM` (the last one: to the end). */
+@Serializable
+data class WindZoneIn(val speedMps: Double = 0.0, val fromDeg: Double = 90.0, val untilM: Double = 0.0)
 
 @Serializable
 data class AppState(
@@ -100,6 +110,20 @@ data class Solution(
     val densityAltitudeM: Double = 0.0,
     val pressureHpa: Double = 0.0,
     val warnings: List<Warning> = emptyList(),
+    val hasGust: Boolean = false,
+    val gustWindage: Double = 0.0,
+    val gustWindageClicks: Double = 0.0,
+    val gustWindageCm: Double = 0.0,
+    val dsf: List<DsfPointIn> = emptyList(),
+    val hasLead: Boolean = false,
+    val lead: Double = 0.0,
+    val leadClicks: Double = 0.0,
+    val leadCm: Double = 0.0,
+    val leadTotalWindage: Double = 0.0,
+    val leadTotalWindageClicks: Double = 0.0,
+    val leadRangeM: Double = 0.0,
+    val leadElevation: Double = 0.0,
+    val leadElevationClicks: Double = 0.0,
     // Reticle hold (present with a scope).
     val hasReticle: Boolean = false,
     val holdMode: String = "",
@@ -134,6 +158,12 @@ data class TableRow(
     val mach: Double = 0.0,
     val energy: Double = 0.0,
     val time: Double = 0.0,
+    val lead: Double = 0.0,
+    val leadClicks: Double = 0.0,
+    val leadCm: Double = 0.0,
+    val spinDriftCm: Double = 0.0,
+    val coriolisDriftCm: Double = 0.0,
+    val coriolisLiftCm: Double = 0.0,
 )
 
 @Serializable
@@ -142,4 +172,41 @@ data class RangeTable(
     val error: String = "",
     val hasScope: Boolean = false,
     val rows: List<TableRow> = emptyList(),
+    // For a compared rifle + cartridge (compareCurves).
+    val label: String = "",
+    val rifleId: Long = 0,
+    val cartridgeId: Long = 0,
+)
+
+/** A rifle and the cartridges of its calibre, for choosing what to compare. */
+@Serializable
+data class PairOption(val rifleId: Long = 0, val rifleName: String = "", val cartridges: List<NamedId> = emptyList())
+
+@Serializable
+data class NamedId(val id: Long = 0, val name: String = "")
+
+/** A drag scale factor (DSF) point: the drag at `mach` times `factor`. */
+@Serializable
+data class DsfPointIn(val mach: Double = 0.0, val factor: Double = 1.0)
+
+@Serializable
+data class DsfShot(
+    val shotId: Long = 0,
+    val rangeM: Double = 0.0,
+    val mach: Double = 0.0,
+    val observed: Double = 0.0,
+    val before: Double = 0.0,
+    val after: Double = 0.0,
+    val used: Boolean = false,
+    val limited: Boolean = false,
+)
+
+@Serializable
+data class DsfResult(
+    val ok: Boolean = false,
+    val error: String = "",
+    val points: List<DsfPointIn> = emptyList(),
+    val shots: List<DsfShot> = emptyList(),
+    val rmsBefore: Double = 0.0,
+    val rmsAfter: Double = 0.0,
 )

@@ -55,6 +55,8 @@ tasks.named<Test>("desktopTest") {
     val resources = project(":desktopApp").layout.buildDirectory.dir("mergedResources")
     dependsOn(":desktopApp:mergedResources")
     environment("BALCALC_RESOURCES", resources.get().asFile.path)
+    // The core library and seed data are inputs: a rebuilt core reruns the tests.
+    inputs.dir(resources).withPropertyName("coreResources").withPathSensitivity(PathSensitivity.RELATIVE)
     systemProperty("balcalc.screenshots", layout.buildDirectory.dir("screenshots").get().asFile.path)
     // The tests look for English texts: the system language must not matter.
     jvmArgs("-Duser.language=en", "-Duser.country=US")

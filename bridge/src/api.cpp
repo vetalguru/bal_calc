@@ -52,12 +52,15 @@
 //   shots / logShot {rangeM, elevation, hasWindage, windage, notes}
 //   deleteShot {id} / setShotUsed {id, used}
 //   computeTruing / applyTruing / resetTruing
+//   computeDsf / applyDsf / setDsf {points:[{mach, factor}]} / resetDsf
 //   reticles / libraryBullets {filter} / bulletForm {id} / saveBullet {form}
 //   deleteBullet {id}
 //   exportJson {kind: "rifle"|"cartridge", id} → {json, fileName}
 //   importShared {text}               → state
 //   importFiles {files:[{name, content}]} → {imported, problems:[{file, message}]}
 //   stationPressure {qnhHpa, altitudeM} → hPa
+//   compareCurves {maxRangeM, points, pairs:[{rifleId, cartridgeId}]} → [table + label]
+//   pairOptions                     → [{rifleId, rifleName, cartridges:[{id, name}]}]
 //
 // save* return {id}; delete*, set* and log return state or {} as noted in
 // the handlers below.
@@ -77,6 +80,8 @@ constexpr const char* kCurrentRifleKey = "ui.current_rifle";
 constexpr const char* kCurrentCartridgeKey = "ui.current_cartridge";
 constexpr const char* kAngleUnitKey = "ui.angle_unit";
 constexpr const char* kLanguageKey = "ui.language";
+constexpr std::size_t kMaxExtraWindZones = 2; // three wind zones in all
+constexpr const char* kTargetSpeedUnitKey = "ui.target_speed_unit";
 constexpr const char* kHoldModeKey = "ui.hold_mode";
 constexpr const char* kTableFromKey = "ui.table.from_m";
 constexpr const char* kTableToKey = "ui.table.to_m";
@@ -253,6 +258,14 @@ al::BulletForm BulletFrom(const json& m) {
     return f;
 }
 
+json DsfJson(const std::vector<DsfPoint>& points) {
+    json out = json::array();
+    for (const DsfPoint& p : points) {
+        out.push_back({{"mach", p.mach}, {"factor", p.factor}});
+    }
+    return out;
+}
+
 json ToJson(const al::RangeTable& t, bool has_scope) {
     json rows = json::array();
     for (const al::RangeRow& r : t.rows) {
@@ -266,7 +279,13 @@ json ToJson(const al::RangeTable& t, bool has_scope) {
                         {"velocity", r.velocity_mps},
                         {"mach", r.mach},
                         {"energy", r.energy_j},
-                        {"time", r.time_s}});
+                        {"time", r.time_s},
+                        {"lead", r.lead},
+                        {"leadClicks", r.lead_clicks},
+                        {"leadCm", r.lead_cm},
+                        {"spinDriftCm", r.spin_drift_cm},
+                        {"coriolisDriftCm", r.coriolis_drift_cm},
+                        {"coriolisLiftCm", r.coriolis_lift_cm}});
     }
     return {{"ok", t.ok}, {"error", t.error}, {"hasScope", has_scope}, {"rows", rows}};
 }
@@ -311,6 +330,12 @@ struct Api::Impl {
     double powder_c = 15.0;
     double wind_speed = 0.0;
     double wind_from_deg = 90.0;
+    double wind_until_m = 0.0;       // end of the first zone when there are more
+    std::vector<al::WindInput> wind_zones; // the zones after the first, in order
+    double wind_gust_mps = 0.0;
+    double target_speed_mps = 0.0;
+    double target_heading_deg = 90.0;
+    std::string target_speed_unit = "kmh"; // how the app shows it: "kmh" or "mps"
     double look_angle_deg = 0.0;
     double cant_deg = 0.0;
     bool coriolis = false;
@@ -325,6 +350,7 @@ struct Api::Impl {
     double weather_at_unix = 0.0;
 
     al::TruingResult last_truing;
+    al::DsfResult last_dsf;
 
     using Handler = std::function<json(Impl&, const json&)>;
     static const std::map<std::string, Handler>& Handlers();
@@ -352,6 +378,7 @@ struct Api::Impl {
         angle_unit = Setting(kAngleUnitKey).value_or(angle_unit);
         hold_mode = Setting(kHoldModeKey).value_or(hold_mode);
         language = Setting(kLanguageKey).value_or(language);
+        target_speed_unit = Setting(kTargetSpeedUnitKey).value_or(target_speed_unit);
         for (const auto& [key, value] : {std::pair{kTableFromKey, &table_from_m},
                                          std::pair{kTableToKey, &table_to_m},
                                          std::pair{kTableStepKey, &table_step_m}}) {
@@ -376,9 +403,19 @@ struct Api::Impl {
         if (!powder_follows_air) {
             s.powder_c = powder_c;
         }
-        if (wind_speed > 0.0) {
-            s.winds.push_back({wind_speed, wind_from_deg, 0.0});
+        // The first zone is always there (a calm one costs nothing), so its
+        // direction survives a zero speed and the gust has a zone to go to.
+        s.winds.push_back({wind_speed, wind_from_deg, wind_zones.empty() ? 0.0 : wind_until_m});
+        for (std::size_t i = 0; i < wind_zones.size(); ++i) {
+            al::WindInput w = wind_zones[i];
+            if (i + 1 == wind_zones.size()) {
+                w.until_m = 0.0; // the last zone goes to the end
+            }
+            s.winds.push_back(w);
         }
+        s.wind_gust_mps = wind_gust_mps;
+        s.target_speed_mps = target_speed_mps;
+        s.target_heading_deg = target_heading_deg;
         s.look_angle_deg = look_angle_deg;
         s.cant_deg = cant_deg;
         if (coriolis) {
@@ -407,7 +444,12 @@ struct Api::Impl {
         if (!s.winds.empty()) {
             wind_speed = s.winds.front().speed_mps;
             wind_from_deg = s.winds.front().from_deg;
+            wind_until_m = s.winds.front().until_m;
         }
+        wind_zones.assign(s.winds.size() > 1 ? s.winds.begin() + 1 : s.winds.end(), s.winds.end());
+        wind_gust_mps = s.wind_gust_mps;
+        target_speed_mps = s.target_speed_mps;
+        target_heading_deg = s.target_heading_deg;
         look_angle_deg = s.look_angle_deg;
         cant_deg = s.cant_deg;
         coriolis = s.latitude_deg.has_value();
@@ -433,7 +475,21 @@ struct Api::Impl {
                 {"targetRangeM", target_range_m},  {"magnification", magnification},
                 {"useDensityAltitude", use_density_altitude},
                 {"densityAltitudeM", density_altitude_m},
-                {"targetHeightCm", target_height_cm}};
+                {"targetHeightCm", target_height_cm},
+                {"windUntilM", wind_until_m},
+                {"windZones", ZonesJson()},
+                {"windGustMps", wind_gust_mps},
+                {"targetSpeedMps", target_speed_mps},
+                {"targetHeadingDeg", target_heading_deg},
+                {"targetSpeedUnit", target_speed_unit}};
+    }
+
+    json ZonesJson() const {
+        json zones = json::array();
+        for (const al::WindInput& w : wind_zones) {
+            zones.push_back({{"speedMps", w.speed_mps}, {"fromDeg", w.from_deg}, {"untilM", w.until_m}});
+        }
+        return zones;
     }
 
     void SetConditions(const json& a) {
@@ -460,6 +516,23 @@ struct Api::Impl {
         flag("useDensityAltitude", use_density_altitude);
         num("densityAltitudeM", density_altitude_m);
         num("targetHeightCm", target_height_cm);
+        num("windUntilM", wind_until_m);
+        num("windGustMps", wind_gust_mps);
+        num("targetSpeedMps", target_speed_mps);
+        num("targetHeadingDeg", target_heading_deg);
+        if (const std::string u = Str(a, "targetSpeedUnit"); (u == "kmh" || u == "mps") && u != target_speed_unit) {
+            target_speed_unit = u;
+            Put(kTargetSpeedUnitKey, u);
+        }
+        if (a.contains("windZones") && a.at("windZones").is_array()) {
+            wind_zones.clear();
+            for (const json& z : a.at("windZones")) {
+                if (wind_zones.size() == kMaxExtraWindZones) {
+                    break;
+                }
+                wind_zones.push_back({Num(z, "speedMps"), Num(z, "fromDeg", 90.0), Num(z, "untilM")});
+            }
+        }
         // The air was entered now: the solution warns when it gets old.
         if (air != std::make_tuple(temperature_c, pressure_hpa, altitude_m, humidity_pct,
                                    use_density_altitude, density_altitude_m)) {
@@ -642,6 +715,7 @@ struct Api::Impl {
                    {"stability", r.stability},
                    {"velocityScale", p.value().profile.velocity_scale},
                    {"dragScale", p.value().profile.drag_scale},
+                   {"dsf", DsfJson(p.value().profile.dsf)},
                    {"spinDriftCm", r.spin_drift_cm},
                    {"subsonic", r.subsonic},
                    {"transonicRangeM", r.transonic_range_m},
@@ -650,7 +724,20 @@ struct Api::Impl {
                    {"pointBlankNearM", r.point_blank_near_m},
                    {"pointBlankFarM", r.point_blank_far_m},
                    {"densityAltitudeM", r.density_altitude_m},
-                   {"pressureHpa", r.pressure_hpa}};
+                   {"pressureHpa", r.pressure_hpa},
+                   {"hasGust", r.has_gust},
+                   {"gustWindage", r.gust_windage},
+                   {"gustWindageClicks", r.gust_windage_clicks},
+                   {"gustWindageCm", r.gust_windage_cm},
+                   {"hasLead", r.has_lead},
+                   {"lead", r.lead},
+                   {"leadClicks", r.lead_clicks},
+                   {"leadCm", r.lead_cm},
+                   {"leadTotalWindage", r.lead_total_windage},
+                   {"leadTotalWindageClicks", r.lead_total_windage_clicks},
+                   {"leadRangeM", r.lead_range_m},
+                   {"leadElevation", r.lead_elevation},
+                   {"leadElevationClicks", r.lead_elevation_clicks}};
             json warnings = json::array();
             for (const al::Warning& w : r.warnings) {
                 warnings.push_back({{"code", w.code}, {"value", w.value}});
@@ -661,6 +748,53 @@ struct Api::Impl {
         out["computeMs"] = std::chrono::duration<double, std::milli>(
                                std::chrono::steady_clock::now() - start)
                                .count();
+        return out;
+    }
+
+    // Curves of other rifle + cartridge pairs in the current conditions (at
+    // most four), each as a range table with its label.
+    json CompareCurves(const json& a) {
+        const double max_range = std::clamp(Num(a, "maxRangeM", 1000.0), 10.0, 3000.0);
+        const int points = std::clamp(static_cast<int>(Num(a, "points", 250)), 10, 1000);
+        json out = json::array();
+        for (const json& pair : a.value("pairs", json::array())) {
+            if (out.size() == 4) {
+                break;
+            }
+            const Id rifle = pair.value("rifleId", Id{0});
+            const Id cartridge = pair.value("cartridgeId", Id{0});
+            json curve = {{"ok", false}, {"error", ""}, {"rows", json::array()}, {"label", ""}};
+            const auto profile = al::EnsureProfile(db, rifle, cartridge);
+            if (!profile) {
+                curve["error"] = profile.error().message;
+            } else if (auto p = bs::LoadProfile(db, profile.value()); !p) {
+                curve["error"] = p.error().message;
+            } else {
+                curve = ToJson(al::BuildRangeTable(p.value(), Session(), Unit(), 0.0, max_range,
+                                                   max_range / points),
+                               p.value().scope.has_value());
+                curve["label"] = p.value().rifle.name + " · " + p.value().cartridge.name;
+            }
+            curve["rifleId"] = rifle;
+            curve["cartridgeId"] = cartridge;
+            out.push_back(curve);
+        }
+        return out;
+    }
+
+    // Every rifle with the cartridges of its calibre: what can be compared.
+    json PairOptions() {
+        const auto cartridges = Must(al::ListCartridges(db));
+        json out = json::array();
+        for (const al::RifleSummary& r : Must(al::ListRifles(db))) {
+            json list = json::array();
+            for (const al::CartridgeSummary& c : cartridges) {
+                if (al::SameCaliber(c.caliber, r.caliber)) {
+                    list.push_back({{"id", c.id}, {"name", c.name}});
+                }
+            }
+            out.push_back({{"rifleId", r.id}, {"rifleName", r.name}, {"cartridges", list}});
+        }
         return out;
     }
 
@@ -704,6 +838,28 @@ struct Api::Impl {
                  {"temperatureC", u::KToC(d.atmosphere.temperature_k)}});
         }
         return out;
+    }
+
+    json Dsf() {
+        last_dsf = al::ComputeDsf(db, profile_id);
+        const al::DsfResult& r = last_dsf;
+        json shots = json::array();
+        for (const al::DsfShot& s : r.shots) {
+            shots.push_back({{"shotId", s.shot_id},
+                             {"rangeM", s.range_m},
+                             {"mach", s.mach},
+                             {"observed", al::FromRad(s.observed_rad, Unit())},
+                             {"before", al::FromRad(s.predicted_before_rad, Unit())},
+                             {"after", al::FromRad(s.predicted_after_rad, Unit())},
+                             {"used", s.used},
+                             {"limited", s.limited}});
+        }
+        return {{"ok", r.ok},
+                {"error", r.error},
+                {"points", DsfJson(r.points)},
+                {"shots", shots},
+                {"rmsBefore", al::FromRad(r.rms_before_rad, Unit())},
+                {"rmsAfter", al::FromRad(r.rms_after_rad, Unit())}};
     }
 
     json Truing() {
@@ -827,6 +983,8 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
          [](I& s, const json&) -> json {
              return s.Table(s.table_from_m, s.table_to_m, s.table_step_m);
          }},
+        {"compareCurves", [](I& s, const json& a) -> json { return s.CompareCurves(a); }},
+        {"pairOptions", [](I& s, const json&) -> json { return s.PairOptions(); }},
         {"trajectoryCurve",
          [](I& s, const json& a) -> json {
              const double max_range = Num(a, "maxRangeM", 1000.0);
@@ -943,6 +1101,30 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
         {"resetTruing",
          [](I& s, const json&) -> json {
              Must(al::ResetTruing(s.db, s.profile_id));
+             return json::object();
+         }},
+        {"computeDsf", [](I& s, const json&) -> json { return s.Dsf(); }},
+        {"applyDsf",
+         [](I& s, const json&) -> json {
+             if (!s.last_dsf.ok) {
+                 throw Failure("Nothing to apply.");
+             }
+             Must(al::SetDsf(s.db, s.profile_id, s.last_dsf.points));
+             s.last_dsf = {};
+             return json::object();
+         }},
+        {"setDsf",
+         [](I& s, const json& a) -> json {
+             std::vector<DsfPoint> points;
+             for (const json& p : a.value("points", json::array())) {
+                 points.push_back({Num(p, "mach"), Num(p, "factor", 1.0)});
+             }
+             Must(al::SetDsf(s.db, s.profile_id, std::move(points)));
+             return json::object();
+         }},
+        {"resetDsf",
+         [](I& s, const json&) -> json {
+             Must(al::SetDsf(s.db, s.profile_id, {}));
              return json::object();
          }},
         // Library

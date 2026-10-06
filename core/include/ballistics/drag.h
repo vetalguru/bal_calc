@@ -45,6 +45,18 @@ private:
     std::vector<double> x_, a_, b_, c_, d_;
 };
 
+// One point of a drag scale factor (DSF) table: the drag of the bullet at
+// `mach` is `factor` times the model's. Used to true the transonic part of
+// a trajectory, where a single BC or a standard curve is least accurate.
+struct DsfPoint {
+    double mach = 0.0;
+    double factor = 1.0;
+};
+
+// The factor of a DSF table at a Mach number: linear between its points,
+// the end values beyond them, 1 for an empty table. `points` sorted by Mach.
+double DsfFactor(const std::vector<DsfPoint>& points, double mach);
+
 // A published BC valid around one velocity (e.g. Sierra's velocity bands).
 struct BcPoint {
     double velocity_mps = 0.0;
@@ -73,6 +85,11 @@ public:
     // The same model with all drag multiplied by `factor` (truing).
     DragModel Scaled(double factor) const;
 
+    // The same model with the drag at each Mach number also multiplied by
+    // the drag scale factor table `dsf` (see DsfFactor); empty = none.
+    DragModel WithMachScale(std::vector<DsfPoint> dsf) const;
+    const std::vector<DsfPoint>& mach_scale() const { return dsf_; }
+
     // K(M) in m^2/kg; multiply by density and v^2 for the deceleration.
     double Coefficient(double mach) const;
 
@@ -82,6 +99,7 @@ public:
 private:
     DragCurve curve_;
     double bc_kg_m2_ = 0.0;
+    std::vector<DsfPoint> dsf_; // sorted by Mach
 };
 
 } // namespace ballistics
