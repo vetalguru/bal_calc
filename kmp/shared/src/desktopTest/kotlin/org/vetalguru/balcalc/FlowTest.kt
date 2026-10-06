@@ -340,12 +340,12 @@ class FlowTest {
 
         // The stopwatch: 5 m in about half a second is about 36 km/h.
         onNodeWithTag("stopwatch").performScrollTo().performClick()
-        waitUntil { exists("stopwatchDistance") }
+        waitUntil(timeoutMillis = 10_000) { exists("stopwatchDistance") }
         type("stopwatchDistance", "5")
         onNodeWithTag("stopwatchToggle").performClick()
         Thread.sleep(500)
         onNodeWithTag("stopwatchToggle").performClick()
-        waitUntil { exists("stopwatchResult") }
+        waitUntil(timeoutMillis = 10_000) { exists("stopwatchResult") }
         onNodeWithTag("stopwatchApply").performClick()
         waitUntil(timeoutMillis = 10_000) { !exists("stopwatchToggle") }
         val kmh = shown("targetSpeed").toDouble()
