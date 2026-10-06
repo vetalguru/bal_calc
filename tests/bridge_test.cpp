@@ -5,11 +5,13 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <set>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
@@ -17,6 +19,20 @@ namespace ballistics::bridge {
 namespace {
 
 using nlohmann::json;
+
+// Standard base64, as the app sends pictures.
+std::string TestBase64(const std::vector<std::uint8_t>& d) {
+    static const char* a = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    std::string out;
+    for (std::size_t i = 0; i < d.size(); i += 3) {
+        const unsigned n = (d[i] << 16) | (i + 1 < d.size() ? d[i + 1] << 8 : 0) | (i + 2 < d.size() ? d[i + 2] : 0);
+        out += a[(n >> 18) & 63];
+        out += a[(n >> 12) & 63];
+        out += i + 1 < d.size() ? a[(n >> 6) & 63] : '=';
+        out += i + 2 < d.size() ? a[n & 63] : '=';
+    }
+    return out;
+}
 
 class Bridge : public ::testing::Test {
 protected:
@@ -307,6 +323,36 @@ TEST_F(Bridge, SituationsRestoreTheRifleCartridgeAndConditions) {
     EXPECT_EQ(Fails("applySituation", {{"name", "Winter match"}}),
               "The rifle or cartridge of this situation was deleted.");
     EXPECT_TRUE(Ok("deleteSituation", {{"name", "Winter match"}}).empty());
+}
+
+TEST_F(Bridge, PhotosGoWithTheirRecords) {
+    const json st = Sample();
+    const int rifle = st.at("currentRifleId");
+    const int cartridge = st.at("currentCartridgeId");
+    // Every byte value, and lengths that need padding.
+    std::string bytes;
+    for (int i = 0; i < 256; ++i) {
+        bytes += static_cast<char>(i);
+    }
+    for (const std::string& data : {bytes, std::string("a"), std::string("ab")}) {
+        std::vector<std::uint8_t> v(data.begin(), data.end());
+        Ok("setPhoto", {{"kind", "rifle"}, {"id", rifle}, {"image", TestBase64(v)}});
+        EXPECT_EQ(Ok("photo", {{"kind", "rifle"}, {"id", rifle}}), TestBase64(v));
+    }
+    EXPECT_EQ(Ok("photo", {{"kind", "cartridge"}, {"id", cartridge}}), "");
+    Ok("setPhoto", {{"kind", "cartridge"}, {"id", cartridge}, {"image", "AAEC"}});
+    const json all = Ok("photos", {{"kind", "cartridge"}});
+    ASSERT_EQ(all.size(), 1U);
+    EXPECT_EQ(all.at(std::to_string(cartridge)), "AAEC");
+
+    EXPECT_EQ(Fails("setPhoto", {{"kind", "rifle"}, {"id", 999}, {"image", "AAEC"}}), "Save the record first.");
+    EXPECT_EQ(Fails("setPhoto", {{"kind", "bullet"}, {"id", 1}, {"image", "AAEC"}}), "Unknown kind of record.");
+    EXPECT_EQ(Fails("setPhoto", {{"kind", "rifle"}, {"id", rifle}, {"image", "*"}}), "The picture is damaged.");
+
+    Ok("setPhoto", {{"kind", "rifle"}, {"id", rifle}, {"image", ""}}); // removes
+    EXPECT_TRUE(Ok("photos", {{"kind", "rifle"}}).empty());
+    Ok("deleteCartridge", {{"id", cartridge}});
+    EXPECT_TRUE(Ok("photos", {{"kind", "cartridge"}}).empty());
 }
 
 TEST_F(Bridge, RangeTableAndCurve) {

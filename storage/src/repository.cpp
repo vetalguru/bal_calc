@@ -724,4 +724,72 @@ Status SetSetting(Database& db, const std::string& key, const std::string& value
                 {key, value});
 }
 
+Result<std::optional<std::vector<std::uint8_t>>> GetPhoto(Database& db, const std::string& kind, Id owner) {
+    auto st = Statement::Prepare(db.connection(), "SELECT image FROM photo WHERE kind = ? AND owner_id = ?");
+    if (!st) {
+        return st.error();
+    }
+    if (Status s = st.value().BindText(1, kind); !s) {
+        return s.error();
+    }
+    if (Status s = st.value().BindInt64(2, owner); !s) {
+        return s.error();
+    }
+    auto step = st.value().Step();
+    if (!step) {
+        return step.error();
+    }
+    if (step.value() == Statement::StepResult::kDone) {
+        return std::optional<std::vector<std::uint8_t>>{};
+    }
+    return std::optional<std::vector<std::uint8_t>>(st.value().ColumnBlob(0));
+}
+
+Status SetPhoto(Database& db, const std::string& kind, Id owner, const std::vector<std::uint8_t>& image) {
+    if (image.empty()) {
+        return Exec(db, "DELETE FROM photo WHERE kind = ? AND owner_id = ?", {kind, owner});
+    }
+    auto st = Statement::Prepare(db.connection(),
+                                 "INSERT INTO photo (kind, owner_id, image) VALUES (?, ?, ?) "
+                                 "ON CONFLICT(kind, owner_id) DO UPDATE SET image = excluded.image");
+    if (!st) {
+        return st.error();
+    }
+    if (Status s = st.value().BindText(1, kind); !s) {
+        return s;
+    }
+    if (Status s = st.value().BindInt64(2, owner); !s) {
+        return s;
+    }
+    if (Status s = st.value().BindBlob(3, image.data(), static_cast<int>(image.size())); !s) {
+        return s;
+    }
+    auto step = st.value().Step();
+    if (!step) {
+        return step.error();
+    }
+    return Ok();
+}
+
+Result<std::vector<Id>> PhotoOwners(Database& db, const std::string& kind) {
+    auto st = Statement::Prepare(db.connection(), "SELECT owner_id FROM photo WHERE kind = ? ORDER BY owner_id");
+    if (!st) {
+        return st.error();
+    }
+    if (Status s = st.value().BindText(1, kind); !s) {
+        return s.error();
+    }
+    std::vector<Id> out;
+    while (true) {
+        auto step = st.value().Step();
+        if (!step) {
+            return step.error();
+        }
+        if (step.value() == Statement::StepResult::kDone) {
+            return out;
+        }
+        out.push_back(st.value().ColumnInt64(0));
+    }
+}
+
 } // namespace ballistics::storage

@@ -232,6 +232,21 @@ CREATE TABLE profile_dsf (
     PRIMARY KEY (profile_id, mach)
 ) WITHOUT ROWID;
 )sql"},
+        // v5: a picture of a rifle or cartridge (JPEG/PNG), at most one each;
+        // it goes with its owner.
+        {5, R"sql(
+CREATE TABLE photo (
+    id       INTEGER PRIMARY KEY,
+    kind     TEXT NOT NULL CHECK (kind IN ('rifle', 'cartridge')),
+    owner_id INTEGER NOT NULL,
+    image    BLOB NOT NULL,
+    UNIQUE (kind, owner_id)
+);
+CREATE TRIGGER rifle_photo_gone AFTER DELETE ON rifle
+BEGIN DELETE FROM photo WHERE kind = 'rifle' AND owner_id = OLD.id; END;
+CREATE TRIGGER cartridge_photo_gone AFTER DELETE ON cartridge
+BEGIN DELETE FROM photo WHERE kind = 'cartridge' AND owner_id = OLD.id; END;
+)sql"},
     };
     return migrations;
 }

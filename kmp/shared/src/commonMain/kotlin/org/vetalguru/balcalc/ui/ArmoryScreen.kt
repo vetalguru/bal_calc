@@ -35,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +49,7 @@ import org.vetalguru.balcalc.AppModel
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.BackHandler
 import org.vetalguru.balcalc.LocalPlatform
+import org.vetalguru.balcalc.PhotoChange
 import org.vetalguru.balcalc.QrShare
 import org.vetalguru.balcalc.core.CartridgeForm
 import org.vetalguru.balcalc.core.CartridgeItem
@@ -64,13 +66,13 @@ import org.vetalguru.balcalc.res.*
 /** Inner pages of the Rifles tab, as a stack. */
 internal sealed interface Route {
     data object Lists : Route
-    class Rifle(form: RifleForm) : Route {
+    class Rifle(form: RifleForm) : Route, WithPhoto() {
         var form by mutableStateOf(form)
     }
     /** The published scope or rifle catalogs; a pick fills the rifle form. */
     class LibraryScopes(val pick: (LibraryScope, ScopeClick) -> Unit) : Route
     class LibraryRifles(val pick: (LibraryRifle) -> Unit) : Route
-    class Cartridge(form: CartridgeForm) : Route {
+    class Cartridge(form: CartridgeForm) : Route, WithPhoto() {
         var form by mutableStateOf(form)
     }
     class Factory : Route
@@ -79,6 +81,26 @@ internal sealed interface Route {
     class Bullet(val form: org.vetalguru.balcalc.core.BulletForm) : Route
     data object Truing : Route
     data object Group : Route
+}
+
+/** An editor's picture: loaded once, saved with the form only when changed. */
+internal open class WithPhoto {
+    var photo by mutableStateOf<ByteArray?>(null)
+    var photoChanged by mutableStateOf(false)
+    var photoLoaded = false
+
+    fun change(image: ByteArray?) {
+        photo = image
+        photoChanged = true
+    }
+
+    val photoChange get() = if (photoChanged) PhotoChange(photo) else null
+
+    suspend fun load(model: AppModel, kind: String, id: Long) {
+        if (photoLoaded) return
+        photoLoaded = true
+        if (id > 0) photo = model.photo(kind, id)
+    }
 }
 
 /** The open inner page of the Rifles tab, so Back can close it first. */
@@ -130,6 +152,14 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     var importMenu by remember { mutableStateOf(false) }
     var newMenu by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf<Triple<String, Long, String>?>(null) }
+    // The pictures of the shown list, as small images.
+    val photoKind = if (nav.tab == 0) "rifle" else "cartridge"
+    var thumbs by remember { mutableStateOf(emptyMap<Long, ImageBitmap>()) }
+    LaunchedEffect(photoKind, model.photosRevision, st.rifles, st.cartridges) {
+        thumbs = runCatching {
+            model.photos(photoKind).mapNotNull { (id, b) -> pictureOf(b)?.let { id to it } }.toMap()
+        }.getOrDefault(emptyMap())
+    }
     val imported = stringResource(Res.string.imported)
     val copied = stringResource(Res.string.copied)
     val saved = stringResource(Res.string.saved)
@@ -224,6 +254,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                     onEdit = { id -> model.act { nav.push(Route.Rifle(model.rifleForm(id))) } },
                     onShare = ::share,
                     onQr = ::showQr,
+                    thumbs = thumbs,
                     onDelete = { id, name -> deleting = Triple("rifle", id, name) },
                 )
             } else {
@@ -248,6 +279,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                     onEdit = { id -> model.act { nav.push(Route.Cartridge(model.cartridgeForm(id))) } },
                     onShare = ::share,
                     onQr = ::showQr,
+                    thumbs = thumbs,
                     onDelete = { id, name -> deleting = Triple("cartridge", id, name) },
                     onShotLog = { id ->
                         model.selectCartridge(id)
@@ -287,6 +319,7 @@ private fun ItemList(
     onEdit: (Long) -> Unit,
     onShare: (String, Long, Boolean) -> Unit,
     onQr: (String, Long, String) -> Unit,
+    thumbs: Map<Long, ImageBitmap> = emptyMap(),
     onDelete: (Long, String) -> Unit,
     onShotLog: ((Long) -> Unit)? = null,
 ) {
@@ -308,6 +341,7 @@ private fun ItemList(
                     .testTag("$kind:${item.title}"),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                thumbs[item.id]?.let { Thumbnail(it, 44.dp, Modifier.padding(end = 12.dp).testTag("thumb:${item.title}")) }
                 Column(Modifier.weight(1f).alpha(if (item.bright) 1f else 0.55f)) {
                     Text(item.title, fontSize = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (item.subtitle.isNotEmpty()) {
@@ -383,6 +417,7 @@ private fun EditorPage(
 @Composable
 private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
     var f by route::form
+    LaunchedEffect(route) { route.load(model, "rifle", route.form.rifleId) }
     val onDone = nav::back
     var error by remember { mutableStateOf<String?>(null) }
     var reticles by remember { mutableStateOf(emptyList<ReticleItem>()) }
@@ -398,7 +433,7 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
         title = stringResource(if (f.rifleId > 0) Res.string.edit_rifle else Res.string.new_rifle),
         error = error,
         onCancel = onDone,
-        onSave = { scope.launch { error = model.saveRifle(f); if (error == null) onDone() } },
+        onSave = { scope.launch { error = model.saveRifle(f, route.photoChange); if (error == null) onDone() } },
     ) { wide ->
         Section(stringResource(Res.string.rifle)) {
             LibraryButton("rifleFromLibrary") {
@@ -406,6 +441,7 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
             }
             TextInput(stringResource(Res.string.rifle_name_hint), f.name, { f = f.copy(name = it) }, tag = "rifleName")
             TextInput(stringResource(Res.string.caliber_hint), f.caliber, { f = f.copy(caliber = it) }, tag = "rifleCaliber")
+            PhotoRow(route.photo, route::change)
             Fields(
                 wide,
                 { mod -> NumberField(stringResource(Res.string.sight_height), f.sightHeightCm, { f = f.copy(sightHeightCm = it) }, mod, cm, from = 0.0, to = 20.0) },
@@ -473,6 +509,7 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
 @Composable
 private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: ArmoryNav) {
     var f by route::form
+    LaunchedEffect(route) { route.load(model, "cartridge", route.form.cartridgeId) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val fromLibrary = f.libraryBulletId > 0
@@ -481,11 +518,12 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
         title = stringResource(if (f.cartridgeId > 0) Res.string.edit_cartridge else Res.string.new_cartridge),
         error = error,
         onCancel = nav::back,
-        onSave = { scope.launch { error = model.saveCartridge(f); if (error == null) nav.back() } },
+        onSave = { scope.launch { error = model.saveCartridge(f, route.photoChange); if (error == null) nav.back() } },
     ) { wide ->
         Section(stringResource(Res.string.cartridge)) {
             TextInput(stringResource(Res.string.cartridge_name_hint), f.name, { f = f.copy(name = it) }, tag = "cartridgeName")
             TextInput(stringResource(Res.string.caliber_hint), f.caliber, { f = f.copy(caliber = it) }, tag = "cartridgeCaliber")
+            PhotoRow(route.photo, route::change)
         }
         Section(stringResource(Res.string.bullet)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

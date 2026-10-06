@@ -464,4 +464,11 @@
     <string name="qr_picture">From a picture</string>
     <string name="qr_progress">%1$s of %2$s parts read: scan the next one.</string>
     <string name="qr_not_found">No BalCalc QR code found.</string>
+    <string name="photo">Photo</string>
+    <string name="photo_choose">Choose a picture</string>
+    <string name="photo_take">Take a photo</string>
+    <string name="photo_remove">Remove the photo</string>
+    <string name="photo_bad">This file is not a picture.</string>
+    <string name="core_35">The picture is too large.</string>
+    <string name="core_36">The picture is damaged.</string>
 </resources>

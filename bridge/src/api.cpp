@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <cstdint>
 #include <cmath>
 #include <functional>
 #include <map>
@@ -65,6 +66,7 @@
 //   importShared {text}               → state
 //   importFiles {files:[{name, content}]} → {imported, problems:[{file, message}]}
 //   stationPressure {qnhHpa, altitudeM} → hPa
+//   photos {kind} → {id: base64} / photo {kind, id} → base64 / setPhoto {kind, id, image} (empty removes)
 //   situations / saveSituation {name} / applySituation {name} → state / deleteSituation {name}
 //   compareCurves {maxRangeM, points, pairs:[{rifleId, cartridgeId}]} → [table + label]
 //   pairOptions                     → [{rifleId, rifleName, cartridges:[{id, name}]}]
@@ -91,6 +93,8 @@ constexpr std::size_t kMaxExtraWindZones = 2; // three wind zones in all
 constexpr const char* kTargetSpeedUnitKey = "ui.target_speed_unit";
 constexpr const char* kHoldModeKey = "ui.hold_mode";
 constexpr const char* kSituationsKey = "ui.situations";
+// The app sends pictures shrunk to about 640 px; this only stops mistakes.
+constexpr std::size_t kMaxPhotoBytes = 2u << 20;
 constexpr const char* kTableFromKey = "ui.table.from_m";
 constexpr const char* kTableToKey = "ui.table.to_m";
 constexpr const char* kTableStepKey = "ui.table.step_m";
@@ -163,6 +167,71 @@ json Matching(const json& catalog, const std::string& filter) {
         }
     }
     return out;
+}
+
+// Pictures travel through the JSON as base64 (RFC 4648, with padding).
+std::string ToBase64(const std::vector<std::uint8_t>& data) {
+    static constexpr char kAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    std::string out;
+    out.reserve((data.size() + 2) / 3 * 4);
+    for (std::size_t i = 0; i < data.size(); i += 3) {
+        const std::uint32_t n = (std::uint32_t{data[i]} << 16) |
+                                (i + 1 < data.size() ? std::uint32_t{data[i + 1]} << 8 : 0) |
+                                (i + 2 < data.size() ? std::uint32_t{data[i + 2]} : 0);
+        out += kAlphabet[(n >> 18) & 63];
+        out += kAlphabet[(n >> 12) & 63];
+        out += i + 1 < data.size() ? kAlphabet[(n >> 6) & 63] : '=';
+        out += i + 2 < data.size() ? kAlphabet[n & 63] : '=';
+    }
+    return out;
+}
+
+std::vector<std::uint8_t> FromBase64(const std::string& text) {
+    std::vector<std::uint8_t> out;
+    std::uint32_t bits = 0;
+    int count = 0;
+    for (const char c : text) {
+        int v = -1;
+        if (c >= 'A' && c <= 'Z') {
+            v = c - 'A';
+        } else if (c >= 'a' && c <= 'z') {
+            v = c - 'a' + 26;
+        } else if (c >= '0' && c <= '9') {
+            v = c - '0' + 52;
+        } else if (c == '+' || c == '-') {
+            v = 62;
+        } else if (c == '/' || c == '_') {
+            v = 63;
+        } else if (c == '=' || std::isspace(static_cast<unsigned char>(c))) {
+            continue;
+        } else {
+            throw Failure("The picture is damaged.");
+        }
+        bits = (bits << 6) | static_cast<std::uint32_t>(v);
+        if (++count == 4) {
+            out.push_back(static_cast<std::uint8_t>(bits >> 16));
+            out.push_back(static_cast<std::uint8_t>(bits >> 8));
+            out.push_back(static_cast<std::uint8_t>(bits));
+            bits = 0;
+            count = 0;
+        }
+    }
+    if (count == 2) {
+        out.push_back(static_cast<std::uint8_t>(bits >> 4));
+    } else if (count == 3) {
+        out.push_back(static_cast<std::uint8_t>(bits >> 10));
+        out.push_back(static_cast<std::uint8_t>(bits >> 2));
+    }
+    return out;
+}
+
+// "rifle" or "cartridge": what may have a picture.
+std::string PhotoKind(const json& a) {
+    const std::string kind = Str(a, "kind");
+    if (kind != "rifle" && kind != "cartridge") {
+        throw Failure("Unknown kind of record.");
+    }
+    return kind;
 }
 
 // ---- Forms <-> JSON ---------------------------------------------------------
@@ -1234,6 +1303,40 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
              Must(al::DeleteCartridge(s.db, IdOf(a)));
              s.Refresh();
              return s.State();
+         }},
+        // Pictures of rifles and cartridges
+        {"photos",
+         [](I& s, const json& a) -> json {
+             const std::string kind = PhotoKind(a);
+             json out = json::object();
+             for (const Id id : Must(bs::PhotoOwners(s.db, kind))) {
+                 if (auto image = Must(bs::GetPhoto(s.db, kind, id))) {
+                     out[std::to_string(id)] = ToBase64(*image);
+                 }
+             }
+             return out;
+         }},
+        {"photo",
+         [](I& s, const json& a) -> json {
+             const auto image = Must(bs::GetPhoto(s.db, PhotoKind(a), IdOf(a)));
+             return image ? ToBase64(*image) : std::string{};
+         }},
+        {"setPhoto",
+         [](I& s, const json& a) -> json {
+             const std::string kind = PhotoKind(a);
+             const Id id = IdOf(a);
+             const bool exists = kind == "rifle"
+                                     ? Must(bs::Repository<bs::RifleRecord>(s.db).Get(id)).has_value()
+                                     : Must(bs::Repository<bs::CartridgeRecord>(s.db).Get(id)).has_value();
+             if (!exists) {
+                 throw Failure("Save the record first.");
+             }
+             const std::vector<std::uint8_t> image = FromBase64(Str(a, "image"));
+             if (image.size() > kMaxPhotoBytes) {
+                 throw Failure("The picture is too large.");
+             }
+             Must(bs::SetPhoto(s.db, kind, id, image));
+             return json::object();
          }},
         {"cartridgeFormWithBullet",
          [](I& s, const json& a) -> json {

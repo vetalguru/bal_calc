@@ -21,6 +21,12 @@ interface Platform {
     /** Whether [scanQr] has a camera to use. */
     val canScanQr: Boolean get() = false
 
+    /** Whether [takePhoto] has a camera to use. */
+    val canTakePhoto: Boolean get() = false
+
+    /** A picture from the camera (asking for it first); null when cancelled. */
+    suspend fun takePhoto(): ByteArray? = null
+
     /** One QR code read by the camera (asking for it first); null when cancelled. */
     suspend fun scanQr(): String? = null
 }
