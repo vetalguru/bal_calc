@@ -51,6 +51,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.core.RangeTable
 import org.vetalguru.balcalc.core.TableRow
 import org.vetalguru.balcalc.fixed
@@ -90,7 +91,7 @@ fun TableScreen(model: AppModel, onRangeChosen: () -> Unit) {
             NumberField(stringResource(Res.string.step), st.tableStepM, { span("tableStepM", it) }, Modifier.weight(1f), m, 0, 5.0, 500.0)
         }
         if (!table.ok && model.ready) {
-            Text(table.error, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(12.dp))
+            Text(coreText(table.error), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(12.dp))
         }
         when (tab) {
             0 -> RangeCard(table, st.moa, st.conditions.targetRangeM) { r ->

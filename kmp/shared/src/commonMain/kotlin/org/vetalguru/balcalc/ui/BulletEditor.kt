@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.core.BcBand
 import org.vetalguru.balcalc.core.BulletForm
 import org.vetalguru.balcalc.res.Res
@@ -58,7 +59,7 @@ fun BulletEditor(model: AppModel, initial: BulletForm, onDone: () -> Unit) {
                 Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 16.dp).testTag("formError")) }
+                error?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 16.dp).testTag("formError")) }
                 Section(stringResource(Res.string.bullet)) {
                     TextInput(stringResource(Res.string.bullet_name_hint), f.name, { f = f.copy(name = it) }, tag = "bulletEditName")
                     Fields(
