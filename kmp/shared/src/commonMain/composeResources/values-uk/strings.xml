@@ -288,4 +288,22 @@
     <string name="add_zone">Додати зону</string>
     <string name="remove_zone">Прибрати</string>
     <string name="quick_zone_note">Зона 1 з %1$s, до %2$s м: решта — на сторінці «Умови».</string>
+    <string name="moving_target">Рухома ціль</string>
+    <string name="target_speed">Швидкість цілі</string>
+    <string name="unit_kmh">км/год</string>
+    <string name="moves_left">← Ліворуч</string>
+    <string name="moves_right">Праворуч →</string>
+    <string name="target_angle">Кут до лінії вогню (90 = поперек)</string>
+    <string name="lead_value">Упередження: %1$s</string>
+    <string name="lead_moves">За час польоту ціль зміститься на %1$s м.</string>
+    <string name="lead_total">По горизонталі з упередженням: %1$s</string>
+    <string name="lead_meet">Куля зустріне ціль на %1$s м: по вертикалі %2$s.</string>
+    <string name="col_lead">Упер.\n%1$s</string>
+    <string name="col_lead_clicks">Упер.\nкліки</string>
+    <string name="stopwatch">Секундомір</string>
+    <string name="stopwatch_hint">Старт, коли ціль проходить мітку, стоп — на наступній.</string>
+    <string name="stopwatch_distance">Між мітками</string>
+    <string name="stopwatch_start">Старт</string>
+    <string name="stopwatch_stop">Стоп</string>
+    <string name="stopwatch_result">%1$s с: %2$s</string>
 </resources>

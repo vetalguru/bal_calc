@@ -113,5 +113,41 @@ TEST(PhysicsAnalysis, PointBlankBeyondTheEnd) {
     EXPECT_DOUBLE_EQ(pbr->far_m, 300.0);
 }
 
+TEST(PhysicsLead, StandingTargetNeedsNoLead) {
+    const Trajectory traj = Fly(Zeroed308(100.0), 1000.0);
+    const auto lead = MovingTargetLead(traj, 500.0, 0.0);
+    ASSERT_TRUE(lead);
+    EXPECT_DOUBLE_EQ(lead->hold_rad, 0.0);
+    EXPECT_DOUBLE_EQ(lead->range_m, 500.0);
+    EXPECT_NEAR(lead->time_s, traj.AtSlantRange(500.0)->time_s, 1e-12);
+}
+
+TEST(PhysicsLead, CrossingTargetMovesSpeedTimesFlightTime) {
+    const Trajectory traj = Fly(Zeroed308(100.0), 1000.0);
+    for (double v : {1.5, 5.0, -8.0}) {
+        const auto lead = MovingTargetLead(traj, 600.0, v);
+        ASSERT_TRUE(lead);
+        const double t = traj.AtSlantRange(600.0)->time_s;
+        EXPECT_NEAR(lead->lateral_m, v * t, 1e-12);
+        EXPECT_NEAR(lead->hold_rad, std::atan2(v * t, 600.0), 1e-12);
+        // 5 m/s at 600 m with ~0.95 s of flight: ~8 mrad.
+        EXPECT_EQ(lead->hold_rad > 0.0, v > 0.0);
+    }
+}
+
+TEST(PhysicsLead, TargetGoingAwayIsMetFurther) {
+    const Trajectory traj = Fly(Zeroed308(100.0), 1000.0);
+    const auto away = MovingTargetLead(traj, 500.0, 0.0, 10.0);
+    const auto toward = MovingTargetLead(traj, 500.0, 0.0, -10.0);
+    ASSERT_TRUE(away && toward);
+    // The meeting point is consistent: the target got there in the flight time.
+    EXPECT_NEAR(away->range_m, 500.0 + 10.0 * traj.AtSlantRange(away->range_m)->time_s, 1e-6);
+    EXPECT_NEAR(toward->range_m, 500.0 - 10.0 * traj.AtSlantRange(toward->range_m)->time_s, 1e-6);
+    EXPECT_GT(away->range_m, 505.0);
+    EXPECT_LT(toward->range_m, 495.0);
+    // Beyond the flight: no meeting point.
+    EXPECT_FALSE(MovingTargetLead(traj, 995.0, 0.0, 20.0));
+}
+
 } // namespace
 } // namespace ballistics

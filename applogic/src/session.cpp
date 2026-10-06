@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include <sqlite_manager/transaction.h>
 
@@ -60,6 +61,17 @@ std::vector<WindInput> WindsFromText(const std::string& text) {
     return winds;
 }
 
+// Speeds of a moving target across the line of fire (right positive) and
+// along it (away positive).
+std::pair<double, double> TargetVelocity(const SessionConditions& s) {
+    const double h = units::DegToRad(s.target_heading_deg);
+    return {s.target_speed_mps * std::sin(h), s.target_speed_mps * std::cos(h)};
+}
+
+// How much further than the range a target going away can take the
+// bullet: 5 s of its motion.
+double LeadReachM(const SessionConditions& s) { return std::max(0.0, s.target_speed_mps) * 5.0; }
+
 } // namespace
 
 storage::ConditionsRecord ToConditions(const SessionConditions& s) {
@@ -107,6 +119,8 @@ Result<SessionConditions> LoadSession(storage::Database& db) {
                             {"magnification", &s.magnification},
                             {"target_height_cm", &s.target_height_cm},
                             {"wind_gust_mps", &s.wind_gust_mps},
+                            {"target_speed_mps", &s.target_speed_mps},
+                            {"target_heading_deg", &s.target_heading_deg},
                             {"weather_at", &s.weather_at_unix}};
     for (const Field& f : fields) {
         auto v = get(f.key);
@@ -170,6 +184,8 @@ Status SaveSession(storage::Database& db, const SessionConditions& s) {
           {"density_altitude_m", opt(s.density_altitude_m)},
           {"target_height_cm", Num(s.target_height_cm)},
           {"wind_gust_mps", Num(s.wind_gust_mps)},
+          {"target_speed_mps", Num(s.target_speed_mps)},
+          {"target_heading_deg", Num(s.target_heading_deg)},
           {"weather_at", Num(s.weather_at_unix)},
           {"winds", WindsToText(s.winds)}}) {
         if (Status st = set(key, value); !st) {
@@ -195,7 +211,7 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
     constexpr double kPointBlankReachM = 1000.0;
     const storage::ConditionsRecord conditions = ToConditions(s);
     auto sol = storage::Solve(profile, conditions,
-                              std::max(s.target_range_m, kPointBlankReachM) + 1.0);
+                              std::max(s.target_range_m + LeadReachM(s), kPointBlankReachM) + 1.0);
     if (!sol) {
         out.error = sol.error().message;
         return out;
@@ -255,6 +271,28 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
         }
     }
 
+    if (s.target_speed_mps > 0.0) {
+        const auto [crossing, radial] = TargetVelocity(s);
+        const auto lead = MovingTargetLead(traj, s.target_range_m, crossing, radial);
+        const auto meet = lead ? traj.AtSlantRange(lead->range_m) : std::nullopt;
+        if (meet) {
+            out.has_lead = true;
+            out.lead = FromRad(lead->hold_rad, unit);
+            out.lead_cm = lead->lateral_m * 100.0;
+            out.lead_range_m = lead->range_m;
+            const double total = meet->hold_windage_rad + lead->hold_rad;
+            out.lead_total_windage = FromRad(total, unit);
+            out.lead_elevation = FromRad(meet->hold_elevation_rad, unit);
+            if (profile.scope) {
+                const double h = profile.scope->click_horizontal_rad;
+                out.lead_clicks = storage::ToClicks(lead->hold_rad, h);
+                out.lead_total_windage_clicks = storage::ToClicks(total, h);
+                out.lead_elevation_clicks =
+                    storage::ToClicks(meet->hold_elevation_rad, profile.scope->click_vertical_rad);
+            }
+        }
+    }
+
     const Apex apex = MaxOrdinate(traj, s.target_range_m);
     out.apex_cm = apex.height_m * 100.0;
     out.apex_range_m = apex.slant_range_m;
@@ -301,7 +339,8 @@ RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionC
         table.error = "Check the table range and step.";
         return table;
     }
-    auto sol = storage::Solve(profile, ToConditions(s), to_m + 1.0);
+    auto sol = storage::Solve(profile, ToConditions(s), to_m + LeadReachM(s) + 1.0);
+    const auto [crossing, radial] = TargetVelocity(s);
     if (!sol) {
         table.error = sol.error().message;
         return table;
@@ -332,6 +371,15 @@ RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionC
         row.mach = pt->mach;
         row.energy_j = pt->energy_j;
         row.time_s = pt->time_s;
+        if (s.target_speed_mps > 0.0 && r > 0.0) {
+            if (const auto lead = MovingTargetLead(traj, r, crossing, radial)) {
+                row.lead = FromRad(lead->hold_rad, unit);
+                if (profile.scope) {
+                    row.lead_clicks =
+                        storage::ToClicks(lead->hold_rad, profile.scope->click_horizontal_rad);
+                }
+            }
+        }
         table.rows.push_back(row);
     }
     table.ok = true;

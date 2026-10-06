@@ -85,4 +85,26 @@ std::optional<PointBlank> PointBlankRange(const Trajectory& trajectory, double h
     return out;
 }
 
+std::optional<Lead> MovingTargetLead(const Trajectory& trajectory, double range_m,
+                                     double crossing_mps, double radial_mps) {
+    Lead lead;
+    lead.range_m = range_m;
+    for (int i = 0; i < 50; ++i) {
+        const auto p = trajectory.AtSlantRange(lead.range_m);
+        if (!p) {
+            return std::nullopt;
+        }
+        const double next = range_m + radial_mps * p->time_s;
+        const bool done = std::abs(p->time_s - lead.time_s) < 1e-9;
+        lead.time_s = p->time_s;
+        if (done) {
+            break;
+        }
+        lead.range_m = next;
+    }
+    lead.lateral_m = crossing_mps * lead.time_s;
+    lead.hold_rad = std::atan2(lead.lateral_m, lead.range_m);
+    return lead;
+}
+
 } // namespace ballistics

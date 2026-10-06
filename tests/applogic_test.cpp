@@ -549,5 +549,44 @@ TEST_F(AppLogic, WindBracketIsTheSecondSpeed) {
     EXPECT_DOUBLE_EQ(LoadSession(db_).value().wind_gust_mps, 6.0);
 }
 
+TEST_F(AppLogic, MovingTargetLead) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    SessionConditions s = AtZero(500.0);
+    s.winds = {{3.0, 90.0, 0.0}};
+    const SolutionSummary still = Summarize(p, s, AngleUnit::kMrad);
+    EXPECT_FALSE(still.has_lead);
+
+    s.target_speed_mps = 4.0; // a walking... running man, to the right
+    s.target_heading_deg = 90.0;
+    const SolutionSummary r = Summarize(p, s, AngleUnit::kMrad);
+    ASSERT_TRUE(r.ok && r.has_lead);
+    EXPECT_NEAR(r.lead, units::RadToMrad(std::atan2(4.0 * r.time_s, 500.0)), 1e-9);
+    EXPECT_NEAR(r.lead_cm, 400.0 * r.time_s, 1e-9);
+    EXPECT_NEAR(r.lead_total_windage, r.windage + r.lead, 1e-9);
+    EXPECT_NEAR(r.lead_range_m, 500.0, 1e-9);
+    EXPECT_NEAR(r.lead_elevation, r.elevation, 1e-9);
+    EXPECT_NEAR(r.lead_clicks, std::round(units::RadToMoa(r.lead * 1e-3) * 4.0), 1e-9); // 1/4 MOA
+
+    s.target_heading_deg = 270.0; // to the left
+    EXPECT_NEAR(Summarize(p, s, AngleUnit::kMrad).lead, -r.lead, 1e-9);
+
+    s.target_heading_deg = 0.0; // straight away: no lead, a longer shot
+    const SolutionSummary away = Summarize(p, s, AngleUnit::kMrad);
+    EXPECT_NEAR(away.lead, 0.0, 1e-9);
+    EXPECT_GT(away.lead_range_m, 502.0);
+    EXPECT_GT(away.lead_elevation, away.elevation);
+
+    // The range card has the same lead at the same range.
+    s.target_heading_deg = 90.0;
+    const RangeTable t = BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 100.0);
+    ASSERT_TRUE(t.ok);
+    EXPECT_DOUBLE_EQ(t.rows.front().lead, 0.0);
+    EXPECT_NEAR(t.rows[5].lead, r.lead, 1e-9);
+    EXPECT_GT(t.rows[10].lead, t.rows[5].lead); // flight time grows faster than range
+
+    ASSERT_TRUE(SaveSession(db_, s).ok());
+    EXPECT_DOUBLE_EQ(LoadSession(db_).value().target_speed_mps, 4.0);
+}
+
 } // namespace
 } // namespace ballistics::applogic

@@ -43,6 +43,11 @@ struct SessionConditions {
     // the gusts; 0 = off. The solution then gives the windage for both.
     double wind_gust_mps = 0.0;
     double weather_at_unix = 0.0;   // when the air was last entered, 0 = unknown
+    // A moving target: its speed and where it heads, like the wind but the
+    // way it goes: 0 = away, 90 = to the right across the line of fire,
+    // 180 = toward the shooter, 270 = to the left. Speed 0 = standing.
+    double target_speed_mps = 0.0;
+    double target_heading_deg = 90.0;
 };
 
 storage::ConditionsRecord ToConditions(const SessionConditions& s);
@@ -112,6 +117,18 @@ struct SolutionSummary {
     double gust_windage = 0.0;
     double gust_windage_clicks = 0.0;
     double gust_windage_cm = 0.0;
+    // A moving target (has_lead): the extra aim in the direction it moves,
+    // the windage with it, and where the bullet meets the target (its
+    // elevation, when the target comes closer or goes away meanwhile).
+    bool has_lead = false;
+    double lead = 0.0; // right positive, like windage
+    double lead_clicks = 0.0;
+    double lead_cm = 0.0; // how far the target moves during the flight
+    double lead_total_windage = 0.0;
+    double lead_total_windage_clicks = 0.0;
+    double lead_range_m = 0.0;
+    double lead_elevation = 0.0;
+    double lead_elevation_clicks = 0.0;
     std::vector<Warning> warnings;
 };
 
@@ -134,6 +151,8 @@ struct RangeRow {
     double mach = 0.0;
     double energy_j = 0.0;
     double time_s = 0.0;
+    double lead = 0.0; // for a moving target (see SessionConditions), 0 otherwise
+    double lead_clicks = 0.0;
 };
 
 struct RangeTable {

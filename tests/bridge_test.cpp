@@ -122,6 +122,20 @@ TEST_F(Bridge, WindZonesAndGust) {
     EXPECT_TRUE(Ok("setConditions", {{"windZones", json::array()}}).at("windZones").empty());
 }
 
+TEST_F(Bridge, MovingTarget) {
+    Sample();
+    EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "kmh");
+    EXPECT_FALSE(Ok("solution").at("hasLead").get<bool>());
+    Ok("setConditions", {{"targetSpeedMps", 5}, {"targetHeadingDeg", 270}, {"targetSpeedUnit", "mps"}});
+    const json sol = Ok("solution");
+    ASSERT_TRUE(sol.at("hasLead").get<bool>());
+    EXPECT_LT(sol.at("lead").get<double>(), -1.0); // to the left, ~5 mrad at 300 m
+    EXPECT_NEAR(sol.at("leadCm").get<double>(), -500.0 * sol.at("time").get<double>(), 1e-6);
+    const json table = Ok("rangeTable");
+    EXPECT_LT(table.at("rows").back().at("lead").get<double>(), sol.at("lead").get<double>());
+    EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mps");
+}
+
 TEST_F(Bridge, DensityAltitudeAndWarnings) {
     Sample();
     json sol = Ok("solution");

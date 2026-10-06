@@ -51,6 +51,9 @@ data class Conditions(
     val windUntilM: Double = 0.0,
     val windZones: List<WindZoneIn> = emptyList(),
     val windGustMps: Double = 0.0,
+    val targetSpeedMps: Double = 0.0,
+    val targetHeadingDeg: Double = 90.0,
+    val targetSpeedUnit: String = "kmh",
 )
 
 /** A wind zone after the first: up to `untilM` (the last one: to the end). */
@@ -111,6 +114,15 @@ data class Solution(
     val gustWindage: Double = 0.0,
     val gustWindageClicks: Double = 0.0,
     val gustWindageCm: Double = 0.0,
+    val hasLead: Boolean = false,
+    val lead: Double = 0.0,
+    val leadClicks: Double = 0.0,
+    val leadCm: Double = 0.0,
+    val leadTotalWindage: Double = 0.0,
+    val leadTotalWindageClicks: Double = 0.0,
+    val leadRangeM: Double = 0.0,
+    val leadElevation: Double = 0.0,
+    val leadElevationClicks: Double = 0.0,
     // Reticle hold (present with a scope).
     val hasReticle: Boolean = false,
     val holdMode: String = "",
@@ -145,6 +157,8 @@ data class TableRow(
     val mach: Double = 0.0,
     val energy: Double = 0.0,
     val time: Double = 0.0,
+    val lead: Double = 0.0,
+    val leadClicks: Double = 0.0,
 )
 
 @Serializable
