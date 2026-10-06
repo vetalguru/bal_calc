@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -315,6 +316,51 @@ class FlowTest {
             shot("reticle-$id")
         }
         db.delete()
+    }
+
+    private fun ComposeUiTest.hasText(text: String): Boolean {
+        announce()
+        return onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+    }
+
+    private fun ComposeUiTest.chooseLanguage(name: String) {
+        onNodeWithTag("navSettings").performClick()
+        waitUntil { exists("language") }
+        onNodeWithTag("language").performClick()
+        onAllNodesWithText(name).onLast().performClick()
+    }
+
+    @Test
+    fun languages() = runDesktopComposeUiTest(400, 820) {
+        val db = startWithSample()
+        try {
+            chooseLanguage("Українська")
+            waitUntil(timeoutMillis = 10_000) { hasText("Рішення") } // the bottom bar
+            shot("uk-settings")
+            onNodeWithTag("navSolution").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+            shot("uk-solution")
+
+            // A message of the core, in Ukrainian: a cartridge without a name.
+            onNodeWithTag("navArmory").performClick()
+            onNodeWithTag("cartridgesTab").performClick()
+            onNodeWithTag("new").performClick()
+            onNodeWithTag("newEmptyCartridge").performClick()
+            waitUntil { exists("save") }
+            onNodeWithTag("save").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("formError") }
+            kotlin.test.assertEquals("Введіть назву набою.", shown("formError"))
+            onNodeWithText("Скасувати").performClick()
+
+            chooseLanguage("Русский")
+            waitUntil(timeoutMillis = 10_000) { hasText("Решение") }
+            shot("ru-settings")
+        } finally {
+            // The language is process-wide: back to the system's for the other tests.
+            chooseLanguage("English")
+            waitUntil(timeoutMillis = 10_000) { hasText("Solve") }
+            db.delete()
+        }
     }
 
     @Test

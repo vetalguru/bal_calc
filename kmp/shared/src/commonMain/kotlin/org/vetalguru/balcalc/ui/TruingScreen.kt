@@ -36,6 +36,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.core.Shot
 import org.vetalguru.balcalc.core.TruingResult
 import org.vetalguru.balcalc.fixed
@@ -66,7 +67,7 @@ fun LogShotDialog(model: AppModel, rangeGuess: Double, elevationGuess: Double, o
                     NumberField(stringResource(Res.string.windage_hit), windage, { windage = it }, Modifier.fillMaxWidth(), unit, 2, -100.0, 100.0)
                 }
                 TextInput(stringResource(Res.string.notes_hint), notes, { notes = it }, tag = "hitNotes")
-                error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                error?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error) }
             }
         },
         confirmButton = {
@@ -137,7 +138,7 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit) {
                             { m -> NumberField(stringResource(Res.string.poi_up), pair.offsetUpCm, { set(it, pair.offsetRightCm) }, m, cm, from = -100.0, to = 100.0, tag = "offsetUp") },
                             { m -> NumberField(stringResource(Res.string.poi_right), pair.offsetRightCm, { set(pair.offsetUpCm, it) }, m, cm, from = -100.0, to = 100.0) },
                         )
-                        offsetError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                        offsetError?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error) }
                     }
                 }
 
@@ -197,7 +198,7 @@ private fun TruingResultCard(r: TruingResult, unit: String, onApply: () -> Unit)
     Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             if (!r.ok) {
-                Text(r.error, color = MaterialTheme.colorScheme.error)
+                Text(coreText(r.error), color = MaterialTheme.colorScheme.error)
                 return@Column
             }
             Text(stringResource(Res.string.mv_change, r.velocityBefore.fixed(1), r.velocityAfter.fixed(1)),

@@ -273,4 +273,28 @@
     <string name="about_data">Bundled data: cartridges and reticles from BallisticCalculator (LGPL-2.1), Lapua Doppler-radar drag curves, manufacturer-published BCs (Berger, Hornady, Sierra).</string>
     <string name="seed_report">Starter library: %1$s records imported.</string>
 
+    <!-- Messages of the C++ core (bridge errors), shown translated; see CoreMessages.kt -->
+    <string name="core_01">Enter a rifle name.</string>
+    <string name="core_02">Enter a cartridge name.</string>
+    <string name="core_03">Sight height must be between 0 and 30 cm.</string>
+    <string name="core_04">Point-of-impact shift must be within 100 cm.</string>
+    <string name="core_05">Muzzle velocity must be between 50 and 2000 m/s.</string>
+    <string name="core_06">Ballistic coefficient must be between 0 and 2.</string>
+    <string name="core_07">Enter the bullet weight.</string>
+    <string name="core_08">Bullet diameter must be between 0 and 1 inch.</string>
+    <string name="core_09">Bullet length and twist cannot be negative.</string>
+    <string name="core_10">Zero range must be between 10 and 1000 m.</string>
+    <string name="core_11">Enter the scope click value.</string>
+    <string name="core_12">Zero pressure must be between 300 and 1200 hPa.</string>
+    <string name="core_13">Humidity must be between 0 and 100 %.</string>
+    <string name="core_14">Enter a target range.</string>
+    <string name="core_15">The bullet does not reach this range.</string>
+    <string name="core_16">Check the table range and step.</string>
+    <string name="core_17">Check the scope magnification range.</string>
+    <string name="core_18">Enter the bullet name.</string>
+    <string name="core_19">Log at least one hit to true the rifle and cartridge.</string>
+    <string name="core_20">The bullet does not reach one of the logged ranges.</string>
+    <string name="core_21">Nothing to apply.</string>
+    <string name="core_22">Each BC band needs a velocity and a BC between 0 and 2.</string>
+    <string name="core_23">This bullet is used by a cartridge and cannot be deleted.</string>
 </resources>

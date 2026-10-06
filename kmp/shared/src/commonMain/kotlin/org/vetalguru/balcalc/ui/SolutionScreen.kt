@@ -62,6 +62,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.core.Solution
 import org.vetalguru.balcalc.fixed
 import org.vetalguru.balcalc.res.Res
@@ -110,7 +111,7 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
 
                 if (!sol.ok && model.ready) {
                     Text(
-                        sol.error,
+                        coreText(sol.error),
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 16.sp,
                         modifier = Modifier.padding(horizontal = 16.dp),

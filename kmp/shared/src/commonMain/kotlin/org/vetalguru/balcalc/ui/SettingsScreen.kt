@@ -58,7 +58,7 @@ fun SettingsScreen(model: AppModel) {
                     "ru" to "Русский",
                     "en" to "English",
                 ),
-                st.language, model::setLanguage,
+                st.language, model::setLanguage, Modifier.testTag("language"),
             )
         }
         Section(stringResource(Res.string.about)) {

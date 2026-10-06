@@ -45,6 +45,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.BackHandler
 import org.vetalguru.balcalc.LocalPlatform
 import org.vetalguru.balcalc.core.CartridgeForm
@@ -337,7 +338,7 @@ private fun EditorPage(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 if (!error.isNullOrEmpty()) {
-                    Text(error, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 16.dp).testTag("formError"))
+                    Text(coreText(error), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 16.dp).testTag("formError"))
                 }
                 content(wide)
                 Button(onClick = onSave, modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 24.dp)) { Text(save) }

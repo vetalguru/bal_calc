@@ -8,6 +8,7 @@ plugins {
 
 kotlin {
     jvmToolchain(17)
+    compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
     android {
         namespace = "org.vetalguru.balcalc.shared"
@@ -55,6 +56,8 @@ tasks.named<Test>("desktopTest") {
     dependsOn(":desktopApp:mergedResources")
     environment("BALCALC_RESOURCES", resources.get().asFile.path)
     systemProperty("balcalc.screenshots", layout.buildDirectory.dir("screenshots").get().asFile.path)
+    // The tests look for English texts: the system language must not matter.
+    jvmArgs("-Duser.language=en", "-Duser.country=US")
 }
 
 compose.resources {

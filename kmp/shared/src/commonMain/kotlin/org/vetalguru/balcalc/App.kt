@@ -69,17 +69,20 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
     } else {
         lightColorScheme(primary = Color(0xFFE65100), secondary = BlueGrey)
     }
+    // Above the language switch: changing the language keeps the data and the page.
+    val scope = rememberCoroutineScope()
+    val model = remember(api) { AppModel(api, scope) }
+    LaunchedEffect(model) { model.start(startup) }
+    var page by rememberSaveable { mutableIntStateOf(0) }
+    val armory = remember { ArmoryNav() }
+    AppLanguage(model.state.language.ifEmpty { null }) {
     MaterialTheme(colorScheme = scheme) {
-        val scope = rememberCoroutineScope()
-        val model = remember(api) { AppModel(api, scope) }
-        LaunchedEffect(model) { model.start(startup) }
-        var page by rememberSaveable { mutableIntStateOf(0) }
-        val armory = remember { ArmoryNav() }
         // Back: an inner page first (handled by it), then to the solution, then out.
         BackHandler(enabled = page != 0) { page = 0 }
         val snackbar = remember { SnackbarHostState() }
-        LaunchedEffect(model.message) {
-            model.message?.let {
+        val message = model.message?.let { coreText(it) }
+        LaunchedEffect(message) {
+            message?.let {
                 snackbar.showSnackbar(it)
                 model.message = null
             }
@@ -141,3 +144,4 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
     }
 }
 
+}
