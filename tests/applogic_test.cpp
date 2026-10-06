@@ -588,5 +588,33 @@ TEST_F(AppLogic, MovingTargetLead) {
     EXPECT_DOUBLE_EQ(LoadSession(db_).value().target_speed_mps, 4.0);
 }
 
+TEST_F(AppLogic, RangeRowsCarryTheParts) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    SessionConditions s = AtZero(800.0);
+    const RangeTable plain = BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 200.0);
+    ASSERT_TRUE(plain.ok);
+    for (const RangeRow& r : plain.rows) {
+        EXPECT_DOUBLE_EQ(r.coriolis_drift_cm, 0.0);
+        EXPECT_DOUBLE_EQ(r.coriolis_lift_cm, 0.0);
+        EXPECT_DOUBLE_EQ(r.lead_cm, 0.0);
+    }
+    EXPECT_NEAR(plain.rows[4].spin_drift_cm, Summarize(p, s, AngleUnit::kMrad).spin_drift_cm, 1e-9);
+
+    // Northern hemisphere, firing east: drift to the right, Eotvos lift.
+    s.latitude_deg = 50.0;
+    s.azimuth_deg = 90.0;
+    s.target_speed_mps = 3.0;
+    const RangeTable t = BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 200.0);
+    ASSERT_TRUE(t.ok);
+    const RangeRow& far = t.rows.back();
+    EXPECT_GT(far.coriolis_drift_cm, 2.0);
+    EXPECT_GT(far.coriolis_lift_cm, 2.0);
+    EXPECT_NEAR(far.windage_cm - plain.rows.back().windage_cm, far.coriolis_drift_cm, 1e-6);
+    EXPECT_NEAR(far.lead_cm, 300.0 * far.time_s, 1e-6);
+    s.azimuth_deg = 270.0; // west: it sinks
+    EXPECT_LT(BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 200.0).rows.back().coriolis_lift_cm,
+              -2.0);
+}
+
 } // namespace
 } // namespace ballistics::applogic

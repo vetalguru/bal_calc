@@ -346,6 +346,16 @@ RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionC
         return table;
     }
     const Trajectory& traj = sol.value().trajectory;
+    // Earth rotation on its own: the same shot without it.
+    std::optional<storage::Solution> still;
+    if (s.latitude_deg) {
+        SessionConditions no_rotation = s;
+        no_rotation.latitude_deg.reset();
+        no_rotation.azimuth_deg.reset();
+        if (auto r = storage::Solve(profile, ToConditions(no_rotation), to_m + LeadReachM(s) + 1.0)) {
+            still = std::move(r.value());
+        }
+    }
     const auto count = static_cast<long>(std::floor((to_m - from_m) / step_m + 1e-9));
     for (long k = 0; k <= count; ++k) {
         const double r = from_m + static_cast<double>(k) * step_m;
@@ -371,9 +381,17 @@ RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionC
         row.mach = pt->mach;
         row.energy_j = pt->energy_j;
         row.time_s = pt->time_s;
+        row.spin_drift_cm = pt->spin_drift_m * 100.0;
+        if (still) {
+            if (const auto q = still->trajectory.AtSlantRange(r)) {
+                row.coriolis_drift_cm = (pt->windage_m - q->windage_m) * 100.0;
+                row.coriolis_lift_cm = (pt->drop_m - q->drop_m) * 100.0;
+            }
+        }
         if (s.target_speed_mps > 0.0 && r > 0.0) {
             if (const auto lead = MovingTargetLead(traj, r, crossing, radial)) {
                 row.lead = FromRad(lead->hold_rad, unit);
+                row.lead_cm = lead->lateral_m * 100.0;
                 if (profile.scope) {
                     row.lead_clicks =
                         storage::ToClicks(lead->hold_rad, profile.scope->click_horizontal_rad);

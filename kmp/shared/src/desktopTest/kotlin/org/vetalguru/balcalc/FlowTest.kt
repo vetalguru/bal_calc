@@ -12,6 +12,10 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -356,6 +360,45 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("rangeTable") }
         assertTrue(hasText("Lead", substring = true))
         shot("table-lead")
+        db.delete()
+    }
+
+    @Test
+    fun chartsAndCompare() = runDesktopComposeUiTest(1100, 760) {
+        val db = startWithSample()
+        // A second, faster load of the sample cartridge (through the core, as
+        // the cartridge editor would); the sample stays chosen.
+        val api = testApi!!
+        kotlinx.coroutines.runBlocking {
+            val st = api.call("state") as JsonObject
+            val rifle = st.getValue("currentRifleId")
+            val first = st.getValue("currentCartridgeId")
+            val form = api.call("cartridgeForm", buildJsonObject { put("id", first) }) as JsonObject
+            val hot = JsonObject(form + ("cartridgeId" to JsonPrimitive(0)) + ("name" to JsonPrimitive("Hot load")) + ("muzzleVelocity" to JsonPrimitive(850.0)))
+            api.call("saveCartridge", buildJsonObject { put("form", hot) })
+            api.call("select", buildJsonObject { put("rifleId", rifle); put("cartridgeId", first) })
+        }
+        onNodeWithTag("navTable").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("chartTab") }
+        onNodeWithTag("chartTab").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("chart") }
+
+        // Velocity instead of the trajectory.
+        onNodeWithTag("chartQuantity").performClick()
+        onAllNodesWithText("Velocity").onLast().performClick()
+        waitUntil { onAllNodesWithText("Velocity").fetchSemanticsNodes().size == 1 } // the menu closed, the field shows it
+
+        // Compared with the faster load.
+        onNodeWithTag("compare").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("compareCartridge") && hasText("Hot load") }
+        onNodeWithTag("compareAdd").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("compared0") }
+        assertTrue(hasText("Hot load", substring = true))
+        shot("chart-compare")
+
+        // Removing it leaves one line.
+        onNodeWithTag("compared0").performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("compared0") }
         db.delete()
     }
 

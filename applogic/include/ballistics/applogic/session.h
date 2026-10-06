@@ -153,6 +153,12 @@ struct RangeRow {
     double time_s = 0.0;
     double lead = 0.0; // for a moving target (see SessionConditions), 0 otherwise
     double lead_clicks = 0.0;
+    double lead_cm = 0.0;           // how far the target moves meanwhile
+    double spin_drift_cm = 0.0;     // the spin-drift part of windage_cm
+    // Earth rotation (with a latitude): its part of the drift (Coriolis)
+    // and of the height (Eotvos, with an azimuth), against the same zero.
+    double coriolis_drift_cm = 0.0;
+    double coriolis_lift_cm = 0.0;
 };
 
 struct RangeTable {

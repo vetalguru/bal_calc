@@ -336,4 +336,19 @@
     <string name="stopwatch_start">Start</string>
     <string name="stopwatch_stop">Stop</string>
     <string name="stopwatch_result">%1$s s: %2$s</string>
+    <string name="chart_show">Show</string>
+    <string name="q_trajectory">Height and drift</string>
+    <string name="q_height">Height over the line of sight</string>
+    <string name="q_drift">Drift (right +)</string>
+    <string name="q_elevation">Elevation correction</string>
+    <string name="q_windage">Windage correction</string>
+    <string name="q_coriolis_drift">Coriolis drift</string>
+    <string name="q_coriolis_lift">Eötvös lift</string>
+    <string name="q_lead">Lead</string>
+    <string name="compare">Compare</string>
+    <string name="compare_with">Compare with</string>
+    <string name="compare_rifle">Rifle</string>
+    <string name="compare_cartridge">Cartridge</string>
+    <string name="compare_add">Add</string>
+    <string name="compare_current">This rifle and cartridge</string>
 </resources>

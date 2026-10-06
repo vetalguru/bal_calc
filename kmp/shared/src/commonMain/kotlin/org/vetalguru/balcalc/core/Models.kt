@@ -159,6 +159,10 @@ data class TableRow(
     val time: Double = 0.0,
     val lead: Double = 0.0,
     val leadClicks: Double = 0.0,
+    val leadCm: Double = 0.0,
+    val spinDriftCm: Double = 0.0,
+    val coriolisDriftCm: Double = 0.0,
+    val coriolisLiftCm: Double = 0.0,
 )
 
 @Serializable
@@ -167,4 +171,15 @@ data class RangeTable(
     val error: String = "",
     val hasScope: Boolean = false,
     val rows: List<TableRow> = emptyList(),
+    // For a compared rifle + cartridge (compareCurves).
+    val label: String = "",
+    val rifleId: Long = 0,
+    val cartridgeId: Long = 0,
 )
+
+/** A rifle and the cartridges of its calibre, for choosing what to compare. */
+@Serializable
+data class PairOption(val rifleId: Long = 0, val rifleName: String = "", val cartridges: List<NamedId> = emptyList())
+
+@Serializable
+data class NamedId(val id: Long = 0, val name: String = "")

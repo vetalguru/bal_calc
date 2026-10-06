@@ -306,4 +306,19 @@
     <string name="stopwatch_start">Старт</string>
     <string name="stopwatch_stop">Стоп</string>
     <string name="stopwatch_result">%1$s с: %2$s</string>
+    <string name="chart_show">Показать</string>
+    <string name="q_trajectory">Высота и снос</string>
+    <string name="q_height">Высота над линией прицеливания</string>
+    <string name="q_drift">Снос (вправо +)</string>
+    <string name="q_elevation">Поправка по вертикали</string>
+    <string name="q_windage">Поправка по горизонтали</string>
+    <string name="q_coriolis_drift">Снос Кориолиса</string>
+    <string name="q_coriolis_lift">Подъём Этвёша</string>
+    <string name="q_lead">Упреждение</string>
+    <string name="compare">Сравнить</string>
+    <string name="compare_with">Сравнить с</string>
+    <string name="compare_rifle">Оружие</string>
+    <string name="compare_cartridge">Патрон</string>
+    <string name="compare_add">Добавить</string>
+    <string name="compare_current">Это оружие и патрон</string>
 </resources>
