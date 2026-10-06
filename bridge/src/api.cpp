@@ -52,6 +52,7 @@
 //   shots / logShot {rangeM, elevation, hasWindage, windage, notes}
 //   deleteShot {id} / setShotUsed {id, used}
 //   computeTruing / applyTruing / resetTruing
+//   computeDsf / applyDsf / setDsf {points:[{mach, factor}]} / resetDsf
 //   reticles / libraryBullets {filter} / bulletForm {id} / saveBullet {form}
 //   deleteBullet {id}
 //   exportJson {kind: "rifle"|"cartridge", id} → {json, fileName}
@@ -257,6 +258,14 @@ al::BulletForm BulletFrom(const json& m) {
     return f;
 }
 
+json DsfJson(const std::vector<DsfPoint>& points) {
+    json out = json::array();
+    for (const DsfPoint& p : points) {
+        out.push_back({{"mach", p.mach}, {"factor", p.factor}});
+    }
+    return out;
+}
+
 json ToJson(const al::RangeTable& t, bool has_scope) {
     json rows = json::array();
     for (const al::RangeRow& r : t.rows) {
@@ -341,6 +350,7 @@ struct Api::Impl {
     double weather_at_unix = 0.0;
 
     al::TruingResult last_truing;
+    al::DsfResult last_dsf;
 
     using Handler = std::function<json(Impl&, const json&)>;
     static const std::map<std::string, Handler>& Handlers();
@@ -705,6 +715,7 @@ struct Api::Impl {
                    {"stability", r.stability},
                    {"velocityScale", p.value().profile.velocity_scale},
                    {"dragScale", p.value().profile.drag_scale},
+                   {"dsf", DsfJson(p.value().profile.dsf)},
                    {"spinDriftCm", r.spin_drift_cm},
                    {"subsonic", r.subsonic},
                    {"transonicRangeM", r.transonic_range_m},
@@ -827,6 +838,28 @@ struct Api::Impl {
                  {"temperatureC", u::KToC(d.atmosphere.temperature_k)}});
         }
         return out;
+    }
+
+    json Dsf() {
+        last_dsf = al::ComputeDsf(db, profile_id);
+        const al::DsfResult& r = last_dsf;
+        json shots = json::array();
+        for (const al::DsfShot& s : r.shots) {
+            shots.push_back({{"shotId", s.shot_id},
+                             {"rangeM", s.range_m},
+                             {"mach", s.mach},
+                             {"observed", al::FromRad(s.observed_rad, Unit())},
+                             {"before", al::FromRad(s.predicted_before_rad, Unit())},
+                             {"after", al::FromRad(s.predicted_after_rad, Unit())},
+                             {"used", s.used},
+                             {"limited", s.limited}});
+        }
+        return {{"ok", r.ok},
+                {"error", r.error},
+                {"points", DsfJson(r.points)},
+                {"shots", shots},
+                {"rmsBefore", al::FromRad(r.rms_before_rad, Unit())},
+                {"rmsAfter", al::FromRad(r.rms_after_rad, Unit())}};
     }
 
     json Truing() {
@@ -1068,6 +1101,30 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
         {"resetTruing",
          [](I& s, const json&) -> json {
              Must(al::ResetTruing(s.db, s.profile_id));
+             return json::object();
+         }},
+        {"computeDsf", [](I& s, const json&) -> json { return s.Dsf(); }},
+        {"applyDsf",
+         [](I& s, const json&) -> json {
+             if (!s.last_dsf.ok) {
+                 throw Failure("Nothing to apply.");
+             }
+             Must(al::SetDsf(s.db, s.profile_id, s.last_dsf.points));
+             s.last_dsf = {};
+             return json::object();
+         }},
+        {"setDsf",
+         [](I& s, const json& a) -> json {
+             std::vector<DsfPoint> points;
+             for (const json& p : a.value("points", json::array())) {
+                 points.push_back({Num(p, "mach"), Num(p, "factor", 1.0)});
+             }
+             Must(al::SetDsf(s.db, s.profile_id, std::move(points)));
+             return json::object();
+         }},
+        {"resetDsf",
+         [](I& s, const json&) -> json {
+             Must(al::SetDsf(s.db, s.profile_id, {}));
              return json::object();
          }},
         // Library

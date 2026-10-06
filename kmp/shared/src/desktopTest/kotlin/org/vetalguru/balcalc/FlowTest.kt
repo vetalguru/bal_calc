@@ -404,6 +404,71 @@ class FlowTest {
     }
 
     @Test
+    fun dsfByHandAndFromTheLog() = runDesktopComposeUiTest(1100, 1000) {
+        val db = startWithSample()
+        setRange(1300)
+        val plain = elevation()
+        fun openShotLog() {
+            onNodeWithTag("navArmory").performClick()
+            if (exists("dsfAdd")) return // still open from before
+            onNodeWithTag("cartridgesTab").performClick()
+            waitUntil(timeoutMillis = 10_000) { count("more:") > 0 }
+            onAllNodes(androidx.compose.ui.test.SemanticsMatcher("more") {
+                it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("more:") == true
+            }).onFirst().performClick()
+            onNodeWithTag("shotLog").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("dsfAdd") }
+        }
+
+        // By hand: one point, 10 % more drag at every speed.
+        openShotLog()
+        onNodeWithTag("dsfAdd").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("dsfFactor0") }
+        type("dsfFactor0", "1.1")
+        onNodeWithTag("dsfSave").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("dsfSave") }
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && elevation() > plain + 0.3 }
+
+        // The bullet "really" has more drag in the transonic part (set through
+        // the core); log the hits it makes.
+        val api = testApi!!
+        kotlinx.coroutines.runBlocking {
+            api.call("setDsf", buildJsonObject {
+                put("points", kotlinx.serialization.json.buildJsonArray {
+                    add(buildJsonObject { put("mach", 1.4); put("factor", 1.0) })
+                    add(buildJsonObject { put("mach", 0.9); put("factor", 1.12) })
+                })
+            })
+        }
+        var truth = 0.0
+        for (r in listOf(900, 1100, 1300)) {
+            setRange(r)
+            truth = elevation()
+            onNodeWithTag("logHitSolution").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("hitElevation") }
+            type("hitElevation", truth.fixed(2))
+            onNodeWithTag("saveHit").performClick()
+            waitUntil(timeoutMillis = 10_000) { !exists("hitElevation") }
+        }
+
+        // Forget the table, fit it from the log.
+        openShotLog()
+        onNodeWithTag("dsfReset").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("dsfNone") }
+        onNodeWithTag("dsfFit").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 20_000) { exists("dsfFitPoints") }
+        onNodeWithTag("dsfFitPoints").performScrollTo()
+        shot("dsf")
+        onNodeWithTag("dsfApply").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("dsfFitPoints") }
+
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && kotlin.math.abs(elevation() - truth) <= 0.03 }
+        db.delete()
+    }
+
+    @Test
     fun libraryBulletAndSettings() = runDesktopComposeUiTest(400, 820) {
         val db = startWithSample()
         val before = elevation()

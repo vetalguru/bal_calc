@@ -1,5 +1,6 @@
-// Schema v3: a v2 database (every profile owning its rifle, scope and
-// cartridge) becomes independent rifles and cartridges plus their pairs.
+// Schema migrations. v3: a v2 database (every profile owning its rifle, scope and
+// cartridge) becomes independent rifles and cartridges plus their pairs;
+// v4: a profile keeps its drag scale factor (DSF) table.
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
@@ -54,7 +55,7 @@ INSERT INTO dope_log (profile_id, range_m, observed_elevation_rad, altitude_m, p
     {
         Database db;
         ASSERT_TRUE(db.Open(path).ok());
-        EXPECT_EQ(db.SchemaVersion().value(), 3);
+        EXPECT_EQ(db.SchemaVersion().value(), Database::LatestSchemaVersion());
 
         const LoadedProfile tikka = LoadProfile(db, 1).value();
         EXPECT_EQ(tikka.rifle.name, "Tikka");
@@ -70,6 +71,7 @@ INSERT INTO dope_log (profile_id, range_m, observed_elevation_rad, altitude_m, p
         EXPECT_DOUBLE_EQ(tikka.profile.zero_offset_up_m, 0.01);
         EXPECT_DOUBLE_EQ(tikka.profile.velocity_scale, 1.01);
         EXPECT_DOUBLE_EQ(tikka.profile.drag_scale, 0.98);
+        EXPECT_TRUE(tikka.profile.dsf.empty()); // v4: no DSF yet
         // Calibre: the rifle's, or the bullet's when the rifle has none.
         EXPECT_EQ(tikka.cartridge.caliber, ".308 Win");
         const LoadedProfile bergara = LoadProfile(db, 2).value();
@@ -91,6 +93,60 @@ INSERT INTO dope_log (profile_id, range_m, observed_elevation_rad, altitude_m, p
     std::error_code ec;
     std::filesystem::remove(path, ec);
     EXPECT_FALSE(ec) << ec.message();
+}
+
+TEST(StorageMigration, ProfileKeepsItsDsfTable) {
+    Database db;
+    ASSERT_TRUE(db.Open(":memory:").ok());
+    BulletRecord b;
+    b.name = "SMK";
+    b.diameter_m = 0.00782;
+    b.mass_kg = 0.01134;
+    b.bc = 0.243;
+    const Id bullet = Repository<BulletRecord>(db).Save(b).value();
+    CartridgeRecord c;
+    c.name = "Load";
+    c.bullet_id = bullet;
+    c.muzzle_velocity_mps = 790;
+    const Id cartridge = Repository<CartridgeRecord>(db).Save(c).value();
+    RifleRecord r;
+    r.name = "Rifle";
+    r.sight_height_m = 0.05;
+    const Id rifle = Repository<RifleRecord>(db).Save(r).value();
+    ProfileRecord p;
+    p.name = "Pair";
+    p.rifle_id = rifle;
+    p.cartridge_id = cartridge;
+    p.dsf = {{1.2, 1.0}, {0.9, 1.08}, {1.05, 1.03}};
+    const Id id = Repository<ProfileRecord>(db).Save(p).value();
+
+    const ProfileRecord back = *Repository<ProfileRecord>(db).Get(id).value();
+    ASSERT_EQ(back.dsf.size(), 3u);
+    EXPECT_DOUBLE_EQ(back.dsf[0].mach, 0.9); // sorted by Mach
+    EXPECT_DOUBLE_EQ(back.dsf[0].factor, 1.08);
+    EXPECT_DOUBLE_EQ(back.dsf[2].mach, 1.2);
+
+    // More drag in the transonic part: more elevation at 1200 m, none at 300 m.
+    ConditionsRecord air;
+    const LoadedProfile with = LoadProfile(db, id).value();
+    LoadedProfile without = with;
+    without.profile.dsf.clear();
+    const auto at = [&](const LoadedProfile& lp, double m) {
+        return Solve(lp, air, m + 1).value().trajectory.AtSlantRange(m)->hold_elevation_rad;
+    };
+    EXPECT_NEAR(at(with, 300.0), at(without, 300.0), 1e-12);
+    EXPECT_GT(at(with, 1200.0), at(without, 1200.0) + 3e-5); // ~0.05 mrad, Mach 0.85 there
+
+    // Saving the profile again rewrites the table; deleting it removes it.
+    ProfileRecord edit = back;
+    edit.dsf = {{1.0, 1.1}};
+    ASSERT_TRUE(Repository<ProfileRecord>(db).Save(edit).ok());
+    EXPECT_EQ(Repository<ProfileRecord>(db).Get(id).value()->dsf.size(), 1u);
+    ASSERT_TRUE(Repository<ProfileRecord>(db).Remove(id).ok());
+    auto count = sqlite_manager::Statement::Prepare(db.connection(), "SELECT count(*) FROM profile_dsf");
+    ASSERT_TRUE(count.ok());
+    ASSERT_TRUE(count.value().Step().ok());
+    EXPECT_EQ(count.value().ColumnInt64(0), 0);
 }
 
 } // namespace

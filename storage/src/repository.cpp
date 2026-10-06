@@ -402,8 +402,30 @@ const Table<ProfileRecord>& TableOf() {
          Col("zero_offset_right_m", &R::zero_offset_right_m),
          Col("velocity_scale", &R::velocity_scale), Col("drag_scale", &R::drag_scale),
          DbDefaultText("created_at", &R::created_at), Col("last_used_at", &R::last_used_at)},
-        nullptr,
-        nullptr};
+        [](Database& db, const R& r) -> Status {
+            if (Status s = Exec(db, "DELETE FROM profile_dsf WHERE profile_id = ?", {r.id}); !s) {
+                return s;
+            }
+            for (const DsfPoint& p : r.dsf) {
+                if (Status s = Exec(db,
+                                    "INSERT INTO profile_dsf (profile_id, mach, factor) VALUES (?, ?, ?)",
+                                    {r.id, p.mach, p.factor});
+                    !s) {
+                    return s;
+                }
+            }
+            return Ok();
+        },
+        [](Database& db, R& r) -> Status {
+            auto rows = Rows<DsfPoint>(
+                db, "SELECT mach, factor FROM profile_dsf WHERE profile_id = ? ORDER BY mach", r.id,
+                [](const Statement& st) { return DsfPoint{st.ColumnDouble(0), st.ColumnDouble(1)}; });
+            if (!rows) {
+                return rows.error();
+            }
+            r.dsf = std::move(rows).value();
+            return Ok();
+        }};
     return t;
 }
 

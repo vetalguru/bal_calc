@@ -321,4 +321,20 @@
     <string name="compare_cartridge">Патрон</string>
     <string name="compare_add">Добавить</string>
     <string name="compare_current">Это оружие и патрон</string>
+    <string name="core_24">Запишите попадания, где на цели пуля медленнее 1.3 Маха.</string>
+    <string name="core_25">Каждой точке DSF нужен Мах от 0 до 5 и множитель от 0.5 до 2.</string>
+    <string name="core_26">У двух точек DSF одинаковый Мах.</string>
+    <string name="dsf_title">Уточнение трансзвука (DSF)</string>
+    <string name="dsf_hint">Множитель сопротивления по числу Маха — для трансзвукового участка, где один BC наименее точен. Подберите его по попаданиям, где на цели пуля медленнее 1.3 Маха, или введите вручную (одна точка меняет сопротивление на всех скоростях).</string>
+    <string name="dsf_none">DSF нет: у пули её собственное сопротивление.</string>
+    <string name="dsf_mach">Мах</string>
+    <string name="dsf_factor">Множитель</string>
+    <string name="dsf_add">Добавить точку</string>
+    <string name="dsf_save">Сохранить таблицу</string>
+    <string name="dsf_fit">Подобрать по журналу</string>
+    <string name="dsf_reset">Сбросить DSF</string>
+    <string name="dsf_shot">%1$s м, Мах %2$s: попадание %3$s, было %4$s, стало %5$s</string>
+    <string name="dsf_supersonic">%1$s м, Мах %2$s: сверхзвук, его уточняют скорость и сопротивление</string>
+    <string name="core_27">Одним DSF эти попадания не объяснить: сначала уточните скорость и сопротивление.</string>
+    <string name="dsf_limited">%1$s м, Мах %2$s: одним DSF это попадание не объяснить; сначала уточните скорость и сопротивление</string>
 </resources>

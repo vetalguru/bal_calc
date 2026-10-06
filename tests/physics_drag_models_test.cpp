@@ -112,6 +112,29 @@ TEST(PhysicsDragModels, RejectsInvalidInput) {
     EXPECT_THROW(DragCurve({{1.0, 0.3}}), std::invalid_argument);
     EXPECT_THROW(DragCurve({{1.0, 0.3}, {1.0, 0.4}}), std::invalid_argument);
 }
+TEST(PhysicsDsf, FactorInterpolatesAndHoldsTheEnds) {
+    EXPECT_DOUBLE_EQ(DsfFactor({}, 1.0), 1.0);
+    const std::vector<DsfPoint> t = {{0.9, 1.10}, {1.1, 1.04}, {1.4, 1.00}};
+    EXPECT_DOUBLE_EQ(DsfFactor(t, 0.5), 1.10);
+    EXPECT_DOUBLE_EQ(DsfFactor(t, 0.9), 1.10);
+    EXPECT_NEAR(DsfFactor(t, 1.0), 1.07, 1e-12);
+    EXPECT_NEAR(DsfFactor(t, 1.25), 1.02, 1e-12);
+    EXPECT_DOUBLE_EQ(DsfFactor(t, 3.0), 1.00);
+}
+
+TEST(PhysicsDsf, ScalesTheDragAtEachMach) {
+    const DragModel m = DragModel::FromBc(DragTableId::kG7, 0.243);
+    const DragModel scaled = m.WithMachScale({{1.4, 1.0}, {0.9, 1.2}}); // unsorted on purpose
+    ASSERT_EQ(scaled.mach_scale().size(), 2u);
+    EXPECT_DOUBLE_EQ(scaled.mach_scale().front().mach, 0.9);
+    EXPECT_DOUBLE_EQ(scaled.Coefficient(2.0), m.Coefficient(2.0));
+    EXPECT_NEAR(scaled.Coefficient(0.8), 1.2 * m.Coefficient(0.8), 1e-15);
+    EXPECT_NEAR(scaled.Coefficient(1.15), 1.1 * m.Coefficient(1.15), 1e-15);
+    // Together with the overall scale.
+    EXPECT_NEAR(m.Scaled(1.05).WithMachScale({{1.0, 1.2}}).Coefficient(0.5),
+                1.05 * 1.2 * m.Coefficient(0.5), 1e-15);
+    EXPECT_THROW(m.WithMachScale({{1.0, 0.0}}), std::invalid_argument);
+}
 
 } // namespace
 } // namespace ballistics

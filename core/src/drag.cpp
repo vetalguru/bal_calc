@@ -182,8 +182,39 @@ DragModel DragModel::Scaled(double factor) const {
     return m;
 }
 
+DragModel DragModel::WithMachScale(std::vector<DsfPoint> dsf) const {
+    for (const DsfPoint& p : dsf) {
+        if (!(p.factor > 0.0) || !(p.mach >= 0.0)) {
+            throw std::invalid_argument("DSF points need a Mach >= 0 and a factor > 0");
+        }
+    }
+    std::sort(dsf.begin(), dsf.end(),
+              [](const DsfPoint& a, const DsfPoint& b) { return a.mach < b.mach; });
+    DragModel m = *this;
+    m.dsf_ = std::move(dsf);
+    return m;
+}
+
+double DsfFactor(const std::vector<DsfPoint>& points, double mach) {
+    if (points.empty()) {
+        return 1.0;
+    }
+    if (mach <= points.front().mach) {
+        return points.front().factor;
+    }
+    if (mach >= points.back().mach) {
+        return points.back().factor;
+    }
+    const auto hi = std::upper_bound(points.begin(), points.end(), mach,
+                                     [](double m, const DsfPoint& p) { return m < p.mach; });
+    const auto lo = hi - 1;
+    const double t = (mach - lo->mach) / (hi->mach - lo->mach);
+    return lo->factor + t * (hi->factor - lo->factor);
+}
+
 double DragModel::Coefficient(double mach) const {
-    return units::kPi / 8.0 * curve_.Cd(mach) / bc_kg_m2_;
+    const double k = units::kPi / 8.0 * curve_.Cd(mach) / bc_kg_m2_;
+    return dsf_.empty() ? k : k * DsfFactor(dsf_, mach);
 }
 
 } // namespace ballistics

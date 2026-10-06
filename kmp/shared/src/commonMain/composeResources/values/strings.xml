@@ -351,4 +351,20 @@
     <string name="compare_cartridge">Cartridge</string>
     <string name="compare_add">Add</string>
     <string name="compare_current">This rifle and cartridge</string>
+    <string name="core_24">Log hits where the bullet is slower than Mach 1.3 at the target.</string>
+    <string name="core_25">Each DSF point needs a Mach between 0 and 5 and a factor between 0.5 and 2.</string>
+    <string name="core_26">Two DSF points have the same Mach.</string>
+    <string name="dsf_title">Transonic truing (DSF)</string>
+    <string name="dsf_hint">A drag factor by Mach number, for the transonic part where one BC is least accurate. Fit it from hits logged where the bullet is slower than Mach 1.3, or enter it by hand (one point alone scales the drag at every speed).</string>
+    <string name="dsf_none">No DSF: the bullet keeps its own drag.</string>
+    <string name="dsf_mach">Mach</string>
+    <string name="dsf_factor">Factor</string>
+    <string name="dsf_add">Add a point</string>
+    <string name="dsf_save">Save the table</string>
+    <string name="dsf_fit">Fit from the shot log</string>
+    <string name="dsf_reset">Reset DSF</string>
+    <string name="dsf_shot">%1$s m, Mach %2$s: hit %3$s, was %4$s, now %5$s</string>
+    <string name="dsf_supersonic">%1$s m, Mach %2$s: supersonic, left to the velocity and drag truing</string>
+    <string name="core_27">The DSF alone cannot explain these hits: true the velocity and drag first.</string>
+    <string name="dsf_limited">%1$s m, Mach %2$s: the DSF alone cannot explain this hit; true the velocity and drag first</string>
 </resources>

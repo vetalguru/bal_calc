@@ -294,5 +294,298 @@ Status ResetTruing(storage::Database& db, Id profile_id) {
     neutral.ok = true;
     return ApplyTruing(db, profile_id, neutral);
 }
+namespace {
+
+// Elevation and Mach at a logged shot with the profile as given (its DSF
+// table included).
+std::optional<std::pair<double, double>> PredictWithMach(const storage::LoadedProfile& p,
+                                                          const DopeRecord& d) {
+    auto sol = storage::Solve(p, ConditionsOf(d), d.range_m + 1.0);
+    if (!sol) {
+        return std::nullopt;
+    }
+    const auto pt = sol.value().trajectory.AtSlantRange(d.range_m);
+    if (!pt) {
+        return std::nullopt;
+    }
+    return std::make_pair(pt->hold_elevation_rad, pt->mach);
+}
+
+// The sequential fit matches each point's own shot exactly, so close points
+// see-saw. This refines all factors at once (Levenberg-Marquardt) on every
+// transonic shot, with a mild penalty on jumps between neighbouring points:
+// 0.1 of factor weighs like a 0.01 mrad miss.
+void RefineDsf(const storage::LoadedProfile& bare, const std::vector<DopeRecord>& log,
+               const std::vector<DsfShot>& shots, std::vector<DsfPoint>& points) {
+    constexpr double kSmooth = 1e-4; // rad per unit of factor difference
+    std::vector<const DopeRecord*> used;
+    for (const DsfShot& s : shots) {
+        if (s.mach < kDsfMaxMach) {
+            for (const DopeRecord& d : log) {
+                if (d.id == s.shot_id) {
+                    used.push_back(&d);
+                }
+            }
+        }
+    }
+    // points[0] is the anchor; the rest are in fitting order (Mach falling).
+    const std::size_t n = points.size() - 1;
+    auto residuals = [&](const std::vector<DsfPoint>& pts, std::vector<double>& r) {
+        storage::LoadedProfile p = bare;
+        p.profile.dsf = pts;
+        std::sort(p.profile.dsf.begin(), p.profile.dsf.end(),
+                  [](const DsfPoint& a, const DsfPoint& b) { return a.mach < b.mach; });
+        r.clear();
+        for (const DopeRecord* d : used) {
+            const auto pred = PredictWithMach(p, *d);
+            if (!pred) {
+                return false;
+            }
+            r.push_back(pred->first - d->observed_elevation_rad);
+        }
+        for (std::size_t k = 1; k < pts.size(); ++k) {
+            r.push_back(kSmooth * (pts[k].factor - pts[k - 1].factor));
+        }
+        return true;
+    };
+    std::vector<double> r;
+    if (!residuals(points, r)) {
+        return;
+    }
+    double cost = 0.0;
+    for (double x : r) {
+        cost += x * x;
+    }
+    double lambda = 1e-3;
+    for (int iter = 0; iter < 20; ++iter) {
+        // Jacobian by forward differences, one column per fitted factor.
+        constexpr double kH = 1e-4;
+        std::vector<std::vector<double>> jac(n);
+        for (std::size_t j = 0; j < n; ++j) {
+            std::vector<DsfPoint> q = points;
+            q[j + 1].factor += kH;
+            std::vector<double> rq;
+            if (!residuals(q, rq)) {
+                return;
+            }
+            jac[j].resize(r.size());
+            for (std::size_t i = 0; i < r.size(); ++i) {
+                jac[j][i] = (rq[i] - r[i]) / kH;
+            }
+        }
+        // Normal equations (J^T J + lambda diag) dx = -J^T r.
+        std::vector<std::vector<double>> a(n, std::vector<double>(n + 1, 0.0));
+        for (std::size_t j = 0; j < n; ++j) {
+            for (std::size_t k = 0; k < n; ++k) {
+                for (std::size_t i = 0; i < r.size(); ++i) {
+                    a[j][k] += jac[j][i] * jac[k][i];
+                }
+            }
+            for (std::size_t i = 0; i < r.size(); ++i) {
+                a[j][n] -= jac[j][i] * r[i];
+            }
+        }
+        bool improved = false;
+        for (int tries = 0; tries < 8 && !improved; ++tries) {
+            std::vector<std::vector<double>> m = a;
+            for (std::size_t j = 0; j < n; ++j) {
+                m[j][j] *= 1.0 + lambda;
+            }
+            // Gaussian elimination with partial pivoting.
+            bool singular = false;
+            for (std::size_t c = 0; c < n && !singular; ++c) {
+                std::size_t piv = c;
+                for (std::size_t row = c + 1; row < n; ++row) {
+                    if (std::fabs(m[row][c]) > std::fabs(m[piv][c])) {
+                        piv = row;
+                    }
+                }
+                std::swap(m[c], m[piv]);
+                if (std::fabs(m[c][c]) < 1e-30) {
+                    singular = true;
+                    break;
+                }
+                for (std::size_t row = 0; row < n; ++row) {
+                    if (row != c) {
+                        const double k = m[row][c] / m[c][c];
+                        for (std::size_t col = c; col <= n; ++col) {
+                            m[row][col] -= k * m[c][col];
+                        }
+                    }
+                }
+            }
+            if (singular) {
+                lambda *= 10;
+                continue;
+            }
+            std::vector<DsfPoint> trial = points;
+            for (std::size_t j = 0; j < n; ++j) {
+                trial[j + 1].factor =
+                    std::clamp(points[j + 1].factor + m[j][n] / m[j][j], kDsfMinFactor, kDsfMaxFactor);
+            }
+            std::vector<double> rt;
+            double c2 = 0.0;
+            if (residuals(trial, rt)) {
+                for (double x : rt) {
+                    c2 += x * x;
+                }
+            }
+            if (!rt.empty() && c2 < cost) {
+                points = std::move(trial);
+                r = std::move(rt);
+                const bool done = cost - c2 < 1e-6 * cost;
+                cost = c2;
+                lambda = std::max(lambda / 10, 1e-9);
+                improved = true;
+                if (done) {
+                    return;
+                }
+            } else {
+                lambda *= 10;
+            }
+        }
+        if (!improved) {
+            return;
+        }
+    }
+}
+
+} // namespace
+
+DsfResult ComputeDsf(storage::Database& db, Id profile_id) {
+    DsfResult out;
+    auto loaded = storage::LoadProfile(db, profile_id);
+    if (!loaded) {
+        out.error = loaded.error().message;
+        return out;
+    }
+    const storage::LoadedProfile& current = loaded.value();
+    auto shots = ListShots(db, profile_id);
+    if (!shots) {
+        out.error = shots.error().message;
+        return out;
+    }
+    // Machs come from the profile without a DSF: the table being fitted
+    // must not move them.
+    storage::LoadedProfile bare = current;
+    bare.profile.dsf.clear();
+    for (const DopeRecord& d : shots.value()) {
+        if (!d.use_for_truing) {
+            continue;
+        }
+        const auto before = PredictWithMach(current, d);
+        const auto plain = PredictWithMach(bare, d);
+        if (!before || !plain) {
+            out.error = "The bullet does not reach one of the logged ranges.";
+            return out;
+        }
+        out.shots.push_back({d.id, d.range_m, plain->second, d.observed_elevation_rad,
+                             before->first, before->first, false});
+    }
+    std::vector<std::size_t> order;
+    for (std::size_t i = 0; i < out.shots.size(); ++i) {
+        if (out.shots[i].mach < kDsfMaxMach) {
+            order.push_back(i);
+        }
+    }
+    if (order.empty()) {
+        out.error = "Log hits where the bullet is slower than Mach 1.3 at the target.";
+        return out;
+    }
+    std::sort(order.begin(), order.end(),
+              [&](std::size_t a, std::size_t b) { return out.shots[a].mach > out.shots[b].mach; });
+
+    std::vector<DsfPoint> points = {{kDsfAnchorMach, 1.0}};
+    for (std::size_t i : order) {
+        DsfShot& s = out.shots[i];
+        if (points.back().mach - s.mach < kDsfMinMachStep) {
+            continue;
+        }
+        const DopeRecord* d = nullptr;
+        for (const DopeRecord& r : shots.value()) {
+            if (r.id == s.shot_id) {
+                d = &r;
+            }
+        }
+        // More drag, more elevation: bisection on the factor.
+        auto miss = [&](double f) {
+            storage::LoadedProfile p = bare;
+            p.profile.dsf = points;
+            p.profile.dsf.push_back({s.mach, f});
+            const auto pred = PredictWithMach(p, *d);
+            return pred ? pred->first - s.observed_rad : 0.0;
+        };
+        double lo = kDsfMinFactor, hi = kDsfMaxFactor;
+        if (miss(lo) >= 0.0) {
+            hi = lo; // a start for the joint fit; judged after it
+        } else if (miss(hi) <= 0.0) {
+            lo = hi;
+        }
+        for (int k = 0; k < 60 && hi - lo > 1e-6; ++k) {
+            const double mid = 0.5 * (lo + hi);
+            (miss(mid) < 0.0 ? lo : hi) = mid;
+        }
+        points.push_back({s.mach, 0.5 * (lo + hi)});
+        s.used = true;
+    }
+    RefineDsf(bare, shots.value(), out.shots, points);
+    std::sort(points.begin(), points.end(),
+              [](const DsfPoint& a, const DsfPoint& b) { return a.mach < b.mach; });
+
+    storage::LoadedProfile fitted = bare;
+    fitted.profile.dsf = points;
+    std::vector<double> before, after;
+    for (DsfShot& s : out.shots) {
+        for (const DopeRecord& r : shots.value()) {
+            if (r.id == s.shot_id) {
+                if (const auto pred = PredictWithMach(fitted, r)) {
+                    s.predicted_after_rad = pred->first;
+                }
+            }
+        }
+        before.push_back(s.predicted_before_rad - s.observed_rad);
+        after.push_back(s.predicted_after_rad - s.observed_rad);
+        s.limited = s.mach < kDsfMaxMach &&
+                    std::fabs(s.predicted_after_rad - s.observed_rad) > kDsfMissTolerance;
+    }
+    if (std::all_of(order.begin(), order.end(), [&](std::size_t i) { return out.shots[i].limited; })) {
+        out.error = "The DSF alone cannot explain these hits: true the velocity and drag first.";
+        return out;
+    }
+    out.rms_before_rad = Rms(before);
+    out.rms_after_rad = Rms(after);
+    out.points = std::move(points);
+    out.ok = true;
+    return out;
+}
+
+Status SetDsf(storage::Database& db, Id profile_id, std::vector<DsfPoint> points) {
+    std::sort(points.begin(), points.end(),
+              [](const DsfPoint& a, const DsfPoint& b) { return a.mach < b.mach; });
+    for (std::size_t i = 0; i < points.size(); ++i) {
+        const DsfPoint& p = points[i];
+        if (!(p.mach > 0.0 && p.mach <= 5.0) ||
+            !(p.factor >= kDsfMinFactor && p.factor <= kDsfMaxFactor)) {
+            return Error(ErrorCode::kConstraint, 0,
+                         "Each DSF point needs a Mach between 0 and 5 and a factor between 0.5 and 2.");
+        }
+        if (i > 0 && p.mach - points[i - 1].mach < 1e-3) {
+            return Error(ErrorCode::kConstraint, 0, "Two DSF points have the same Mach.");
+        }
+    }
+    auto p = Repository<storage::ProfileRecord>(db).Get(profile_id);
+    if (!p) {
+        return p.error();
+    }
+    if (!p.value()) {
+        return Error(ErrorCode::kNotFound, 0, "profile not found");
+    }
+    storage::ProfileRecord r = std::move(*p.value());
+    r.dsf = std::move(points);
+    if (auto id = Repository<storage::ProfileRecord>(db).Save(r); !id) {
+        return id.error();
+    }
+    return sqlite_manager::Ok();
+}
 
 } // namespace ballistics::applogic

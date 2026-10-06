@@ -222,6 +222,16 @@ ALTER TABLE profile DROP COLUMN zero_powder_temp_k;
 CREATE UNIQUE INDEX profile_by_pair ON profile(rifle_id, cartridge_id);
 CREATE INDEX profile_by_cartridge ON profile(cartridge_id);
 )sql"},
+        // v4: drag scale factor (DSF) table of a profile: the drag at a Mach
+        // number is scaled by a factor interpolated between these points.
+        {4, R"sql(
+CREATE TABLE profile_dsf (
+    profile_id INTEGER NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+    mach       REAL NOT NULL CHECK (mach >= 0),
+    factor     REAL NOT NULL CHECK (factor > 0),
+    PRIMARY KEY (profile_id, mach)
+) WITHOUT ROWID;
+)sql"},
     };
     return migrations;
 }

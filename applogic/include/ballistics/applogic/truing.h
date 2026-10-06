@@ -55,6 +55,49 @@ TruingResult ComputeTruing(storage::Database& db, Id profile_id);
 Status ApplyTruing(storage::Database& db, Id profile_id, const TruingResult& result);
 Status ResetTruing(storage::Database& db, Id profile_id);
 
+// Drag scale factor (DSF) truing: the transonic part of the trajectory.
+// Shots slower than kDsfMaxMach at the target each get a DSF point at
+// their Mach, fitted from the nearest shot out (each point changes the
+// flight to every farther one); the table keeps factor 1 from
+// kDsfAnchorMach up, so the supersonic part stays as velocity and drag
+// truing left it. Shots closer than kDsfMinMachStep to the previous point
+// are skipped.
+inline constexpr double kDsfMaxMach = 1.3;
+inline constexpr double kDsfAnchorMach = 1.4;
+inline constexpr double kDsfMinMachStep = 0.08;
+inline constexpr double kDsfMinFactor = 0.5;
+inline constexpr double kDsfMaxFactor = 2.0;
+// A transonic shot still missing by more than this after the fit is one the
+// DSF cannot explain (DsfShot::limited).
+inline constexpr double kDsfMissTolerance = 0.05e-3; // rad
+
+struct DsfShot {
+    Id shot_id = 0;
+    double range_m = 0.0;
+    double mach = 0.0;                 // at the target, before the fit
+    double observed_rad = 0.0;
+    double predicted_before_rad = 0.0; // with the profile's current DSF
+    double predicted_after_rad = 0.0;  // with the fitted one
+    bool used = false;                 // gave a DSF point
+    // Still misses by more than kDsfMissTolerance after the fit: the DSF
+    // alone cannot explain this hit (true the velocity and drag first).
+    bool limited = false;
+};
+
+struct DsfResult {
+    bool ok = false;
+    std::string error;
+    std::vector<DsfPoint> points; // sorted by Mach
+    std::vector<DsfShot> shots;   // every shot marked for truing
+    double rms_before_rad = 0.0;
+    double rms_after_rad = 0.0;
+};
+
+DsfResult ComputeDsf(storage::Database& db, Id profile_id);
+// Replaces the profile's DSF table (empty = none) after checking it: Mach
+// 0..5, factors kDsfMinFactor..kDsfMaxFactor, no two points at one Mach.
+Status SetDsf(storage::Database& db, Id profile_id, std::vector<DsfPoint> points);
+
 } // namespace ballistics::applogic
 
 #endif // BALLISTICS_APPLOGIC_TRUING_H

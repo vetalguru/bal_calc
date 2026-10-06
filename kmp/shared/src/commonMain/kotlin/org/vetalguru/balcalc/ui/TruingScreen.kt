@@ -185,6 +185,8 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit) {
                         result = if (error == null) null else r.copy(ok = false, error = error)
                     }
                 } }
+
+                if (st.hasPair) DsfSection(model, shotList.isNotEmpty(), unit)
             }
         }
     }
