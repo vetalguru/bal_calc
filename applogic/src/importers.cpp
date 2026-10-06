@@ -256,15 +256,17 @@ Result<Id> ImportBulletsJson(Database& db, const json& doc, int* imported, int* 
         b.length_m = units::InchToM(j.value("length_in", 0.0));
         b.source = kSourcePublished;
         b.notes = j.value("reference", "");
-        if (j.contains("g7")) {
-            b.drag_table = "G7";
-            b.bc = j.at("g7").get<double>();
-        } else if (j.contains("g1_bands")) {
-            b.drag_table = "G1";
+        // Bands (BCs by velocity) describe the bullet better than one BC.
+        const char* bands = j.contains("g7_bands") ? "g7_bands" : j.contains("g1_bands") ? "g1_bands" : nullptr;
+        if (bands != nullptr) {
+            b.drag_table = bands[1] == '7' ? "G7" : "G1";
             b.drag_kind = storage::kDragKindMultiBc;
-            for (const json& band : j.at("g1_bands")) {
+            for (const json& band : j.at(bands)) {
                 b.bc_bands.push_back({units::FpsToMps(band.at(0).get<double>()), band.at(1).get<double>()});
             }
+        } else if (j.contains("g7")) {
+            b.drag_table = "G7";
+            b.bc = j.at("g7").get<double>();
         } else {
             b.drag_table = "G1";
             b.bc = j.at("g1").get<double>();

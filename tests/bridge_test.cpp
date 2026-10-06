@@ -409,8 +409,8 @@ TEST_F(Bridge, StarterLibraryIsSeededOnce) {
         files.push_back({{"name", name}, {"content", text.str()}});
     }
     const json r = Ok("seed", {{"version", 1}, {"files", files}});
-    EXPECT_EQ(r.at("imported"), 166) << r.dump(); // as the Qt app reports
-    EXPECT_EQ(Ok("libraryBullets").size(), 162U);
+    EXPECT_EQ(r.at("imported"), 327) << r.dump(); // 69 ammo + 1 drg + 4 reticles + 253 bullets
+    EXPECT_EQ(Ok("libraryBullets").size(), 323U);
     EXPECT_EQ(Ok("libraryCartridges").size(), 69U);
     EXPECT_EQ(Ok("reticles").size(), 4U);
     EXPECT_TRUE(Ok("state").at("cartridges").empty()); // factory loads stay in the library

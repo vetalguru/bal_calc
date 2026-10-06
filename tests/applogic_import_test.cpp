@@ -12,6 +12,9 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <set>
+
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -100,7 +103,7 @@ TEST(Import, AmmoValuesAndUnits) {
 
 TEST(Import, EveryBundledDrgFileParses) {
     const auto files = FilesIn(kSeed / "drg", ".drg");
-    EXPECT_EQ(files.size(), 55U);
+    EXPECT_EQ(files.size(), 1U); // McCoy's .308 Sierra 168 gr (Lapua's are not bundled)
     for (const auto& f : files) {
         const auto d = ParseDrg(ReadFile(f));
         ASSERT_TRUE(d.ok()) << f << ": " << d.error().message;
@@ -167,8 +170,8 @@ TEST_F(ImportDb, SeedImportsEverythingOnce) {
     const auto first = SeedLibrary(db_, files, 1);
     ASSERT_TRUE(first.ok()) << first.error().message;
     EXPECT_TRUE(first.value().problems.empty()) << first.value().problems.front();
-    // 69 ammo + 55 drg + 4 reticles + 38 published bullets.
-    EXPECT_EQ(first.value().imported, 69 + 55 + 4 + 38);
+    // 69 ammo + 1 drg + 4 reticles + 253 published bullets.
+    EXPECT_EQ(first.value().imported, 69 + 1 + 4 + 253);
 
     const auto again = SeedLibrary(db_, files, 1); // same version: nothing to do
     EXPECT_EQ(again.value().imported, 0);
@@ -176,18 +179,22 @@ TEST_F(ImportDb, SeedImportsEverythingOnce) {
 
     const auto newer = SeedLibrary(db_, files, 2); // new version: existing ones skipped
     EXPECT_EQ(newer.value().imported, 0);
-    EXPECT_EQ(newer.value().skipped, 69 + 55 + 4 + 38);
+    EXPECT_EQ(newer.value().skipped, 69 + 1 + 4 + 253);
 
-    EXPECT_EQ(ListLibraryBullets(db_).value().size(), 69U + 55U + 38U);
+    EXPECT_EQ(ListLibraryBullets(db_).value().size(), 69U + 1U + 253U);
     EXPECT_EQ(storage::Repository<storage::ReticleRecord>(db_).List().value().size(), 4U);
     EXPECT_EQ(ListLibraryBullets(db_, "lapua").value().size() >= 50U, true);
 }
 
 TEST_F(ImportDb, RadarCurveBulletSolves) {
     ASSERT_TRUE(SeedLibrary(db_, AllSeedFiles(), 1).ok());
-    const auto hits = ListLibraryBullets(db_, "GB432").value();
-    ASSERT_FALSE(hits.empty()); // .30 Lapua Scenar 185 gr
-    EXPECT_EQ(hits.front().drag_kind, storage::kDragKindCurve);
+    // .308 Sierra 168 gr with McCoy's radar data (a library bullet of the
+    // same name from an .ammo file has a plain BC).
+    auto hits = ListLibraryBullets(db_, "McCoy").value();
+    hits.erase(std::remove_if(hits.begin(), hits.end(),
+                              [](const auto& h) { return h.drag_kind != storage::kDragKindCurve; }),
+               hits.end());
+    ASSERT_FALSE(hits.empty());
 
     storage::LoadedProfile p;
     p.bullet = *storage::Repository<storage::BulletRecord>(db_).Get(hits.front().id).value();
@@ -198,9 +205,9 @@ TEST_F(ImportDb, RadarCurveBulletSolves) {
     s.target_range_m = 1000.0;
     const SolutionSummary sum = Summarize(p, s, AngleUnit::kMrad);
     ASSERT_TRUE(sum.ok) << sum.error;
-    // A heavy .308 match bullet at 800 m/s: roughly 10-14 MRAD at 1000 m.
+    // A .308 168 gr match bullet at 800 m/s, transonic by 1000 m: 12-17 MRAD there.
     EXPECT_GT(sum.elevation, 9.0);
-    EXPECT_LT(sum.elevation, 15.0);
+    EXPECT_LT(sum.elevation, 17.0);
 }
 
 TEST_F(ImportDb, PublishedBandsAreImported) {
@@ -218,6 +225,73 @@ TEST_F(ImportDb, ImportFileDispatchesByExtension) {
     EXPECT_TRUE(ImportFile(db_, "x.AMMO", ReadFile(kSeed / "ammo" / "7.5x55 GP11.ammo")).ok());
     EXPECT_TRUE(ImportFile(db_, "mildot.reticle", ReadFile(kSeed / "reticle" / "mildot.reticle")).ok());
     EXPECT_FALSE(ImportFile(db_, "notes.txt", "hello").ok());
+}
+
+TEST_F(ImportDb, HornadyBandsAreG7) {
+    ASSERT_TRUE(SeedLibrary(db_, AllSeedFiles(), 1).ok());
+    const auto eld = ListLibraryBullets(db_, "6.5mm ELD Match 140").value();
+    ASSERT_EQ(eld.size(), 1U);
+    EXPECT_EQ(eld[0].bc_bands, 3);
+    const auto form = LoadBulletForm(db_, eld[0].id).value();
+    EXPECT_EQ(form.drag_table, "G7");
+    EXPECT_NEAR(form.bands[0].bc, 0.326, 1e-9); // Mach 2.25
+    EXPECT_NEAR(form.bands[0].velocity_mps, units::FpsToMps(2512.0), 1e-9);
+}
+
+// Every published bullet: plausible numbers, a source, and a solution.
+TEST_F(ImportDb, PublishedBulletsAreSane) {
+    std::ifstream in(kSeed / "published_bullets.json");
+    const nlohmann::json doc = nlohmann::json::parse(in);
+    std::set<std::string> names;
+    int count = 0;
+    for (const auto& b : doc.at("bullets")) {
+        const std::string name = b.at("name").get<std::string>();
+        SCOPED_TRACE(name);
+        ++count;
+        EXPECT_TRUE(names.insert(name).second) << "duplicate name";
+        EXPECT_FALSE(b.value("reference", "").empty());
+        const double d = b.at("diameter_in").get<double>();
+        const double w = b.at("weight_gr").get<double>();
+        EXPECT_GE(d, 0.17);
+        EXPECT_LE(d, 0.52);
+        // Sectional density (lb/in^2) of real rifle bullets.
+        const double sd = w / 7000.0 / (d * d);
+        EXPECT_GT(sd, 0.1);
+        EXPECT_LT(sd, 0.45);
+        const double g1 = b.contains("g1") ? b.at("g1").get<double>() : b.at("g1_bands").at(0).at(1).get<double>();
+        EXPECT_GT(g1, 0.05);
+        EXPECT_LT(g1, 1.2);
+        if (b.contains("g7")) {
+            const double ratio = b.at("g7").get<double>() / g1;
+            EXPECT_GT(ratio, 0.40);
+            EXPECT_LT(ratio, 0.60);
+        }
+        if (b.contains("length_in")) {
+            EXPECT_GT(b.at("length_in").get<double>(), 2.0 * d);
+            EXPECT_LT(b.at("length_in").get<double>(), 7.0 * d);
+        }
+    }
+    EXPECT_EQ(count, 253);
+
+    // All of them fly: imported and solved to 600 m.
+    ASSERT_TRUE(SeedLibrary(db_, AllSeedFiles(), 1).ok());
+    int solved = 0;
+    const auto all = storage::Repository<storage::BulletRecord>(db_).List().value();
+    for (const auto& bullet : all) {
+        if (bullet.source != kSourcePublished) {
+            continue;
+        }
+        storage::LoadedProfile p;
+        p.bullet = bullet;
+        p.cartridge.muzzle_velocity_mps = 800.0;
+        p.rifle.sight_height_m = 0.05;
+        SessionConditions s;
+        s.target_range_m = 600.0;
+        const SolutionSummary sum = Summarize(p, s, AngleUnit::kMrad);
+        EXPECT_TRUE(sum.ok) << bullet.name << ": " << sum.error;
+        solved += sum.ok;
+    }
+    EXPECT_EQ(solved, 253);
 }
 
 } // namespace
