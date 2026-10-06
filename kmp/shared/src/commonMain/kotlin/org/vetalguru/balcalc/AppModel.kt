@@ -22,6 +22,7 @@ import kotlinx.serialization.json.putJsonArray
 import org.vetalguru.balcalc.core.ImportReport
 import org.vetalguru.balcalc.core.Info
 import org.vetalguru.balcalc.core.NamedText
+import org.vetalguru.balcalc.core.PairOption
 import org.vetalguru.balcalc.core.SeedReport
 import org.vetalguru.balcalc.core.Shot
 import org.vetalguru.balcalc.core.TruingResult
@@ -307,6 +308,23 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
             put("maxRangeM", maxRangeM)
             put("points", points)
         })
+
+    /** Curves of other rifle + cartridge pairs in the current conditions. */
+    suspend fun compareCurves(maxRangeM: Double, points: Int, pairs: List<Pair<Long, Long>>): List<RangeTable> =
+        api.get("compareCurves", buildJsonObject {
+            put("maxRangeM", maxRangeM)
+            put("points", points)
+            put("pairs", kotlinx.serialization.json.buildJsonArray {
+                pairs.forEach { (rifle, cartridge) ->
+                    add(buildJsonObject {
+                        put("rifleId", rifle)
+                        put("cartridgeId", cartridge)
+                    })
+                }
+            })
+        })
+
+    suspend fun pairOptions(): List<PairOption> = api.get("pairOptions")
 
     suspend fun stationPressure(qnhHpa: Double, altitudeM: Double): Double =
         api.call("stationPressure", buildJsonObject {

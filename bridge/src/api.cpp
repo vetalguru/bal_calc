@@ -58,6 +58,8 @@
 //   importShared {text}               → state
 //   importFiles {files:[{name, content}]} → {imported, problems:[{file, message}]}
 //   stationPressure {qnhHpa, altitudeM} → hPa
+//   compareCurves {maxRangeM, points, pairs:[{rifleId, cartridgeId}]} → [table + label]
+//   pairOptions                     → [{rifleId, rifleName, cartridges:[{id, name}]}]
 //
 // save* return {id}; delete*, set* and log return state or {} as noted in
 // the handlers below.
@@ -270,7 +272,11 @@ json ToJson(const al::RangeTable& t, bool has_scope) {
                         {"energy", r.energy_j},
                         {"time", r.time_s},
                         {"lead", r.lead},
-                        {"leadClicks", r.lead_clicks}});
+                        {"leadClicks", r.lead_clicks},
+                        {"leadCm", r.lead_cm},
+                        {"spinDriftCm", r.spin_drift_cm},
+                        {"coriolisDriftCm", r.coriolis_drift_cm},
+                        {"coriolisLiftCm", r.coriolis_lift_cm}});
     }
     return {{"ok", t.ok}, {"error", t.error}, {"hasScope", has_scope}, {"rows", rows}};
 }
@@ -734,6 +740,53 @@ struct Api::Impl {
         return out;
     }
 
+    // Curves of other rifle + cartridge pairs in the current conditions (at
+    // most four), each as a range table with its label.
+    json CompareCurves(const json& a) {
+        const double max_range = std::clamp(Num(a, "maxRangeM", 1000.0), 10.0, 3000.0);
+        const int points = std::clamp(static_cast<int>(Num(a, "points", 250)), 10, 1000);
+        json out = json::array();
+        for (const json& pair : a.value("pairs", json::array())) {
+            if (out.size() == 4) {
+                break;
+            }
+            const Id rifle = pair.value("rifleId", Id{0});
+            const Id cartridge = pair.value("cartridgeId", Id{0});
+            json curve = {{"ok", false}, {"error", ""}, {"rows", json::array()}, {"label", ""}};
+            const auto profile = al::EnsureProfile(db, rifle, cartridge);
+            if (!profile) {
+                curve["error"] = profile.error().message;
+            } else if (auto p = bs::LoadProfile(db, profile.value()); !p) {
+                curve["error"] = p.error().message;
+            } else {
+                curve = ToJson(al::BuildRangeTable(p.value(), Session(), Unit(), 0.0, max_range,
+                                                   max_range / points),
+                               p.value().scope.has_value());
+                curve["label"] = p.value().rifle.name + " · " + p.value().cartridge.name;
+            }
+            curve["rifleId"] = rifle;
+            curve["cartridgeId"] = cartridge;
+            out.push_back(curve);
+        }
+        return out;
+    }
+
+    // Every rifle with the cartridges of its calibre: what can be compared.
+    json PairOptions() {
+        const auto cartridges = Must(al::ListCartridges(db));
+        json out = json::array();
+        for (const al::RifleSummary& r : Must(al::ListRifles(db))) {
+            json list = json::array();
+            for (const al::CartridgeSummary& c : cartridges) {
+                if (al::SameCaliber(c.caliber, r.caliber)) {
+                    list.push_back({{"id", c.id}, {"name", c.name}});
+                }
+            }
+            out.push_back({{"rifleId", r.id}, {"rifleName", r.name}, {"cartridges", list}});
+        }
+        return out;
+    }
+
     json Table(double from_m, double to_m, double step_m) {
         const auto start = std::chrono::steady_clock::now();
         if (profile_id == 0) {
@@ -897,6 +950,8 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
          [](I& s, const json&) -> json {
              return s.Table(s.table_from_m, s.table_to_m, s.table_step_m);
          }},
+        {"compareCurves", [](I& s, const json& a) -> json { return s.CompareCurves(a); }},
+        {"pairOptions", [](I& s, const json&) -> json { return s.PairOptions(); }},
         {"trajectoryCurve",
          [](I& s, const json& a) -> json {
              const double max_range = Num(a, "maxRangeM", 1000.0);

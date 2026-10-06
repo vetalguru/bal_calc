@@ -136,6 +136,41 @@ TEST_F(Bridge, MovingTarget) {
     EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mps");
 }
 
+TEST_F(Bridge, CompareCurves) {
+    Sample();
+    const json st = Ok("state");
+    const auto rifle = st.at("currentRifleId").get<int>();
+    const auto first = st.at("currentCartridgeId").get<int>();
+    json form = Ok("cartridgeForm", {{"id", first}});
+    form["cartridgeId"] = 0;
+    form["name"] = "Hot load";
+    form["muzzleVelocity"] = 850.0;
+    const auto hot = Ok("saveCartridge", {{"form", form}}).at("id").get<int>();
+    const auto chosen = Ok("state").at("currentCartridgeId").get<int>(); // saving selects it
+
+    const json options = Ok("pairOptions");
+    ASSERT_EQ(options.size(), 1u);
+    EXPECT_EQ(options[0].at("cartridges").size(), 2u);
+
+    const json curves = Ok("compareCurves", {{"maxRangeM", 1000}, {"points", 10},
+        {"pairs", json::array({{{"rifleId", rifle}, {"cartridgeId", first}},
+                               {{"rifleId", rifle}, {"cartridgeId", hot}},
+                               {{"rifleId", 999}, {"cartridgeId", hot}}})}});
+    ASSERT_EQ(curves.size(), 3u);
+    ASSERT_TRUE(curves[0].at("ok").get<bool>());
+    ASSERT_TRUE(curves[1].at("ok").get<bool>());
+    EXPECT_EQ(curves[1].at("label"), "Rifle · Hot load");
+    EXPECT_EQ(curves[0].at("rows").size(), 11u);
+    const json& slow = curves[0].at("rows").back();
+    const json& fast = curves[1].at("rows").back();
+    EXPECT_GT(fast.at("velocity").get<double>(), slow.at("velocity").get<double>() + 10.0);
+    EXPECT_GT(fast.at("dropCm").get<double>(), slow.at("dropCm").get<double>()); // less drop
+    EXPECT_FALSE(curves[2].at("ok").get<bool>());
+    EXPECT_FALSE(curves[2].at("error").get<std::string>().empty());
+    // The current choice is untouched.
+    EXPECT_EQ(Ok("state").at("currentCartridgeId"), chosen);
+}
+
 TEST_F(Bridge, DensityAltitudeAndWarnings) {
     Sample();
     json sol = Ok("solution");
