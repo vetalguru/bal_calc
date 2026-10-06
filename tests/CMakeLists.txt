@@ -15,6 +15,7 @@ add_executable(core_tests
     applogic_reticle_test.cpp
     applogic_truing_test.cpp
     applogic_test.cpp
+    bridge_test.cpp
     physics_basics_test.cpp
     physics_drag_models_test.cpp
     physics_effects_test.cpp
@@ -28,6 +29,8 @@ target_link_libraries(core_tests PRIVATE
     ballistics_core
     ballistics_storage
     ballistics_applogic
+    ballistics_bridge
+    nlohmann_json::nlohmann_json
     GTest::gtest_main
     GTest::gmock
     ballistics_warnings
