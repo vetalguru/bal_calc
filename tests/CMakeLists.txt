@@ -50,8 +50,3 @@ include(GoogleTest)
 # PRE_TEST: list tests when ctest runs, not at build time, so a build
 # never needs to execute the test binary (cross builds, locked-down hosts).
 gtest_discover_tests(core_tests DISCOVERY_MODE PRE_TEST)
-
-# UI tests (Qt Quick Test) against the same QML module the app uses.
-if(TARGET balcalc_ui)
-    add_subdirectory(ui)
-endif()

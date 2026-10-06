@@ -10,27 +10,19 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  QT_VERSION: 6.9.2
-
 jobs:
   linux:
-    name: Ubuntu 26.04 (GCC, system Qt)
+    name: C++ core on Ubuntu 26.04 (GCC)
     runs-on: ubuntu-24.04
     container: ubuntu:26.04
     steps:
-      - name: Install toolchain and Qt
+      - name: Install toolchain
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-            build-essential cmake ninja-build git ca-certificates python3 file dpkg-dev fakeroot \
-            qt6-base-dev qt6-declarative-dev qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools \
-            qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
-            qml6-module-qtquick-templates qml6-module-qtquick-window qml6-module-qtquick-dialogs \
-            qml6-module-qtqml-workerscript qml6-module-qtquick-shapes qml6-module-qttest \
-            qt6-qpa-plugins libgl-dev fonts-dejavu-core
+            build-essential cmake ninja-build git ca-certificates
 
       - uses: actions/checkout@v4
         with:
@@ -42,121 +34,24 @@ jobs:
       - name: Build
         run: cmake --build build/debug
 
-      - name: Test (unit + UI, headless)
+      - name: Test
         run: ctest --test-dir build/debug --output-on-failure
 
-      - name: Package (.deb)
-        run: |
-          cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DBALLISTICS_BUILD_TESTS=OFF
-          cmake --build build/release
-          cd build/release && cpack -G DEB
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: balcalc-ubuntu-deb
-          path: build/release/*.deb
-          if-no-files-found: error
-
   windows:
-    name: Windows (MSVC 2022, Qt 6.9.2)
+    name: C++ core on Windows (MSVC 2022)
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          arch: win64_msvc2022_64
-          cache: true
-
       - name: Configure
-        run: cmake --preset windows-msvc -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+        run: cmake --preset windows-msvc
 
-      - name: Build (Debug) and test
+      - name: Build and test
         run: |
           cmake --build build/windows-msvc --config Debug
           ctest --test-dir build/windows-msvc -C Debug --output-on-failure
-
-      - name: Build (Release) and package
-        run: |
-          cmake --build build/windows-msvc --config Release
-          cpack --config build/windows-msvc/CPackConfig.cmake -C Release -B build/windows-msvc/packages
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: balcalc-windows
-          path: |
-            build/windows-msvc/packages/*.zip
-            build/windows-msvc/packages/*.exe
-          if-no-files-found: error
-
-  android:
-    name: Android arm64 (Qt 6.9.2, NDK r26b)
-    runs-on: ubuntu-24.04
-    env:
-      NDK_VERSION: 26.1.10909125
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Install Ninja
-        run: sudo apt-get update && sudo apt-get install -y ninja-build fakeroot
-
-      - name: Install NDK and SDK platform
-        run: |
-          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
-            "ndk;$NDK_VERSION" "platforms;android-35" "build-tools;35.0.0"
-          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/$NDK_VERSION" >> "$GITHUB_ENV"
-
-      - name: Install Qt (host)
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: linux
-          target: desktop
-          arch: linux_gcc_64
-          cache: true
-
-      - name: Remember the host Qt
-        run: echo "QT_HOST_PATH=$QT_ROOT_DIR" >> "$GITHUB_ENV"
-
-      # Qt 6.7+ publishes Android packages for the "all_os" host.
-      - name: Install Qt (Android)
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: all_os
-          target: android
-          arch: android_arm64_v8a
-          cache: true
-
-      - name: Configure
-        run: |
-          cmake -S . -B build/android -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE="$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake" \
-            -DQT_HOST_PATH="$QT_HOST_PATH" \
-            -DANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
-            -DANDROID_NDK_ROOT="$ANDROID_NDK_ROOT" \
-            -DCMAKE_BUILD_TYPE=Debug
-
-      - name: Build APK
-        run: cmake --build build/android --target apk
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: balcalc-android-debug-apk
-          path: build/android/app/android-build/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
 
   kotlin:
     name: Kotlin app on Linux (Android APK, desktop UI test, DEB)

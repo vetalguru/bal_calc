@@ -27,9 +27,11 @@ Android, in Ukrainian, Russian and English.
 | `core/` | ballistics engine, plain C++17 |
 | `storage/` | SQLite schema, migrations, repositories, firing solution |
 | `applogic/` | toolkit-free screen logic: forms, truing, importers, reticle holds |
-| `app/` | Qt 6 Quick application (QML), translations, icons, Android files |
+| `bridge/` | JSON facade over applogic, the one entry point of the apps |
+| `jni/` | `libbalcalc_jni`: the C++ core for the Kotlin app |
+| `kmp/` | the app: Kotlin, Compose Multiplatform (Android, Windows, Linux), icons |
 | `cli/` | `bal-cli` — range cards and data import from the command line |
-| `tests/` | GoogleTest suites and Qt Quick UI tests (`tests/ui`) |
+| `tests/` | GoogleTest suites (UI tests: `kmp/shared/src/desktopTest`) |
 | `data/seed/` | bundled starter library and its licences |
 | `docs/` | release builds for desktop and Android |
 
@@ -37,7 +39,7 @@ Android, in Ukrainian, Russian and English.
 
 Clone with the submodule: `git clone --recursive https://github.com/vetalguru/bal_calc.git`.
 
-**Ubuntu** (GCC, Qt 6.8+ from the distribution, see `docs/desktop-release.md`):
+**C++ core, CLI and tests** on Ubuntu (GCC, CMake, Ninja):
 
 ```bash
 cmake -S . -B build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
@@ -45,7 +47,7 @@ cmake --build build/debug
 ctest --test-dir build/debug --output-on-failure
 ```
 
-**Windows** (Visual Studio 2022, Qt 6.9.2 `msvc2022_64`):
+On Windows (Visual Studio 2022):
 
 ```powershell
 cmake --preset windows-msvc
@@ -53,11 +55,14 @@ cmake --build --preset windows-msvc
 ctest --preset windows-msvc
 ```
 
-**Android** (Qt 6.9.2 `android_arm64_v8a`, SDK 35, NDK r26b, JDK 17):
+**The app** (JDK 17; Gradle builds the C++ core itself; Android needs the SDK
+with NDK 26.1.10909125 and CMake 3.31.6):
 
-```powershell
-cmake --preset android-arm64-debug
-cmake --build --preset android-arm64-debug
+```bash
+cd kmp
+./gradlew :desktopApp:run                # desktop app
+./gradlew :shared:desktopTest            # UI tests, screenshots in shared/build/screenshots
+./gradlew :androidApp:assembleDebug      # Android APK
 ```
 
 Packages and signed releases: [`docs/desktop-release.md`](docs/desktop-release.md),

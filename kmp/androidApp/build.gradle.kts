@@ -24,7 +24,6 @@ android {
         externalNativeBuild {
             cmake {
                 arguments += listOf(
-                    "-DBALLISTICS_BUILD_APP=OFF",
                     "-DBALLISTICS_BUILD_CLI=OFF",
                     "-DBALLISTICS_BUILD_TESTS=OFF",
                     "-DBALLISTICS_BUILD_JNI=ON",
@@ -63,8 +62,6 @@ android {
     }
 
     buildFeatures { compose = true }
-
-    sourceSets["main"].res.directories += repoRoot.resolve("app/android/res").path // icons of the Qt app
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

@@ -24,36 +24,11 @@
     },
     {
       "name": "windows-msvc",
-      "displayName": "Windows MSVC 2022 x64 (Qt 6.9.2)",
+      "displayName": "Windows MSVC 2022 x64",
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
       "binaryDir": "${sourceDir}/build/${presetName}",
-      "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "C:/Qt/6.9.2/msvc2022_64"
-      },
       "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
-    },
-    {
-      "name": "android-arm64",
-      "displayName": "Android arm64-v8a (Qt 6.9.2, needs ANDROID_SDK_ROOT/ANDROID_NDK_ROOT/JAVA_HOME)",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "toolchainFile": "C:/Qt/6.9.2/android_arm64_v8a/lib/cmake/Qt6/qt.toolchain.cmake",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_MAKE_PROGRAM": "C:/Qt/Tools/Ninja/ninja.exe",
-        "QT_HOST_PATH": "C:/Qt/6.9.2/msvc2022_64",
-        "ANDROID_SDK_ROOT": "$env{ANDROID_SDK_ROOT}",
-        "ANDROID_NDK_ROOT": "$env{ANDROID_NDK_ROOT}",
-        "QT_ANDROID_BUILD_ALL_ABIS": "OFF"
-      },
-      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
-    },
-    {
-      "name": "android-arm64-debug",
-      "displayName": "Android arm64-v8a Debug (debug-signed APK, installable for testing)",
-      "inherits": "android-arm64",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     }
   ],
   "buildPresets": [
@@ -61,9 +36,7 @@
     { "name": "linux-release", "configurePreset": "linux-release" },
     { "name": "linux-tidy", "configurePreset": "linux-tidy" },
     { "name": "windows-msvc", "configurePreset": "windows-msvc", "configuration": "Debug" },
-    { "name": "windows-msvc-release", "configurePreset": "windows-msvc", "configuration": "Release" },
-    { "name": "android-arm64", "configurePreset": "android-arm64", "targets": ["apk"] },
-    { "name": "android-arm64-debug", "configurePreset": "android-arm64-debug", "targets": ["apk"] }
+    { "name": "windows-msvc-release", "configurePreset": "windows-msvc", "configuration": "Release" }
   ],
   "testPresets": [
     { "name": "linux-debug", "configurePreset": "linux-debug", "output": { "outputOnFailure": true } },

@@ -30,7 +30,6 @@ val configureNative = tasks.register<Exec>("configureNative") {
     commandLine(
         listOf("cmake", "-S", repoRoot.path, "-B", nativeBuildDir.path) + generator + listOf(
             "-DCMAKE_BUILD_TYPE=Release",
-            "-DBALLISTICS_BUILD_APP=OFF",
             "-DBALLISTICS_BUILD_CLI=OFF",
             "-DBALLISTICS_BUILD_TESTS=OFF",
             "-DBALLISTICS_BUILD_JNI=ON",
@@ -61,7 +60,7 @@ val stageResources = tasks.register<Sync>("stageResources") {
         include("**/*.ammo", "**/*.drg", "**/*.reticle", "**/*.json")
         into("common/seed")
     }
-    from(repoRoot.resolve("app/icons/balcalc.png")) {
+    from(repoRoot.resolve("kmp/icons/balcalc.png")) {
         into("common") // the window icon
     }
 }
@@ -81,7 +80,7 @@ compose.desktop {
             // What suggestRuntimeModules finds; the bundled JRE holds only these.
             modules("java.instrument", "jdk.unsupported")
             windows {
-                iconFile.set(repoRoot.resolve("app/icons/balcalc.ico"))
+                iconFile.set(repoRoot.resolve("kmp/icons/balcalc.ico"))
                 menu = true
                 menuGroup = "BalCalc"
                 shortcut = true
@@ -90,7 +89,7 @@ compose.desktop {
                 upgradeUuid = "5c1f3a8e-2d4b-4f6a-9e7c-0b8d1a2c3e4f"
             }
             linux {
-                iconFile.set(repoRoot.resolve("app/icons/balcalc.png"))
+                iconFile.set(repoRoot.resolve("kmp/icons/balcalc.png"))
                 packageName = "balcalc"
                 menuGroup = "Science;Engineering"
                 appCategory = "science"
