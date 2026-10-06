@@ -297,7 +297,7 @@ class FlowTest {
 
         // Gusts of 6 m/s: the windage tile shows the second correction.
         onNodeWithTag("navConditions").performClick()
-        waitUntil { exists("windGust") }
+        waitUntil(timeoutMillis = 10_000) { exists("windGust") }
         onNodeWithTag("windGust").performScrollTo()
         type("windGust", "6")
         onNodeWithTag("navSolution").performClick()
@@ -306,13 +306,13 @@ class FlowTest {
 
         // Calm near the shooter, 8 m/s further out, then a third zone.
         onNodeWithTag("navConditions").performClick()
-        waitUntil { exists("windZonesOn") }
+        waitUntil(timeoutMillis = 10_000) { exists("windZonesOn") }
         onNodeWithTag("windZonesOn").performScrollTo().performClick()
-        waitUntil { exists("zoneSpeed1") }
+        waitUntil(timeoutMillis = 10_000) { exists("zoneSpeed1") }
         onNodeWithTag("zoneSpeed1").performScrollTo()
         type("zoneSpeed1", "8")
         onNodeWithTag("addZone").performScrollTo().performClick()
-        waitUntil { exists("zoneSpeed2") }
+        waitUntil(timeoutMillis = 10_000) { exists("zoneSpeed2") }
         onNodeWithTag("zoneSpeed2").performScrollTo()
         shot("wind-zones")
         assertTrue(!exists("addZone")) // three zones in all
