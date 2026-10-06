@@ -337,4 +337,23 @@
     <string name="dsf_supersonic">%1$s м, Мах %2$s: сверхзвук, его уточняют скорость и сопротивление</string>
     <string name="core_27">Одним DSF эти попадания не объяснить: сначала уточните скорость и сопротивление.</string>
     <string name="dsf_limited">%1$s м, Мах %2$s: одним DSF это попадание не объяснить; сначала уточните скорость и сопротивление</string>
+    <string name="core_28">Неизвестная таблица сопротивления.</string>
+    <string name="core_29">Введите расстояние и две скорости, дальняя меньше.</string>
+    <string name="core_30">Ни один BC от 0.02 до 2 не даёт таких замеров.</string>
+    <string name="core_31">Ни один BC от 0.02 до 2 не даёт такой поправки.</string>
+    <string name="bc_calc">Калькулятор BC</string>
+    <string name="bc_calc_hint">BC, с которым калькулятор воспроизводит ваш замер, по выбранной таблице сопротивления.</string>
+    <string name="bc_mode_chrono">Два хронографа</string>
+    <string name="bc_mode_hit">Попадание на дистанции</string>
+    <string name="bc_table">Таблица сопротивления</string>
+    <string name="bc_v_near">Скорость на ближнем хронографе</string>
+    <string name="bc_v_far">Скорость на дальнем</string>
+    <string name="bc_distance">Расстояние между ними</string>
+    <string name="bc_hit_note">С этим оружием и патроном, в текущих условиях.</string>
+    <string name="bc_hit_elevation">Поправка, которая попала</string>
+    <string name="bc_calculate">Рассчитать</string>
+    <string name="bc_result">BC %1$s: %2$s</string>
+    <string name="bc_current">У патрона сейчас: %1$s</string>
+    <string name="bc_save">Записать в патрон</string>
+    <string name="bc_save_note">Патрон тогда получит собственную пулю с этим одним BC (кривая из библиотеки или полосы BC заменяются).</string>
 </resources>

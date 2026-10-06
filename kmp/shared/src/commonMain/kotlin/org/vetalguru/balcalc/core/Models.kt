@@ -210,3 +210,7 @@ data class DsfResult(
     val rmsBefore: Double = 0.0,
     val rmsAfter: Double = 0.0,
 )
+
+/** What the BC calculator found (bcCalculator). */
+@Serializable
+data class BcCalc(val ok: Boolean = false, val error: String = "", val bc: Double = 0.0, val table: String = "")

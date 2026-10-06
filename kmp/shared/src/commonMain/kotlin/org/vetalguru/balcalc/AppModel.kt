@@ -25,6 +25,7 @@ import org.vetalguru.balcalc.core.NamedText
 import org.vetalguru.balcalc.core.PairOption
 import org.vetalguru.balcalc.core.DsfPointIn
 import org.vetalguru.balcalc.core.DsfResult
+import org.vetalguru.balcalc.core.BcCalc
 import org.vetalguru.balcalc.core.SeedReport
 import org.vetalguru.balcalc.core.Shot
 import org.vetalguru.balcalc.core.TruingResult
@@ -282,6 +283,24 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     }
 
     fun resetDsf() = act { api.call("resetDsf"); recompute() }
+
+    /** The BC from two chronograph readings, or from the elevation that hit (current unit). */
+    suspend fun bcFromChronograph(table: String, vNear: Double, vFar: Double, distanceM: Double): BcCalc =
+        api.get("bcCalculator", buildJsonObject {
+            put("mode", "chronograph")
+            put("table", table)
+            put("vNearMps", vNear)
+            put("vFarMps", vFar)
+            put("distanceM", distanceM)
+        })
+
+    suspend fun bcFromHit(table: String, rangeM: Double, elevation: Double): BcCalc =
+        api.get("bcCalculator", buildJsonObject {
+            put("mode", "hit")
+            put("table", table)
+            put("rangeM", rangeM)
+            put("elevation", elevation)
+        })
 
     /** Where this cartridge hits at the rifle's zero; returns the core's error or null. */
     suspend fun setZeroOffset(upCm: Double, rightCm: Double): String? = detached {

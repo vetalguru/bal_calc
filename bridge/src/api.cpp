@@ -53,6 +53,8 @@
 //   deleteShot {id} / setShotUsed {id, used}
 //   computeTruing / applyTruing / resetTruing
 //   computeDsf / applyDsf / setDsf {points:[{mach, factor}]} / resetDsf
+//   bcCalculator {mode: "chronograph"|"hit", table, vNearMps, vFarMps, distanceM,
+//                 rangeM, elevation} → {ok, error, bc, table}
 //   reticles / libraryBullets {filter} / bulletForm {id} / saveBullet {form}
 //   deleteBullet {id}
 //   exportJson {kind: "rifle"|"cartridge", id} → {json, fileName}
@@ -1102,6 +1104,22 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
          [](I& s, const json&) -> json {
              Must(al::ResetTruing(s.db, s.profile_id));
              return json::object();
+         }},
+        {"bcCalculator",
+         [](I& s, const json& a) -> json {
+             const std::string table = Str(a, "table", "G7");
+             al::BcResult r;
+             if (Str(a, "mode") == "hit") {
+                 if (s.profile_id == 0) {
+                     throw Failure("Choose a rifle and a cartridge.");
+                 }
+                 r = al::BcFromHit(Must(bs::LoadProfile(s.db, s.profile_id)), table, Num(a, "rangeM"),
+                                   Num(a, "elevation") * s.UnitRad(), s.Session());
+             } else {
+                 r = al::BcFromChronograph(table, Num(a, "vNearMps"), Num(a, "vFarMps"),
+                                           Num(a, "distanceM"), s.Session());
+             }
+             return {{"ok", r.ok}, {"error", r.error}, {"bc", r.bc}, {"table", table}};
          }},
         {"computeDsf", [](I& s, const json&) -> json { return s.Dsf(); }},
         {"applyDsf",

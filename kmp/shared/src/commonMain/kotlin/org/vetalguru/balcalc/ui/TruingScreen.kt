@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -94,6 +95,7 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit) {
     var shots by remember { mutableStateOf(emptyList<Shot>()) }
     var result by remember { mutableStateOf<TruingResult?>(null) }
     var logging by remember { mutableStateOf(false) }
+    var bcCalc by remember { mutableStateOf(false) }
     var offsetError by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     LaunchedEffect(model.shotsRevision, st.currentProfileId, st.angleUnit) {
@@ -187,12 +189,19 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit) {
                 } }
 
                 if (st.hasPair) DsfSection(model, shotList.isNotEmpty(), unit)
+
+                if (st.hasPair) {
+                    OutlinedButton(onClick = { bcCalc = true }, modifier = Modifier.padding(horizontal = 12.dp).testTag("bcCalc")) {
+                        Text(stringResource(Res.string.bc_calc))
+                    }
+                }
             }
         }
     }
     if (logging) {
         LogShotDialog(model, st.conditions.targetRangeM, sol.elevation) { logging = false }
     }
+    if (bcCalc) BcCalculatorDialog(model) { bcCalc = false }
 }
 
 @Composable

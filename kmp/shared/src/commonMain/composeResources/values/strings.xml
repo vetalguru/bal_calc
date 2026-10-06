@@ -367,4 +367,23 @@
     <string name="dsf_supersonic">%1$s m, Mach %2$s: supersonic, left to the velocity and drag truing</string>
     <string name="core_27">The DSF alone cannot explain these hits: true the velocity and drag first.</string>
     <string name="dsf_limited">%1$s m, Mach %2$s: the DSF alone cannot explain this hit; true the velocity and drag first</string>
+    <string name="core_28">Unknown drag table.</string>
+    <string name="core_29">Enter the distance and two velocities, the far one lower.</string>
+    <string name="core_30">No BC between 0.02 and 2 gives these measurements.</string>
+    <string name="core_31">No BC between 0.02 and 2 gives this correction.</string>
+    <string name="bc_calc">BC calculator</string>
+    <string name="bc_calc_hint">The BC with which the calculator reproduces what you measured, against the drag table you choose.</string>
+    <string name="bc_mode_chrono">Two chronographs</string>
+    <string name="bc_mode_hit">A hit at a range</string>
+    <string name="bc_table">Drag table</string>
+    <string name="bc_v_near">Velocity at the near chronograph</string>
+    <string name="bc_v_far">Velocity at the far one</string>
+    <string name="bc_distance">Distance between them</string>
+    <string name="bc_hit_note">With this rifle and cartridge, in the current conditions.</string>
+    <string name="bc_hit_elevation">Elevation that hit</string>
+    <string name="bc_calculate">Calculate</string>
+    <string name="bc_result">BC %1$s: %2$s</string>
+    <string name="bc_current">The cartridge now: %1$s</string>
+    <string name="bc_save">Write to the cartridge</string>
+    <string name="bc_save_note">The cartridge then uses its own bullet with this one BC (a library curve or BC bands are replaced).</string>
 </resources>
