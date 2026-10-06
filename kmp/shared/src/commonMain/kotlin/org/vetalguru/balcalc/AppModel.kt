@@ -263,20 +263,22 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     suspend fun computeDsf(): DsfResult = api.get("computeDsf")
 
     /** Applies the last fitted DSF table, or sets `points`; returns the core's error or null. */
-    suspend fun applyDsf(points: List<DsfPointIn>? = null): String? = try {
-        if (points == null) {
-            api.call("applyDsf")
-        } else {
-            api.call("setDsf", buildJsonObject {
-                put("points", kotlinx.serialization.json.buildJsonArray {
-                    points.forEach { p -> add(buildJsonObject { put("mach", p.mach); put("factor", p.factor) }) }
+    suspend fun applyDsf(points: List<DsfPointIn>? = null): String? = detached {
+        try {
+            if (points == null) {
+                api.call("applyDsf")
+            } else {
+                api.call("setDsf", buildJsonObject {
+                    put("points", kotlinx.serialization.json.buildJsonArray {
+                        points.forEach { p -> add(buildJsonObject { put("mach", p.mach); put("factor", p.factor) }) }
+                    })
                 })
-            })
+            }
+            recompute()
+            null
+        } catch (e: ApiException) {
+            e.message
         }
-        recompute()
-        null
-    } catch (e: ApiException) {
-        e.message
     }
 
     fun resetDsf() = act { api.call("resetDsf"); recompute() }
