@@ -15,6 +15,11 @@ endif()
 option(BALLISTICS_BUILD_CLI "Build the bal-cli tool" ${ballistics_host_tools})
 option(BALLISTICS_BUILD_TESTS "Build the unit tests" ${ballistics_host_tools})
 option(BALLISTICS_BUILD_APP "Build the Qt Quick application" ON)
+option(BALLISTICS_BUILD_JNI "Build libbalcalc_jni for the Kotlin app" OFF)
+if(BALLISTICS_BUILD_JNI)
+    # Static libraries end up in a shared one.
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
 
 option(ENABLE_CLANG_TIDY "Run clang-tidy during build" OFF)
 if(ENABLE_CLANG_TIDY)
@@ -43,6 +48,10 @@ add_subdirectory(storage)
 add_subdirectory(applogic)
 add_subdirectory(bridge)
 
+if(BALLISTICS_BUILD_JNI)
+    add_subdirectory(jni)
+endif()
+
 if(BALLISTICS_BUILD_CLI)
     add_subdirectory(cli)
 endif()
@@ -56,8 +65,8 @@ if(BALLISTICS_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-# Install rules and desktop packages (.deb, Windows ZIP/installer).
-if(NOT ANDROID)
+# Install rules and desktop packages of the Qt app (.deb, Windows ZIP/installer).
+if(NOT ANDROID AND BALLISTICS_BUILD_APP)
     list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
     include(Packaging)
 endif()

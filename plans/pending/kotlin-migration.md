@@ -105,7 +105,7 @@ kmp/      — Gradle: Kotlin Multiplatform
 | Фаза | Статус |
 |---|---|
 | 1 bridge | ✅ `bridge/` (JSON-фасад, 33 метода), 11 тестов gtest; ctest 119/119 |
-| 2 Скелет KMP + JNI | ⏳ |
+| 2 Скелет KMP + JNI | ✅ jni/, kmp/ (shared, androidApp, desktopApp); 1.61 MRAD на эмуляторе (поверх Qt-версии, её база подхвачена), Windows и Linux (UI-тест Compose); CI-задача Kotlin |
 | 3 Решение, условия, таблица | ⏳ |
 | 4 Остальные экраны | ⏳ |
 | 5 Локализация, обновление | ⏳ |

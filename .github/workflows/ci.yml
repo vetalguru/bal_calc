@@ -157,3 +157,42 @@ jobs:
           name: balcalc-android-debug-apk
           path: build/android/app/android-build/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
+  kotlin:
+    name: Kotlin app (Gradle - Android APK, desktop UI test)
+    runs-on: ubuntu-24.04
+    env:
+      NDK_VERSION: 26.1.10909125
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Install NDK, CMake and SDK platform
+        run: |
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+            "ndk;$NDK_VERSION" "cmake;3.31.6" "platforms;android-37.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Desktop UI test (C++ core through JNI) and Android APK
+        working-directory: kmp
+        run: ./gradlew :shared:desktopTest :androidApp:assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: balcalc-kotlin
+          path: |
+            kmp/androidApp/build/outputs/apk/debug/*.apk
+            kmp/shared/build/screenshots/*.png
+            kmp/shared/build/reports/tests/
