@@ -15,6 +15,14 @@ import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.putJsonArray
+import org.vetalguru.balcalc.core.ImportReport
+import org.vetalguru.balcalc.core.Info
+import org.vetalguru.balcalc.core.NamedText
+import org.vetalguru.balcalc.core.SeedReport
+import org.vetalguru.balcalc.core.Shot
+import org.vetalguru.balcalc.core.TruingResult
 import org.vetalguru.balcalc.core.Api
 import org.vetalguru.balcalc.core.ApiException
 import org.vetalguru.balcalc.core.BulletForm
@@ -154,6 +162,7 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     fun deleteCartridge(id: Long) = act { state = api.get("deleteCartridge", id(id)); recompute() }
     suspend fun deleteBullet(id: Long): String? = try {
         api.call("deleteBullet", id(id))
+        recompute() // lists reload on the revision
         null
     } catch (e: ApiException) {
         e.message
@@ -171,6 +180,93 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
         state = api.get("importShared", buildJsonObject { put("text", text) })
         recompute()
     }
+
+    // ---- Shot log and truing (the current rifle + cartridge) -------------
+
+    /** Bumps when the shot log or the pair's truing changed. */
+    var shotsRevision by mutableIntStateOf(0)
+        private set
+
+    suspend fun shots(): List<Shot> = api.get("shots")
+
+    /** Angles in the current unit; returns the core's error or null. */
+    suspend fun logShot(rangeM: Double, elevation: Double, windage: Double?, notes: String): String? = try {
+        api.call("logShot", buildJsonObject {
+            put("rangeM", rangeM)
+            put("elevation", elevation)
+            put("hasWindage", windage != null)
+            put("windage", windage ?: 0.0)
+            put("notes", notes)
+        })
+        shotsRevision++
+        null
+    } catch (e: ApiException) {
+        e.message
+    }
+
+    fun deleteShot(id: Long) = act { api.call("deleteShot", id(id)); shotsRevision++ }
+
+    fun setShotUsed(id: Long, used: Boolean) = act {
+        api.call("setShotUsed", buildJsonObject {
+            put("id", id)
+            put("used", used)
+        })
+        shotsRevision++
+    }
+
+    suspend fun computeTruing(): TruingResult = api.get("computeTruing")
+
+    suspend fun applyTruing(): String? = try {
+        api.call("applyTruing")
+        shotsRevision++
+        recompute()
+        null
+    } catch (e: ApiException) {
+        e.message
+    }
+
+    fun resetTruing() = act { api.call("resetTruing"); shotsRevision++; recompute() }
+
+    /** Where this cartridge hits at the rifle's zero; returns the core's error or null. */
+    suspend fun setZeroOffset(upCm: Double, rightCm: Double): String? = try {
+        api.call("setZeroOffset", buildJsonObject {
+            put("upCm", upCm)
+            put("rightCm", rightCm)
+        })
+        state = api.get("state")
+        recompute()
+        null
+    } catch (e: ApiException) {
+        e.message
+    }
+
+    // ---- Files, settings, about -------------------------------------------
+
+    /** .ammo / .drg / .reticle / bullet-list / rifle / cartridge files into the library. */
+    suspend fun importFiles(files: List<NamedText>): ImportReport {
+        val report: ImportReport = api.get("importFiles", buildJsonObject {
+            putJsonArray("files") {
+                files.forEach { f ->
+                    addJsonObject {
+                        put("name", f.name)
+                        put("content", f.content)
+                    }
+                }
+            }
+        })
+        state = api.get("state")
+        recompute()
+        return report
+    }
+
+    suspend fun info(): Info = api.get("info")
+
+    val seedReport: SeedReport?
+        get() = api.seedResult?.let { Api.json.decodeFromJsonElement(SeedReport.serializer(), it) }
+
+    fun setAngleUnit(unit: String) = setSettings(buildJsonObject { put("angleUnit", unit) })
+    fun setHoldMode(mode: String) = setSettings(buildJsonObject { put("holdMode", mode) })
+    fun setLanguage(language: String) = setSettings(buildJsonObject { put("language", language) })
 
     suspend fun rangeTable(): RangeTable = api.get("rangeTable")
 

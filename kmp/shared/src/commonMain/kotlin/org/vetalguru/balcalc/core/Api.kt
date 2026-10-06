@@ -41,6 +41,10 @@ class Api(private val engine: Engine) {
 
     private var started = false
 
+    /** What the starter-library import did on this start (Settings shows it). */
+    var seedResult: JsonElement? = null
+        private set
+
     /**
      * Opens the database and imports the starter library on first run.
      * Once per core: later calls (a recreated activity) do nothing.
@@ -49,7 +53,7 @@ class Api(private val engine: Engine) {
         if (started) return
         started = true
         call("open", buildJsonObject { put("path", databasePath) })
-        call("seed", buildJsonObject {
+        seedResult = call("seed", buildJsonObject {
             put("version", SEED_VERSION)
             putJsonArray("files") {
                 for (f in seed()) {

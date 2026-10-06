@@ -89,3 +89,51 @@ data class ExportedJson(val json: String = "", val fileName: String = "")
 
 /** A file the user picked: its name and text. */
 class NamedText(val name: String, val content: String)
+
+@Serializable
+data class Shot(
+    val id: Long = 0,
+    val rangeM: Double = 0.0,
+    val observed: Double = 0.0,
+    val predicted: Double? = null,
+    val hasWindage: Boolean = false,
+    val observedWindage: Double = 0.0,
+    val shotAt: String = "",
+    val used: Boolean = true,
+    val notes: String = "",
+    val temperatureC: Double = 15.0,
+)
+
+@Serializable
+data class TruingPoint(
+    val rangeM: Double = 0.0,
+    val observed: Double = 0.0,
+    val before: Double = 0.0,
+    val after: Double = 0.0,
+)
+
+@Serializable
+data class TruingResult(
+    val ok: Boolean = false,
+    val error: String = "",
+    val velocityScale: Double = 1.0,
+    val dragScale: Double = 1.0,
+    val dragFitted: Boolean = false,
+    val rmsBefore: Double = 0.0,
+    val rmsAfter: Double = 0.0,
+    val velocityBefore: Double = 0.0,
+    val velocityAfter: Double = 0.0,
+    val points: List<TruingPoint> = emptyList(),
+)
+
+@Serializable
+data class ImportProblem(val file: String = "", val message: String = "")
+
+@Serializable
+data class ImportReport(val imported: Int = 0, val problems: List<ImportProblem> = emptyList())
+
+@Serializable
+data class SeedReport(val imported: Int = 0, val skipped: Int = 0)
+
+@Serializable
+data class Info(val engineVersion: String = "", val sqliteVersion: String = "", val databasePath: String = "")

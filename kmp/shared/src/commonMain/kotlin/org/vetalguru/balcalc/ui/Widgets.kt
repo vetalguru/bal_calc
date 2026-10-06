@@ -1,6 +1,7 @@
 package org.vetalguru.balcalc.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -95,11 +96,11 @@ fun NumberField(
 @Composable
 fun SwitchRow(text: String, checked: Boolean, onChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier.fillMaxWidth(),
+        modifier.fillMaxWidth().toggleable(checked, onValueChange = onChange),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Switch(checked = checked, onCheckedChange = onChange)
+        Switch(checked = checked, onCheckedChange = null) // the whole row toggles
         Text(text, Modifier.weight(1f))
     }
 }
@@ -109,7 +110,7 @@ fun SwitchRow(text: String, checked: Boolean, onChange: (Boolean) -> Unit, modif
 fun Section(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Card(modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(
+            if (title.isNotEmpty()) Text(
                 title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
