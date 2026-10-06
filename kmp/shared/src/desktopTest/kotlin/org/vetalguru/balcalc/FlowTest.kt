@@ -509,6 +509,30 @@ class FlowTest {
     }
 
     @Test
+    fun hitChance() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(600)
+        onNodeWithTag("navTable").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("hitTab") }
+        onNodeWithTag("hitTab").performClick()
+        waitUntil(timeoutMillis = 20_000) { exists("hitChance") }
+        fun chance() = shown("hitChance").removeSuffix(" %").toInt()
+        val before = chance()
+        assertTrue(before in 1..100, "$before")
+        assertTrue(exists("shotsToHit"))
+        shot("hit-chance")
+
+        // A rifle that shoots 3 MOA groups hits less often.
+        onNodeWithTag("errGroup").performScrollTo()
+        type("errGroup", "3")
+        onNodeWithTag("hitChance").performScrollTo()
+        waitUntil(timeoutMillis = 20_000) { exists("hitChance") && chance() < before }
+        onNodeWithTag("part:dispersion").performScrollTo()
+        shot("hit-chance-sources")
+        db.delete()
+    }
+
+    @Test
     fun libraryBulletAndSettings() = runDesktopComposeUiTest(400, 820) {
         val db = startWithSample()
         val before = elevation()

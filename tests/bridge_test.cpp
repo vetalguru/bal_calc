@@ -225,6 +225,23 @@ TEST_F(Bridge, BcCalculator) {
     EXPECT_FALSE(r.at("error").get<std::string>().empty());
 }
 
+TEST_F(Bridge, HitProbability) {
+    json r = Ok("wez");
+    EXPECT_FALSE(r.at("ok").get<bool>()); // no rifle yet, settings still there
+    EXPECT_EQ(r.at("settings").at("targetKind"), "rectangle");
+    Sample();
+    r = Ok("wez", {{"toM", 1000}, {"stepM", 100}, {"settings", {{"targetKind", "ellipse"}, {"groupMoa", 0.5}}}});
+    ASSERT_TRUE(r.at("ok").get<bool>()) << r.dump();
+    EXPECT_EQ(r.at("rows").size(), 10u);
+    EXPECT_EQ(r.at("settings").at("targetKind"), "ellipse");
+    EXPECT_EQ(r.at("settings").at("groupMoa"), 0.5);
+    EXPECT_GT(r.at("atTarget").at("probability").get<double>(), 0.5); // 300 m, a 50 cm ellipse
+    EXPECT_GE(r.at("shots95").get<int>(), r.at("shots50").get<int>());
+    EXPECT_FALSE(r.at("parts").empty());
+    // Kept.
+    EXPECT_EQ(Ok("wez").at("settings").at("groupMoa"), 0.5);
+}
+
 TEST_F(Bridge, DensityAltitudeAndWarnings) {
     Sample();
     json sol = Ok("solution");
