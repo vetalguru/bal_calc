@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <utility>
+#include <vector>
 
 namespace ballistics::applogic {
 namespace {
@@ -484,6 +486,67 @@ TEST_F(AppLogic, SessionKeepsTheNewFields) {
     s.density_altitude_m.reset();
     ASSERT_TRUE(SaveSession(db_, s).ok());
     EXPECT_FALSE(LoadSession(db_).value().density_altitude_m.has_value());
+}
+
+TEST_F(AppLogic, ThreeEqualZonesAreOneWind) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    SessionConditions one = AtZero(900.0);
+    one.winds = {{5.0, 60.0, 0.0}};
+    SessionConditions three = one;
+    three.winds = {{5.0, 60.0, 300.0}, {5.0, 60.0, 600.0}, {5.0, 60.0, 0.0}};
+    const SolutionSummary a = Summarize(p, one, AngleUnit::kMrad);
+    const SolutionSummary b = Summarize(p, three, AngleUnit::kMrad);
+    ASSERT_TRUE(a.ok && b.ok);
+    EXPECT_NEAR(a.windage, b.windage, 1e-9);
+    EXPECT_NEAR(a.elevation, b.elevation, 1e-9);
+}
+
+TEST_F(AppLogic, ZonesWeighByWhereTheWindBlows) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    auto windage = [&](std::vector<WindInput> winds) {
+        SessionConditions s = AtZero(900.0);
+        s.winds = std::move(winds);
+        return Summarize(p, s, AngleUnit::kMrad).windage;
+    };
+    const double everywhere = windage({{5.0, 90.0, 0.0}});
+    const double near = windage({{5.0, 90.0, 450.0}, {0.0, 90.0, 0.0}});
+    const double far = windage({{0.0, 90.0, 450.0}, {5.0, 90.0, 0.0}});
+    // Both halves push right; the near wind has longer to act on the bullet.
+    EXPECT_GT(near, 0.0);
+    EXPECT_GT(far, 0.0);
+    EXPECT_GT(near, far);
+    // Nearly linear in the wind; spin drift is in each of them once.
+    const double calm = windage({});
+    EXPECT_NEAR(near + far - calm, everywhere, 0.02 * (everywhere - calm));
+    // Opposite winds in the two halves nearly cancel.
+    EXPECT_LT(std::abs(windage({{5.0, 90.0, 450.0}, {5.0, 270.0, 0.0}}) - calm),
+              0.5 * (everywhere - calm));
+}
+
+TEST_F(AppLogic, WindBracketIsTheSecondSpeed) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    SessionConditions s = AtZero(700.0);
+    s.winds = {{3.0, 90.0, 300.0}, {2.0, 45.0, 0.0}};
+    s.wind_gust_mps = 6.0;
+    const SolutionSummary r = Summarize(p, s, AngleUnit::kMrad);
+    ASSERT_TRUE(r.ok && r.has_gust);
+    SessionConditions strong = s;
+    strong.winds.front().speed_mps = 6.0;
+    strong.wind_gust_mps = 0.0;
+    const SolutionSummary g = Summarize(p, strong, AngleUnit::kMrad);
+    EXPECT_FALSE(g.has_gust);
+    EXPECT_NEAR(r.gust_windage, g.windage, 1e-9);
+    EXPECT_NEAR(r.gust_windage_clicks, g.windage_clicks, 1e-9);
+    EXPECT_NEAR(r.gust_windage_cm, g.windage_cm, 1e-9);
+    EXPECT_GT(r.gust_windage, r.windage);
+
+    // No wind at all: the gust blows from the right.
+    SessionConditions calm = AtZero(700.0);
+    calm.wind_gust_mps = 4.0;
+    EXPECT_GT(Summarize(p, calm, AngleUnit::kMrad).gust_windage, 0.1);
+    EXPECT_TRUE(LoadSession(db_).value().wind_gust_mps == 0.0);
+    ASSERT_TRUE(SaveSession(db_, s).ok());
+    EXPECT_DOUBLE_EQ(LoadSession(db_).value().wind_gust_mps, 6.0);
 }
 
 } // namespace

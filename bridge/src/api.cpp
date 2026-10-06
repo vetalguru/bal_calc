@@ -77,6 +77,7 @@ constexpr const char* kCurrentRifleKey = "ui.current_rifle";
 constexpr const char* kCurrentCartridgeKey = "ui.current_cartridge";
 constexpr const char* kAngleUnitKey = "ui.angle_unit";
 constexpr const char* kLanguageKey = "ui.language";
+constexpr std::size_t kMaxExtraWindZones = 2; // three wind zones in all
 constexpr const char* kHoldModeKey = "ui.hold_mode";
 constexpr const char* kTableFromKey = "ui.table.from_m";
 constexpr const char* kTableToKey = "ui.table.to_m";
@@ -311,6 +312,9 @@ struct Api::Impl {
     double powder_c = 15.0;
     double wind_speed = 0.0;
     double wind_from_deg = 90.0;
+    double wind_until_m = 0.0;       // end of the first zone when there are more
+    std::vector<al::WindInput> wind_zones; // the zones after the first, in order
+    double wind_gust_mps = 0.0;
     double look_angle_deg = 0.0;
     double cant_deg = 0.0;
     bool coriolis = false;
@@ -376,9 +380,17 @@ struct Api::Impl {
         if (!powder_follows_air) {
             s.powder_c = powder_c;
         }
-        if (wind_speed > 0.0) {
-            s.winds.push_back({wind_speed, wind_from_deg, 0.0});
+        // The first zone is always there (a calm one costs nothing), so its
+        // direction survives a zero speed and the gust has a zone to go to.
+        s.winds.push_back({wind_speed, wind_from_deg, wind_zones.empty() ? 0.0 : wind_until_m});
+        for (std::size_t i = 0; i < wind_zones.size(); ++i) {
+            al::WindInput w = wind_zones[i];
+            if (i + 1 == wind_zones.size()) {
+                w.until_m = 0.0; // the last zone goes to the end
+            }
+            s.winds.push_back(w);
         }
+        s.wind_gust_mps = wind_gust_mps;
         s.look_angle_deg = look_angle_deg;
         s.cant_deg = cant_deg;
         if (coriolis) {
@@ -407,7 +419,10 @@ struct Api::Impl {
         if (!s.winds.empty()) {
             wind_speed = s.winds.front().speed_mps;
             wind_from_deg = s.winds.front().from_deg;
+            wind_until_m = s.winds.front().until_m;
         }
+        wind_zones.assign(s.winds.size() > 1 ? s.winds.begin() + 1 : s.winds.end(), s.winds.end());
+        wind_gust_mps = s.wind_gust_mps;
         look_angle_deg = s.look_angle_deg;
         cant_deg = s.cant_deg;
         coriolis = s.latitude_deg.has_value();
@@ -433,7 +448,18 @@ struct Api::Impl {
                 {"targetRangeM", target_range_m},  {"magnification", magnification},
                 {"useDensityAltitude", use_density_altitude},
                 {"densityAltitudeM", density_altitude_m},
-                {"targetHeightCm", target_height_cm}};
+                {"targetHeightCm", target_height_cm},
+                {"windUntilM", wind_until_m},
+                {"windZones", ZonesJson()},
+                {"windGustMps", wind_gust_mps}};
+    }
+
+    json ZonesJson() const {
+        json zones = json::array();
+        for (const al::WindInput& w : wind_zones) {
+            zones.push_back({{"speedMps", w.speed_mps}, {"fromDeg", w.from_deg}, {"untilM", w.until_m}});
+        }
+        return zones;
     }
 
     void SetConditions(const json& a) {
@@ -460,6 +486,17 @@ struct Api::Impl {
         flag("useDensityAltitude", use_density_altitude);
         num("densityAltitudeM", density_altitude_m);
         num("targetHeightCm", target_height_cm);
+        num("windUntilM", wind_until_m);
+        num("windGustMps", wind_gust_mps);
+        if (a.contains("windZones") && a.at("windZones").is_array()) {
+            wind_zones.clear();
+            for (const json& z : a.at("windZones")) {
+                if (wind_zones.size() == kMaxExtraWindZones) {
+                    break;
+                }
+                wind_zones.push_back({Num(z, "speedMps"), Num(z, "fromDeg", 90.0), Num(z, "untilM")});
+            }
+        }
         // The air was entered now: the solution warns when it gets old.
         if (air != std::make_tuple(temperature_c, pressure_hpa, altitude_m, humidity_pct,
                                    use_density_altitude, density_altitude_m)) {
@@ -650,7 +687,11 @@ struct Api::Impl {
                    {"pointBlankNearM", r.point_blank_near_m},
                    {"pointBlankFarM", r.point_blank_far_m},
                    {"densityAltitudeM", r.density_altitude_m},
-                   {"pressureHpa", r.pressure_hpa}};
+                   {"pressureHpa", r.pressure_hpa},
+                   {"hasGust", r.has_gust},
+                   {"gustWindage", r.gust_windage},
+                   {"gustWindageClicks", r.gust_windage_clicks},
+                   {"gustWindageCm", r.gust_windage_cm}};
             json warnings = json::array();
             for (const al::Warning& w : r.warnings) {
                 warnings.push_back({{"code", w.code}, {"value", w.value}});

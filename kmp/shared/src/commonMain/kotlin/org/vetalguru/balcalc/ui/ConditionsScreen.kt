@@ -19,6 +19,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
+import org.vetalguru.balcalc.core.WindZoneIn
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -140,6 +146,8 @@ fun ConditionsScreen(model: AppModel) {
             }
 
             Section(stringResource(Res.string.wind)) {
+                val zoned = c.windZones.isNotEmpty()
+                if (zoned) Text(stringResource(Res.string.zone_title, 1), fontWeight = FontWeight.Bold)
                 Fields(
                     wide,
                     { m ->
@@ -157,6 +165,99 @@ fun ConditionsScreen(model: AppModel) {
                         )
                     },
                 )
+                if (zoned) {
+                    NumberField(
+                        stringResource(Res.string.zone_until), c.windUntilM,
+                        { v -> model.updateConditions { it.copy(windUntilM = v) } },
+                        unit = stringResource(Res.string.unit_m), decimals = 0, from = 10.0, to = 3000.0,
+                        tag = "zoneUntil0",
+                    )
+                }
+                NumberField(
+                    stringResource(Res.string.wind_gust), c.windGustMps,
+                    { v -> model.updateConditions { it.copy(windGustMps = v) } },
+                    unit = stringResource(Res.string.unit_mps), from = 0.0, to = 40.0, tag = "windGust",
+                )
+                SwitchRow(
+                    stringResource(Res.string.wind_zones_on), zoned,
+                    { on ->
+                        model.updateConditions {
+                            if (!on) {
+                                it.copy(windZones = emptyList())
+                            } else {
+                                // The first third of the current range, then the same wind beyond.
+                                val until = (it.targetRangeM / 3).roundToInt().coerceAtLeast(50).toDouble()
+                                it.copy(
+                                    windUntilM = until,
+                                    windZones = listOf(WindZoneIn(it.windSpeed, it.windFromDeg)),
+                                )
+                            }
+                        }
+                    },
+                    modifier = Modifier.testTag("windZonesOn"),
+                )
+                c.windZones.forEachIndexed { i, z ->
+                    val last = i == c.windZones.lastIndex
+                    fun change(f: (WindZoneIn) -> WindZoneIn) = model.updateConditions {
+                        it.copy(windZones = it.windZones.mapIndexed { j, old -> if (j == i) f(old) else old })
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            stringResource(Res.string.zone_title, i + 2) +
+                                if (last) " — " + stringResource(Res.string.zone_to_end) else "",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(
+                            onClick = {
+                                model.updateConditions {
+                                    it.copy(windZones = it.windZones.filterIndexed { j, _ -> j != i })
+                                }
+                            },
+                            modifier = Modifier.testTag("removeZone$i"),
+                        ) { Text(stringResource(Res.string.remove_zone)) }
+                    }
+                    Fields(
+                        wide,
+                        { m ->
+                            NumberField(
+                                stringResource(Res.string.speed), z.speedMps,
+                                { v -> change { it.copy(speedMps = v) } },
+                                m, stringResource(Res.string.unit_mps), from = 0.0, to = 40.0, tag = "zoneSpeed${i + 1}",
+                            )
+                        },
+                        { m ->
+                            NumberField(
+                                stringResource(Res.string.wind_from_degrees), z.fromDeg,
+                                { v -> change { it.copy(fromDeg = v % 360) } },
+                                m, deg, decimals = 0, from = 0.0, to = 360.0, tag = "zoneFrom${i + 1}",
+                            )
+                        },
+                    )
+                    if (!last) {
+                        NumberField(
+                            stringResource(Res.string.zone_until), z.untilM,
+                            { v -> change { it.copy(untilM = v) } },
+                            unit = stringResource(Res.string.unit_m), decimals = 0, from = 10.0, to = 3000.0,
+                            tag = "zoneUntil${i + 1}",
+                        )
+                    }
+                }
+                if (zoned && c.windZones.size < 2) {
+                    OutlinedButton(
+                        onClick = {
+                            model.updateConditions {
+                                // The zone that went to the end now stops halfway to the target.
+                                val start = maxOf(it.windUntilM, it.windZones.dropLast(1).maxOfOrNull { z -> z.untilM } ?: 0.0)
+                                val until = ((start + it.targetRangeM.coerceAtLeast(start + 100)) / 2).roundToInt().toDouble()
+                                val zones = it.windZones.toMutableList()
+                                val lastZone = zones.removeAt(zones.lastIndex)
+                                it.copy(windZones = zones + lastZone.copy(untilM = until) + lastZone.copy(untilM = 0.0))
+                            }
+                        },
+                        modifier = Modifier.testTag("addZone"),
+                    ) { Text(stringResource(Res.string.add_zone)) }
+                }
             }
 
             Section(stringResource(Res.string.angles)) {

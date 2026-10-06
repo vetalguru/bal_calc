@@ -39,6 +39,9 @@ struct SessionConditions {
     // temperature and the humidity.
     std::optional<double> density_altitude_m;
     double target_height_cm = 20.0; // for the point-blank range
+    // Wind bracket: a second speed of the first (nearest) wind zone, e.g.
+    // the gusts; 0 = off. The solution then gives the windage for both.
+    double wind_gust_mps = 0.0;
     double weather_at_unix = 0.0;   // when the air was last entered, 0 = unknown
 };
 
@@ -104,6 +107,11 @@ struct SolutionSummary {
     double point_blank_far_m = 0.0;
     double density_altitude_m = 0.0;
     double pressure_hpa = 0.0; // station pressure used (follows a typed density altitude)
+    // Windage with the second wind speed (has_gust when it is set).
+    bool has_gust = false;
+    double gust_windage = 0.0;
+    double gust_windage_clicks = 0.0;
+    double gust_windage_cm = 0.0;
     std::vector<Warning> warnings;
 };
 

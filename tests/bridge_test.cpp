@@ -95,6 +95,33 @@ TEST_F(Bridge, ConditionsAndSettingsChangeTheSolution) {
     EXPECT_GT(Ok("solution").at("windage").get<double>(), 0.5);
 }
 
+TEST_F(Bridge, WindZonesAndGust) {
+    Sample();
+    Ok("setConditions", {{"targetRangeM", 800}, {"windSpeed", 0}, {"windFromDeg", 270}});
+    const double still = Ok("solution").at("windage").get<double>(); // spin drift only
+    EXPECT_FALSE(Ok("solution").at("hasGust").get<bool>());
+
+    // Calm here, wind from the right further out, more of it at the end.
+    const json zones = json::array({{{"speedMps", 4}, {"fromDeg", 90}, {"untilM", 600}},
+                                    {{"speedMps", 6}, {"fromDeg", 90}, {"untilM", 0}},
+                                    {{"speedMps", 9}, {"fromDeg", 90}, {"untilM", 0}}});
+    const json c = Ok("setConditions", {{"windUntilM", 300}, {"windZones", zones}});
+    ASSERT_EQ(c.at("windZones").size(), 2u); // three zones in all
+    EXPECT_EQ(c.at("windUntilM"), 300.0);
+    EXPECT_EQ(c.at("windFromDeg"), 270.0); // a calm zone keeps its direction
+    const double zoned = Ok("solution").at("windage").get<double>();
+    EXPECT_GT(zoned, still + 0.1);
+
+    // A gust in the first zone (from the left): the bracket goes the other way.
+    Ok("setConditions", {{"windGustMps", 8}});
+    const json sol = Ok("solution");
+    EXPECT_TRUE(sol.at("hasGust").get<bool>());
+    EXPECT_LT(sol.at("gustWindage").get<double>(), zoned);
+
+    // Back to one wind.
+    EXPECT_TRUE(Ok("setConditions", {{"windZones", json::array()}}).at("windZones").empty());
+}
+
 TEST_F(Bridge, DensityAltitudeAndWarnings) {
     Sample();
     json sol = Ok("solution");
