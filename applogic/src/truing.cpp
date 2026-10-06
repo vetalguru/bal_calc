@@ -4,6 +4,7 @@
 #include <cmath>
 #include <utility>
 
+#include <ballistics/bc.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
@@ -586,6 +587,78 @@ Status SetDsf(storage::Database& db, Id profile_id, std::vector<DsfPoint> points
         return id.error();
     }
     return sqlite_manager::Ok();
+}
+namespace {
+
+std::optional<DragTableId> TableNamed(const std::string& name) {
+    for (DragTableId id : {DragTableId::kG1, DragTableId::kG2, DragTableId::kG5, DragTableId::kG6,
+                           DragTableId::kG7, DragTableId::kG8, DragTableId::kGI, DragTableId::kGS,
+                           DragTableId::kRA4}) {
+        if (name == DragTableName(id)) {
+            return id;
+        }
+    }
+    return std::nullopt;
+}
+
+BcResult BcOrError(std::optional<double> bc, const char* error) {
+    BcResult r;
+    if (bc) {
+        r.ok = true;
+        r.bc = *bc;
+    } else {
+        r.error = error;
+    }
+    return r;
+}
+
+} // namespace
+
+BcResult BcFromChronograph(const std::string& table, double v_near_mps, double v_far_mps,
+                           double distance_m, const SessionConditions& s) {
+    const auto id = TableNamed(table);
+    if (!id) {
+        return BcOrError(std::nullopt, "Unknown drag table.");
+    }
+    if (!(distance_m > 0.0) || !(v_far_mps > 0.0) || !(v_near_mps > v_far_mps)) {
+        return BcOrError(std::nullopt,
+                         "Enter the distance and two velocities, the far one lower.");
+    }
+    return BcOrError(BcFromVelocities(*id, v_near_mps, v_far_mps, distance_m,
+                                      ToConditions(s).atmosphere),
+                     "No BC between 0.02 and 2 gives these measurements.");
+}
+
+BcResult BcFromHit(const storage::LoadedProfile& profile, const std::string& table,
+                   double range_m, double elevation_rad, const SessionConditions& s) {
+    const auto id = TableNamed(table);
+    if (!id) {
+        return BcOrError(std::nullopt, "Unknown drag table.");
+    }
+    if (!(range_m > 0.0)) {
+        return BcOrError(std::nullopt, "Enter a target range.");
+    }
+    storage::LoadedProfile p = profile;
+    p.bullet.drag_kind = storage::kDragKindBc;
+    p.bullet.drag_table = DragTableName(*id);
+    p.curve.reset();
+    const storage::ConditionsRecord c = ToConditions(s);
+    // A higher BC needs less elevation: fit minus the correction.
+    return BcOrError(FitBc(
+                         [&](double bc) -> std::optional<double> {
+                             p.bullet.bc = bc;
+                             auto sol = storage::Solve(p, c, range_m + 1.0);
+                             if (!sol) {
+                                 return std::nullopt;
+                             }
+                             const auto pt = sol.value().trajectory.AtSlantRange(range_m);
+                             if (!pt) {
+                                 return std::nullopt;
+                             }
+                             return -pt->hold_elevation_rad;
+                         },
+                         -elevation_rad),
+                     "No BC between 0.02 and 2 gives this correction.");
 }
 
 } // namespace ballistics::applogic

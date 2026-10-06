@@ -226,5 +226,38 @@ TEST_F(Truing, DsfLeavesAVelocityErrorToTheVelocityTruing) {
     }
 }
 
+TEST_F(Truing, BcFromAHitIsTheBcThatMadeIt) {
+    const SessionConditions air = Air(5.0);
+    storage::LoadedProfile real = storage::LoadProfile(db_, profile_).value();
+    for (double true_bc : {0.215, 0.243, 0.280}) {
+        for (double range : {600.0, 1000.0}) {
+            real.bullet.bc = true_bc;
+            const double hit = storage::Solve(real, ToConditions(air), range + 1.0)
+                                   .value().trajectory.AtSlantRange(range)->hold_elevation_rad;
+            const BcResult r =
+                BcFromHit(storage::LoadProfile(db_, profile_).value(), "G7", range, hit, air);
+            ASSERT_TRUE(r.ok) << r.error;
+            EXPECT_NEAR(r.bc, true_bc, 0.005 * true_bc) << true_bc << " at " << range;
+        }
+    }
+}
+
+TEST_F(Truing, BcCalculatorChecksItsInput) {
+    const SessionConditions air = Air(15.0);
+    EXPECT_EQ(BcFromChronograph("G9", 800, 700, 100, air).error, "Unknown drag table.");
+    EXPECT_EQ(BcFromChronograph("G7", 700, 800, 100, air).error,
+              "Enter the distance and two velocities, the far one lower.");
+    EXPECT_EQ(BcFromChronograph("G7", 800, 799.99, 100, air).error,
+              "No BC between 0.02 and 2 gives these measurements.");
+    const BcResult ok = BcFromChronograph("G1", 820, 700, 200, air);
+    EXPECT_TRUE(ok.ok);
+    EXPECT_GT(ok.bc, 0.2);
+    EXPECT_LT(ok.bc, 0.6);
+    const storage::LoadedProfile p = storage::LoadProfile(db_, profile_).value();
+    EXPECT_EQ(BcFromHit(p, "G7", 0.0, 0.01, air).error, "Enter a target range.");
+    EXPECT_EQ(BcFromHit(p, "G7", 300.0, -0.5, air).error,
+              "No BC between 0.02 and 2 gives this correction.");
+}
+
 } // namespace
 } // namespace ballistics::applogic

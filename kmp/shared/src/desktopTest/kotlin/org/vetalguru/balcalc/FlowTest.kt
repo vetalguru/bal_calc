@@ -68,7 +68,8 @@ class FlowTest {
     private fun ComposeUiTest.shot(name: String) {
         val dir = System.getProperty("balcalc.screenshots") ?: return
         File(dir).mkdirs()
-        ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", File(dir, "$name.png"))
+        // The topmost layer: a dialog when one is open.
+        ImageIO.write(onAllNodes(androidx.compose.ui.test.isRoot()).onLast().captureToImage().toAwtImage(), "png", File(dir, "$name.png"))
     }
 
     /** The main flow at one screen size; [fontScale] is the phone's font size setting. */
@@ -465,6 +466,45 @@ class FlowTest {
 
         onNodeWithTag("navSolution").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") && kotlin.math.abs(elevation() - truth) <= 0.03 }
+        db.delete()
+    }
+
+    @Test
+    fun bcCalculator() = runDesktopComposeUiTest(1100, 1000) {
+        val db = startWithSample()
+        setRange(800)
+        val before = elevation()
+        onNodeWithTag("navArmory").performClick()
+        onNodeWithTag("cartridgesTab").performClick()
+        waitUntil(timeoutMillis = 10_000) { count("more:") > 0 }
+        onAllNodes(androidx.compose.ui.test.SemanticsMatcher("more") {
+            it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("more:") == true
+        }).onFirst().performClick()
+        onNodeWithTag("shotLog").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("bcCalc") }
+
+        // A hit at the current range with the current correction: the BC it has.
+        onNodeWithTag("bcCalc").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("bcCalculate") }
+        onNodeWithTag("bcModeHit").performClick()
+        onNodeWithTag("bcCalculate").performClick()
+        waitUntil(timeoutMillis = 20_000) { exists("bcResult") }
+        // The sample bullet is a library SMK with Sierra's G1 BCs (about 0.50).
+        assertTrue(Regex("""BC G1: 0\.(49|50)\d""").matches(shown("bcResult")), shown("bcResult"))
+
+        // Two chronographs: 790 and 720 m/s 100 m apart, a lower BC (G1 ~0.42); written in.
+        onNodeWithText("Two chronographs").performClick()
+        type("bcVNear", "790")
+        type("bcVFar", "720")
+        onNodeWithTag("bcCalculate").performClick()
+        waitUntil(timeoutMillis = 20_000) { exists("bcResult") }
+        shot("bc-calculator")
+        onNodeWithTag("bcSave").performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("bcCalculate") }
+
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && elevation() != before }
+        assertTrue(elevation() > before) // more drag, more elevation
         db.delete()
     }
 

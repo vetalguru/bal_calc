@@ -1,6 +1,7 @@
 add_library(ballistics_core STATIC
     src/analysis.cpp
     src/atmosphere.cpp
+    src/bc.cpp
     src/drag.cpp
     src/effects.cpp
     src/solver.cpp

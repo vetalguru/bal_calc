@@ -98,6 +98,24 @@ DsfResult ComputeDsf(storage::Database& db, Id profile_id);
 // 0..5, factors kDsfMinFactor..kDsfMaxFactor, no two points at one Mach.
 Status SetDsf(storage::Database& db, Id profile_id, std::vector<DsfPoint> points);
 
+// BC calculator: the BC against a standard table ("G1", "G7", ...) that
+// reproduces a measurement. Failures are a sentence for the shooter.
+struct BcResult {
+    bool ok = false;
+    std::string error;
+    double bc = 0.0; // lb/in^2
+};
+
+// From two chronograph readings `distance_m` apart, in the session's air.
+BcResult BcFromChronograph(const std::string& table, double v_near_mps, double v_far_mps,
+                           double distance_m, const SessionConditions& s);
+
+// From the elevation that hit at `range_m` with this rifle and cartridge in
+// the session's conditions: the bullet's drag becomes one BC against
+// `table`, everything else (zero, powder, truing) stays as the app solves.
+BcResult BcFromHit(const storage::LoadedProfile& profile, const std::string& table,
+                   double range_m, double elevation_rad, const SessionConditions& s);
+
 } // namespace ballistics::applogic
 
 #endif // BALLISTICS_APPLOGIC_TRUING_H

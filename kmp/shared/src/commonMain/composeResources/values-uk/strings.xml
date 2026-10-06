@@ -337,4 +337,23 @@
     <string name="dsf_supersonic">%1$s м, Мах %2$s: надзвук, його уточнюють швидкість і опір</string>
     <string name="core_27">Самим DSF ці влучання не пояснити: спершу уточніть швидкість і опір.</string>
     <string name="dsf_limited">%1$s м, Мах %2$s: самим DSF це влучання не пояснити; спершу уточніть швидкість і опір</string>
+    <string name="core_28">Невідома таблиця опору.</string>
+    <string name="core_29">Введіть відстань і дві швидкості, дальня менша.</string>
+    <string name="core_30">Жоден BC від 0.02 до 2 не дає таких замірів.</string>
+    <string name="core_31">Жоден BC від 0.02 до 2 не дає такої поправки.</string>
+    <string name="bc_calc">Калькулятор BC</string>
+    <string name="bc_calc_hint">BC, з яким калькулятор відтворює ваш замір, за обраною таблицею опору.</string>
+    <string name="bc_mode_chrono">Два хронографи</string>
+    <string name="bc_mode_hit">Влучання на дистанції</string>
+    <string name="bc_table">Таблиця опору</string>
+    <string name="bc_v_near">Швидкість на ближньому хронографі</string>
+    <string name="bc_v_far">Швидкість на дальньому</string>
+    <string name="bc_distance">Відстань між ними</string>
+    <string name="bc_hit_note">З цією зброєю і патроном, у поточних умовах.</string>
+    <string name="bc_hit_elevation">Поправка, що влучила</string>
+    <string name="bc_calculate">Розрахувати</string>
+    <string name="bc_result">BC %1$s: %2$s</string>
+    <string name="bc_current">У патрона зараз: %1$s</string>
+    <string name="bc_save">Записати в патрон</string>
+    <string name="bc_save_note">Патрон тоді матиме власну кулю з цим одним BC (крива з бібліотеки чи смуги BC замінюються).</string>
 </resources>

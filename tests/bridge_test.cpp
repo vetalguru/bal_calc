@@ -203,6 +203,28 @@ TEST_F(Bridge, DsfTable) {
     EXPECT_EQ(Ok("solution").at("dsf").size(), fit.at("points").size());
 }
 
+TEST_F(Bridge, BcCalculator) {
+    EXPECT_EQ(Fails("bcCalculator", {{"mode", "hit"}, {"rangeM", 500}, {"elevation", 3}}),
+              "Choose a rifle and a cartridge.");
+    Sample();
+    json r = Ok("bcCalculator", {{"mode", "chronograph"}, {"table", "G7"}, {"vNearMps", 790},
+                                 {"vFarMps", 760}, {"distanceM", 100}});
+    ASSERT_TRUE(r.at("ok").get<bool>()) << r.dump();
+    EXPECT_GT(r.at("bc").get<double>(), 0.4); // 30 m/s over 100 m: a long, sleek bullet
+    EXPECT_LT(r.at("bc").get<double>(), 0.6);
+
+    // The sample's own correction at 800 m gives back its BC (G7 0.243).
+    Ok("setConditions", {{"targetRangeM", 800}});
+    const double hit = Ok("solution").at("elevation").get<double>();
+    r = Ok("bcCalculator", {{"mode", "hit"}, {"table", "G7"}, {"rangeM", 800}, {"elevation", hit}});
+    ASSERT_TRUE(r.at("ok").get<bool>()) << r.dump();
+    EXPECT_NEAR(r.at("bc").get<double>(), 0.243, 0.002); // the shown correction is rounded
+
+    r = Ok("bcCalculator", {{"table", "G7"}, {"vNearMps", 700}, {"vFarMps", 760}, {"distanceM", 100}});
+    EXPECT_FALSE(r.at("ok").get<bool>());
+    EXPECT_FALSE(r.at("error").get<std::string>().empty());
+}
+
 TEST_F(Bridge, DensityAltitudeAndWarnings) {
     Sample();
     json sol = Ok("solution");

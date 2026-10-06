@@ -18,6 +18,7 @@ add_executable(core_tests
     bridge_test.cpp
     physics_analysis_test.cpp
     physics_basics_test.cpp
+    physics_bc_test.cpp
     physics_drag_models_test.cpp
     physics_effects_test.cpp
     physics_gekht_test.cpp

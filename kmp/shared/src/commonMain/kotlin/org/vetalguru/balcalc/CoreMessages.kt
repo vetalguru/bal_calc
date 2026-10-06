@@ -39,6 +39,10 @@ private val coreMessages: Map<String, StringResource> = mapOf(
     "Each DSF point needs a Mach between 0 and 5 and a factor between 0.5 and 2." to Res.string.core_25,
     "Two DSF points have the same Mach." to Res.string.core_26,
     "The DSF alone cannot explain these hits: true the velocity and drag first." to Res.string.core_27,
+    "Unknown drag table." to Res.string.core_28,
+    "Enter the distance and two velocities, the far one lower." to Res.string.core_29,
+    "No BC between 0.02 and 2 gives these measurements." to Res.string.core_30,
+    "No BC between 0.02 and 2 gives this correction." to Res.string.core_31,
 )
 
 /** A message from the core in the app's language (unknown ones as they are). */
