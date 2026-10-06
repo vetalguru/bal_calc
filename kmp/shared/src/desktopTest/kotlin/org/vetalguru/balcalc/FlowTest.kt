@@ -18,6 +18,9 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
@@ -51,16 +54,28 @@ class FlowTest {
                 .joinToString("") { it.text }
     }
 
+    /** One element as an image (e.g. a card below the fold). */
+    private fun ComposeUiTest.shotOf(tag: String, name: String) {
+        val dir = System.getProperty("balcalc.screenshots") ?: return
+        File(dir).mkdirs()
+        ImageIO.write(onNodeWithTag(tag).captureToImage().toAwtImage(), "png", File(dir, "$name.png"))
+    }
+
     private fun ComposeUiTest.shot(name: String) {
         val dir = System.getProperty("balcalc.screenshots") ?: return
         File(dir).mkdirs()
         ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", File(dir, "$name.png"))
     }
 
-    private fun run(width: Int, height: Int, name: String) = runDesktopComposeUiTest(width, height) {
+    /** The main flow at one screen size; [fontScale] is the phone's font size setting. */
+    private fun run(width: Int, height: Int, name: String, fontScale: Float = 1f) = runDesktopComposeUiTest(width, height) {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val api = Api(desktopEngine())
-        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform()) }
+        setContent {
+            CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
+                BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform())
+            }
+        }
 
         // Seeded library, sample rifle + cartridge: the Qt app's 1.61 at 300 m.
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
@@ -68,6 +83,8 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }
         onNodeWithTag("elevation").assertTextEquals("1.61")
         shot("$name-solution")
+        onNodeWithTag("quickWind").performScrollTo()
+        shotOf("quickWind", "$name-wind")
 
         // Colder air: more elevation.
         onNodeWithTag("navConditions").performClick()
@@ -364,7 +381,19 @@ class FlowTest {
     }
 
     @Test
-    fun phone() = run(400, 820, "phone")
+    fun phone() = run(412, 915, "phone") // Samsung S26 Ultra and most large phones, dp
+
+    @Test
+    fun commonPhone() = run(360, 780, "common") // the most common Android width
+
+    @Test
+    fun largeText() = run(412, 915, "large-text", fontScale = 1.3f) // Settings > Font size, large
+
+    @Test
+    fun landscape() = run(915, 412, "landscape")
+
+    @Test
+    fun smallPhone() = run(320, 640, "small")
 
     @Test
     fun desktop() = run(1100, 760, "desktop")
