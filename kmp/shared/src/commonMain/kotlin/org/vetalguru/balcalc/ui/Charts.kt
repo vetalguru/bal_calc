@@ -56,7 +56,7 @@ private val SeriesColors = listOf(Transonic, Color(0xFF1E88E5), Color(0xFF8E24AA
 /** What the chart can show: one value per range-card row, in `unit`. */
 private class Quantity(val key: String, val title: String, val unit: String, val decimals: Int, val value: (TableRow) -> Double)
 
-private class Series(val label: String, val color: Color, val points: List<Pair<Double, Double>>)
+internal class Series(val label: String, val color: Color, val points: List<Pair<Double, Double>>)
 
 /** The chart tab: a quantity along the range, for this rifle and cartridge and up to two more. */
 @Composable
@@ -177,7 +177,7 @@ private fun ComparePicker(model: AppModel, onDismiss: () -> Unit, onChosen: (Pai
  * `centimetres` switches the axis to metres when the values span more than 3 m.
  */
 @Composable
-private fun LineChart(
+internal fun LineChart(
     series: List<Series>,
     unit: String,
     centimetres: Boolean,

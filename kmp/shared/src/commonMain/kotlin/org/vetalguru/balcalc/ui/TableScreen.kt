@@ -84,6 +84,7 @@ fun TableScreen(model: AppModel, onRangeChosen: () -> Unit) {
         PrimaryTabRow(selectedTabIndex = tab) {
             Tab(tab == 0, { tab = 0 }, text = { Text(stringResource(Res.string.tab_table)) })
             Tab(tab == 1, { tab = 1 }, text = { Text(stringResource(Res.string.tab_chart)) }, modifier = Modifier.testTag("chartTab"))
+            Tab(tab == 2, { tab = 2 }, text = { Text(stringResource(Res.string.tab_hit)) }, modifier = Modifier.testTag("hitTab"))
         }
         Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             NumberField(stringResource(Res.string.from), st.tableFromM, { span("tableFromM", it) }, Modifier.weight(1f), m, 0, 0.0, 3000.0)
@@ -98,7 +99,8 @@ fun TableScreen(model: AppModel, onRangeChosen: () -> Unit) {
                 model.setTargetRange(r)
                 onRangeChosen()
             }
-            else -> ChartPanel(model, curve, max(st.tableToM, st.conditions.targetRangeM), Modifier.fillMaxSize())
+            1 -> ChartPanel(model, curve, max(st.tableToM, st.conditions.targetRangeM), Modifier.fillMaxSize())
+            else -> WezPanel(model, max(st.tableToM, st.conditions.targetRangeM), Modifier.fillMaxSize())
         }
     }
 }

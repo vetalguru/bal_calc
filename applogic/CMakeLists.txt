@@ -32,6 +32,7 @@ add_library(ballistics_applogic STATIC
     src/reticle.cpp
     src/session.cpp
     src/truing.cpp
+    src/wez.cpp
 )
 target_include_directories(ballistics_applogic PUBLIC include)
 

@@ -26,6 +26,8 @@ import org.vetalguru.balcalc.core.PairOption
 import org.vetalguru.balcalc.core.DsfPointIn
 import org.vetalguru.balcalc.core.DsfResult
 import org.vetalguru.balcalc.core.BcCalc
+import org.vetalguru.balcalc.core.WezResult
+import org.vetalguru.balcalc.core.WezSettings
 import org.vetalguru.balcalc.core.SeedReport
 import org.vetalguru.balcalc.core.Shot
 import org.vetalguru.balcalc.core.TruingResult
@@ -283,6 +285,14 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     }
 
     fun resetDsf() = act { api.call("resetDsf"); recompute() }
+
+    /** Hit probability over the range; `settings` (when given) are saved first. */
+    suspend fun wez(settings: WezSettings?, toM: Double, stepM: Double): WezResult =
+        api.get("wez", buildJsonObject {
+            put("toM", toM)
+            put("stepM", stepM)
+            if (settings != null) put("settings", Api.json.encodeToJsonElement(WezSettings.serializer(), settings))
+        })
 
     /** The BC from two chronograph readings, or from the elevation that hit (current unit). */
     suspend fun bcFromChronograph(table: String, vNear: Double, vFar: Double, distanceM: Double): BcCalc =

@@ -214,3 +214,43 @@ data class DsfResult(
 /** What the BC calculator found (bcCalculator). */
 @Serializable
 data class BcCalc(val ok: Boolean = false, val error: String = "", val bc: Double = 0.0, val table: String = "")
+
+/** Errors (1 sigma) and the target of the hit probability, as entered. */
+@Serializable
+data class WezSettings(
+    val rangeM: Double = 5.0,
+    val windSpeedMps: Double = 1.0,
+    val windDirectionDeg: Double = 10.0,
+    val muzzleVelocityMps: Double = 4.0,
+    val bcPercent: Double = 1.0,
+    val temperatureC: Double = 2.0,
+    val pressureHpa: Double = 2.0,
+    val humidityPct: Double = 10.0,
+    val lookAngleDeg: Double = 0.5,
+    val cantDeg: Double = 1.0,
+    val azimuthDeg: Double = 5.0,
+    val latitudeDeg: Double = 0.5,
+    val groupMoa: Double = 1.0,
+    val targetKind: String = "rectangle",
+    val targetWidthCm: Double = 50.0,
+    val targetHeightCm: Double = 50.0,
+)
+
+@Serializable
+data class WezRow(val rangeM: Double = 0.0, val probability: Double = 0.0, val sigmaUpCm: Double = 0.0, val sigmaRightCm: Double = 0.0)
+
+@Serializable
+data class WezPart(val source: String = "", val upCm: Double = 0.0, val rightCm: Double = 0.0)
+
+@Serializable
+data class WezResult(
+    val settings: WezSettings = WezSettings(),
+    val ok: Boolean = false,
+    val error: String = "",
+    val rows: List<WezRow> = emptyList(),
+    val atTarget: WezRow = WezRow(),
+    val parts: List<WezPart> = emptyList(),
+    val shots50: Int = 0,
+    val shots80: Int = 0,
+    val shots95: Int = 0,
+)

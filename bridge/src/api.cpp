@@ -21,6 +21,7 @@
 #include <ballistics/applogic/reticle.h>
 #include <ballistics/applogic/session.h>
 #include <ballistics/applogic/truing.h>
+#include <ballistics/applogic/wez.h>
 #include <ballistics/atmosphere.h>
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/repository.h>
@@ -53,6 +54,7 @@
 //   deleteShot {id} / setShotUsed {id, used}
 //   computeTruing / applyTruing / resetTruing
 //   computeDsf / applyDsf / setDsf {points:[{mach, factor}]} / resetDsf
+//   wez {settings?, toM, stepM}     → {settings, ok, error, rows, atTarget, parts, shots50/80/95}
 //   bcCalculator {mode: "chronograph"|"hit", table, vNearMps, vFarMps, distanceM,
 //                 rangeM, elevation} → {ok, error, bc, table}
 //   reticles / libraryBullets {filter} / bulletForm {id} / saveBullet {form}
@@ -258,6 +260,54 @@ al::BulletForm BulletFrom(const json& m) {
     f.source = Str(m, "source", al::kSourceLibrary);
     f.has_custom_curve = Bool(m, "hasCustomCurve");
     return f;
+}
+
+// WEZ settings in the app's keys and units.
+struct WezKey {
+    const char* key;
+    double al::WezSettings::*value;
+};
+const WezKey kWezKeys[] = {
+    {"rangeM", &al::WezSettings::range_m},
+    {"windSpeedMps", &al::WezSettings::wind_speed_mps},
+    {"windDirectionDeg", &al::WezSettings::wind_direction_deg},
+    {"muzzleVelocityMps", &al::WezSettings::muzzle_velocity_mps},
+    {"bcPercent", &al::WezSettings::bc_percent},
+    {"temperatureC", &al::WezSettings::temperature_c},
+    {"pressureHpa", &al::WezSettings::pressure_hpa},
+    {"humidityPct", &al::WezSettings::humidity_pct},
+    {"lookAngleDeg", &al::WezSettings::look_angle_deg},
+    {"cantDeg", &al::WezSettings::cant_deg},
+    {"azimuthDeg", &al::WezSettings::azimuth_deg},
+    {"latitudeDeg", &al::WezSettings::latitude_deg},
+    {"groupMoa", &al::WezSettings::group_moa},
+    {"targetWidthCm", &al::WezSettings::target_width_cm},
+    {"targetHeightCm", &al::WezSettings::target_height_cm},
+};
+
+json ToJson(const al::WezSettings& w) {
+    json out = {{"targetKind", w.target_kind}};
+    for (const WezKey& k : kWezKeys) {
+        out[k.key] = w.*k.value;
+    }
+    return out;
+}
+
+void Update(al::WezSettings& w, const json& a) {
+    for (const WezKey& k : kWezKeys) {
+        w.*k.value = Num(a, k.key, w.*k.value);
+    }
+    const std::string kind = Str(a, "targetKind", w.target_kind);
+    if (kind == "rectangle" || kind == "ellipse" || kind == "figure") {
+        w.target_kind = kind;
+    }
+}
+
+json ToJson(const al::WezRow& r) {
+    return {{"rangeM", r.range_m},
+            {"probability", r.probability},
+            {"sigmaUpCm", r.sigma_up_cm},
+            {"sigmaRightCm", r.sigma_right_cm}};
 }
 
 json DsfJson(const std::vector<DsfPoint>& points) {
@@ -1104,6 +1154,40 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
          [](I& s, const json&) -> json {
              Must(al::ResetTruing(s.db, s.profile_id));
              return json::object();
+         }},
+        {"wez",
+         [](I& s, const json& a) -> json {
+             al::WezSettings w = Must(al::LoadWezSettings(s.db));
+             if (a.contains("settings")) {
+                 Update(w, a.at("settings"));
+                 Must(al::SaveWezSettings(s.db, w));
+             }
+             json out = {{"settings", ToJson(w)}};
+             if (s.profile_id == 0) {
+                 out["ok"] = false;
+                 out["error"] = "Choose a rifle and a cartridge.";
+                 return out;
+             }
+             const al::WezResult r = al::ComputeWez(Must(bs::LoadProfile(s.db, s.profile_id)),
+                                                    s.Session(), w, Num(a, "toM", 1000.0),
+                                                    Num(a, "stepM", 50.0));
+             json rows = json::array();
+             for (const al::WezRow& row : r.rows) {
+                 rows.push_back(ToJson(row));
+             }
+             json parts = json::array();
+             for (const Spread::Part& p : r.parts) {
+                 parts.push_back({{"source", p.source}, {"upCm", p.up_m * 100.0}, {"rightCm", p.right_m * 100.0}});
+             }
+             out.update({{"ok", r.ok},
+                         {"error", r.error},
+                         {"rows", rows},
+                         {"atTarget", ToJson(r.at_target)},
+                         {"parts", parts},
+                         {"shots50", r.shots_50},
+                         {"shots80", r.shots_80},
+                         {"shots95", r.shots_95}});
+             return out;
          }},
         {"bcCalculator",
          [](I& s, const json& a) -> json {

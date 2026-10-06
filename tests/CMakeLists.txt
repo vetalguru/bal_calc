@@ -23,6 +23,7 @@ add_executable(core_tests
     physics_effects_test.cpp
     physics_gekht_test.cpp
     physics_reference_test.cpp
+    physics_wez_test.cpp
     smoke_test.cpp
     storage_database_test.cpp
     storage_migration_test.cpp
