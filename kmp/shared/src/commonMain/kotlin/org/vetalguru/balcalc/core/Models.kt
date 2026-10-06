@@ -114,6 +114,7 @@ data class Solution(
     val gustWindage: Double = 0.0,
     val gustWindageClicks: Double = 0.0,
     val gustWindageCm: Double = 0.0,
+    val dsf: List<DsfPointIn> = emptyList(),
     val hasLead: Boolean = false,
     val lead: Double = 0.0,
     val leadClicks: Double = 0.0,
@@ -183,3 +184,29 @@ data class PairOption(val rifleId: Long = 0, val rifleName: String = "", val car
 
 @Serializable
 data class NamedId(val id: Long = 0, val name: String = "")
+
+/** A drag scale factor (DSF) point: the drag at `mach` times `factor`. */
+@Serializable
+data class DsfPointIn(val mach: Double = 0.0, val factor: Double = 1.0)
+
+@Serializable
+data class DsfShot(
+    val shotId: Long = 0,
+    val rangeM: Double = 0.0,
+    val mach: Double = 0.0,
+    val observed: Double = 0.0,
+    val before: Double = 0.0,
+    val after: Double = 0.0,
+    val used: Boolean = false,
+    val limited: Boolean = false,
+)
+
+@Serializable
+data class DsfResult(
+    val ok: Boolean = false,
+    val error: String = "",
+    val points: List<DsfPointIn> = emptyList(),
+    val shots: List<DsfShot> = emptyList(),
+    val rmsBefore: Double = 0.0,
+    val rmsAfter: Double = 0.0,
+)

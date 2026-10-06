@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <vector>
 
 namespace ballistics::applogic {
 namespace {
@@ -142,6 +143,87 @@ TEST_F(Truing, NoisyObservationsStillImprove) {
     EXPECT_LT(r.rms_after_rad, r.rms_before_rad / 5.0);
     EXPECT_NEAR(r.velocity_scale, true_v, 0.01);
     EXPECT_NEAR(r.drag_scale, true_d, 0.05);
+}
+
+// The bullet "really" has more drag in the transonic part than its BC says.
+const std::vector<DsfPoint> kTrueDsf = {{1.4, 1.0}, {1.1, 1.06}, {0.95, 1.14}, {0.8, 1.10}};
+
+double DsfTruthAt(storage::Database& db, Id profile, double range_m, const SessionConditions& s) {
+    storage::LoadedProfile p = storage::LoadProfile(db, profile).value();
+    p.profile.dsf = kTrueDsf;
+    auto sol = storage::Solve(p, ToConditions(s), range_m + 1.0);
+    return sol.value().trajectory.AtSlantRange(range_m)->hold_elevation_rad;
+}
+
+TEST_F(Truing, DsfNeedsTransonicShots) {
+    ASSERT_TRUE(LogShot(db_, profile_, Air(15.0), 500.0, DsfTruthAt(db_, profile_, 500.0, Air(15.0))).ok());
+    const DsfResult r = ComputeDsf(db_, profile_);
+    EXPECT_FALSE(r.ok);
+    EXPECT_EQ(r.error, "Log hits where the bullet is slower than Mach 1.3 at the target.");
+}
+
+TEST_F(Truing, DsfFromTheShotLogReproducesTheTransonicDrop) {
+    const SessionConditions air = Air(15.0);
+    for (double range = 500.0; range <= 1500.0; range += 100.0) {
+        ASSERT_TRUE(LogShot(db_, profile_, air, range, DsfTruthAt(db_, profile_, range, air)).ok());
+    }
+    const DsfResult r = ComputeDsf(db_, profile_);
+    ASSERT_TRUE(r.ok) << r.error;
+    EXPECT_GE(r.points.size(), 4u);
+    for (const DsfShot& s : r.shots) {
+        EXPECT_FALSE(s.limited) << s.range_m;
+    }
+    EXPECT_DOUBLE_EQ(r.points.back().mach, kDsfAnchorMach);
+    EXPECT_DOUBLE_EQ(r.points.back().factor, 1.0);
+    // Supersonic shots give no point and are untouched.
+    for (const DsfShot& s : r.shots) {
+        EXPECT_FALSE(s.used && s.mach >= kDsfMaxMach) << s.range_m;
+        if (s.mach >= kDsfAnchorMach) {
+            EXPECT_NEAR(s.predicted_after_rad, s.predicted_before_rad, 1e-12) << s.range_m;
+        }
+    }
+    EXPECT_GT(r.rms_before_rad, units::MradToRad(0.1));
+    EXPECT_LT(r.rms_after_rad, units::MradToRad(0.02));
+
+    ASSERT_TRUE(SetDsf(db_, profile_, r.points).ok());
+    // Between the logged ranges, too (another day: colder air).
+    const SessionConditions cold = Air(-5.0);
+    const storage::LoadedProfile trued = storage::LoadProfile(db_, profile_).value();
+    for (double range : {750.0, 1050.0, 1250.0, 1450.0}) {
+        auto sol = storage::Solve(trued, ToConditions(cold), range + 1.0);
+        const double got = sol.value().trajectory.AtSlantRange(range)->hold_elevation_rad;
+        EXPECT_NEAR(units::RadToMrad(got), units::RadToMrad(DsfTruthAt(db_, profile_, range, cold)), 0.05)
+            << range;
+    }
+}
+
+TEST_F(Truing, DsfTableIsChecked) {
+    EXPECT_EQ(SetDsf(db_, profile_, {{1.0, 2.5}}).error().message,
+              "Each DSF point needs a Mach between 0 and 5 and a factor between 0.5 and 2.");
+    EXPECT_EQ(SetDsf(db_, profile_, {{1.0, 1.1}, {1.0, 1.2}}).error().message,
+              "Two DSF points have the same Mach.");
+    ASSERT_TRUE(SetDsf(db_, profile_, {{1.2, 1.0}, {0.9, 1.1}}).ok());
+    EXPECT_EQ(storage::LoadProfile(db_, profile_).value().profile.dsf.size(), 2u);
+    ASSERT_TRUE(SetDsf(db_, profile_, {}).ok());
+    EXPECT_TRUE(storage::LoadProfile(db_, profile_).value().profile.dsf.empty());
+}
+
+TEST_F(Truing, DsfLeavesAVelocityErrorToTheVelocityTruing) {
+    // 5 % slower than the cartridge says: every range misses, the
+    // supersonic ones too. The DSF alone cannot fix that.
+    const SessionConditions air = Air(15.0);
+    for (double range : {900.0, 1100.0, 1300.0}) {
+        ASSERT_TRUE(LogShot(db_, profile_, air, range, TruthAt(range, air, 0.95, 1.0)).ok());
+    }
+    const DsfResult r = ComputeDsf(db_, profile_);
+    if (r.ok) {
+        // Whatever it fitted, the shots it could not explain are marked.
+        bool any = false;
+        for (const DsfShot& s : r.shots) any = any || s.limited;
+        EXPECT_TRUE(any);
+    } else {
+        EXPECT_EQ(r.error, "The DSF alone cannot explain these hits: true the velocity and drag first.");
+    }
 }
 
 } // namespace

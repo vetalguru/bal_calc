@@ -130,7 +130,7 @@ Result<Solution> Solve(const LoadedProfile& p, const ConditionsRecord& condition
     }
 
     Shot base;
-    base.drag = drag.value().Scaled(p.profile.drag_scale);
+    base.drag = drag.value().Scaled(p.profile.drag_scale).WithMachScale(p.profile.dsf);
     base.mass_kg = p.bullet.mass_kg;
     base.bullet_diameter_m = p.bullet.diameter_m;
     base.bullet_length_m = p.bullet.length_m;

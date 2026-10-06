@@ -171,6 +171,38 @@ TEST_F(Bridge, CompareCurves) {
     EXPECT_EQ(Ok("state").at("currentCartridgeId"), chosen);
 }
 
+TEST_F(Bridge, DsfTable) {
+    Sample();
+    EXPECT_TRUE(Ok("solution").at("dsf").empty());
+    EXPECT_FALSE(Ok("computeDsf").at("ok").get<bool>()); // no shots yet
+    EXPECT_EQ(Fails("applyDsf"), "Nothing to apply.");
+
+    Ok("setConditions", {{"targetRangeM", 1300}});
+    const double before = Ok("solution").at("elevation").get<double>();
+    Ok("setDsf", {{"points", json::array({{{"mach", 1.4}, {"factor", 1.0}}, {{"mach", 0.9}, {"factor", 1.15}}})}});
+    const json sol = Ok("solution");
+    ASSERT_EQ(sol.at("dsf").size(), 2u);
+    EXPECT_DOUBLE_EQ(sol.at("dsf")[0].at("mach").get<double>(), 0.9);
+    EXPECT_GT(sol.at("elevation").get<double>(), before + 0.05);
+    EXPECT_EQ(Fails("setDsf", {{"points", json::array({{{"mach", 1.0}, {"factor", 3.0}}})}}),
+              "Each DSF point needs a Mach between 0 and 5 and a factor between 0.5 and 2.");
+
+    // Shots in the transonic part give a table to apply.
+    Ok("resetDsf");
+    EXPECT_TRUE(Ok("solution").at("dsf").empty());
+    for (int range : {900, 1100, 1300}) {
+        Ok("setConditions", {{"targetRangeM", range}});
+        const double predicted = Ok("solution").at("elevation").get<double>();
+        const double more = range == 900 ? 1.0 : 1.03; // transonic: 3 % more drop
+        Ok("logShot", {{"rangeM", range}, {"elevation", predicted * more}});
+    }
+    const json fit = Ok("computeDsf");
+    ASSERT_TRUE(fit.at("ok").get<bool>()) << fit.dump();
+    EXPECT_EQ(fit.at("shots").size(), 3u);
+    Ok("applyDsf");
+    EXPECT_EQ(Ok("solution").at("dsf").size(), fit.at("points").size());
+}
+
 TEST_F(Bridge, DensityAltitudeAndWarnings) {
     Sample();
     json sol = Ok("solution");

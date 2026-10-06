@@ -21,6 +21,8 @@ import org.vetalguru.balcalc.core.ImportReport
 import org.vetalguru.balcalc.core.Info
 import org.vetalguru.balcalc.core.NamedText
 import org.vetalguru.balcalc.core.PairOption
+import org.vetalguru.balcalc.core.DsfPointIn
+import org.vetalguru.balcalc.core.DsfResult
 import org.vetalguru.balcalc.core.SeedReport
 import org.vetalguru.balcalc.core.Shot
 import org.vetalguru.balcalc.core.TruingResult
@@ -227,6 +229,27 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     }
 
     fun resetTruing() = act { api.call("resetTruing"); shotsRevision++; recompute() }
+
+    suspend fun computeDsf(): DsfResult = api.get("computeDsf")
+
+    /** Applies the last fitted DSF table, or sets `points`; returns the core's error or null. */
+    suspend fun applyDsf(points: List<DsfPointIn>? = null): String? = try {
+        if (points == null) {
+            api.call("applyDsf")
+        } else {
+            api.call("setDsf", buildJsonObject {
+                put("points", kotlinx.serialization.json.buildJsonArray {
+                    points.forEach { p -> add(buildJsonObject { put("mach", p.mach); put("factor", p.factor) }) }
+                })
+            })
+        }
+        recompute()
+        null
+    } catch (e: ApiException) {
+        e.message
+    }
+
+    fun resetDsf() = act { api.call("resetDsf"); recompute() }
 
     /** Where this cartridge hits at the rifle's zero; returns the core's error or null. */
     suspend fun setZeroOffset(upCm: Double, rightCm: Double): String? = try {

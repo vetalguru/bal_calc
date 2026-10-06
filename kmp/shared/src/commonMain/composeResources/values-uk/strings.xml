@@ -321,4 +321,20 @@
     <string name="compare_cartridge">Патрон</string>
     <string name="compare_add">Додати</string>
     <string name="compare_current">Ця зброя і патрон</string>
+    <string name="core_24">Запишіть влучання, де на цілі куля повільніша за 1.3 Маха.</string>
+    <string name="core_25">Кожна точка DSF потребує Маха від 0 до 5 і множника від 0.5 до 2.</string>
+    <string name="core_26">Дві точки DSF мають однаковий Мах.</string>
+    <string name="dsf_title">Уточнення трансзвуку (DSF)</string>
+    <string name="dsf_hint">Множник опору за числом Маха — для трансзвукової ділянки, де один BC найменш точний. Підберіть його за влучаннями, де на цілі куля повільніша за 1.3 Маха, або введіть вручну (одна точка змінює опір на всіх швидкостях).</string>
+    <string name="dsf_none">DSF немає: куля має свій опір.</string>
+    <string name="dsf_mach">Мах</string>
+    <string name="dsf_factor">Множник</string>
+    <string name="dsf_add">Додати точку</string>
+    <string name="dsf_save">Зберегти таблицю</string>
+    <string name="dsf_fit">Підібрати за журналом</string>
+    <string name="dsf_reset">Скинути DSF</string>
+    <string name="dsf_shot">%1$s м, Мах %2$s: влучання %3$s, було %4$s, стало %5$s</string>
+    <string name="dsf_supersonic">%1$s м, Мах %2$s: надзвук, його уточнюють швидкість і опір</string>
+    <string name="core_27">Самим DSF ці влучання не пояснити: спершу уточніть швидкість і опір.</string>
+    <string name="dsf_limited">%1$s м, Мах %2$s: самим DSF це влучання не пояснити; спершу уточніть швидкість і опір</string>
 </resources>
