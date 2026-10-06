@@ -20,6 +20,7 @@ add_executable(core_tests
     physics_basics_test.cpp
     physics_drag_models_test.cpp
     physics_effects_test.cpp
+    physics_gekht_test.cpp
     physics_reference_test.cpp
     smoke_test.cpp
     storage_database_test.cpp
@@ -40,7 +41,8 @@ ballistics_enable_tidy(core_tests)
 
 target_include_directories(core_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(core_tests PRIVATE
-    BALLISTICS_SEED_DIR="${PROJECT_SOURCE_DIR}/data/seed")
+    BALLISTICS_SEED_DIR="${PROJECT_SOURCE_DIR}/data/seed"
+    BALLISTICS_TEST_REFERENCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/reference")
 
 if(TARGET bal_cli_lib)
     target_sources(core_tests PRIVATE cli_test.cpp)
