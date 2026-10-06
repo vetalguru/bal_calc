@@ -99,37 +99,27 @@ function Invoke-Setup {
 if ($Setup -or -not (Test-Path $configFile)) { Invoke-Setup }
 
 $cfg = Get-Content $configFile -Raw | ConvertFrom-Json
-$env:QT_ANDROID_KEYSTORE_PATH = $cfg.keystore
-$env:QT_ANDROID_KEYSTORE_ALIAS = $cfg.alias
-$env:QT_ANDROID_KEYSTORE_STORE_PASS = Get-PlainText (ConvertTo-SecureString $cfg.password)
-$env:QT_ANDROID_KEYSTORE_KEY_PASS = $env:QT_ANDROID_KEYSTORE_STORE_PASS
+$env:BALCALC_KEYSTORE_PATH = $cfg.keystore
+$env:BALCALC_KEYSTORE_ALIAS = $cfg.alias
+$env:BALCALC_KEYSTORE_PASSWORD = Get-PlainText (ConvertTo-SecureString $cfg.password)
 
 try {
-    Push-Location $repo
-    cmake --preset android-arm64
-    if ($LASTEXITCODE -ne 0) { throw 'configure failed' }
-    # Ninja does not notice a changed key: drop the packaging stamp and the old
-    # outputs so androiddeployqt packages and signs again on every run.
-    $buildDir = Join-Path $repo 'build\android-arm64\app\android-build'
-    Remove-Item -Force -ErrorAction SilentlyContinue "$buildDir\balcalc.apk",
-        "$buildDir\build\outputs\apk\release\*.apk*", "$buildDir\build\outputs\bundle\release\*.aab"
-    cmake --build --preset android-arm64
-    if ($LASTEXITCODE -ne 0) { throw 'APK build failed' }
-    if ($Aab) {
-        cmake --build build/android-arm64 --target aab
-        if ($LASTEXITCODE -ne 0) { throw 'AAB build failed' }
-    }
+    Push-Location (Join-Path $repo 'kmp')
+    $tasks = @(':androidApp:assembleRelease')
+    if ($Aab) { $tasks += ':androidApp:bundleRelease' }
+    # --no-configuration-cache: the signing settings come from the environment.
+    & .\gradlew.bat @tasks --no-configuration-cache
+    if ($LASTEXITCODE -ne 0) { throw 'Release build failed' }
 } finally {
     Pop-Location
-    'QT_ANDROID_KEYSTORE_STORE_PASS', 'QT_ANDROID_KEYSTORE_KEY_PASS' |
-        ForEach-Object { Remove-Item "Env:$_" -ErrorAction SilentlyContinue }
+    Remove-Item Env:BALCALC_KEYSTORE_PASSWORD -ErrorAction SilentlyContinue
 }
 
-$outputs = Join-Path $repo 'build\android-arm64\app\android-build\build\outputs'
-$apk = Get-ChildItem "$outputs\apk\release\*-signed.apk" | Select-Object -First 1
-if (-not $apk) { throw "No signed APK in $outputs\apk\release" }
+$outputs = Join-Path $repo 'kmp\androidApp\build\outputs'
+$apk = Get-Item "$outputs\apk\release\androidApp-release.apk" -ErrorAction SilentlyContinue
+if (-not $apk) { throw "No release APK in $outputs\apk\release" }
 
-$apksigner = Find-Tool 'apksigner.bat' @("$env:ANDROID_SDK_ROOT\build-tools\35.0.0")
+$apksigner = Find-Tool 'apksigner.bat' @("$env:ANDROID_SDK_ROOT\build-tools\36.0.0", "$env:ANDROID_SDK_ROOT\build-tools\35.0.0")
 # Collect all output first: cutting the pipe short (Select-Object -First)
 # makes apksigner exit with an error in Windows PowerShell.
 $certs = & $apksigner verify --print-certs $apk.FullName

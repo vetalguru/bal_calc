@@ -1,53 +1,63 @@
 # Desktop packages
 
-## Ubuntu (.deb)
+The desktop app is the Kotlin app in `kmp/` (Compose Multiplatform for the
+JVM). Packages carry their own Java runtime and the C++ core
+(`balcalc_jni`), so nothing else needs installing.
 
-Requirements: GCC, CMake, Ninja and the Qt 6 packages
-(`qt6-base-dev qt6-declarative-dev qt6-tools-dev qt6-l10n-tools` and the
-`qml6-module-qtquick*` runtime modules).
+Requirements: JDK 17, CMake, and a C++ compiler — Visual Studio 2022 on
+Windows, GCC and Ninja on Linux. Gradle comes with the wrapper; it builds the
+C++ core by itself (`:desktopApp:buildNative`).
 
-```bash
-cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DBALLISTICS_BUILD_TESTS=OFF
-cmake --build build/release
-(cd build/release && cpack -G DEB)
+## Windows: MSI and ZIP
+
+The MSI needs the WiX Toolset 3 (`winget install --id WiXToolset.WiXToolset -e`).
+
+```powershell
+cd kmp
+.\gradlew.bat :desktopApp:packageMsi :desktopApp:packageZip
 ```
 
-Result: `build/release/balcalc_<version>_amd64.deb`, built against the system
-Qt (its library dependencies are found by `dpkg-shlibdeps`, the QML modules
-are listed in `cmake/Packaging.cmake`). Install and remove:
+Results in `kmp\desktopApp\build\compose\binaries\main\`:
+
+- `msi\BalCalc-<version>.msi` - installer (Start-menu and desktop shortcuts,
+  uninstall in Settings -> Apps); a newer MSI replaces the installed version;
+- `zip\BalCalc-<version>-windows-x64.zip` - portable: unpack anywhere and run
+  `BalCalc\BalCalc.exe`.
+
+## Ubuntu: DEB and ZIP
 
 ```bash
-sudo apt install ./build/release/balcalc_*_amd64.deb
+sudo apt install openjdk-17-jdk ninja-build fakeroot   # or 21
+cd kmp
+./gradlew :desktopApp:packageDeb :desktopApp:packageZip
+```
+
+Results in `kmp/desktopApp/build/compose/binaries/main/`:
+`deb/balcalc_<version>_amd64.deb` (installs to `/opt/balcalc`, menu entry
+"BalCalc") and `zip/BalCalc-<version>-linux-x64.zip`.
+
+```bash
+sudo apt install ./kmp/desktopApp/build/compose/binaries/main/deb/balcalc_*_amd64.deb
 sudo apt remove balcalc
 ```
 
-The package installs `balcalc` (menu entry "BalCalc") and `bal-cli` in
-`/usr/bin`, the icon, AppStream metadata and the licences in
-`/usr/share/doc/balcalc`.
+## Data
 
-## Windows (ZIP and installer)
+The database is the same file the Qt version used, so an update keeps
+rifles, cartridges, shot logs and settings:
+`%APPDATA%\vetalguru\BalCalc\balcalc.db` on Windows,
+`~/.local/share/vetalguru/BalCalc/balcalc.db` on Linux (`BALCALC_DB`
+points the app at another file).
 
-Requirements: Visual Studio 2022 (MSVC), Qt 6.9.2 `msvc2022_64`, CMake and,
-for the installer, NSIS (`winget install --id NSIS.NSIS -e`).
+## Running from the sources
 
-```powershell
-cmake --preset windows-msvc
-cmake --build build\windows-msvc --config Release
-cpack --config build\windows-msvc\CPackConfig.cmake -C Release -B build\windows-msvc\packages
+```bash
+cd kmp
+./gradlew :desktopApp:run            # the app
+./gradlew :shared:desktopTest        # UI tests with the real core (screenshots in shared/build/screenshots)
 ```
-
-Results in `build\windows-msvc\packages`:
-
-- `BalCalc-<version>-win64.exe` - installer (Start-menu shortcut, uninstaller
-  in Settings -> Apps); only when NSIS is installed;
-- `BalCalc-<version>-win64.zip` - portable: unpack anywhere and run
-  `bin\balcalc.exe`.
-
-Both carry the Qt libraries, QML modules and the Visual C++ runtime, so no
-other installation is needed. The user's database lives in
-`%APPDATA%\vetalguru\BalCalc\balcalc.db` and survives reinstalls.
 
 ## Version
 
 `project(ballistics VERSION x.y.z)` in the top-level `CMakeLists.txt` sets
-the package version (and the Android version name).
+the version of every package (desktop, Android and `bal-cli`).

@@ -109,7 +109,7 @@ jobs:
           java-version: 17
 
       - name: Install Ninja
-        run: sudo apt-get update && sudo apt-get install -y ninja-build
+        run: sudo apt-get update && sudo apt-get install -y ninja-build fakeroot
 
       - name: Install NDK and SDK platform
         run: |
@@ -159,7 +159,7 @@ jobs:
           if-no-files-found: error
 
   kotlin:
-    name: Kotlin app (Gradle - Android APK, desktop UI test)
+    name: Kotlin app on Linux (Android APK, desktop UI test, DEB)
     runs-on: ubuntu-24.04
     env:
       NDK_VERSION: 26.1.10909125
@@ -174,7 +174,7 @@ jobs:
           java-version: 17
 
       - name: Install Ninja
-        run: sudo apt-get update && sudo apt-get install -y ninja-build
+        run: sudo apt-get update && sudo apt-get install -y ninja-build fakeroot
 
       - name: Install NDK, CMake and SDK platform
         run: |
@@ -186,7 +186,7 @@ jobs:
 
       - name: Desktop UI test (C++ core through JNI) and Android APK
         working-directory: kmp
-        run: ./gradlew :shared:desktopTest :androidApp:assembleDebug
+        run: ./gradlew :shared:desktopTest :androidApp:assembleDebug :desktopApp:packageDeb :desktopApp:packageZip
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -194,5 +194,37 @@ jobs:
           name: balcalc-kotlin
           path: |
             kmp/androidApp/build/outputs/apk/debug/*.apk
+            kmp/desktopApp/build/compose/binaries/main/deb/*.deb
+            kmp/desktopApp/build/compose/binaries/main/zip/*.zip
+            kmp/shared/build/screenshots/*.png
+            kmp/shared/build/reports/tests/
+
+  kotlin-windows:
+    name: Kotlin app on Windows (desktop UI test, MSI)
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # WiX 3 (for the MSI) comes with the runner image.
+      - name: Desktop UI test (C++ core through JNI), MSI and ZIP
+        working-directory: kmp
+        run: ./gradlew.bat :shared:desktopTest :desktopApp:packageMsi :desktopApp:packageZip
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: balcalc-kotlin-windows
+          path: |
+            kmp/desktopApp/build/compose/binaries/main/msi/*.msi
+            kmp/desktopApp/build/compose/binaries/main/zip/*.zip
             kmp/shared/build/screenshots/*.png
             kmp/shared/build/reports/tests/

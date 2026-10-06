@@ -409,29 +409,43 @@ private fun ReticleCard(model: AppModel, sol: Solution, wide: Boolean) {
 
 @Composable
 private fun QuickWind(speed: Double, fromDeg: Double, onSpeed: (Double) -> Unit, onDirection: (Double) -> Unit) {
-    Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
-        Row(
-            Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            NumberField(
-                label = stringResource(Res.string.wind_speed),
-                value = speed,
-                onEdited = onSpeed,
-                unit = stringResource(Res.string.unit_mps),
-                from = 0.0,
-                to = 40.0,
-                modifier = Modifier.width(130.dp),
-            )
-            WindDial(fromDeg, onDirection, Modifier.size(96.dp))
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(Res.string.wind_from), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(
-                    stringResource(Res.string.wind_clock, clockHour(fromDeg)) + "  (${fromDeg.roundToInt()}°)",
-                    fontSize = 18.sp,
-                )
-                Text(stringResource(Res.string.wind_clock_hint), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("quickWind")) {
+        // The dial on the left, everything else in the rest of the width. The
+        // dial is a third of the card (84..112 dp), so a 320 dp phone, a
+        // 412 dp one and a tablet all keep the text on its lines.
+        BoxWithConstraints(Modifier.padding(16.dp)) {
+            val dial = (maxWidth * 0.32f).coerceIn(84.dp, 112.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                WindDial(fromDeg, onDirection, Modifier.size(dial))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    NumberField(
+                        label = stringResource(Res.string.wind_speed),
+                        value = speed,
+                        onEdited = onSpeed,
+                        unit = stringResource(Res.string.unit_mps),
+                        from = 0.0,
+                        to = 40.0,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                        tag = "windSpeed",
+                    )
+                    Text(
+                        stringResource(Res.string.wind_from),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        stringResource(Res.string.wind_clock, clockHour(fromDeg)) + " · ${fromDeg.roundToInt()}°",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        stringResource(Res.string.wind_clock_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
