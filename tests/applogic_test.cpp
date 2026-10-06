@@ -1,5 +1,6 @@
 #include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/session.h>
+#include <ballistics/applogic/wez.h>
 #include <ballistics/atmosphere.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
@@ -614,6 +615,41 @@ TEST_F(AppLogic, RangeRowsCarryTheParts) {
     s.azimuth_deg = 270.0; // west: it sinks
     EXPECT_LT(BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 200.0).rows.back().coriolis_lift_cm,
               -2.0);
+}
+
+TEST_F(AppLogic, HitProbabilityFallsWithRange) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    EXPECT_DOUBLE_EQ(LoadWezSettings(db_).value().group_moa, 1.0); // defaults
+    WezSettings w;
+    w.target_kind = "figure";
+    w.target_width_cm = 45;
+    w.target_height_cm = 100;
+    ASSERT_TRUE(SaveWezSettings(db_, w).ok());
+    EXPECT_EQ(LoadWezSettings(db_).value().target_kind, "figure");
+
+    SessionConditions s = AtZero(600.0);
+    s.winds = {{3.0, 90.0, 0.0}};
+    const WezResult r = ComputeWez(p, s, w, 1200.0, 100.0);
+    ASSERT_TRUE(r.ok) << r.error;
+    ASSERT_EQ(r.rows.size(), 12u);
+    EXPECT_GT(r.rows.front().probability, 0.99); // 100 m: a sure hit
+    for (std::size_t i = 1; i < r.rows.size(); ++i) {
+        EXPECT_LE(r.rows[i].probability, r.rows[i - 1].probability + 1e-9) << i;
+        EXPECT_GT(r.rows[i].sigma_right_cm, r.rows[i - 1].sigma_right_cm);
+    }
+    EXPECT_LT(r.rows.back().probability, 0.6);
+    EXPECT_NEAR(r.at_target.probability, r.rows[5].probability, 1e-12); // 600 m
+    ASSERT_FALSE(r.parts.empty());
+    EXPECT_LE(r.shots_50, r.shots_80);
+    EXPECT_LE(r.shots_80, r.shots_95);
+    EXPECT_GE(r.shots_50, 1);
+
+    // Better known wind: better odds.
+    WezSettings calm = w;
+    calm.wind_speed_mps = 0.2;
+    EXPECT_GT(ComputeWez(p, s, calm, 1200.0, 100.0).rows.back().probability,
+              r.rows.back().probability + 0.05);
+    EXPECT_FALSE(ComputeWez(p, s, w, 1200.0, 0.0).ok);
 }
 
 } // namespace

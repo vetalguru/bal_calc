@@ -7,6 +7,7 @@ add_library(ballistics_core STATIC
     src/solver.cpp
     src/standard_drag_tables.cpp
     src/version.cpp
+    src/wez.cpp
 )
 target_include_directories(ballistics_core PUBLIC include)
 target_compile_definitions(ballistics_core PRIVATE
