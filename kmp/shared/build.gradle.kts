@@ -13,6 +13,8 @@ kotlin {
         namespace = "org.vetalguru.balcalc.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
+        // Compose resources (strings) travel in the APK only with this on.
+        androidResources.enable = true
     }
     jvm("desktop")
 
@@ -22,6 +24,7 @@ kotlin {
             api(libs.compose.foundation)
             api(libs.compose.ui)
             api(libs.compose.material3)
+            api(libs.compose.resources)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.coroutines.core)
         }
@@ -52,4 +55,9 @@ tasks.named<Test>("desktopTest") {
     dependsOn(":desktopApp:mergedResources")
     environment("BALCALC_RESOURCES", resources.get().asFile.path)
     systemProperty("balcalc.screenshots", layout.buildDirectory.dir("screenshots").get().asFile.path)
+}
+
+compose.resources {
+    packageOfResClass = "org.vetalguru.balcalc.res"
+    publicResClass = true
 }

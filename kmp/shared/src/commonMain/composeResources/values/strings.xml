@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Navigation -->
+    <string name="app_name">BalCalc</string>
+    <string name="nav_solution">Solution</string>
+    <string name="nav_solution_short">Solve</string>
+    <string name="nav_table">Range table</string>
+    <string name="nav_table_short">Table</string>
+    <string name="nav_conditions">Conditions</string>
+    <string name="nav_conditions_short">Air</string>
+    <string name="nav_armory">Rifles and cartridges</string>
+    <string name="nav_armory_short">Rifles</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_settings_short">More</string>
+
+    <!-- Units -->
+    <string name="unit_mrad">MRAD</string>
+    <string name="unit_moa">MOA</string>
+    <string name="unit_m">m</string>
+    <string name="unit_cm">cm</string>
+    <string name="unit_mps">m/s</string>
+    <string name="unit_j">J</string>
+    <string name="unit_s">s</string>
+    <string name="unit_c">°C</string>
+    <string name="unit_hpa">hPa</string>
+    <string name="unit_deg">°</string>
+    <string name="unit_percent">%</string>
+
+    <!-- Solution -->
+    <string name="no_rifles">No rifles</string>
+    <string name="no_cartridges">No cartridges</string>
+    <string name="distance">Distance</string>
+    <string name="add_rifle">Add a rifle</string>
+    <string name="add_cartridge">Add a cartridge</string>
+    <string name="try_sample">Try a sample</string>
+    <string name="sample_rifle_name">Sample .308 Win</string>
+    <string name="sample_cartridge_name">Sample SMK 175 gr</string>
+    <string name="elevation">Elevation</string>
+    <string name="windage">Windage</string>
+    <string name="up">UP</string>
+    <string name="down">DOWN</string>
+    <string name="left">LEFT</string>
+    <string name="right">RIGHT</string>
+    <string name="clicks">%1$s clicks</string>
+    <string name="trued">Trued: velocity ×%1$s, drag ×%2$s</string>
+    <string name="not_trued">Not trued yet: log hits to true this rifle and cartridge.</string>
+    <string name="wind_speed">Wind speed</string>
+    <string name="wind_from">Wind from</string>
+    <string name="wind_clock">%1$s o\'clock</string>
+    <string name="wind_clock_hint">12 = from the target, 3 = from the right</string>
+    <string name="velocity">Velocity</string>
+    <string name="energy">Energy</string>
+    <string name="time_of_flight">Time of flight</string>
+    <string name="mach">Mach</string>
+    <string name="drop">Drop</string>
+    <string name="drift">Drift</string>
+    <string name="spin_drift">Spin drift</string>
+    <string name="muzzle_velocity">Muzzle velocity</string>
+    <string name="stability">Stability Sg</string>
+    <string name="subsonic_at_target">Subsonic at the target: expect larger dispersion.</string>
+    <string name="transonic_from">Transonic from about %1$s m.</string>
+
+    <!-- Conditions -->
+    <string name="atmosphere">Atmosphere</string>
+    <string name="temperature">Temperature</string>
+    <string name="altitude">Altitude above sea level</string>
+    <string name="pressure_qnh">Pressure at sea level (QNH)</string>
+    <string name="pressure_station">Station pressure (absolute)</string>
+    <string name="humidity">Relative humidity</string>
+    <string name="enter_qnh">I enter sea-level pressure (QNH, weather report)</string>
+    <string name="station_pressure_is">Station pressure: %1$s hPa</string>
+    <string name="powder">Powder</string>
+    <string name="powder_follows_air">Powder temperature = air temperature</string>
+    <string name="powder_temperature">Powder temperature</string>
+    <string name="wind">Wind</string>
+    <string name="speed">Speed</string>
+    <string name="wind_from_degrees">Blowing from (0 = from the target, 90 = from the right)</string>
+    <string name="angles">Angles</string>
+    <string name="shot_angle">Shot angle (uphill +, downhill −)</string>
+    <string name="cant">Cant (clockwise +)</string>
+    <string name="coriolis_section">Earth rotation (Coriolis)</string>
+    <string name="coriolis_on">Account for Earth rotation</string>
+    <string name="latitude">Latitude (north +)</string>
+    <string name="known_direction">Known shot direction</string>
+    <string name="azimuth">Azimuth (from north, clockwise)</string>
+
+    <!-- Range table -->
+    <string name="tab_table">Table</string>
+    <string name="tab_chart">Chart</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="step">Step</string>
+    <string name="col_range">Range\nm</string>
+    <string name="col_elev">Elev\n%1$s</string>
+    <string name="col_elev_clicks">Elev\nclicks</string>
+    <string name="col_wind">Wind\n%1$s</string>
+    <string name="col_wind_clicks">Wind\nclicks</string>
+    <string name="col_velocity">V\nm/s</string>
+    <string name="col_drop">Drop\ncm</string>
+    <string name="col_drift">Drift\ncm</string>
+    <string name="col_mach">Mach</string>
+    <string name="col_energy">Energy\nJ</string>
+    <string name="col_time">Time\ns</string>
+    <string name="table_note">Corrections: up and right are positive. Orange: transonic (below Mach 1.2). Red: subsonic. Tap a row to aim at it.</string>
+    <string name="chart_height">height over line of sight</string>
+    <string name="chart_drift">drift (right +)</string>
+    <string name="chart_range">range, m</string>
+
+    <!-- Not yet moved from the Qt app (phase 4) -->
+    <string name="coming_soon">This screen is being moved to the new app.</string>
+</resources>
