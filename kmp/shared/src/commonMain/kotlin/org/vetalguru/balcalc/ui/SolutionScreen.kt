@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -74,6 +75,8 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
     val unit = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
     val sampleRifle = stringResource(Res.string.sample_rifle_name)
     val sampleCartridge = stringResource(Res.string.sample_cartridge_name)
+    var logging by remember { mutableStateOf(false) }
+    if (logging) LogShotDialog(model, st.conditions.targetRangeM, sol.elevation) { logging = false }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 600.dp
@@ -126,15 +129,21 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
 
                 if (sol.ok) {
                     Corrections(sol, unit, wide)
-                    Text(
-                        if (sol.velocityScale != 1.0 || sol.dragScale != 1.0) {
-                            stringResource(Res.string.trued, sol.velocityScale.fixed(4), sol.dragScale.fixed(3))
-                        } else {
-                            stringResource(Res.string.not_trued)
-                        },
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
+                    Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            if (sol.velocityScale != 1.0 || sol.dragScale != 1.0) {
+                                stringResource(Res.string.trued, sol.velocityScale.fixed(4), sol.dragScale.fixed(3))
+                            } else {
+                                stringResource(Res.string.not_trued)
+                            },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                        OutlinedButton(onClick = { logging = true }, modifier = Modifier.testTag("logHitSolution")) {
+                            Text(stringResource(Res.string.log_hit))
+                        }
+                    }
+                    ReticleCard(model, sol, wide)
                 }
 
                 QuickWind(
@@ -318,6 +327,81 @@ private fun CorrectionTile(
                 Text(unit, fontSize = 18.sp, modifier = Modifier.padding(bottom = 12.dp))
             }
             if (clicks.isNotEmpty()) Text(clicks, fontSize = 18.sp)
+        }
+    }
+}
+
+/** The reticle with the hold, the hold mode and the turret settings. */
+@Composable
+private fun ReticleCard(model: AppModel, sol: Solution, wide: Boolean) {
+    val reticle: @Composable (Modifier) -> Unit = { m ->
+        ReticleView(if (sol.hasReticle) sol.reticleDefinition else "", sol.targetX, sol.targetY, m.aspectRatio(1f))
+    }
+    val text: @Composable (Modifier) -> Unit = { m ->
+        Column(m, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                if (sol.hasReticle) sol.reticleName else stringResource(Res.string.no_reticle),
+                fontWeight = FontWeight.Bold,
+            )
+            ChoiceField(
+                stringResource(Res.string.hold_mode),
+                listOf(
+                    "dial_elevation" to stringResource(Res.string.hold_dial_elevation),
+                    "hold" to stringResource(Res.string.hold_everything),
+                    "dial" to stringResource(Res.string.dial_everything),
+                ),
+                model.state.holdMode, model::setHoldMode,
+            )
+            if (sol.dialElevationClicks != 0.0 || sol.dialWindageClicks != 0.0) {
+                Text(
+                    stringResource(
+                        Res.string.turrets,
+                        abs(sol.dialElevationClicks).roundToInt(),
+                        stringResource(if (sol.dialElevationClicks >= 0) Res.string.up_lower else Res.string.down_lower),
+                        abs(sol.dialWindageClicks).roundToInt(),
+                        stringResource(if (sol.dialWindageClicks >= 0) Res.string.right_lower else Res.string.left_lower),
+                    ),
+                    fontSize = 16.sp,
+                )
+            }
+            // Reticle marks are counted in the reticle's own units.
+            val moa = sol.hasReticle && sol.reticleUnits == "moa"
+            val perUnit = if (moa) 0.29088821 else 1.0 // mrad per unit
+            Text(
+                stringResource(
+                    Res.string.target_on_mark,
+                    (abs(sol.targetY) / perUnit).fixed(2),
+                    stringResource(if (moa) Res.string.unit_moa else Res.string.unit_mrad),
+                    stringResource(if (sol.targetY <= 0) Res.string.below else Res.string.above),
+                    (abs(sol.targetX) / perUnit).fixed(2),
+                    stringResource(if (sol.targetX <= 0) Res.string.left_lower else Res.string.right_lower),
+                ),
+                fontSize = 16.sp,
+            )
+            if (sol.focalPlane == "sfp" && sol.maxMagnification > sol.minMagnification) {
+                Text(
+                    stringResource(Res.string.sfp_magnification, sol.magnification.fixed(1)),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Slider(
+                    value = sol.magnification.toFloat(),
+                    onValueChange = { v -> model.updateConditions { it.copy(magnification = (v * 2).roundToInt() / 2.0) } },
+                    valueRange = sol.minMagnification.toFloat()..sol.maxMagnification.toFloat(),
+                )
+            }
+        }
+    }
+    Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+        if (wide) {
+            Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                reticle(Modifier.width(320.dp))
+                text(Modifier.weight(1f))
+            }
+        } else {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                reticle(Modifier.fillMaxWidth())
+                text(Modifier.fillMaxWidth())
+            }
         }
     }
 }

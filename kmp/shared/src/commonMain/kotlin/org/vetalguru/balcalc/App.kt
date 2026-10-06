@@ -131,7 +131,7 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
                             1 -> TableScreen(model, onRangeChosen = { page = 0 })
                             2 -> ConditionsScreen(model)
                             3 -> ArmoryScreen(model, armory, onChosen = { page = 0 })
-                            else -> ComingSoon()
+                            else -> org.vetalguru.balcalc.ui.SettingsScreen(model)
                         }
                     }
                 }
@@ -141,12 +141,3 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
     }
 }
 
-/** Pages still being moved from the Qt app (phase 4). */
-@Composable
-private fun ComingSoon() {
-    Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(stringResource(Res.string.coming_soon), textAlign = TextAlign.Center)
-        }
-    }
-}

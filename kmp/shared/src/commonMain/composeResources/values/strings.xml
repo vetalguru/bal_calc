@@ -46,7 +46,7 @@
     <string name="not_trued">Not trued yet: log hits to true this rifle and cartridge.</string>
     <string name="wind_speed">Wind speed</string>
     <string name="wind_from">Wind from</string>
-    <string name="wind_clock">%1$s o\'clock</string>
+    <string name="wind_clock">%1$s o'clock</string>
     <string name="wind_clock_hint">12 = from the target, 3 = from the right</string>
     <string name="velocity">Velocity</string>
     <string name="energy">Energy</string>
@@ -203,6 +203,74 @@
     <string name="own_curve">own drag curve</string>
     <string name="bands_count">(%1$s bands)</string>
 
-    <!-- Not yet moved from the Qt app (phase 4) -->
-    <string name="coming_soon">This screen is being moved to the new app.</string>
+    <!-- Reticle on the solution page -->
+    <string name="no_reticle">No reticle chosen: plain crosshair in MRAD</string>
+    <string name="hold_dial_elevation">Dial elevation, hold wind</string>
+    <string name="hold_everything">Hold everything</string>
+    <string name="dial_everything">Dial everything</string>
+    <string name="hold_mode">Turrets and holds</string>
+    <string name="turrets">Turrets: %1$s clicks %2$s, %3$s clicks %4$s</string>
+    <string name="up_lower">up</string>
+    <string name="down_lower">down</string>
+    <string name="left_lower">left</string>
+    <string name="right_lower">right</string>
+    <string name="below">below</string>
+    <string name="above">above</string>
+    <string name="target_on_mark">Put the target on the red mark: %1$s %2$s %3$s, %4$s %2$s %5$s of the centre.</string>
+    <string name="sfp_magnification">Magnification %1$s× (second focal plane: marks are true at the reference power)</string>
+    <string name="log_hit">Log a hit</string>
+
+    <!-- Log a hit -->
+    <string name="log_note">Current air, powder temperature and shot angle are saved with it.</string>
+    <string name="elevation_hit">Elevation that hit (up +)</string>
+    <string name="also_windage">Also log the windage that hit</string>
+    <string name="windage_hit">Windage that hit (right +)</string>
+    <string name="notes_hint">Notes (group size, light, wind)</string>
+
+    <!-- Shot log and truing -->
+    <string name="choose_pair">Choose a rifle and a cartridge.</string>
+    <string name="truing_intro">Log the elevation that actually hit, at several distances (ideally one close, one where the bullet is still fast, one far). Truing then adjusts the muzzle velocity and the drag for this rifle and cartridge so the calculator agrees with them.</string>
+    <string name="poi_title">Point of impact at the rifle's zero (%1$s m) with this cartridge</string>
+    <string name="poi_up">Above the aim point</string>
+    <string name="poi_right">Right of the aim point</string>
+    <string name="no_shots">No shots logged for this rifle and cartridge yet.</string>
+    <string name="shot_line">%1$s m: hit at %2$s %3$s</string>
+    <string name="predicted">predicted %1$s</string>
+    <string name="calculate_truing">Calculate truing</string>
+    <string name="reset_truing">Reset truing</string>
+    <string name="trued_now">Trued: velocity ×%1$s, drag ×%2$s.</string>
+    <string name="mv_change">Muzzle velocity %1$s → %2$s m/s</string>
+    <string name="drag_change">Drag ×%1$s</string>
+    <string name="drag_unchanged">Drag unchanged: log shots at more different distances to fit it.</string>
+    <string name="avg_miss">Average miss %1$s → %2$s %3$s</string>
+    <string name="truing_point">%1$s m: hit %2$s, was %3$s, now %4$s</string>
+    <string name="apply">Apply</string>
+
+    <!-- Bullet library and editor -->
+    <string name="import_library_title">Import bullets, drag curves or reticles</string>
+    <string name="files_imported">%1$s file(s) imported.</string>
+    <string name="edit_bullet">Edit bullet</string>
+    <string name="new_bullet">New bullet</string>
+    <string name="bullet_name_hint">Name, e.g. MatchKing 175 gr HPBT</string>
+    <string name="manufacturer">Manufacturer</string>
+    <string name="drag">Drag</string>
+    <string name="own_curve_note">This bullet uses its own measured drag curve.</string>
+    <string name="banded">Different BCs by velocity (as published by Sierra)</string>
+    <string name="above_velocity">Above velocity</string>
+    <string name="bc_short">BC</string>
+    <string name="add_band">Add band</string>
+    <string name="notes_source">Notes, source of the data</string>
+
+    <!-- Settings -->
+    <string name="angle_units">Angle units</string>
+    <string name="mrad_long">MRAD (milliradians)</string>
+    <string name="moa_long">MOA (minutes of angle)</string>
+    <string name="language">Language</string>
+    <string name="system_language">System</string>
+    <string name="about">About</string>
+    <string name="engine_versions">Engine %1$s, SQLite %2$s</string>
+    <string name="about_model">Point-mass trajectory model with Coriolis, spin drift and aerodynamic jump. Always confirm with live fire.</string>
+    <string name="about_data">Bundled data: cartridges and reticles from BallisticCalculator (LGPL-2.1), Lapua Doppler-radar drag curves, manufacturer-published BCs (Berger, Hornady, Sierra).</string>
+    <string name="seed_report">Starter library: %1$s records imported.</string>
+
 </resources>

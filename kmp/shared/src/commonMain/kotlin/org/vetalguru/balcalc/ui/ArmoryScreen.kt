@@ -66,6 +66,8 @@ internal sealed interface Route {
     class Factory : Route
     /** The bullet library; [pick] set: choose one for a cartridge. */
     class Bullets(val pick: ((Long) -> Unit)?) : Route
+    class Bullet(val form: org.vetalguru.balcalc.core.BulletForm) : Route
+    data object Truing : Route
 }
 
 /** The open inner page of the Rifles tab, so Back can close it first. */
@@ -90,12 +92,22 @@ fun ArmoryScreen(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
             nav.back()
             model.act { nav.push(Route.Cartridge(model.cartridgeFormFromLibrary(id))) }
         }
-        is Route.Bullets -> BulletList(model, picker = r.pick != null, onBack = nav::back) { id ->
+        is Route.Bullets -> BulletList(
+            model,
+            picker = r.pick != null,
+            onBack = nav::back,
+            onEdit = { id -> model.act { nav.push(Route.Bullet(model.bulletForm(id))) } },
+        ) { id ->
             nav.back()
             r.pick?.invoke(id)
         }
+        is Route.Bullet -> BulletEditor(model, r.form) { nav.back() }
+        Route.Truing -> TruingScreen(model, onBack = nav::back)
     }
 }
+
+/** Opens the shot log of the current rifle with this cartridge. */
+fun ArmoryNav.openShotLog() = push(Route.Truing)
 
 @Composable
 private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
@@ -208,6 +220,10 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                     onEdit = { id -> model.act { nav.push(Route.Cartridge(model.cartridgeForm(id))) } },
                     onShare = ::share,
                     onDelete = { id, name -> deleting = Triple("cartridge", id, name) },
+                    onShotLog = { id ->
+                        model.selectCartridge(id)
+                        nav.openShotLog()
+                    },
                 )
             }
         }
@@ -242,6 +258,7 @@ private fun ItemList(
     onEdit: (Long) -> Unit,
     onShare: (String, Long, Boolean) -> Unit,
     onDelete: (Long, String) -> Unit,
+    onShotLog: ((Long) -> Unit)? = null,
 ) {
     if (items.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
@@ -271,6 +288,12 @@ private fun ItemList(
                 Box {
                     TextButton(onClick = { menu = true }, modifier = Modifier.testTag("more:${item.title}")) { Text("⋮", fontSize = 18.sp) }
                     DropdownMenu(menu, { menu = false }) {
+                        if (onShotLog != null) {
+                            DropdownMenuItem({ Text(stringResource(Res.string.shot_log)) }, onClick = {
+                                menu = false
+                                onShotLog(item.id)
+                            }, modifier = Modifier.testTag("shotLog"))
+                        }
                         DropdownMenuItem({ Text(stringResource(Res.string.export_file)) }, onClick = {
                             menu = false
                             onShare(kind, item.id, true)
@@ -329,6 +352,7 @@ private fun RifleEditor(model: AppModel, initial: RifleForm, onDone: () -> Unit)
     var error by remember { mutableStateOf<String?>(null) }
     var reticles by remember { mutableStateOf(emptyList<ReticleItem>()) }
     LaunchedEffect(Unit) { reticles = model.reticles() }
+    val reticleList = reticles // read outside the editor's BoxWithConstraints (see TruingScreen)
     val scope = rememberCoroutineScope()
     val cm = stringResource(Res.string.unit_cm)
     val inch = stringResource(Res.string.unit_in)
@@ -370,7 +394,7 @@ private fun RifleEditor(model: AppModel, initial: RifleForm, onDone: () -> Unit)
                 { mod ->
                     ChoiceField(
                         stringResource(Res.string.reticle),
-                        listOf(0L to stringResource(Res.string.reticle_none)) + reticles.map { it.id to it.name },
+                        listOf(0L to stringResource(Res.string.reticle_none)) + reticleList.map { it.id to it.name },
                         f.reticleId, { f = f.copy(reticleId = it) }, mod,
                     )
                 },
@@ -475,15 +499,18 @@ private fun <T> SearchList(
     empty: String,
     load: suspend (String) -> List<T>,
     onBack: () -> Unit,
+    reloadKey: Any? = null,
+    actions: @Composable () -> Unit = {},
     row: @Composable (T) -> Unit,
 ) {
     var filter by rememberSaveable { mutableStateOf("") }
     var items by remember { mutableStateOf(emptyList<T>()) }
-    LaunchedEffect(filter) { items = runCatching { load(filter) }.getOrDefault(emptyList()) }
+    LaunchedEffect(filter, reloadKey) { items = runCatching { load(filter) }.getOrDefault(emptyList()) }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
-            Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            actions()
         }
         TextInput(hint, filter, { filter = it }, Modifier.padding(horizontal = 12.dp), tag = "search")
         if (items.isEmpty()) {
@@ -530,28 +557,61 @@ private fun FactoryCartridges(model: AppModel, onBack: () -> Unit, onPick: (Long
     }
 }
 
-/** The bullet library; in picker mode tapping a bullet chooses it. Editing arrives in phase 4b. */
+/**
+ * The bullet library: search, add, edit, import data files; in picker
+ * mode tapping a bullet chooses it (Edit still edits).
+ */
 @Composable
-fun BulletList(model: AppModel, picker: Boolean, onBack: () -> Unit, onPick: (Long) -> Unit) {
+fun BulletList(model: AppModel, picker: Boolean, onBack: () -> Unit, onEdit: (Long) -> Unit, onPick: (Long) -> Unit) {
     val gr = stringResource(Res.string.gr_value, "%s")
     val ownCurve = stringResource(Res.string.own_curve)
     val bands = stringResource(Res.string.bands_count, "%s")
+    val importedFiles = stringResource(Res.string.files_imported, "%s")
+    val platform = LocalPlatform.current
+    var report by remember { mutableStateOf<String?>(null) }
     SearchList<BulletItem>(
         stringResource(if (picker) Res.string.choose_bullet else Res.string.bullet_library),
         stringResource(Res.string.search_bullets),
         stringResource(Res.string.library_empty),
         model::libraryBullets,
         onBack,
+        reloadKey = model.revision,
+        actions = {
+            TextButton(onClick = {
+                model.act {
+                    val files = platform.openTexts(listOf("ammo", "drg", "reticle", "json"), multiple = true)
+                    if (files.isNotEmpty()) {
+                        val r = model.importFiles(files)
+                        report = (listOf(importedFiles.replace("%s", r.imported.toString())) +
+                            r.problems.map { "${it.file}: ${it.message}" }).joinToString("\n")
+                    }
+                }
+            }) { Text(stringResource(Res.string.import_action)) }
+            Button(onClick = { onEdit(0) }, modifier = Modifier.testTag("newBullet")) { Text(stringResource(Res.string.new_action)) }
+        },
     ) { b ->
-        TwoLines(
-            b.name,
-            listOf(
-                b.manufacturer, b.caliber, gr.replace("%s", b.massGr.fixed(1)),
-                if (b.dragKind == "curve") ownCurve
-                else "${b.dragTable} ${b.bc.fixed(3)}" + if (b.bcBands > 1) " " + bands.replace("%s", b.bcBands.toString()) else "",
-            ).filter { it.isNotEmpty() }.joinToString("  ·  "),
-            "bullet:${b.name}",
-        ) { if (picker) onPick(b.id) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) {
+                TwoLines(
+                    b.name,
+                    listOf(
+                        b.manufacturer, b.caliber, gr.replace("%s", b.massGr.fixed(1)),
+                        if (b.dragKind == "curve") ownCurve
+                        else "${b.dragTable} ${b.bc.fixed(3)}" + if (b.bcBands > 1) " " + bands.replace("%s", b.bcBands.toString()) else "",
+                    ).filter { it.isNotEmpty() }.joinToString("  ·  "),
+                    "bullet:${b.name}",
+                ) { if (picker) onPick(b.id) else onEdit(b.id) }
+            }
+            if (picker) TextButton(onClick = { onEdit(b.id) }) { Text(stringResource(Res.string.edit)) }
+        }
+    }
+    report?.let {
+        AlertDialog(
+            onDismissRequest = { report = null },
+            title = { Text(stringResource(Res.string.import_action)) },
+            text = { Text(it) },
+            confirmButton = { TextButton(onClick = { report = null }) { Text("OK") } },
+        )
     }
 }
 

@@ -7,11 +7,13 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runDesktopComposeUiTest
@@ -27,11 +29,21 @@ import org.vetalguru.balcalc.core.desktopSeed
 /** The app on the desktop JVM with the real C++ core, end to end. */
 @OptIn(ExperimentalTestApi::class)
 class FlowTest {
-    private fun ComposeUiTest.exists(tag: String) =
-        onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
+    // State written from the core's worker thread reaches the test once its
+    // snapshot changes are announced; announce them before every check.
+    private fun ComposeUiTest.announce() {
+        androidx.compose.runtime.snapshots.Snapshot.sendApplyNotifications()
+        waitForIdle() // let the recomposer run the frame those changes need
+    }
+
+    private fun ComposeUiTest.exists(tag: String): Boolean {
+        announce()
+        return onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
+    }
 
     /** What a node shows: an input's content, or its text. */
     private fun ComposeUiTest.shown(tag: String): String {
+        announce()
         val config = onNodeWithTag(tag).fetchSemanticsNode().config
         return config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.EditableText)?.text
             ?: config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text).orEmpty()
@@ -82,10 +94,12 @@ class FlowTest {
         onNodeWithTag(tag).performImeAction()
     }
 
-    private fun ComposeUiTest.count(prefix: String) =
-        onAllNodes(androidx.compose.ui.test.SemanticsMatcher("tag $prefix*") {
+    private fun ComposeUiTest.count(prefix: String): Int {
+        announce()
+        return onAllNodes(androidx.compose.ui.test.SemanticsMatcher("tag $prefix*") {
             it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith(prefix) == true
         }).fetchSemanticsNodes().size
+    }
 
     @Test
     fun armory() = runDesktopComposeUiTest(400, 820) {
@@ -157,6 +171,149 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("cartridgeName") && shown("cartridgeName").contains("GP11") }
         onNodeWithTag("save").performClick()
         waitUntil(timeoutMillis = 10_000) { count("cartridge:") == 2 }
+        db.delete()
+    }
+
+    /** Seeded library + sample rifle and cartridge, on the given screen size. */
+    private var testApi: Api? = null
+
+    private fun ComposeUiTest.startWithSample(): File {
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
+        val api = Api(desktopEngine()).also { testApi = it }
+        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform()) }
+        waitUntil(timeoutMillis = 30_000) { exists("sample") }
+        onNodeWithTag("sample").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+        return db
+    }
+
+    private fun ComposeUiTest.elevation(): Double = shown("elevation").toDouble()
+
+    private fun ComposeUiTest.setRange(m: Int) {
+        type("range", m.toString())
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && shown("range") == m.toString() }
+        waitForIdle()
+    }
+
+    @Test
+    fun logHitsTrueAndShift() = runDesktopComposeUiTest(1100, 900) {
+        val db = startWithSample()
+        // The reticle card is there (plain crosshair: no reticle chosen).
+        assertTrue(exists("reticle"))
+
+        // Pretend the rifle needs 4 % more elevation than predicted at two ranges.
+        for (r in listOf(500, 900)) {
+            setRange(r)
+            val predicted = elevation()
+            onNodeWithTag("logHitSolution").performClick()
+            waitUntil { exists("hitElevation") }
+            type("hitElevation", (predicted * 1.04).fixed(2))
+            type("hitNotes", "test")
+            onNodeWithTag("saveHit").performClick()
+            waitUntil { !exists("hitElevation") }
+        }
+        val before = elevation()
+
+        onNodeWithTag("navArmory").performClick()
+        onNodeWithTag("cartridgesTab").performClick()
+        waitUntil { count("more:") > 0 }
+        onAllNodes(androidx.compose.ui.test.SemanticsMatcher("more") {
+            it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("more:") == true
+        }).onFirst().performClick()
+        onNodeWithTag("shotLog").performClick()
+        waitUntil(timeoutMillis = 10_000) { count("shotRow") == 2 }
+        onNodeWithTag("computeTruing").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("truingResult") }
+        shot("truing")
+        onNodeWithTag("applyTruing").performClick()
+        waitUntil { !exists("truingResult") }
+
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && elevation() > before }
+        assertTrue(elevation() > before) // slower bullet: more elevation
+
+        // Point-of-impact shift of this cartridge: 3 cm high at the 100 m zero.
+        setRange(100)
+        val atZero = elevation()
+        onNodeWithTag("navArmory").performClick()
+        waitUntil { exists("offsetUp") } // the shot log is still open in the Rifles tab
+        type("offsetUp", "3")
+        onNodeWithTag("navSolution").performClick()
+        // The tile shows the size of the correction (its direction is a word): 0.30 DOWN.
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && kotlin.math.abs(elevation() - kotlin.math.abs(atZero - 0.3)) < 0.02 }
+        db.delete()
+    }
+
+    @Test
+    fun libraryBulletAndSettings() = runDesktopComposeUiTest(400, 820) {
+        val db = startWithSample()
+        val before = elevation()
+
+        // A banded library bullet through its editor.
+        onNodeWithTag("navArmory").performClick()
+        onNodeWithText("Bullets").performClick()
+        waitUntil { exists("newBullet") }
+        onNodeWithTag("newBullet").performClick()
+        waitUntil { exists("bulletEditName") }
+        type("bulletEditName", "Test bullet 175 HPBT")
+        type("bulletMass", "175")
+        type("bulletDiameter", "0.308")
+        onNodeWithText("Different BCs by velocity (as published by Sierra)").performClick()
+        type("bandVelocity0", "869")
+        type("bandBc0", "0.505")
+        onNodeWithTag("addBand").performScrollTo().performClick()
+        waitUntil { exists("bandBc1") }
+        type("bandBc1", "0.496")
+        shot("bullet-editor")
+        onNodeWithTag("save").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("bullet:Test bullet 175 HPBT") }
+        onNodeWithText("Back").performClick()
+
+        // The sample cartridge switches to it.
+        onNodeWithTag("cartridgesTab").performClick()
+        waitUntil { count("cartridge:") == 1 }
+        onAllNodesWithText("Edit").onFirst().performClick()
+        waitUntil { exists("chooseBullet") }
+        onNodeWithTag("chooseBullet").performClick()
+        waitUntil { exists("search") }
+        onNodeWithTag("search").performTextReplacement("Test bullet")
+        waitUntil(timeoutMillis = 10_000) { exists("bullet:Test bullet 175 HPBT") }
+        onNodeWithTag("bullet:Test bullet 175 HPBT").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("bulletName") && shown("bulletName") == "Test bullet 175 HPBT" }
+        onNodeWithTag("save").performClick()
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && elevation() != before }
+
+        // MOA: the same correction, ×3.4377.
+        val mrad = elevation()
+        onNodeWithTag("navSettings").performClick()
+        onNodeWithTag("unit:moa").performClick()
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") && kotlin.math.abs(elevation() - mrad * 3.4377) < 0.02 }
+        shot("settings-moa-solution")
+        db.delete()
+    }
+
+    @Test
+    fun reticleFromTheLibrary() = runDesktopComposeUiTest(1100, 1000) {
+        val db = startWithSample()
+        // Give the sample rifle each starter-library reticle in turn (through
+        // the core, as the rifle editor would) and draw it with the hold.
+        val api = testApi!!
+        val reticles = kotlinx.coroutines.runBlocking { api.call("reticles") }.toString()
+        val ids = Regex("\"id\":(\\d+)").findAll(reticles).map { it.groupValues[1] }.toList()
+        assertTrue(ids.isNotEmpty())
+        for (id in ids) {
+            kotlinx.coroutines.runBlocking {
+                val form = api.call("rifleForm", kotlinx.serialization.json.buildJsonObject { put("id", kotlinx.serialization.json.JsonPrimitive(1)) })
+                val withReticle = kotlinx.serialization.json.JsonObject(form.let { it as kotlinx.serialization.json.JsonObject } + ("reticleId" to kotlinx.serialization.json.JsonPrimitive(id.toLong())))
+                api.call("saveRifle", kotlinx.serialization.json.buildJsonObject { put("form", withReticle) })
+            }
+            // Any edit refreshes the screen's solution.
+            setRange(600 + id.toInt())
+            waitUntil(timeoutMillis = 10_000) { exists("reticle") }
+            shot("reticle-$id")
+        }
         db.delete()
     }
 
