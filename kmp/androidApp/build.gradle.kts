@@ -17,7 +17,7 @@ android {
         applicationId = "org.vetalguru.balcalc"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 2 // the Qt version was 1
+        versionCode = 2 // the Qt version was 1; grow with every release
         versionName = rootProject.extra["appVersion"] as String
 
         ndk { abiFilters += listOf("arm64-v8a") }
@@ -38,6 +38,27 @@ android {
         cmake {
             path = repoRoot.resolve("CMakeLists.txt")
             version = libs.versions.android.cmake.get()
+        }
+    }
+
+    // Release signing from the environment, never from the repository
+    // (tools/android-release.ps1 sets these from the user's encrypted
+    // settings). Without them the release APK stays unsigned.
+    val keystore = providers.environmentVariable("BALCALC_KEYSTORE_PATH").orNull
+    signingConfigs {
+        if (keystore != null) {
+            create("release") {
+                storeFile = file(keystore)
+                storePassword = providers.environmentVariable("BALCALC_KEYSTORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("BALCALC_KEYSTORE_ALIAS").get()
+                keyPassword = storePassword
+            }
+        }
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 

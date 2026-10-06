@@ -21,7 +21,12 @@ dependencies {
 val nativeBuildDir = layout.buildDirectory.dir("native").get().asFile
 val configureNative = tasks.register<Exec>("configureNative") {
     workingDir = repoRoot
-    val generator = if (windows) listOf("-G", "Visual Studio 17 2022", "-A", "x64") else listOf("-G", "Ninja")
+    // Windows: the C++ runtime linked in (/MT), so no Visual C++ Redistributable is needed.
+    val generator = if (windows) {
+        listOf("-G", "Visual Studio 17 2022", "-A", "x64", "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded")
+    } else {
+        listOf("-G", "Ninja")
+    }
     commandLine(
         listOf("cmake", "-S", repoRoot.path, "-B", nativeBuildDir.path) + generator + listOf(
             "-DCMAKE_BUILD_TYPE=Release",
@@ -56,6 +61,9 @@ val stageResources = tasks.register<Sync>("stageResources") {
         include("**/*.ammo", "**/*.drg", "**/*.reticle", "**/*.json")
         into("common/seed")
     }
+    from(repoRoot.resolve("app/icons/balcalc.png")) {
+        into("common") // the window icon
+    }
 }
 
 compose.desktop {
@@ -66,7 +74,28 @@ compose.desktop {
             targetFormats(TargetFormat.Msi, TargetFormat.Deb)
             packageName = "BalCalc"
             packageVersion = rootProject.extra["appVersion"] as String
+            description = "Ballistic calculator"
             vendor = "vetalguru"
+            copyright = "GPL-3.0"
+            licenseFile.set(repoRoot.resolve("LICENSE"))
+            // What suggestRuntimeModules finds; the bundled JRE holds only these.
+            modules("java.instrument", "jdk.unsupported")
+            windows {
+                iconFile.set(repoRoot.resolve("app/icons/balcalc.ico"))
+                menu = true
+                menuGroup = "BalCalc"
+                shortcut = true
+                dirChooser = true
+                // Fixed: a newer MSI replaces the installed version.
+                upgradeUuid = "5c1f3a8e-2d4b-4f6a-9e7c-0b8d1a2c3e4f"
+            }
+            linux {
+                iconFile.set(repoRoot.resolve("app/icons/balcalc.png"))
+                packageName = "balcalc"
+                menuGroup = "Science;Engineering"
+                appCategory = "science"
+                shortcut = true
+            }
         }
     }
 }
@@ -82,4 +111,14 @@ val mergedResources = tasks.register<Sync>("mergedResources") {
     from(appResources.map { it.dir(os) })
     from(appResources.map { it.dir("common") })
     into(layout.buildDirectory.dir("mergedResources"))
+}
+
+// Portable package: the app folder (with its own Java runtime) as a ZIP.
+tasks.register<Zip>("packageZip") {
+    group = "compose desktop"
+    dependsOn("createDistributable")
+    val os = if (System.getProperty("os.name").startsWith("Windows")) "windows" else "linux"
+    from(layout.buildDirectory.dir("compose/binaries/main/app"))
+    archiveFileName.set("BalCalc-${rootProject.extra["appVersion"]}-$os-x64.zip")
+    destinationDirectory.set(layout.buildDirectory.dir("compose/binaries/main/zip"))
 }
