@@ -213,7 +213,8 @@ class FlowTest {
 
     private fun ComposeUiTest.setRange(m: Int) {
         type("range", m.toString())
-        waitUntil(timeoutMillis = 10_000) { exists("elevation") && shown("range") == m.toString() }
+        // The corrections must be the ones for this range, not the last.
+        waitUntil(timeoutMillis = 10_000) { exists("solvedFor:$m") && shown("range") == m.toString() }
         waitForIdle()
     }
 
