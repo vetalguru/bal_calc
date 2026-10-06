@@ -14,6 +14,9 @@ interface Platform {
     suspend fun copyText(text: String)
 
     suspend fun pasteText(): String?
+
+    /** Asks for a picture (a target photo); its bytes, or null when cancelled. */
+    suspend fun openImage(): ByteArray? = null
 }
 
 /** The system Back action (Android key or gesture); nothing on desktops. */

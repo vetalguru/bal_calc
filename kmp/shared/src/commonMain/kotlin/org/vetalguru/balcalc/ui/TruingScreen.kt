@@ -88,7 +88,7 @@ fun LogShotDialog(model: AppModel, rangeGuess: Double, elevationGuess: Double, o
  * truing (fitting muzzle velocity and drag to the corrections that hit).
  */
 @Composable
-fun TruingScreen(model: AppModel, onBack: () -> Unit) {
+fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) {
     val st = model.state
     val pair = st.currentPair
     val sol = model.solution
@@ -188,6 +188,11 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit) {
                     }
                 } }
 
+                if (st.hasPair) {
+                    OutlinedButton(onClick = onGroup, modifier = Modifier.padding(horizontal = 12.dp).testTag("openGroup")) {
+                        Text(stringResource(Res.string.group_title))
+                    }
+                }
                 if (st.hasPair) DsfSection(model, shotList.isNotEmpty(), unit)
 
                 if (st.hasPair) {

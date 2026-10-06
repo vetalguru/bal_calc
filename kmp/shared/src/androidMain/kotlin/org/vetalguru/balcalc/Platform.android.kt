@@ -66,6 +66,14 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
         }
     }
 
+    override suspend fun openImage(): ByteArray? {
+        val uri = suspendCancellableCoroutine<List<Uri>> { c ->
+            onOpened = { c.resume(it) }
+            openOne.launch(arrayOf("image/*"))
+        }.firstOrNull() ?: return null
+        return withContext(Dispatchers.IO) { activity.contentResolver.openInputStream(uri)!!.use { it.readBytes() } }
+    }
+
     private fun displayName(uri: Uri): String =
         activity.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
             ?.use { if (it.moveToFirst()) it.getString(0) else null }

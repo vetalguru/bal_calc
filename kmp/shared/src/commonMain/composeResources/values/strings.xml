@@ -418,4 +418,22 @@
     <string name="err_mv">Muzzle velocity SD</string>
     <string name="err_group">Group of 5 shots</string>
     <string name="part_line">↕ %1$s cm   ↔ %2$s cm</string>
+    <string name="group_title">Group from a photo</string>
+    <string name="group_photo">Choose a photo</string>
+    <string name="group_hint">Scale: tap two points a known distance apart. Aim: tap the point you aimed at. Holes: tap the centre of every hole.</string>
+    <string name="mode_scale">Scale</string>
+    <string name="mode_aim">Aim</string>
+    <string name="mode_holes">Holes</string>
+    <string name="group_undo">Undo</string>
+    <string name="group_scale_cm">Between the scale points</string>
+    <string name="group_need">Mark the scale, the aim point and at least two holes.</string>
+    <string name="group_shots">%1$s shots at %2$s m</string>
+    <string name="group_es">Extreme spread: %1$s cm = %2$s MOA = %3$s MRAD</string>
+    <string name="group_mr">Mean radius: %1$s cm</string>
+    <string name="group_centre">Centre of the group: %1$s cm up, %2$s cm right of the aim point</string>
+    <string name="group_dial">To centre it: %1$s up, %2$s right (%3$s)</string>
+    <string name="group_zero">Shift of this cartridge at the zero</string>
+    <string name="group_zero_hint">Shot at the rifle's zero range (%1$s m): the centre is where this cartridge hits.</string>
+    <string name="group_wez">Rifle precision for Hit chance: %1$s MOA (5 shots)</string>
+    <string name="group_saved">Saved.</string>
 </resources>

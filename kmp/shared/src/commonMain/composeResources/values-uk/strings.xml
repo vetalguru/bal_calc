@@ -388,4 +388,22 @@
     <string name="err_mv">СКВ початкової швидкості</string>
     <string name="err_group">Група з 5 пострілів</string>
     <string name="part_line">↕ %1$s см   ↔ %2$s см</string>
+    <string name="group_title">Група за фото</string>
+    <string name="group_photo">Вибрати фото</string>
+    <string name="group_hint">Масштаб: торкніться двох точок на відомій відстані. Точка прицілювання: куди цілилися. Пробоїни: центр кожної.</string>
+    <string name="mode_scale">Масштаб</string>
+    <string name="mode_aim">Приціл</string>
+    <string name="mode_holes">Пробоїни</string>
+    <string name="group_undo">Скасувати</string>
+    <string name="group_scale_cm">Між точками масштабу</string>
+    <string name="group_need">Позначте масштаб, точку прицілювання і щонайменше дві пробоїни.</string>
+    <string name="group_shots">%1$s пострілів на %2$s м</string>
+    <string name="group_es">Розкид: %1$s см = %2$s MOA = %3$s MRAD</string>
+    <string name="group_mr">Середній радіус: %1$s см</string>
+    <string name="group_centre">СТП: %1$s см вгору, %2$s см праворуч від точки прицілювання</string>
+    <string name="group_dial">Щоб звести в центр: %1$s вгору, %2$s праворуч (%3$s)</string>
+    <string name="group_zero">Зсув цього патрона на пристрілці</string>
+    <string name="group_zero_hint">Стріляли на дистанції пристрілки (%1$s м): СТП — це куди б'є цей патрон.</string>
+    <string name="group_wez">Купчастість для «Влучання»: %1$s MOA (5 пострілів)</string>
+    <string name="group_saved">Збережено.</string>
 </resources>

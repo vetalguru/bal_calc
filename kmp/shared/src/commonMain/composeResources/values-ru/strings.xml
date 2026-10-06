@@ -388,4 +388,22 @@
     <string name="err_mv">СКО начальной скорости</string>
     <string name="err_group">Группа из 5 выстрелов</string>
     <string name="part_line">↕ %1$s см   ↔ %2$s см</string>
+    <string name="group_title">Группа по фото</string>
+    <string name="group_photo">Выбрать фото</string>
+    <string name="group_hint">Масштаб: коснитесь двух точек на известном расстоянии. Точка прицеливания: куда целились. Пробоины: центр каждой.</string>
+    <string name="mode_scale">Масштаб</string>
+    <string name="mode_aim">Прицел</string>
+    <string name="mode_holes">Пробоины</string>
+    <string name="group_undo">Отменить</string>
+    <string name="group_scale_cm">Между точками масштаба</string>
+    <string name="group_need">Отметьте масштаб, точку прицеливания и хотя бы две пробоины.</string>
+    <string name="group_shots">%1$s выстрелов на %2$s м</string>
+    <string name="group_es">Разброс: %1$s см = %2$s MOA = %3$s MRAD</string>
+    <string name="group_mr">Средний радиус: %1$s см</string>
+    <string name="group_centre">СТП: %1$s см вверх, %2$s см вправо от точки прицеливания</string>
+    <string name="group_dial">Чтобы свести в центр: %1$s вверх, %2$s вправо (%3$s)</string>
+    <string name="group_zero">Сдвиг этого патрона на пристрелке</string>
+    <string name="group_zero_hint">Стреляли на дистанции пристрелки (%1$s м): СТП — это куда бьёт этот патрон.</string>
+    <string name="group_wez">Кучность для «Попадания»: %1$s MOA (5 выстрелов)</string>
+    <string name="group_saved">Сохранено.</string>
 </resources>

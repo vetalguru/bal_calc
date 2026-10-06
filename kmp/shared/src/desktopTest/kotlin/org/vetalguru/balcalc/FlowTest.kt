@@ -12,6 +12,8 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.performTouchInput
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -529,6 +531,60 @@ class FlowTest {
         waitUntil(timeoutMillis = 20_000) { exists("hitChance") && chance() < before }
         onNodeWithTag("part:dispersion").performScrollTo()
         shot("hit-chance-sources")
+        db.delete()
+    }
+
+    @Test
+    fun groupFromAPhoto() = runDesktopComposeUiTest(412, 1000) {
+        // A blank 400 x 400 target: 10 px per cm, as the scale below says.
+        val png = java.io.ByteArrayOutputStream().also { out ->
+            val img = java.awt.image.BufferedImage(400, 400, java.awt.image.BufferedImage.TYPE_INT_RGB)
+            val g = img.createGraphics()
+            g.color = java.awt.Color.WHITE
+            g.fillRect(0, 0, 400, 400)
+            g.dispose()
+            ImageIO.write(img, "png", out)
+        }.toByteArray()
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
+        val platform = FakePlatform().apply { image = png }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        waitUntil(timeoutMillis = 30_000) { exists("sample") }
+        onNodeWithTag("sample").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+
+        onNodeWithTag("navArmory").performClick()
+        onNodeWithTag("cartridgesTab").performClick()
+        waitUntil(timeoutMillis = 10_000) { count("more:") > 0 }
+        onAllNodes(androidx.compose.ui.test.SemanticsMatcher("more") {
+            it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("more:") == true
+        }).onFirst().performClick()
+        onNodeWithTag("shotLog").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("openGroup") }
+        onNodeWithTag("openGroup").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("groupPhoto") }
+        onNodeWithTag("groupPhoto").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("groupCanvas") }
+        type("groupScaleCm", "20")
+
+        // Image pixels -> taps on the canvas (the photo fills its width).
+        fun tap(x: Double, y: Double) = onNodeWithTag("groupCanvas").performTouchInput {
+            click(androidx.compose.ui.geometry.Offset((x / 400 * width).toFloat(), (y / 400 * width).toFloat()))
+        }
+        tap(100.0, 300.0); tap(300.0, 300.0) // scale: 200 px = 20 cm
+        tap(200.0, 200.0)                   // aim
+        tap(210.0, 180.0); tap(250.0, 180.0); tap(230.0, 160.0) // holes, 4 cm apart
+        waitUntil(timeoutMillis = 10_000) { exists("groupEs") }
+        shot("group")
+        // Extreme spread 4 cm (+-a pixel of the taps) at 100 m: 0.40 MRAD.
+        assertTrue(Regex("""Extreme spread: (3.9|4.0|4.1) cm""").containsMatchIn(shown("groupEs")), shown("groupEs"))
+        assertTrue(shown("groupCentre").startsWith("Centre of the group: 2."), shown("groupCentre"))
+
+        // Shot at the zero range: it can be this cartridge's zero shift; and the
+        // precision goes to the hit chance.
+        onNodeWithTag("groupZero").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("groupSaved") }
+        onNodeWithTag("groupWez").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("groupSaved") }
         db.delete()
     }
 
