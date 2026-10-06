@@ -1,11 +1,13 @@
 #include <ballistics/bridge/api.h>
 
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <cmath>
 #include <functional>
 #include <map>
 #include <optional>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -132,6 +134,35 @@ std::string Trim(const std::string& s) {
 }
 bool Bool(const json& j, const char* key, bool fallback = false) {
     return j.contains(key) && j.at(key).is_boolean() ? j.at(key).get<bool>() : fallback;
+}
+
+std::string Lower(std::string s) {
+    for (char& c : s) {
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    }
+    return s;
+}
+
+// Catalog items whose maker, model and calibre contain every word of the filter.
+json Matching(const json& catalog, const std::string& filter) {
+    std::vector<std::string> words;
+    std::istringstream in(Lower(filter));
+    for (std::string w; in >> w;) {
+        words.push_back(w);
+    }
+    json out = json::array();
+    for (const json& item : catalog) {
+        const std::string text = Lower(item.value("maker", "") + " " + item.value("model", "") + " " +
+                                       item.value("caliber", ""));
+        bool all = true;
+        for (const std::string& w : words) {
+            all = all && text.find(w) != std::string::npos;
+        }
+        if (all) {
+            out.push_back(item);
+        }
+    }
+    return out;
 }
 
 // ---- Forms <-> JSON ---------------------------------------------------------
@@ -364,6 +395,11 @@ struct Api::Impl {
     bs::Database db;
     bool open = false;
     std::string db_path;
+
+    // Read-only catalogs from the seed files (published_scopes.json,
+    // published_rifles.json): "Choose from the library" in the rifle editor.
+    json scope_catalog = json::array();
+    json rifle_catalog = json::array();
 
     // Selection and the pair derived from it.
     json rifles = json::array();
@@ -645,6 +681,22 @@ struct Api::Impl {
             ReloadArmory(); // cartridges of the new calibre first
         }
         UpdatePair();
+    }
+
+    // A seed file that is one of the read-only catalogs: kept in memory.
+    bool TakeCatalog(const std::string& content) {
+        const std::string head = content.substr(0, 200);
+        const bool is_scopes = head.find("\"balcalc-scopes\"") != std::string::npos;
+        const bool is_rifles = head.find("\"balcalc-rifles\"") != std::string::npos;
+        if (!is_scopes && !is_rifles) {
+            return false;
+        }
+        const json doc = json::parse(content, nullptr, false);
+        const char* key = is_scopes ? "scopes" : "rifles";
+        if (!doc.is_discarded() && doc.contains(key) && doc.at(key).is_array()) {
+            (is_scopes ? scope_catalog : rifle_catalog) = doc.at(key);
+        }
+        return true;
     }
 
     // ---- Situations: a rifle, a cartridge and the conditions, by name -------
@@ -1068,6 +1120,9 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
              std::vector<al::SeedFile> files;
              if (a.contains("files")) {
                  for (const json& f : a.at("files")) {
+                     if (s.TakeCatalog(Str(f, "content"))) {
+                         continue; // a catalog, not a library record
+                     }
                      files.push_back({Str(f, "name"), Str(f, "content")});
                  }
              }
@@ -1185,6 +1240,8 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
              return ToJson(Must(al::WithLibraryBullet(
                  s.db, CartridgeFrom(a.value("form", json::object())), IdOf(a, "bulletId"))));
          }},
+        {"libraryScopes", [](I& s, const json& a) -> json { return Matching(s.scope_catalog, Str(a, "filter")); }},
+        {"libraryRifles", [](I& s, const json& a) -> json { return Matching(s.rifle_catalog, Str(a, "filter")); }},
         {"libraryCartridges",
          [](I& s, const json& a) -> json {
              json out = json::array();

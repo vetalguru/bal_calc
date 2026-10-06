@@ -75,6 +75,7 @@ kotlin { jvmToolchain(17) }
 val seedAssets = tasks.register<Sync>("seedAssets") {
     from(repoRoot.resolve("data/seed")) {
         include("**/*.ammo", "**/*.drg", "**/*.reticle", "**/*.json")
+        exclude("sources/**") // collection inputs
     }
     into(layout.buildDirectory.dir("generated/seedAssets/seed"))
 }

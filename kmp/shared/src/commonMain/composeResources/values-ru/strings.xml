@@ -417,4 +417,12 @@
     <string name="situation_line">%1$s · %2$s · %3$s м</string>
     <string name="situation_missing">Винтовка или патрон удалены</string>
     <string name="close">Закрыть</string>
+    <string name="library_rifles">Библиотека винтовок</string>
+    <string name="library_scopes">Библиотека прицелов</string>
+    <string name="library_search_rifle">Производитель, модель или калибр</string>
+    <string name="library_search_scope">Производитель или модель</string>
+    <string name="catalog_empty">Библиотека пуста.</string>
+    <string name="library_rifle_line">Шаг нарезов 1:%1$s″ · ствол %2$s″</string>
+    <string name="library_scope_line">%1$s–%2$s× %3$s · клик %4$s %5$s</string>
+    <string name="library_note">Как публикует производитель: сверьте шаг нарезов и цену клика со своей винтовкой и прицелом.</string>
 </resources>

@@ -39,6 +39,8 @@ import org.vetalguru.balcalc.core.BulletItem
 import org.vetalguru.balcalc.core.CartridgeForm
 import org.vetalguru.balcalc.core.CartridgeItem
 import org.vetalguru.balcalc.core.ExportedJson
+import org.vetalguru.balcalc.core.LibraryRifle
+import org.vetalguru.balcalc.core.LibraryScope
 import org.vetalguru.balcalc.core.ReticleItem
 import org.vetalguru.balcalc.core.RifleForm
 import org.vetalguru.balcalc.core.AppState
@@ -164,6 +166,10 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
         api.get("libraryBullets", buildJsonObject { put("filter", filter) })
     suspend fun libraryCartridges(filter: String): List<CartridgeItem> =
         api.get("libraryCartridges", buildJsonObject { put("filter", filter) })
+    suspend fun libraryScopes(filter: String): List<LibraryScope> =
+        api.get("libraryScopes", buildJsonObject { put("filter", filter) })
+    suspend fun libraryRifles(filter: String): List<LibraryRifle> =
+        api.get("libraryRifles", buildJsonObject { put("filter", filter) })
     suspend fun cartridgeFormFromLibrary(id: Long): CartridgeForm = api.get("cartridgeFormFromLibrary", id(id))
     suspend fun cartridgeFormWithBullet(form: CartridgeForm, bulletId: Long): CartridgeForm =
         api.get("cartridgeFormWithBullet", buildJsonObject {

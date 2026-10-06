@@ -7,6 +7,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <set>
 #include <sstream>
 #include <string>
 
@@ -437,6 +438,9 @@ TEST_F(Bridge, StarterLibraryIsSeededOnce) {
     for (const auto& entry :
          std::filesystem::recursive_directory_iterator(std::string(BALLISTICS_SEED_DIR))) {
         const std::string name = entry.path().filename().string();
+        if (entry.path().parent_path().filename() == "sources") {
+            continue; // collection inputs, not shipped
+        }
         if (!entry.is_regular_file() || name == "README.md" || name.find(".py") != std::string::npos ||
             name.rfind("LICENSE", 0) == 0) {
             continue;
@@ -451,6 +455,8 @@ TEST_F(Bridge, StarterLibraryIsSeededOnce) {
     EXPECT_EQ(Ok("libraryBullets").size(), 323U);
     EXPECT_EQ(Ok("libraryCartridges").size(), 69U);
     EXPECT_EQ(Ok("reticles").size(), 4U);
+    EXPECT_EQ(Ok("libraryScopes").size(), 50U);
+    EXPECT_EQ(Ok("libraryRifles").size(), 126U);
     EXPECT_TRUE(Ok("state").at("cartridges").empty()); // factory loads stay in the library
     EXPECT_EQ(Ok("seed", {{"version", 1}, {"files", files}}).at("imported"), 0);
 
@@ -461,6 +467,78 @@ TEST_F(Bridge, StarterLibraryIsSeededOnce) {
     EXPECT_GT(copy.at("muzzleVelocity").get<double>(), 0.0);
     Ok("saveCartridge", {{"form", copy}});
     EXPECT_EQ(Ok("state").at("cartridges").size(), 1U);
+}
+
+// The bundled scope and rifle catalogs: what the makers publish, in range.
+TEST_F(Bridge, PublishedScopesAndRiflesAreSane) {
+    json files = json::array();
+    for (const char* name : {"published_scopes.json", "published_rifles.json"}) {
+        std::ifstream in(std::filesystem::path(BALLISTICS_SEED_DIR) / name, std::ios::binary);
+        std::ostringstream text;
+        text << in.rdbuf();
+        files.push_back({{"name", name}, {"content", text.str()}});
+    }
+    EXPECT_EQ(Ok("seed", {{"version", 1}, {"files", files}}).at("imported"), 0); // not records
+
+    const json scopes = Ok("libraryScopes");
+    ASSERT_GE(scopes.size(), 50U);
+    std::set<std::string> names;
+    for (const json& s : scopes) {
+        const std::string name = s.at("maker").get<std::string>() + " " + s.at("model").get<std::string>();
+        SCOPED_TRACE(name);
+        EXPECT_TRUE(names.insert(name).second) << "duplicate";
+        EXPECT_EQ(s.at("source").get<std::string>().rfind("https://", 0), 0U);
+        const double lo = s.at("minMagnification"), hi = s.at("maxMagnification");
+        EXPECT_GE(lo, 1.0);
+        EXPECT_GT(hi, lo - 1e-9);
+        EXPECT_LE(hi, 80.0);
+        const std::string plane = s.at("focalPlane");
+        EXPECT_TRUE(plane == "ffp" || plane == "sfp");
+        if (s.contains("sfpReferenceMagnification")) {
+            EXPECT_EQ(plane, "sfp");
+            EXPECT_GE(s.at("sfpReferenceMagnification").get<double>(), lo);
+            EXPECT_LE(s.at("sfpReferenceMagnification").get<double>(), hi);
+        }
+        ASSERT_FALSE(s.at("clicks").empty());
+        for (const json& c : s.at("clicks")) {
+            const double v = c.at("value");
+            if (c.at("units") == "mrad") {
+                EXPECT_TRUE(v >= 0.025 && v <= 0.25) << v;
+            } else {
+                EXPECT_EQ(c.at("units"), "moa");
+                EXPECT_TRUE(v >= 0.1 && v <= 1.0) << v;
+            }
+        }
+    }
+
+    const json rifles = Ok("libraryRifles");
+    ASSERT_GE(rifles.size(), 100U);
+    std::set<std::string> keys;
+    for (const json& r : rifles) {
+        const std::string key = r.at("maker").get<std::string>() + " " + r.at("model").get<std::string>() +
+                                " " + r.at("caliber").get<std::string>() + " " + r.at("twistIn").dump();
+        SCOPED_TRACE(key);
+        EXPECT_TRUE(keys.insert(key).second) << "duplicate";
+        EXPECT_EQ(r.at("source").get<std::string>().rfind("https://", 0), 0U);
+        EXPECT_FALSE(r.at("caliber").get<std::string>().empty());
+        EXPECT_GE(r.at("twistIn").get<double>(), 6.5);
+        EXPECT_LE(r.at("twistIn").get<double>(), 24.0);
+        ASSERT_FALSE(r.at("barrelsIn").empty());
+        for (const json& b : r.at("barrelsIn")) {
+            EXPECT_GE(b.get<double>(), 16.0);
+            EXPECT_LE(b.get<double>(), 30.0);
+        }
+    }
+
+    // Every word of the filter, in any order and case.
+    const json atacr = Ok("libraryScopes", {{"filter", "f1 ATACR"}});
+    EXPECT_EQ(atacr.size(), 5U);
+    for (const json& s : atacr) {
+        EXPECT_EQ(s.at("focalPlane"), "ffp");
+    }
+    const json tikka = Ok("libraryRifles", {{"filter", "tikka ctr 6.5 creedmoor"}});
+    ASSERT_EQ(tikka.size(), 1U);
+    EXPECT_EQ(tikka[0].at("twistIn"), 8.0);
 }
 
 TEST(BridgeFile, SessionSelectionAndSettingsPersist) {

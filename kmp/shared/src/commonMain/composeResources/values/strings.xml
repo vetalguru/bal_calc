@@ -447,4 +447,12 @@
     <string name="situation_line">%1$s · %2$s · %3$s m</string>
     <string name="situation_missing">The rifle or cartridge was deleted</string>
     <string name="close">Close</string>
+    <string name="library_rifles">Rifle library</string>
+    <string name="library_scopes">Scope library</string>
+    <string name="library_search_rifle">Maker, model or caliber</string>
+    <string name="library_search_scope">Maker or model</string>
+    <string name="catalog_empty">The library is empty.</string>
+    <string name="library_rifle_line">Twist 1:%1$s in · barrel %2$s in</string>
+    <string name="library_scope_line">%1$s–%2$s× %3$s · click %4$s %5$s</string>
+    <string name="library_note">As the maker publishes it: check the twist and the click value against your rifle and scope.</string>
 </resources>

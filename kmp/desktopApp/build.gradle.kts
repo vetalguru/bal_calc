@@ -58,6 +58,7 @@ val stageResources = tasks.register<Sync>("stageResources") {
     }
     from(repoRoot.resolve("data/seed")) {
         include("**/*.ammo", "**/*.drg", "**/*.reticle", "**/*.json")
+        exclude("sources/**") // collection inputs
         into("common/seed")
     }
     from(repoRoot.resolve("kmp/icons/balcalc.png")) {

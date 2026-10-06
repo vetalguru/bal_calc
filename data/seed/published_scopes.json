@@ -1,0 +1,1144 @@
+{
+ "format": "balcalc-scopes",
+ "version": 1,
+ "scopes": [
+  {
+   "maker": "Athlon",
+   "model": "Ares BTR Gen3 HD 4.5-27x50 FFP",
+   "minMagnification": 4.5,
+   "maxMagnification": 27.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "APRS13 (MIL)",
+    "APLR13 (MOA)"
+   ],
+   "source": "https://athlonoptics.com/product/ares-btr-gen3-hd-4-5-27x50-aprs13-ffp-ir-mil/",
+   "note": "Turret units match the reticle."
+  },
+  {
+   "maker": "Athlon",
+   "model": "Ares ETR Gen2 UHD 4.5-30x56 FFP",
+   "minMagnification": 4.5,
+   "maxMagnification": 30.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "APRS12 (MIL)",
+    "APLR12 (MOA)"
+   ],
+   "source": "https://athlonoptics.com/product/ares-etr-gen2-uhd-4-5-30x56-aprs12-ffp-ir-mil/",
+   "note": "Turret units match the reticle: 0.1 MIL with APRS, 0.25 MOA with APLR."
+  },
+  {
+   "maker": "Athlon",
+   "model": "Argos BTR Gen3 6-24x50 FFP",
+   "minMagnification": 6.0,
+   "maxMagnification": 24.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "APRS11 (MIL)",
+    "APLR11 (MOA)"
+   ],
+   "source": "https://athlonoptics.com/product/argos-btr-gen3-6-24x50-aprs11-ffp-ir-mil/",
+   "note": "Turret units match the reticle."
+  },
+  {
+   "maker": "Athlon",
+   "model": "Cronus BTR Gen2 UHD 4.5-29x56 FFP",
+   "minMagnification": 4.5,
+   "maxMagnification": 29.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "APRS1 (MIL)",
+    "APLR5 (MOA)"
+   ],
+   "source": "https://athlonoptics.com/product/cronus-btr-gen2-uhd-4-5-29x56-aprs1-ffp-ir-mil/",
+   "note": "Turret units match the reticle."
+  },
+  {
+   "maker": "Athlon",
+   "model": "Helos BTR Gen2 6-24x56 FFP",
+   "minMagnification": 6.0,
+   "maxMagnification": 24.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "APRS6 (MIL)",
+    "APLR6 (MOA)"
+   ],
+   "source": "https://athlonoptics.com/product/helos-btr-gen2-6-24x50-aprs6-ffp-ir-mil/",
+   "note": "Turret units match the reticle."
+  },
+  {
+   "maker": "Athlon",
+   "model": "Midas TAC Gen2 HD 6-24x50 FFP",
+   "minMagnification": 6.0,
+   "maxMagnification": 24.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "APRS15 (MIL)",
+    "APRS14 (MIL)",
+    "APLR15 (MOA)"
+   ],
+   "source": "https://athlonoptics.com/product/midas-tac-gen2-hd-6-24x50-aprs15-ffp-mil/",
+   "note": "Turret units match the reticle."
+  },
+  {
+   "maker": "Kahles",
+   "model": "K1050 10-50x56",
+   "minMagnification": 10.0,
+   "maxMagnification": 50.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.125
+    }
+   ],
+   "reticles": [
+    "MOAK"
+   ],
+   "source": "https://www.kahles.at/de/sport/zielfernrohre/k1050-10-50x56",
+   "elevation": "1.6 m/100 m"
+  },
+  {
+   "maker": "Kahles",
+   "model": "K18i-2 1-8x24i",
+   "minMagnification": 1.0,
+   "maxMagnification": 8.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "3GR"
+   ],
+   "source": "https://www.kahles.at/de/sport/zielfernrohre/k18i-2_1-8x24i",
+   "elevation": "2.4 m/100 m"
+  },
+  {
+   "maker": "Kahles",
+   "model": "K318i 3.5-18x50i",
+   "minMagnification": 3.5,
+   "maxMagnification": 18.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "SKMR4",
+    "MSR2/Ki"
+   ],
+   "source": "https://www.kahles.at/de/sport/zielfernrohre/k318i-refined"
+  },
+  {
+   "maker": "Kahles",
+   "model": "K328i 3.5-28x50i",
+   "minMagnification": 3.5,
+   "maxMagnification": 28.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "SKMR4+",
+    "SKMR+",
+    "MSR2/Ki"
+   ],
+   "source": "https://www.kahles.at/de/sport/zielfernrohre/k328i-refined"
+  },
+  {
+   "maker": "Kahles",
+   "model": "K525i 5-25x56i",
+   "minMagnification": 5.0,
+   "maxMagnification": 25.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "AMR",
+    "MOAK",
+    "MSR2/Ki",
+    "SKMR",
+    "SKMR4",
+    "TREMOR 3"
+   ],
+   "source": "https://www.kahles.at/de/sport/zielfernrohre/k525i-5-25x56i-rsw",
+   "elevation": "2.9 m/100 m"
+  },
+  {
+   "maker": "Kahles",
+   "model": "K540i 5-40x56i",
+   "minMagnification": 5.0,
+   "maxMagnification": 40.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "SKMR4+",
+    "SKMR+",
+    "MSR2/Ki"
+   ],
+   "source": "https://www.kahles.at/de/sport/zielfernrohre/k540i-refined"
+  },
+  {
+   "maker": "Kahles",
+   "model": "K864 8-64x56",
+   "minMagnification": 8.0,
+   "maxMagnification": 64.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.125
+    }
+   ],
+   "reticles": [
+    "MOAK+"
+   ],
+   "source": "https://www.kahles.at/de/sport/zielfernrohre/k864",
+   "elevation": "55 MOA"
+  },
+  {
+   "maker": "Leupold",
+   "model": "Mark 4HD 6-24x52",
+   "minMagnification": 6.0,
+   "maxMagnification": 24.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "PR2-MIL",
+    "PR3-MIL"
+   ],
+   "source": "https://www.leupold.com/mark-4hd-6-24x52-m5c3-side-focus-ffp-pr2-mil"
+  },
+  {
+   "maker": "Leupold",
+   "model": "Mark 4HD 8-32x56",
+   "minMagnification": 8.0,
+   "maxMagnification": 32.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "PR2-MIL",
+    "PR3-MIL",
+    "PR2-MOA"
+   ],
+   "source": "https://www.leupold.com/mark-4hd-8-32x56-m5c3-side-focus-ffp-pr2-mil-riflescope",
+   "note": "M5C3 dial: 0.1 Mil; M1C3 dial: 1/4 MOA."
+  },
+  {
+   "maker": "Leupold",
+   "model": "Mark 5HD 2-10x30",
+   "minMagnification": 2.0,
+   "maxMagnification": 10.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "TMR",
+    "CMR-Mil",
+    "PR1-MOA"
+   ],
+   "source": "https://www.leupold.com/mark-5hd-2-10x30-m5c3-ffp-tmr-riflescope",
+   "note": "M5C3 dial: 0.1 Mil; M1C3 dial: 1/4 MOA."
+  },
+  {
+   "maker": "Leupold",
+   "model": "Mark 5HD 3.6-18x44",
+   "minMagnification": 3.6,
+   "maxMagnification": 18.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "PR1-MIL",
+    "PR2-MIL",
+    "TMR",
+    "H59",
+    "Tremor 3",
+    "PR1-MOA",
+    "PR2-MOA"
+   ],
+   "source": "https://www.leupold.com/mark-5hd-3-6-18x44-m5c3-ffp-pr2-mil-riflescope",
+   "note": "M5C3 dial: 0.1 Mil; M1C3 dial: 1/4 MOA."
+  },
+  {
+   "maker": "Leupold",
+   "model": "Mark 5HD 5-25x56",
+   "minMagnification": 5.0,
+   "maxMagnification": 25.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "PR1-MIL",
+    "PR2-MIL",
+    "TMR",
+    "Tremor 3",
+    "PR1-MOA",
+    "PR2-MOA"
+   ],
+   "source": "https://www.leupold.com/mark-5hd-5-25x56-m5c3-ffp-pr2-mil-riflescope",
+   "note": "M5C3 dial: 0.1 Mil; M1C3 dial: 1/4 MOA."
+  },
+  {
+   "maker": "Leupold",
+   "model": "Mark 5HD 7-35x56",
+   "minMagnification": 7.0,
+   "maxMagnification": 35.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "PR2-MIL",
+    "TMR",
+    "Tremor 3",
+    "PR2-MOA",
+    "Impact 60 MOA"
+   ],
+   "source": "https://www.leupold.com/mark-5hd-7-35x56-m5c3-ffp-pr2-mil-riflescope",
+   "note": "M5C3 dial: 0.1 Mil; M1C3 dial: 1/4 MOA."
+  },
+  {
+   "maker": "Nightforce",
+   "model": "ATACR 1-8x24 F1",
+   "minMagnification": 1.0,
+   "maxMagnification": 8.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "FC-DMx",
+    "FC-DMx (MOA)"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/atacr/atacr-1-8x24-f1",
+   "elevation": "103 MOA / 30 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "ATACR 4-16x42 F1",
+   "minMagnification": 4.0,
+   "maxMagnification": 16.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR F1",
+    "MIL-R F1",
+    "MIL-C F1",
+    "MIL-XT",
+    "Horus TREMOR3",
+    "MOA-XT"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/atacr/atacr-4-16x42-f1",
+   "elevation": "89 MOA / 26 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "ATACR 4-16x50",
+   "minMagnification": 4.0,
+   "maxMagnification": 16.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MIL-R",
+    "MOAR"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/atacr/atacr-4-16x50-f2",
+   "elevation": "110 MOA / 32 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "ATACR 4-20x50 F1",
+   "minMagnification": 4.0,
+   "maxMagnification": 20.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR F1",
+    "MIL-C F1",
+    "MIL-XT",
+    "Horus TREMOR3",
+    "MOA-XT"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/atacr/atacr-4-20x50-f1",
+   "elevation": "130 MOA / 38 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "ATACR 5-25x56",
+   "minMagnification": 5.0,
+   "maxMagnification": 25.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR",
+    "MOAR-T",
+    "MIL-R"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/atacr/atacr-5-25x56-f2",
+   "elevation": "120 MOA / 35 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "ATACR 5-25x56 F1",
+   "minMagnification": 5.0,
+   "maxMagnification": 25.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR F1",
+    "MIL-R F1",
+    "MIL-C F1",
+    "MIL-XT",
+    "Horus TREMOR3",
+    "MOA-XT"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/atacr/atacr-5-25x56-f1",
+   "elevation": "120 MOA / 35 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "ATACR 7-35x56",
+   "minMagnification": 7.0,
+   "maxMagnification": 35.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR-T Dualscale",
+    "MIL-C F2 Dualscale"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/atacr/atacr-7-35x56-f2",
+   "elevation": "100 MOA / 29 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "ATACR 7-35x56 F1",
+   "minMagnification": 7.0,
+   "maxMagnification": 35.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR F1",
+    "MIL-R F1",
+    "MIL-C F1",
+    "MIL-XT",
+    "Horus TREMOR3",
+    "MOA-XT",
+    "Horus TREMOR5"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/atacr/atacr-7-35x56-f1",
+   "elevation": "100 MOA / 29 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "Competition 15-55x52",
+   "minMagnification": 15.0,
+   "maxMagnification": 55.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.125
+    }
+   ],
+   "reticles": [
+    "CTR-2",
+    "CTR-3",
+    "DDR-2",
+    "FCR-1"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/competition-and-benchrest/competition-15-55x52",
+   "elevation": "55 MOA"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NF 8-32x56 Benchrest",
+   "minMagnification": 8.0,
+   "maxMagnification": 32.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.125
+    }
+   ],
+   "reticles": [
+    "NP-R2",
+    "MOAR-T"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/competition-and-benchrest/precision-benchrest-8-32x56",
+   "elevation": "50 MOA"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX6 2-12x42",
+   "minMagnification": 2.0,
+   "maxMagnification": 12.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "MOAR",
+    "4A-i"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/products/nx6/nx6-2-12x42mm/",
+   "elevation": "115 MOA"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX6 2-12x42 F1",
+   "minMagnification": 2.0,
+   "maxMagnification": 12.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "FC-MRx (MOA)",
+    "FC-MRx"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/products/nx6/nx6-2-12x42mm-f1/",
+   "elevation": "115 MOA / 33.4 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX6 3-18x50",
+   "minMagnification": 3.0,
+   "maxMagnification": 18.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "MOAR",
+    "4A-i"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/products/nx6/nx6-3-18x50mm/",
+   "elevation": "120 MOA"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX6 3-18x50 F1",
+   "minMagnification": 3.0,
+   "maxMagnification": 18.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOA-C",
+    "MIL-C",
+    "MIL-XT",
+    "MOA-XT"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/products/nx6/nx6-3-18x50mm-F1/",
+   "elevation": "120 MOA / 34.9 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX6 4-24x50",
+   "minMagnification": 4.0,
+   "maxMagnification": 24.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "MOAR",
+    "4A-i"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/products/nx6/nx6-4-24x50mm/",
+   "elevation": "115 MOA"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX6 5-30x56 F1",
+   "minMagnification": 5.0,
+   "maxMagnification": 30.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOA-C",
+    "MIL-C",
+    "MIL-XT",
+    "MOA-XT"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/products/nx6/nx6-5-30x56mm-f1/",
+   "elevation": "120 MOA / 34.9 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX6 6-36x56",
+   "minMagnification": 6.0,
+   "maxMagnification": 36.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "FVR-1"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/products/nx6/nx6-6-36x56mm/",
+   "elevation": "115 MOA"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX6 6-36x56 F1",
+   "minMagnification": 6.0,
+   "maxMagnification": 36.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOA-C",
+    "MIL-C",
+    "MIL-XT",
+    "MOA-XT"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/products/nx6/nx6-6-36x56mm-f1/",
+   "elevation": "115 MOA / 33.4 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX8 1-8x24 F1",
+   "minMagnification": 1.0,
+   "maxMagnification": 8.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.5
+    },
+    {
+     "units": "mrad",
+     "value": 0.2
+    }
+   ],
+   "reticles": [
+    "FC-MOA",
+    "FC-MIL"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/nx8/nx8-1-8x24-f1",
+   "elevation": "100 MOA / 29 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX8 2.5-20x50",
+   "minMagnification": 2.5,
+   "maxMagnification": 20.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR-CF2",
+    "Mil-CF2"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/nx8/nx8-25-20x50-f2",
+   "elevation": "110 MOA / 32 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX8 2.5-20x50 F1",
+   "minMagnification": 2.5,
+   "maxMagnification": 20.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR F1",
+    "MIL-C F1",
+    "MIL-XT",
+    "Horus TREMOR3",
+    "MOA-XT"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/nx8/nx8-25-20x50-f1",
+   "elevation": "110 MOA / 32 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX8 4-32x50",
+   "minMagnification": 4.0,
+   "maxMagnification": 32.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR-CF2D",
+    "Mil-CF2D"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/nx8/nx8-4-32x50-f2",
+   "sfpReferenceMagnification": 32.0,
+   "elevation": "90 MOA / 26 MRAD",
+   "note": "Dual-scale reticle: true at 16x (doubled) and 32x."
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NX8 4-32x50 F1",
+   "minMagnification": 4.0,
+   "maxMagnification": 32.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR F1",
+    "MIL-C F1",
+    "MIL-XT",
+    "Horus TREMOR3",
+    "MOA-XT",
+    "Horus TREMOR5"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/nx8/nx8-4-32x50-f1",
+   "elevation": "90 MOA / 26 MRAD"
+  },
+  {
+   "maker": "Nightforce",
+   "model": "NXS 2.5-10x42",
+   "minMagnification": 2.5,
+   "maxMagnification": 10.0,
+   "focalPlane": "sfp",
+   "clicks": [
+    {
+     "units": "moa",
+     "value": 0.25
+    },
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MOAR",
+    "MIL-R"
+   ],
+   "source": "https://www.nightforceoptics.com/riflescopes/nxs/nxs-25-10x42-compact",
+   "elevation": "100 MOA / 29 MRAD"
+  },
+  {
+   "maker": "Schmidt & Bender",
+   "model": "PM II 3-27x56 High Power",
+   "minMagnification": 3.0,
+   "maxMagnification": 27.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "mrad",
+     "value": 0.05
+    }
+   ],
+   "reticles": [
+    "MSR2",
+    "P4FL",
+    "TREMOR3"
+   ],
+   "source": "https://www.schmidtundbender.de/en/3-27x56-PM-II-High-Power-LP-MSR2-0.5cm-ccw-MT-II-MTC-LT-DT-II-ZC-LT/669-911-842-I5-H5",
+   "elevation": "39.5 mrad (0.05 mrad turret)",
+   "note": "1 cm turrets: 0.1 mrad; 0.5 cm turrets: 0.05 mrad."
+  },
+  {
+   "maker": "Schmidt & Bender",
+   "model": "PM II 5-25x56",
+   "minMagnification": 5.0,
+   "maxMagnification": 25.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MSR2",
+    "P4FL",
+    "P5FL",
+    "TREMOR3"
+   ],
+   "source": "https://www.schmidtundbender.de/en/5-25x56-PM-II/689-xxx-xxx-xx-xx",
+   "elevation": "27 mrad"
+  },
+  {
+   "maker": "Schmidt & Bender",
+   "model": "PM II 5-45x56 High Power",
+   "minMagnification": 5.0,
+   "maxMagnification": 45.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "mrad",
+     "value": 0.05
+    }
+   ],
+   "reticles": [
+    "LRR-MIL",
+    "MSR2",
+    "P4FL",
+    "TREMOR3"
+   ],
+   "source": "https://www.schmidtundbender.de/en/5-45x56-PM-II-High-Power-LP-MSR2-1cm-cw-DT27-MTC-LT-ST-ZC-CT/666-911-842-G9-E9",
+   "elevation": "27 mrad",
+   "note": "1 cm turrets: 0.1 mrad; 0.5 cm turrets: 0.05 mrad."
+  },
+  {
+   "maker": "Schmidt & Bender",
+   "model": "PM II 6-36x56 High Performance",
+   "minMagnification": 6.0,
+   "maxMagnification": 36.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "M1FL",
+    "MSR2",
+    "P5FL",
+    "TREMOR3",
+    "TREMOR5",
+    "GR2ID",
+    "TR2ID"
+   ],
+   "source": "https://www.schmidtundbender.de/en/6-36x56-PM-II-High-Performance-LPI-P5FL-1cm-ccw-DT35-MTC-LT-ST-ZC-CT",
+   "elevation": "35 mrad"
+  },
+  {
+   "maker": "Steiner",
+   "model": "T6Xi 2.5-15x50",
+   "minMagnification": 2.5,
+   "maxMagnification": 15.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    },
+    {
+     "units": "moa",
+     "value": 0.25
+    }
+   ],
+   "reticles": [
+    "SCR MIL",
+    "SCR MOA"
+   ],
+   "source": "https://www.steiner-optics.com/products/t6xi-25-15x50"
+  },
+  {
+   "maker": "Steiner",
+   "model": "T6Xi 3-18x56",
+   "minMagnification": 3.0,
+   "maxMagnification": 18.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MSR2-MIL",
+    "SCR 2"
+   ],
+   "source": "https://www.steiner-optics.com/products/t6xi-3-18x56"
+  },
+  {
+   "maker": "Steiner",
+   "model": "T6Xi 5-30x56",
+   "minMagnification": 5.0,
+   "maxMagnification": 30.0,
+   "focalPlane": "ffp",
+   "clicks": [
+    {
+     "units": "mrad",
+     "value": 0.1
+    }
+   ],
+   "reticles": [
+    "MSR2-MIL",
+    "SCR 2"
+   ],
+   "source": "https://www.steiner-optics.com/products/t6xi-5-30x56"
+  }
+ ]
+}
