@@ -141,7 +141,7 @@ TruingResult ComputeTruing(storage::Database& db, Id profile_id) {
         }
     }
     if (used.empty()) {
-        out.error = "Log at least one shot to true the profile.";
+        out.error = "Log at least one hit to true the rifle and cartridge.";
         return out;
     }
 

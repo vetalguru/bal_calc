@@ -7,6 +7,10 @@
 
 #include <filesystem>
 
+#include <sqlite_manager/connection.h>
+
+#include "../storage/src/schema.h"
+
 namespace ballistics::applogic {
 namespace {
 
@@ -91,16 +95,15 @@ TEST(Reticle, VersionOneDatabaseIsUpgraded) {
     const auto path = (std::filesystem::temp_directory_path() / "balcalc_v1.db").string();
     std::filesystem::remove(path);
     {
-        storage::Database db;
-        ASSERT_TRUE(db.Open(path).ok());
-        // Turn it back into a v1 file: no v2 columns, version 1.
-        ASSERT_TRUE(db.connection()
-                        .Execute("ALTER TABLE scope DROP COLUMN focal_plane;"
-                                 "ALTER TABLE scope DROP COLUMN sfp_reference_magnification;"
-                                 "INSERT INTO scope (name, click_vertical_rad, click_horizontal_rad)"
-                                 " VALUES ('old', 0.0001, 0.0001);"
-                                 "PRAGMA user_version = 1;")
+        // A v1 file: the first migration only.
+        sqlite_manager::Connection c;
+        ASSERT_TRUE(c.Open(path).ok());
+        ASSERT_TRUE(c.Execute(storage::detail::Migrations().front().sql).ok());
+        ASSERT_TRUE(c.Execute("INSERT INTO scope (name, click_vertical_rad, click_horizontal_rad)"
+                              " VALUES ('old', 0.0001, 0.0001);"
+                              "PRAGMA user_version = 1;")
                         .ok());
+        ASSERT_TRUE(c.Close().ok());
     }
     {
         storage::Database db;

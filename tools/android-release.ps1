@@ -130,8 +130,11 @@ $apk = Get-ChildItem "$outputs\apk\release\*-signed.apk" | Select-Object -First 
 if (-not $apk) { throw "No signed APK in $outputs\apk\release" }
 
 $apksigner = Find-Tool 'apksigner.bat' @("$env:ANDROID_SDK_ROOT\build-tools\35.0.0")
-& $apksigner verify --print-certs $apk.FullName | Select-Object -First 3
+# Collect all output first: cutting the pipe short (Select-Object -First)
+# makes apksigner exit with an error in Windows PowerShell.
+$certs = & $apksigner verify --print-certs $apk.FullName
 if ($LASTEXITCODE -ne 0) { throw 'Signature check failed' }
+$certs | Select-Object -First 3
 
 Write-Host "`nSigned APK: $($apk.FullName)" -ForegroundColor Green
 if ($Aab) { Get-ChildItem "$outputs\bundle\release\*.aab" | ForEach-Object { Write-Host "AAB: $($_.FullName)" -ForegroundColor Green } }

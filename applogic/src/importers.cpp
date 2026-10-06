@@ -575,7 +575,12 @@ Result<Id> ImportFile(Database& db, const std::string& file_name, const std::str
                 return Bad(std::string("Bullet list: ") + e.what());
             }
         }
-        return ImportProfileJson(db, content);
+        auto imported = ImportShareJson(db, content);
+        if (!imported) {
+            return imported.error();
+        }
+        return imported.value().rifle_id != 0 ? imported.value().rifle_id
+                                              : imported.value().cartridge_id;
     }
     return Bad("Unknown file type: " + file_name);
 }

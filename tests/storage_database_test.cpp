@@ -184,17 +184,33 @@ TEST_F(StorageRepositories, ProfileReferencesAreEnforced) {
     EXPECT_FALSE(Repository<ProfileRecord>(db_).Save(dangling).ok());
 }
 
-TEST_F(StorageRepositories, ProfileStoresZeroConditionsAndDefaults) {
+TEST_F(StorageRepositories, RifleStoresScopeAndZeroConditions) {
     ProfileRecord p = MakeProfile();
-    p.zero_atmosphere = {350.0, 97000.0, units::CToK(-5.0), 0.4};
-    p.zero_range_m = 300.0;
-    ASSERT_TRUE(Repository<ProfileRecord>(db_).Save(p).ok());
-    const ProfileRecord got = *Repository<ProfileRecord>(db_).Get(p.id).value();
+    ScopeRecord s;
+    s.name = "scope";
+    s.click_vertical_rad = s.click_horizontal_rad = units::MradToRad(0.1);
+    ASSERT_TRUE(Repository<ScopeRecord>(db_).Save(s).ok());
+    RifleRecord r = *Repository<RifleRecord>(db_).Get(p.rifle_id).value();
+    r.scope_id = s.id;
+    r.zero_atmosphere = {350.0, 97000.0, units::CToK(-5.0), 0.4};
+    r.zero_range_m = 300.0;
+    ASSERT_TRUE(Repository<RifleRecord>(db_).Save(r).ok());
+    const RifleRecord got = *Repository<RifleRecord>(db_).Get(r.id).value();
+    EXPECT_EQ(got.scope_id, s.id);
     EXPECT_DOUBLE_EQ(got.zero_range_m, 300.0);
     EXPECT_DOUBLE_EQ(got.zero_atmosphere.pressure_pa, 97000.0);
     EXPECT_DOUBLE_EQ(got.zero_atmosphere.humidity, 0.4);
-    EXPECT_FALSE(got.created_at.empty()); // filled by the database
-    EXPECT_FALSE(got.last_used_at.has_value());
+    // Deleting the scope leaves the rifle without one.
+    ASSERT_TRUE(Repository<ScopeRecord>(db_).Remove(s.id).ok());
+    EXPECT_FALSE(Repository<RifleRecord>(db_).Get(r.id).value()->scope_id.has_value());
+
+    const ProfileRecord pair = *Repository<ProfileRecord>(db_).Get(p.id).value();
+    EXPECT_FALSE(pair.created_at.empty()); // filled by the database
+    EXPECT_FALSE(pair.last_used_at.has_value());
+    // One profile per rifle + cartridge pair.
+    ProfileRecord twin = pair;
+    twin.id = 0;
+    EXPECT_FALSE(Repository<ProfileRecord>(db_).Save(twin).ok());
 }
 
 TEST_F(StorageRepositories, ConditionsWithWindZones) {

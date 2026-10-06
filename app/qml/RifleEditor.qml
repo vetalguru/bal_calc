@@ -6,7 +6,7 @@ import QtQuick.Controls.Material
 import QtQuick.Layouts
 import BalCalc
 
-// One form for a rifle, its scope, its cartridge and the zero.
+// A rifle: barrel, scope and zero.
 Page {
     id: page
 
@@ -15,22 +15,9 @@ Page {
     implicitWidth: 360
     implicitHeight: 640
 
-    // Field values, keys as Backend.profileForm() returns them.
+    // Field values, keys as Backend.rifleForm() returns them.
     property var form: ({})
-    // The stack this editor was pushed on (to open the bullet library).
-    property StackView stack
     signal done()
-
-    readonly property bool fromLibrary: (form.libraryBulletId || 0) > 0
-
-    function chooseBullet() {
-        page.forceActiveFocus()
-        var library = page.stack.push(libraryComponent, { stack: page.stack, picker: true })
-        library.picked.connect(function(id) {
-            page.form = Backend.profileFormWithBullet(page.form, id)
-            page.stack.pop()
-        })
-    }
 
     readonly property bool wide: width >= 640
     readonly property var clickUnits: [
@@ -43,7 +30,7 @@ Page {
     function save() {
         // Push edits from a field that still has focus.
         page.forceActiveFocus()
-        var err = Backend.saveProfile(page.form)
+        var err = Backend.saveRifle(page.form)
         errorLabel.text = err
         if (err.length === 0)
             page.done()
@@ -60,7 +47,7 @@ Page {
                 onClicked: page.done()
             }
             Label {
-                text: page.form.profileId > 0 ? qsTr("Edit profile") : qsTr("New profile")
+                text: page.form.rifleId > 0 ? qsTr("Edit rifle") : qsTr("New rifle")
                 font.pixelSize: 18
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -90,11 +77,12 @@ Page {
                 color: Material.color(Material.Red)
             }
 
-            Group {
-                title: qsTr("Profile")
+            FormGroup {
+                title: qsTr("Rifle")
+                Layout.topMargin: 12
                 TextField {
                     Layout.fillWidth: true
-                    placeholderText: qsTr("Name, e.g. Tikka T3x .308 / SMK 175")
+                    placeholderText: qsTr("Name, e.g. Tikka T3x")
                     text: page.form.name || ""
                     onTextEdited: page.form.name = text
                 }
@@ -104,10 +92,6 @@ Page {
                     text: page.form.caliber || ""
                     onTextEdited: page.form.caliber = text
                 }
-            }
-
-            Group {
-                title: qsTr("Rifle and scope")
                 Grid2 {
                     NumberField {
                         Layout.fillWidth: true
@@ -132,6 +116,10 @@ Page {
                     checked: page.form.twistLeft || false
                     onToggled: page.form.twistLeft = checked
                 }
+            }
+
+            FormGroup {
+                title: qsTr("Scope")
                 Grid2 {
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -145,6 +133,14 @@ Page {
                             Component.onCompleted: currentIndex = Math.max(0, indexOfValue(page.form.clickUnits))
                             onActivated: page.form.clickUnits = currentValue
                         }
+                    }
+                    NumberField {
+                        Layout.fillWidth: true
+                        label: qsTr("One click")
+                        decimals: 4
+                        value: page.form.clickValue
+                        from: 0; to: 10
+                        onEdited: v => page.form.clickValue = v
                     }
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -199,135 +195,17 @@ Page {
                         from: 0; to: 100
                         onEdited: v => page.form.sfpReferenceMagnification = v
                     }
-                    NumberField {
-                        Layout.fillWidth: true
-                        label: qsTr("One click")
-                        decimals: 4
-                        value: page.form.clickValue
-                        from: 0; to: 10
-                        onEdited: v => page.form.clickValue = v
-                    }
                 }
             }
 
-            Group {
-                title: qsTr("Bullet")
-                RowLayout {
-                    Layout.fillWidth: true
-                    Label {
-                        Layout.fillWidth: true
-                        wrapMode: Text.Wrap
-                        opacity: 0.8
-                        text: page.fromLibrary ? qsTr("From the library: %1").arg(page.form.bulletName)
-                                               : qsTr("Own bullet of this profile")
-                    }
-                    Button {
-                        text: page.fromLibrary ? qsTr("Change") : qsTr("From library")
-                        flat: true
-                        onClicked: page.chooseBullet()
-                    }
-                    Button {
-                        visible: page.fromLibrary
-                        text: qsTr("Edit as own")
-                        flat: true
-                        onClicked: {
-                            var f = page.form
-                            f.libraryBulletId = 0
-                            page.form = f
-                            page.formChanged()
-                        }
-                    }
-                }
-                TextField {
-                    Layout.fillWidth: true
-                    enabled: !page.fromLibrary
-                    placeholderText: qsTr("Bullet, e.g. Sierra MatchKing 175 gr")
-                    text: page.form.bulletName || ""
-                    onTextEdited: page.form.bulletName = text
-                }
-                Grid2 {
-                    enabled: !page.fromLibrary
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 2
-                        Label { text: qsTr("Drag model"); font.pixelSize: 12; opacity: 0.7 }
-                        ComboBox {
-                            Layout.fillWidth: true
-                            model: ["G7", "G1", "G2", "G5", "G6", "G8", "GI", "GS", "RA4"]
-                            Component.onCompleted: currentIndex = Math.max(0, find(page.form.dragTable))
-                            onActivated: page.form.dragTable = currentText
-                        }
-                    }
-                    NumberField {
-                        Layout.fillWidth: true
-                        label: qsTr("Ballistic coefficient")
-                        decimals: 3
-                        value: page.form.bc
-                        from: 0; to: 2
-                        onEdited: v => page.form.bc = v
-                    }
-                    NumberField {
-                        Layout.fillWidth: true
-                        label: qsTr("Weight")
-                        unit: qsTr("gr")
-                        value: page.form.massGr
-                        from: 0; to: 2000
-                        onEdited: v => page.form.massGr = v
-                    }
-                    NumberField {
-                        Layout.fillWidth: true
-                        label: qsTr("Diameter")
-                        unit: qsTr("in")
-                        decimals: 3
-                        value: page.form.diameterIn
-                        from: 0; to: 1
-                        onEdited: v => page.form.diameterIn = v
-                    }
-                    NumberField {
-                        Layout.fillWidth: true
-                        label: qsTr("Length (for spin drift)")
-                        unit: qsTr("in")
-                        decimals: 3
-                        value: page.form.lengthIn
-                        from: 0; to: 4
-                        onEdited: v => page.form.lengthIn = v
-                    }
-                }
-            }
-
-            Group {
-                title: qsTr("Cartridge")
-                Grid2 {
-                    NumberField {
-                        Layout.fillWidth: true
-                        label: qsTr("Muzzle velocity")
-                        unit: qsTr("m/s")
-                        value: page.form.muzzleVelocity
-                        from: 0; to: 2000
-                        onEdited: v => page.form.muzzleVelocity = v
-                    }
-                    NumberField {
-                        Layout.fillWidth: true
-                        label: qsTr("Measured at powder temperature")
-                        unit: qsTr("°C")
-                        value: page.form.powderReferenceC
-                        from: -60; to: 80
-                        onEdited: v => page.form.powderReferenceC = v
-                    }
-                    NumberField {
-                        Layout.fillWidth: true
-                        label: qsTr("Powder sensitivity")
-                        unit: qsTr("%/°C")
-                        decimals: 3
-                        value: page.form.powderSensitivity
-                        from: -2; to: 2
-                        onEdited: v => page.form.powderSensitivity = v
-                    }
-                }
-            }
-
-            Group {
+            FormGroup {
                 title: qsTr("Zero")
+                Label {
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    opacity: 0.7
+                    text: qsTr("Where and in what air the rifle was zeroed. A cartridge that hits elsewhere at the zero distance gets its own shift in its shot log.")
+                }
                 Grid2 {
                     NumberField {
                         Layout.fillWidth: true
@@ -337,14 +215,6 @@ Page {
                         value: page.form.zeroRangeM
                         from: 10; to: 1000
                         onEdited: v => page.form.zeroRangeM = v
-                    }
-                    NumberField {
-                        Layout.fillWidth: true
-                        label: qsTr("Impact above aim at zero")
-                        unit: qsTr("cm")
-                        value: page.form.zeroOffsetUpCm
-                        from: -50; to: 50
-                        onEdited: v => page.form.zeroOffsetUpCm = v
                     }
                     NumberField {
                         Layout.fillWidth: true
@@ -389,34 +259,6 @@ Page {
                 text: qsTr("Save")
                 highlighted: true
                 onClicked: page.save()
-            }
-        }
-    }
-
-    Component {
-        id: libraryComponent
-        LibraryPage {
-            onClosed: page.stack.pop()
-        }
-    }
-
-    component Group: Pane {
-        id: section
-        property string title
-        default property alias content: box.data
-        Layout.fillWidth: true
-        Layout.leftMargin: 12
-        Layout.rightMargin: 12
-        Material.elevation: 1
-        ColumnLayout {
-            id: box
-            anchors.fill: parent
-            spacing: 8
-            Label {
-                text: section.title
-                font.pixelSize: 16
-                font.bold: true
-                color: Material.accent
             }
         }
     }

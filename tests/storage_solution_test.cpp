@@ -31,22 +31,22 @@ protected:
         c.powder_sensitivity_per_k = 0.001;
         ASSERT_TRUE(Repository<CartridgeRecord>(db_).Save(c).ok());
 
-        RifleRecord r;
-        r.name = "M24";
-        r.twist_m = units::InchToM(11.25);
-        r.sight_height_m = 0.05;
-        ASSERT_TRUE(Repository<RifleRecord>(db_).Save(r).ok());
-
         ScopeRecord s;
         s.name = "0.1 mil";
         s.click_vertical_rad = s.click_horizontal_rad = units::MradToRad(0.1);
         ASSERT_TRUE(Repository<ScopeRecord>(db_).Save(s).ok());
 
+        RifleRecord r;
+        r.name = "M24";
+        r.twist_m = units::InchToM(11.25);
+        r.sight_height_m = 0.05;
+        r.scope_id = s.id;
+        ASSERT_TRUE(Repository<RifleRecord>(db_).Save(r).ok());
+
         ProfileRecord p;
         p.name = "M24 / M118LR";
         p.rifle_id = r.id;
         p.cartridge_id = c.id;
-        p.scope_id = s.id;
         ASSERT_TRUE(Repository<ProfileRecord>(db_).Save(p).ok());
         profile_id_ = p.id;
     }

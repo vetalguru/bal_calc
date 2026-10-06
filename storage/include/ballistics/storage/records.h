@@ -52,6 +52,7 @@ struct BulletRecord {
 struct CartridgeRecord {
     Id id = 0;
     std::string name;
+    std::string caliber; // e.g. ".308 Win"; matched against the rifle's
     Id bullet_id = 0;
     double muzzle_velocity_mps = 0.0;
     double reference_powder_temp_k = 288.15;
@@ -71,6 +72,12 @@ struct RifleRecord {
     double twist_m = 0.0; // right-hand positive, left-hand negative, 0 unknown
     double sight_height_m = 0.0;
     std::string notes;
+    // The rifle's scope and zero (the cartridge it is fired with may shift
+    // the point of impact, see ProfileRecord).
+    std::optional<Id> scope_id;
+    double zero_range_m = 100.0;
+    Atmosphere zero_atmosphere = StandardAtmosphere(0.0);
+    double zero_powder_temp_k = 288.15;
 };
 
 struct ReticleRecord {
@@ -99,17 +106,16 @@ struct ScopeRecord {
     double sfp_reference_magnification = 0.0;
 };
 
+// A rifle + cartridge pair: what a solution is computed for. Holds what
+// depends on both - the point-of-impact shift of this cartridge relative to
+// the rifle's zero, truing and (in dope_log) the shot log.
 struct ProfileRecord {
     Id id = 0;
     std::string name;
     Id rifle_id = 0;
-    std::optional<Id> scope_id;
     Id cartridge_id = 0;
-    double zero_range_m = 100.0;
     double zero_offset_up_m = 0.0;
     double zero_offset_right_m = 0.0;
-    Atmosphere zero_atmosphere = StandardAtmosphere(0.0);
-    double zero_powder_temp_k = 288.15;
     double velocity_scale = 1.0; // truing
     double drag_scale = 1.0;     // truing
     std::string created_at;      // set by the database

@@ -21,6 +21,7 @@ add_executable(core_tests
     physics_reference_test.cpp
     smoke_test.cpp
     storage_database_test.cpp
+    storage_migration_test.cpp
     storage_solution_test.cpp
 )
 target_link_libraries(core_tests PRIVATE

@@ -27,9 +27,21 @@ class Backend : public QObject {
     Q_PROPERTY(QString databasePath READ databasePath CONSTANT)
     Q_PROPERTY(QString databaseError READ databaseError CONSTANT)
 
-    Q_PROPERTY(QVariantList profiles READ profiles NOTIFY profilesChanged)
-    Q_PROPERTY(int currentProfileId READ currentProfileId WRITE setCurrentProfileId NOTIFY
-                   currentProfileIdChanged)
+    // Rifles [{id, name, caliber}] and the user's cartridges [{id, name,
+    // caliber, bulletName, muzzleVelocity, matches}] (those matching the
+    // current rifle's calibre first, `matches` true).
+    Q_PROPERTY(QVariantList rifles READ rifles NOTIFY armoryChanged)
+    Q_PROPERTY(QVariantList cartridges READ cartridges NOTIFY armoryChanged)
+    // The solution is for this rifle + cartridge (both persisted).
+    Q_PROPERTY(int currentRifleId READ currentRifleId WRITE setCurrentRifleId NOTIFY selectionChanged)
+    Q_PROPERTY(int currentCartridgeId READ currentCartridgeId WRITE setCurrentCartridgeId NOTIFY
+                   selectionChanged)
+    // Their pair (shot log, truing, point-of-impact shift); 0 until both
+    // are chosen.
+    Q_PROPERTY(int currentProfileId READ currentProfileId NOTIFY currentProfileIdChanged)
+    // {rifleName, cartridgeName, zeroRangeM, offsetUpCm, offsetRightCm} of
+    // the current pair (empty without one).
+    Q_PROPERTY(QVariantMap currentPair READ currentPair NOTIFY currentProfileIdChanged)
     Q_PROPERTY(QString angleUnit READ angleUnit WRITE setAngleUnit NOTIFY angleUnitChanged)
     // "" = follow the system, otherwise "uk", "ru" or "en".
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
@@ -71,9 +83,14 @@ public:
     QString databasePath() const { return db_path_; }
     QString databaseError() const { return db_error_; }
 
-    QVariantList profiles() const { return profiles_; }
+    QVariantList rifles() const { return rifles_; }
+    QVariantList cartridges() const { return cartridges_; }
+    int currentRifleId() const { return current_rifle_id_; }
+    void setCurrentRifleId(int id);
+    int currentCartridgeId() const { return current_cartridge_id_; }
+    void setCurrentCartridgeId(int id);
     int currentProfileId() const { return current_profile_id_; }
-    void setCurrentProfileId(int id);
+    QVariantMap currentPair();
     QString angleUnit() const { return angle_unit_; }
     void setAngleUnit(const QString& unit);
     QString holdMode() const { return hold_mode_; }
@@ -82,14 +99,25 @@ public:
     void setLanguage(const QString& language);
     QVariantMap solution() const { return solution_; }
 
-    // Profile form as a map (keys: camelCase ProfileForm fields); id 0 gives
-    // the defaults for a new profile.
-    Q_INVOKABLE QVariantMap profileForm(int id);
-    // Saves the form; returns an error message, or "" on success (the saved
-    // profile becomes current).
-    Q_INVOKABLE QString saveProfile(const QVariantMap& form);
-    Q_INVOKABLE QString deleteProfile(int id);
-    // Adds a ready-to-try sample profile and makes it current.
+    // Forms as maps (keys: camelCase RifleForm / CartridgeForm fields); id 0
+    // gives the defaults for a new one. Save returns an error message, or ""
+    // on success (the saved record becomes current); delete removes the
+    // record's pairs and shot logs too.
+    Q_INVOKABLE QVariantMap rifleForm(int id);
+    Q_INVOKABLE QString saveRifle(const QVariantMap& form);
+    Q_INVOKABLE QString deleteRifle(int id);
+    Q_INVOKABLE QVariantMap cartridgeForm(int id);
+    Q_INVOKABLE QString saveCartridge(const QVariantMap& form);
+    Q_INVOKABLE QString deleteCartridge(int id);
+    // The cartridge form with a library bullet chosen for it.
+    Q_INVOKABLE QVariantMap cartridgeFormWithBullet(const QVariantMap& form, int bullet_id);
+    // Factory loads (starter library, imported .ammo) matching `filter`,
+    // as in `cartridges`; a new cartridge form copied from one of them.
+    Q_INVOKABLE QVariantList libraryCartridges(const QString& filter);
+    Q_INVOKABLE QVariantMap cartridgeFormFromLibrary(int id);
+    // Point-of-impact shift of the current cartridge from the rifle's zero.
+    Q_INVOKABLE QString setZeroOffset(double up_cm, double right_cm);
+    // Adds a ready-to-try sample rifle and cartridge and makes them current.
     Q_INVOKABLE QString addSampleProfile();
 
     // Range card for the current profile and conditions over the table
@@ -121,9 +149,6 @@ public:
     // Reticles in the library: [{id, name, units}].
     Q_INVOKABLE QVariantList reticles();
 
-    // The form with a library bullet chosen for it.
-    Q_INVOKABLE QVariantMap profileFormWithBullet(const QVariantMap& form, int bullet_id);
-
     // Bullet library: summaries matching `filter`, one bullet as a form
     // (keys: camelCase BulletForm fields, bands as [{velocity, bc}]), save
     // and delete returning an error message or "".
@@ -132,12 +157,13 @@ public:
     Q_INVOKABLE QString saveBullet(const QVariantMap& form);
     Q_INVOKABLE QString deleteBullet(int id);
 
-    // Profile files (JSON): error message or "" on success. Import makes
-    // the new profile current.
-    Q_INVOKABLE QString exportProfile(int id, const QUrl& file);
-    Q_INVOKABLE QString importProfile(const QUrl& file);
-    Q_INVOKABLE QString copyProfileToClipboard(int id);
-    Q_INVOKABLE QString importProfileFromClipboard();
+    // Rifle and cartridge files (JSON, `kind` "rifle" or "cartridge"):
+    // error message or "" on success. Import (also of old profile files)
+    // makes what it brought in current.
+    Q_INVOKABLE QString exportItem(const QString& kind, int id, const QUrl& file);
+    Q_INVOKABLE QString copyItemToClipboard(const QString& kind, int id);
+    Q_INVOKABLE QString importShared(const QUrl& file);
+    Q_INVOKABLE QString importSharedFromClipboard();
 
     // Imports data files (.ammo, .drg, .reticle, profile or bullet-list
     // .json); returns a summary such as "3 imported" plus any problems.
@@ -146,14 +172,15 @@ public:
     // Starter library import result, for the About screen.
     Q_PROPERTY(QString seedReport READ seedReport CONSTANT)
     QString seedReport() const { return seed_report_; }
-    // Suggested file name for a profile export.
-    Q_INVOKABLE QString profileFileName(int id) const;
+    // Suggested file name for an export.
+    Q_INVOKABLE QString exportFileName(const QString& kind, int id) const;
 
     // Station pressure from sea-level pressure (QNH) at an altitude, hPa.
     Q_INVOKABLE double stationPressure(double qnh_hpa, double altitude_m) const;
 
 signals:
-    void profilesChanged();
+    void armoryChanged();
+    void selectionChanged();
     void currentProfileIdChanged();
     void angleUnitChanged();
     void languageChanged();
@@ -165,7 +192,10 @@ signals:
     void shotsChanged();
 
 private:
-    void ReloadProfiles();
+    void ReloadArmory();
+    // Keeps the selection valid and the pair in step with it.
+    void UpdatePair();
+    void Select(int rifle_id, int cartridge_id);
     QVariantMap Table(double from_m, double to_m, double step_m);
     QString ImportJson(const std::string& json);
     void SeedStarterLibrary();
@@ -179,7 +209,10 @@ private:
     ballistics::storage::Database db_;
     QString db_path_;
     QString db_error_;
-    QVariantList profiles_;
+    QVariantList rifles_;
+    QVariantList cartridges_;
+    int current_rifle_id_ = 0;
+    int current_cartridge_id_ = 0;
     int current_profile_id_ = 0;
     QString angle_unit_ = QStringLiteral("mrad");
     QString language_;

@@ -27,7 +27,7 @@ target_include_directories(ballistics_tinyxml2 SYSTEM PUBLIC ${tinyxml2_SOURCE_D
 add_library(ballistics_applogic STATIC
     src/importers.cpp
     src/library.cpp
-    src/profile_form.cpp
+    src/armory.cpp
     src/profile_io.cpp
     src/reticle.cpp
     src/session.cpp

@@ -13,6 +13,7 @@
 #include <fstream>
 #include <sstream>
 
+#include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/importers.h>
 #include <ballistics/atmosphere.h>
 #include <ballistics/effects.h>
@@ -27,6 +28,7 @@ namespace balcli {
 
 namespace {
 
+namespace al = ballistics::applogic;
 namespace bs = ballistics::storage;
 namespace u = ballistics::units;
 using ballistics::Shot;
@@ -39,11 +41,13 @@ Usage: bal-cli [--db FILE] COMMAND [options]
 
 Commands:
   version                 engine and SQLite versions
-  demo                    add a demo profile (.308 M118LR, 100 m zero) to --db
-  profiles                list the profiles in --db
+  demo                    add a demo rifle and cartridge (M24, M118LR) to --db
+  rifles, cartridges      list the rifles / the user's cartridges in --db
+  profiles                list the rifle + cartridge pairs in --db
   import FILE...          import .ammo/.drg/.reticle/.json files into --db
   seed DIR                import the starter library (data/seed) into --db
-  table --profile ID      range card for a stored profile
+  table --rifle ID --cartridge ID  (or --profile ID of a pair)
+                          range card for a stored rifle and cartridge
   quick                   range card without a database:
       --bc BC --drag G1|G7|...  --v0 M/S  [--mass-gr GR --diam-in IN --len-in IN]
       [--twist-in IN (negative = left)] [--sight-cm CM] [--zero-m M]
@@ -285,14 +289,13 @@ void PrintSummary(const Shot& shot, const Trajectory& traj, const ballistics::Ze
 
 int CmdTable(const Args& a, std::ostream& out, std::ostream& err) {
     const auto db_path = a.opts.find("db");
-    const auto profile = a.opts.find("profile");
-    if (db_path == a.opts.end() || profile == a.opts.end()) {
-        err << "table needs --db FILE and --profile ID\n";
+    std::optional<double> profile_id, rifle_id, cartridge_id;
+    if (!Opt(a, "profile", profile_id, err) || !Opt(a, "rifle", rifle_id, err) ||
+        !Opt(a, "cartridge", cartridge_id, err)) {
         return 2;
     }
-    double id = 0.0;
-    if (!Number(profile->second, id)) {
-        err << "--profile: not a number\n";
+    if (db_path == a.opts.end() || !(profile_id || (rifle_id && cartridge_id))) {
+        err << "table needs --db FILE and --rifle ID --cartridge ID (or --profile ID)\n";
         return 2;
     }
     bs::ConditionsRecord cond;
@@ -305,7 +308,17 @@ int CmdTable(const Args& a, std::ostream& out, std::ostream& err) {
         err << "cannot open " << db_path->second << ": " << s.error().message << "\n";
         return 1;
     }
-    auto loaded = bs::LoadProfile(db, static_cast<bs::Id>(id));
+    bs::Id id = static_cast<bs::Id>(profile_id.value_or(0.0));
+    if (!profile_id) {
+        auto pair = al::EnsureProfile(db, static_cast<bs::Id>(*rifle_id),
+                                      static_cast<bs::Id>(*cartridge_id));
+        if (!pair) {
+            err << pair.error().message << "\n";
+            return 1;
+        }
+        id = pair.value();
+    }
+    auto loaded = bs::LoadProfile(db, id);
     if (!loaded) {
         err << loaded.error().message << "\n";
         return 1;
@@ -315,7 +328,7 @@ int CmdTable(const Args& a, std::ostream& out, std::ostream& err) {
         err << sol.error().message << "\n";
         return 1;
     }
-    out << loaded.value().profile.name << "\n";
+    out << loaded.value().rifle.name << " / " << loaded.value().cartridge.name << "\n";
     PrintSummary(sol.value().shot, sol.value().trajectory, sol.value().zero, out);
     PrintTable(sol.value().trajectory, spec, loaded.value().scope ? &*loaded.value().scope : nullptr,
                a.csv, out);
@@ -346,7 +359,7 @@ int CmdQuick(const Args& a, std::ostream& out, std::ostream& err) {
     p.cartridge.muzzle_velocity_mps = *v0;
     p.rifle.twist_m = u::InchToM(twist.value_or(0.0));
     p.rifle.sight_height_m = sight.value_or(5.0) / 100.0;
-    p.profile.zero_range_m = zero.value_or(100.0);
+    p.rifle.zero_range_m = zero.value_or(100.0);
 
     bs::ConditionsRecord cond;
     TableSpec spec;
@@ -354,9 +367,9 @@ int CmdQuick(const Args& a, std::ostream& out, std::ostream& err) {
         return 2;
     }
     // Quick mode zeroes in the same air it shoots in.
-    p.profile.zero_atmosphere = cond.atmosphere;
-    p.profile.zero_powder_temp_k = cond.powder_temp_k.value_or(cond.atmosphere.temperature_k);
-    p.cartridge.reference_powder_temp_k = p.profile.zero_powder_temp_k;
+    p.rifle.zero_atmosphere = cond.atmosphere;
+    p.rifle.zero_powder_temp_k = cond.powder_temp_k.value_or(cond.atmosphere.temperature_k);
+    p.cartridge.reference_powder_temp_k = p.rifle.zero_powder_temp_k;
     auto sol = bs::Solve(p, cond, spec.to + 1.0);
     if (!sol) {
         err << sol.error().message << "\n";
@@ -367,10 +380,11 @@ int CmdQuick(const Args& a, std::ostream& out, std::ostream& err) {
     return 0;
 }
 
-int CmdProfiles(const Args& a, std::ostream& out, std::ostream& err) {
+// Lists rifles, the user's cartridges or the pairs.
+int CmdList(const Args& a, std::ostream& out, std::ostream& err) {
     const auto db_path = a.opts.find("db");
     if (db_path == a.opts.end()) {
-        err << "profiles needs --db FILE\n";
+        err << a.command << " needs --db FILE\n";
         return 2;
     }
     bs::Database db;
@@ -378,13 +392,42 @@ int CmdProfiles(const Args& a, std::ostream& out, std::ostream& err) {
         err << "cannot open " << db_path->second << ": " << s.error().message << "\n";
         return 1;
     }
+    if (a.command == "rifles") {
+        auto list = bs::Repository<bs::RifleRecord>(db).List();
+        if (!list) {
+            err << list.error().message << "\n";
+            return 1;
+        }
+        for (const auto& r : list.value()) {
+            out << r.id << "  " << r.name << "  " << r.caliber << "  (zero "
+                << Fixed(r.zero_range_m, 0) << " m)\n";
+        }
+        return 0;
+    }
+    if (a.command == "cartridges") {
+        auto list = al::ListCartridges(db);
+        if (!list) {
+            err << list.error().message << "\n";
+            return 1;
+        }
+        for (const auto& c : list.value()) {
+            out << c.id << "  " << c.name << "  " << c.caliber << "  "
+                << Fixed(c.muzzle_velocity_mps, 0) << " m/s  " << c.bullet_name << "\n";
+        }
+        return 0;
+    }
     auto list = bs::Repository<bs::ProfileRecord>(db).List();
     if (!list) {
         err << list.error().message << "\n";
         return 1;
     }
     for (const auto& p : list.value()) {
-        out << p.id << "  " << p.name << "  (zero " << Fixed(p.zero_range_m, 0) << " m)\n";
+        auto r = bs::Repository<bs::RifleRecord>(db).Get(p.rifle_id);
+        auto c = bs::Repository<bs::CartridgeRecord>(db).Get(p.cartridge_id);
+        if (r && r.value() && c && c.value()) {
+            out << p.id << "  " << r.value()->name << " / " << c.value()->name << "  (rifle "
+                << p.rifle_id << ", cartridge " << p.cartridge_id << ")\n";
+        }
     }
     return 0;
 }
@@ -414,6 +457,7 @@ int CmdDemo(const Args& a, std::ostream& out, std::ostream& err) {
     b.source = "demo";
     bs::CartridgeRecord c;
     c.name = "M118LR (demo)";
+    c.caliber = ".308";
     c.muzzle_velocity_mps = 790.0;
     c.powder_sensitivity_per_k = 0.0008;
     bs::RifleRecord r;
@@ -421,12 +465,10 @@ int CmdDemo(const Args& a, std::ostream& out, std::ostream& err) {
     r.caliber = ".308";
     r.twist_m = u::InchToM(11.25);
     r.sight_height_m = 0.05;
+    r.zero_range_m = 100.0;
     bs::ScopeRecord s;
     s.name = "0.1 MRAD scope (demo)";
     s.click_vertical_rad = s.click_horizontal_rad = u::MradToRad(0.1);
-    bs::ProfileRecord p;
-    p.name = "M24 / M118LR (demo)";
-    p.zero_range_m = 100.0;
 
     if (auto id = bs::Repository<bs::BulletRecord>(db).Save(b); !id) {
         err << id.error().message << "\n";
@@ -434,19 +476,22 @@ int CmdDemo(const Args& a, std::ostream& out, std::ostream& err) {
     }
     c.bullet_id = b.id;
     if (!bs::Repository<bs::CartridgeRecord>(db).Save(c) ||
-        !bs::Repository<bs::RifleRecord>(db).Save(r) ||
         !bs::Repository<bs::ScopeRecord>(db).Save(s)) {
         err << "could not save the demo records\n";
         return 1;
     }
-    p.rifle_id = r.id;
-    p.cartridge_id = c.id;
-    p.scope_id = s.id;
-    if (auto id = bs::Repository<bs::ProfileRecord>(db).Save(p); !id) {
-        err << id.error().message << "\n";
+    r.scope_id = s.id;
+    if (!bs::Repository<bs::RifleRecord>(db).Save(r)) {
+        err << "could not save the demo records\n";
         return 1;
     }
-    out << "demo profile " << p.id << " created\n";
+    auto pair = al::EnsureProfile(db, r.id, c.id);
+    if (!pair) {
+        err << pair.error().message << "\n";
+        return 1;
+    }
+    out << "demo rifle " << r.id << ", cartridge " << c.id << " created (profile "
+        << pair.value() << ")\n";
     return 0;
 }
 
@@ -597,8 +642,8 @@ int Run(const std::vector<std::string>& args, std::ostream& out, std::ostream& e
     if (a.command == "quick") {
         return CmdQuick(a, out, err);
     }
-    if (a.command == "profiles") {
-        return CmdProfiles(a, out, err);
+    if (a.command == "profiles" || a.command == "rifles" || a.command == "cartridges") {
+        return CmdList(a, out, err);
     }
     if (a.command == "demo") {
         return CmdDemo(a, out, err);

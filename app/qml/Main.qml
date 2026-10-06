@@ -28,7 +28,7 @@ ApplicationWindow {
     // Back (Android key, Esc): close an inner page first, then return to the
     // solution, then leave.
     function handleBack() {
-        if (win.page === 3 && profilesPage.back())
+        if (win.page === 3 && armoryPage.back())
             return true
         if (win.page !== 0) {
             win.page = 0
@@ -49,7 +49,7 @@ ApplicationWindow {
         { title: qsTr("Solution"), short: qsTr("Solve") },
         { title: qsTr("Range table"), short: qsTr("Table") },
         { title: qsTr("Conditions"), short: qsTr("Air") },
-        { title: qsTr("Profiles"), short: qsTr("Rifles") },
+        { title: qsTr("Rifles and cartridges"), short: qsTr("Rifles") },
         { title: qsTr("Settings"), short: qsTr("More") }
     ]
 
@@ -98,16 +98,19 @@ ApplicationWindow {
             currentIndex: win.page
 
             SolutionPage {
-                onEditProfiles: win.page = 3
+                onEditProfiles: {
+                    armoryPage.tab = Backend.rifles.length === 0 ? 0 : 1
+                    win.page = 3
+                }
             }
             TablePage {
                 id: tablePage
                 onRangeChosen: win.page = 0
             }
             ConditionsPage {}
-            ProfilesPage {
-                id: profilesPage
-                onProfileChosen: win.page = 0
+            ArmoryPage {
+                id: armoryPage
+                onChosen: win.page = 0
             }
             SettingsPage {}
         }
