@@ -16,6 +16,7 @@ add_executable(core_tests
     applogic_truing_test.cpp
     applogic_test.cpp
     bridge_test.cpp
+    physics_analysis_test.cpp
     physics_basics_test.cpp
     physics_drag_models_test.cpp
     physics_effects_test.cpp

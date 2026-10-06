@@ -57,8 +57,6 @@
     <string name="spin_drift">Spin drift</string>
     <string name="muzzle_velocity">Muzzle velocity</string>
     <string name="stability">Stability Sg</string>
-    <string name="subsonic_at_target">Subsonic at the target: expect larger dispersion.</string>
-    <string name="transonic_from">Transonic from about %1$s m.</string>
 
     <!-- Conditions -->
     <string name="atmosphere">Atmosphere</string>
@@ -297,4 +295,18 @@
     <string name="core_21">Nothing to apply.</string>
     <string name="core_22">Each BC band needs a velocity and a BC between 0 and 2.</string>
     <string name="core_23">This bullet is used by a cartridge and cannot be deleted.</string>
+    <string name="warn_unstable">The bullet is unstable (Sg %1$s): it may tumble. It needs a faster twist or a shorter bullet.</string>
+    <string name="warn_low_stability">Marginal stability (Sg %1$s, below 1.3): the BC drops and accuracy suffers.</string>
+    <string name="warn_subsonic">Subsonic at the target (Mach %1$s): expect larger dispersion.</string>
+    <string name="warn_transonic">Transonic at the target (Mach %1$s): the corrections are less certain.</string>
+    <string name="warn_zero_temperature">The air is %1$s °C off the zero conditions: confirm with a shot.</string>
+    <string name="warn_zero_pressure">The pressure is %1$s hPa off the zero conditions: confirm with a shot.</string>
+    <string name="warn_stale_weather">The weather was entered %1$s h ago: update it.</string>
+    <string name="apex">Max ordinate</string>
+    <string name="apex_value">%1$s cm at %2$s m</string>
+    <string name="point_blank">Point-blank, %1$s cm target</string>
+    <string name="density_altitude">Density altitude</string>
+    <string name="enter_density_altitude">I enter density altitude instead of pressure</string>
+    <string name="target_section">Target</string>
+    <string name="target_height">Target height (for the point-blank range)</string>
 </resources>

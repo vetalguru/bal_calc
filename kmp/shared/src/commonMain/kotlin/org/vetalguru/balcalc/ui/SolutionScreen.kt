@@ -64,6 +64,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.core.Solution
+import org.vetalguru.balcalc.core.Warning
 import org.vetalguru.balcalc.fixed
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
@@ -130,6 +131,7 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
 
                 if (sol.ok) {
                     Corrections(sol, unit, wide)
+                    Warnings(sol.warnings)
                     Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             if (sol.velocityScale != 1.0 || sol.dragScale != 1.0) {
@@ -154,17 +156,7 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
                     onDirection = { d -> model.updateConditions { it.copy(windFromDeg = d) } },
                 )
 
-                if (sol.ok) {
-                    Details(sol, wide)
-                    if (sol.subsonic || sol.transonicRangeM > 0) {
-                        Text(
-                            if (sol.subsonic) stringResource(Res.string.subsonic_at_target)
-                            else stringResource(Res.string.transonic_from, sol.transonicRangeM.roundToInt()),
-                            color = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                        )
-                    }
-                }
+                if (sol.ok) Details(sol, st.conditions.targetHeightCm, wide)
             }
         }
     }
@@ -294,12 +286,13 @@ private fun Corrections(sol: Solution, unit: String, wide: Boolean) {
         )
     }
     if (wide) {
-        Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Tagged with the range it was solved for, so tests can wait for it.
+        Row(Modifier.padding(horizontal = 12.dp).testTag("solvedFor:${sol.rangeM.roundToInt()}"), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             elevation(Modifier.weight(1f))
             windage(Modifier.weight(1f))
         }
     } else {
-        Column(Modifier.padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(horizontal = 12.dp).testTag("solvedFor:${sol.rangeM.roundToInt()}"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             elevation(Modifier.fillMaxWidth())
             windage(Modifier.fillMaxWidth())
         }
@@ -489,9 +482,10 @@ fun WindDial(fromDeg: Double, onChange: (Double) -> Unit, modifier: Modifier = M
 }
 
 @Composable
-private fun Details(sol: Solution, wide: Boolean) {
+private fun Details(sol: Solution, targetHeightCm: Double, wide: Boolean) {
     val m = stringResource(Res.string.unit_mps)
     val cm = stringResource(Res.string.unit_cm)
+    val metres = stringResource(Res.string.unit_m)
     val items = listOf(
         Triple(stringResource(Res.string.velocity), "${sol.velocity.fixed(0)} $m", false),
         Triple(stringResource(Res.string.energy), "${sol.energy.fixed(0)} ${stringResource(Res.string.unit_j)}", false),
@@ -504,8 +498,23 @@ private fun Details(sol: Solution, wide: Boolean) {
         Triple(
             stringResource(Res.string.stability),
             if (sol.stability > 0) sol.stability.fixed(2) else "—",
-            sol.stability > 0 && sol.stability < 1.4,
+            sol.stability > 0 && sol.stability < 1.3,
         ),
+        Triple(
+            stringResource(Res.string.apex),
+            stringResource(Res.string.apex_value, sol.apexCm.fixed(1), sol.apexRangeM.roundToInt()),
+            false,
+        ),
+        Triple(
+            stringResource(Res.string.point_blank, targetHeightCm.roundToInt()),
+            if (sol.pointBlankFarM > 0) {
+                "${sol.pointBlankNearM.roundToInt()}–${sol.pointBlankFarM.roundToInt()} $metres"
+            } else {
+                "—"
+            },
+            false,
+        ),
+        Triple(stringResource(Res.string.density_altitude), "${sol.densityAltitudeM.roundToInt()} $metres", false),
     )
     Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -516,5 +525,43 @@ private fun Details(sol: Solution, wide: Boolean) {
                 }
             }
         }
+    }
+}
+
+/** What the shooter should know before trusting the numbers; nothing when all is well. */
+@Composable
+private fun Warnings(warnings: List<Warning>) {
+    if (warnings.isEmpty()) return
+    Card(
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("warnings"),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        ),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            warnings.forEach { w ->
+                val text = warningText(w) ?: return@forEach
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("⚠", fontWeight = FontWeight.Bold)
+                    Text(text, modifier = Modifier.testTag("warning_${w.code}"))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun warningText(w: Warning): String? {
+    val signed = { v: Double, d: Int -> (if (v > 0) "+" else "") + v.fixed(d) }
+    return when (w.code) {
+        "unstable" -> stringResource(Res.string.warn_unstable, w.value.fixed(2))
+        "lowStability" -> stringResource(Res.string.warn_low_stability, w.value.fixed(2))
+        "subsonic" -> stringResource(Res.string.warn_subsonic, w.value.fixed(2))
+        "transonic" -> stringResource(Res.string.warn_transonic, w.value.fixed(2))
+        "zeroTemperature" -> stringResource(Res.string.warn_zero_temperature, signed(w.value, 0))
+        "zeroPressure" -> stringResource(Res.string.warn_zero_pressure, signed(w.value, 0))
+        "staleWeather" -> stringResource(Res.string.warn_stale_weather, w.value.roundToInt())
+        else -> null // a newer core: not known to this app yet
     }
 }

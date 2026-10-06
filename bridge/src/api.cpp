@@ -101,6 +101,10 @@ void Must(const bs::Status& s) {
     }
 }
 
+double NowUnix() {
+    return std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
 double Num(const json& j, const char* key, double fallback = 0.0) {
     return j.contains(key) && j.at(key).is_number() ? j.at(key).get<double>() : fallback;
 }
@@ -315,6 +319,10 @@ struct Api::Impl {
     double azimuth_deg = 0.0;
     double target_range_m = 300.0;
     double magnification = 0.0;
+    bool use_density_altitude = false;
+    double density_altitude_m = 0.0;
+    double target_height_cm = 20.0;
+    double weather_at_unix = 0.0;
 
     al::TruingResult last_truing;
 
@@ -381,6 +389,11 @@ struct Api::Impl {
         }
         s.target_range_m = target_range_m;
         s.magnification = magnification;
+        if (use_density_altitude) {
+            s.density_altitude_m = density_altitude_m;
+        }
+        s.target_height_cm = target_height_cm;
+        s.weather_at_unix = weather_at_unix;
         return s;
     }
 
@@ -403,6 +416,10 @@ struct Api::Impl {
         azimuth_deg = s.azimuth_deg.value_or(azimuth_deg);
         target_range_m = s.target_range_m;
         magnification = s.magnification;
+        use_density_altitude = s.density_altitude_m.has_value();
+        density_altitude_m = s.density_altitude_m.value_or(density_altitude_m);
+        target_height_cm = s.target_height_cm;
+        weather_at_unix = s.weather_at_unix;
     }
 
     json Conditions() const {
@@ -413,12 +430,17 @@ struct Api::Impl {
                 {"lookAngleDeg", look_angle_deg},  {"cantDeg", cant_deg},
                 {"coriolis", coriolis},            {"latitudeDeg", latitude_deg},
                 {"useAzimuth", use_azimuth},       {"azimuthDeg", azimuth_deg},
-                {"targetRangeM", target_range_m},  {"magnification", magnification}};
+                {"targetRangeM", target_range_m},  {"magnification", magnification},
+                {"useDensityAltitude", use_density_altitude},
+                {"densityAltitudeM", density_altitude_m},
+                {"targetHeightCm", target_height_cm}};
     }
 
     void SetConditions(const json& a) {
         const auto num = [&a](const char* key, double& field) { field = Num(a, key, field); };
         const auto flag = [&a](const char* key, bool& field) { field = Bool(a, key, field); };
+        const auto air = std::make_tuple(temperature_c, pressure_hpa, altitude_m, humidity_pct,
+                                         use_density_altitude, density_altitude_m);
         num("temperatureC", temperature_c);
         num("pressureHpa", pressure_hpa);
         num("altitudeM", altitude_m);
@@ -435,6 +457,14 @@ struct Api::Impl {
         num("azimuthDeg", azimuth_deg);
         num("targetRangeM", target_range_m);
         num("magnification", magnification);
+        flag("useDensityAltitude", use_density_altitude);
+        num("densityAltitudeM", density_altitude_m);
+        num("targetHeightCm", target_height_cm);
+        // The air was entered now: the solution warns when it gets old.
+        if (air != std::make_tuple(temperature_c, pressure_hpa, altitude_m, humidity_pct,
+                                   use_density_altitude, density_altitude_m)) {
+            weather_at_unix = NowUnix();
+        }
         al::SaveSession(db, Session()).ok();
     }
 
@@ -593,7 +623,7 @@ struct Api::Impl {
         } else if (auto p = bs::LoadProfile(db, profile_id); !p) {
             out = {{"ok", false}, {"error", p.error().message}};
         } else {
-            const al::SolutionSummary r = al::Summarize(p.value(), Session(), Unit());
+            const al::SolutionSummary r = al::Summarize(p.value(), Session(), Unit(), NowUnix());
             out = {{"ok", r.ok},
                    {"error", r.error},
                    {"rangeM", r.range_m},
@@ -614,7 +644,18 @@ struct Api::Impl {
                    {"dragScale", p.value().profile.drag_scale},
                    {"spinDriftCm", r.spin_drift_cm},
                    {"subsonic", r.subsonic},
-                   {"transonicRangeM", r.transonic_range_m}};
+                   {"transonicRangeM", r.transonic_range_m},
+                   {"apexCm", r.apex_cm},
+                   {"apexRangeM", r.apex_range_m},
+                   {"pointBlankNearM", r.point_blank_near_m},
+                   {"pointBlankFarM", r.point_blank_far_m},
+                   {"densityAltitudeM", r.density_altitude_m},
+                   {"pressureHpa", r.pressure_hpa}};
+            json warnings = json::array();
+            for (const al::Warning& w : r.warnings) {
+                warnings.push_back({{"code", w.code}, {"value", w.value}});
+            }
+            out["warnings"] = warnings;
             AddReticle(p.value(), r, out);
         }
         out["computeMs"] = std::chrono::duration<double, std::milli>(

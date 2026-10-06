@@ -51,8 +51,6 @@
     <string name="spin_drift">Деривация</string>
     <string name="muzzle_velocity">Начальная скорость</string>
     <string name="stability">Устойчивость Sg</string>
-    <string name="subsonic_at_target">На цели пуля дозвуковая: ожидайте большего рассеивания.</string>
-    <string name="transonic_from">Трансзвук примерно с %1$s м.</string>
     <string name="atmosphere">Атмосфера</string>
     <string name="temperature">Температура</string>
     <string name="altitude">Высота над уровнем моря</string>
@@ -267,4 +265,18 @@
     <string name="core_21">Нечего применять.</string>
     <string name="core_22">Для каждого диапазона нужны скорость и БК от 0 до 2.</string>
     <string name="core_23">Эту пулю использует патрон, её нельзя удалить.</string>
+    <string name="warn_unstable">Пуля неустойчива (Sg %1$s): может кувыркаться. Нужен более быстрый шаг нарезов или более короткая пуля.</string>
+    <string name="warn_low_stability">Устойчивость на грани (Sg %1$s, меньше 1.3): BC падает, кучность хуже.</string>
+    <string name="warn_subsonic">На цели пуля дозвуковая (Мах %1$s): ожидайте большего рассеивания.</string>
+    <string name="warn_transonic">На цели трансзвук (Мах %1$s): поправки менее надёжны.</string>
+    <string name="warn_zero_temperature">Воздух на %1$s °C отличается от условий пристрелки: проверьте выстрелом.</string>
+    <string name="warn_zero_pressure">Давление на %1$s гПа отличается от условий пристрелки: проверьте выстрелом.</string>
+    <string name="warn_stale_weather">Погода введена %1$s ч назад: обновите её.</string>
+    <string name="apex">Максимальное превышение</string>
+    <string name="apex_value">%1$s см на %2$s м</string>
+    <string name="point_blank">Прямой выстрел, цель %1$s см</string>
+    <string name="density_altitude">Плотностная высота</string>
+    <string name="enter_density_altitude">Ввожу плотностную высоту вместо давления</string>
+    <string name="target_section">Цель</string>
+    <string name="target_height">Высота цели (для прямого выстрела)</string>
 </resources>

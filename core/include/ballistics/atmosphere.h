@@ -49,6 +49,15 @@ double AirDensityFromMoleFraction(double temperature_k, double pressure_pa, doub
 double SpeedOfSoundFromMoleFraction(double temperature_k, double xv,
                                     SoundSpeedModel model = SoundSpeedModel::kHumidAir);
 
+// Density altitude: the ICAO standard-atmosphere altitude where dry air
+// has the density of `air` (moist air, CIPM-2007).
+double DensityAltitude(const Atmosphere& air);
+
+// Station pressure that gives air at `temperature_k` and `humidity` the
+// density of the standard atmosphere at `density_altitude_m`.
+double StationPressureFromDensityAltitude(double density_altitude_m, double temperature_k,
+                                          double humidity);
+
 // Air along the trajectory: the firing-point atmosphere, extrapolated to
 // other altitudes with the standard lapse rate (-6.5 K/km), the barometric
 // formula and the water-vapour content of the firing-point air (capped at

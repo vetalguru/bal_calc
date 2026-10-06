@@ -45,6 +45,9 @@ data class Conditions(
     val azimuthDeg: Double = 0.0,
     val targetRangeM: Double = 300.0,
     val magnification: Double = 0.0,
+    val useDensityAltitude: Boolean = false,
+    val densityAltitudeM: Double = 0.0,
+    val targetHeightCm: Double = 20.0,
 )
 
 @Serializable
@@ -90,6 +93,13 @@ data class Solution(
     val spinDriftCm: Double = 0.0,
     val subsonic: Boolean = false,
     val transonicRangeM: Double = 0.0,
+    val apexCm: Double = 0.0,
+    val apexRangeM: Double = 0.0,
+    val pointBlankNearM: Double = 0.0,
+    val pointBlankFarM: Double = 0.0,
+    val densityAltitudeM: Double = 0.0,
+    val pressureHpa: Double = 0.0,
+    val warnings: List<Warning> = emptyList(),
     // Reticle hold (present with a scope).
     val hasReticle: Boolean = false,
     val holdMode: String = "",
@@ -106,6 +116,10 @@ data class Solution(
     val reticleUnits: String = "mrad",
     val reticleDefinition: String = "",
 )
+
+/** Something to know about the solution; `code` as in applogic/session.h. */
+@Serializable
+data class Warning(val code: String = "", val value: Double = 0.0)
 
 @Serializable
 data class TableRow(

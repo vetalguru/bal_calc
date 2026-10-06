@@ -130,4 +130,35 @@ AirState AtmosphereModel::At(double altitude_m) const {
     return s;
 }
 
+namespace {
+
+// Density exponent of the standard troposphere: rho ~ (T / T0)^(n - 1).
+constexpr double kDensityExponent = kPressureExponent - 1.0;
+
+double StandardSeaLevelDensity() {
+    return AirDensity(kSeaLevelTemperature, kSeaLevelPressure, 0.0);
+}
+
+} // namespace
+
+double DensityAltitude(const Atmosphere& air) {
+    const double ratio =
+        AirDensity(air.temperature_k, air.pressure_pa, air.humidity) / StandardSeaLevelDensity();
+    return kSeaLevelTemperature / -kLapseRate * (1.0 - std::pow(ratio, 1.0 / kDensityExponent));
+}
+
+double StationPressureFromDensityAltitude(double density_altitude_m, double temperature_k,
+                                          double humidity) {
+    const double t_ratio = 1.0 + kLapseRate * density_altitude_m / kSeaLevelTemperature;
+    const double target =
+        StandardSeaLevelDensity() * std::pow(std::max(t_ratio, 1e-3), kDensityExponent);
+    // Density is nearly proportional to pressure: a few fixed-point steps
+    // absorb the compressibility and vapour terms.
+    double p = kSeaLevelPressure * target / StandardSeaLevelDensity();
+    for (int i = 0; i < 6; ++i) {
+        p *= target / AirDensity(temperature_k, p, humidity);
+    }
+    return p;
+}
+
 } // namespace ballistics

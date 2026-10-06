@@ -35,6 +35,11 @@ struct SessionConditions {
     std::optional<double> azimuth_deg;
     double target_range_m = 300.0;
     double magnification = 0.0; // current zoom (SFP holds), 0 = unknown
+    // Typed instead of the pressure: the pressure then follows from it, the
+    // temperature and the humidity.
+    std::optional<double> density_altitude_m;
+    double target_height_cm = 20.0; // for the point-blank range
+    double weather_at_unix = 0.0;   // when the air was last entered, 0 = unknown
 };
 
 storage::ConditionsRecord ToConditions(const SessionConditions& s);
@@ -44,6 +49,28 @@ Result<SessionConditions> LoadSession(storage::Database& db);
 Status SaveSession(storage::Database& db, const SessionConditions& s);
 
 enum class AngleUnit { kMrad, kMoa };
+
+// Something the shooter should know about this solution. `code` is stable
+// (the app translates it); `value` is the number the message shows.
+struct Warning {
+    std::string code;
+    double value = 0.0;
+};
+
+// Warning codes.
+inline constexpr const char* kWarnUnstable = "unstable";          // Sg < 1.0; value = Sg
+inline constexpr const char* kWarnLowStability = "lowStability";  // Sg < 1.3; value = Sg
+inline constexpr const char* kWarnSubsonic = "subsonic";          // at the target; value = Mach
+inline constexpr const char* kWarnTransonic = "transonic";        // Mach < 1.2 at the target
+inline constexpr const char* kWarnZeroTemperature = "zeroTemperature"; // value = C off the zero
+inline constexpr const char* kWarnZeroPressure = "zeroPressure";       // value = hPa off the zero
+inline constexpr const char* kWarnStaleWeather = "staleWeather";       // value = hours since entered
+
+// Thresholds of the warnings (one place, see Summarize).
+inline constexpr double kMarginalStability = 1.3;
+inline constexpr double kZeroTemperatureLimitC = 15.0;
+inline constexpr double kZeroPressureLimitHpa = 50.0;
+inline constexpr double kStaleWeatherHours = 24.0;
 
 struct SolutionSummary {
     bool ok = false;
@@ -68,10 +95,21 @@ struct SolutionSummary {
     double spin_drift_cm = 0.0;
     bool subsonic = false;     // at the target
     double transonic_range_m = 0.0; // first range below Mach 1.2, 0 if none
+    // Highest point above the line of sight on the way to the target.
+    double apex_cm = 0.0;
+    double apex_range_m = 0.0;
+    // Point-blank range for a target `target_height_cm` tall, aimed at its
+    // centre (0/0 if the bullet never stays within it).
+    double point_blank_near_m = 0.0;
+    double point_blank_far_m = 0.0;
+    double density_altitude_m = 0.0;
+    double pressure_hpa = 0.0; // station pressure used (follows a typed density altitude)
+    std::vector<Warning> warnings;
 };
 
+// `now_unix` (seconds) enables the stale-weather warning; 0 skips it.
 SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionConditions& s,
-                          AngleUnit unit);
+                          AngleUnit unit, double now_unix = 0.0);
 
 double FromRad(double rad, AngleUnit unit);
 

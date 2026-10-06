@@ -95,6 +95,34 @@ TEST_F(Bridge, ConditionsAndSettingsChangeTheSolution) {
     EXPECT_GT(Ok("solution").at("windage").get<double>(), 0.5);
 }
 
+TEST_F(Bridge, DensityAltitudeAndWarnings) {
+    Sample();
+    json sol = Ok("solution");
+    EXPECT_TRUE(sol.at("warnings").is_array());
+    EXPECT_GT(sol.at("pointBlankFarM").get<double>(), 100.0);
+    EXPECT_GT(sol.at("apexRangeM").get<double>(), 0.0);
+    EXPECT_NEAR(sol.at("pressureHpa").get<double>(), 1013.25, 1e-9);
+
+    const json c = Ok("setConditions", {{"useDensityAltitude", true}, {"densityAltitudeM", 2000}});
+    EXPECT_EQ(c.at("useDensityAltitude"), true);
+    EXPECT_EQ(c.at("densityAltitudeM"), 2000.0);
+    sol = Ok("solution");
+    EXPECT_NEAR(sol.at("densityAltitudeM").get<double>(), 2000.0, 0.1);
+    EXPECT_LT(sol.at("pressureHpa").get<double>(), 850.0);
+
+    // Far from the sample's zero air (15 C): a warning with the difference.
+    Ok("setConditions", {{"useDensityAltitude", false}, {"temperatureC", 35}});
+    bool found = false;
+    const json warnings = Ok("solution").at("warnings");
+    for (const json& w : warnings) {
+        if (w.at("code") == "zeroTemperature") {
+            found = true;
+            EXPECT_NEAR(w.at("value").get<double>(), 20.0, 1e-6);
+        }
+    }
+    EXPECT_TRUE(found) << warnings.dump();
+}
+
 TEST_F(Bridge, RangeTableAndCurve) {
     Sample();
     Ok("setSettings", {{"tableFromM", 0}, {"tableToM", 1000}, {"tableStepM", 100}});

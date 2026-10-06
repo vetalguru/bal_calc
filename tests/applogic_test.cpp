@@ -1,5 +1,6 @@
 #include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/session.h>
+#include <ballistics/atmosphere.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
@@ -374,6 +375,115 @@ TEST_F(AppLogic, RangeTableRejectsBadSpec) {
     EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 0.0, 1000.0, 0.0).ok);
     EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 500.0, 100.0, 50.0).ok);
     EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 0.0, 3000.0, 1.0).ok); // > 2000 rows
+}
+
+bool Has(const SolutionSummary& s, const char* code, double* value = nullptr) {
+    for (const Warning& w : s.warnings) {
+        if (w.code == code) {
+            if (value) {
+                *value = w.value;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+// At the zero conditions of the sample rifle (10 C, 990 hPa).
+SessionConditions AtZero(double range_m) {
+    SessionConditions s;
+    s.temperature_c = 10.0;
+    s.pressure_hpa = 990.0;
+    s.target_range_m = range_m;
+    return s;
+}
+
+TEST_F(AppLogic, SummaryApexPointBlankAndDensityAltitude) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    const SolutionSummary r = Summarize(p, AtZero(300.0), AngleUnit::kMrad);
+    ASSERT_TRUE(r.ok) << r.error;
+    // Zeroed at 100 m: the bullet tops out just past ~50 m, a few mm high.
+    EXPECT_GT(r.apex_cm, 0.0);
+    EXPECT_LT(r.apex_cm, 2.0);
+    EXPECT_GT(r.apex_range_m, 30.0);
+    EXPECT_LT(r.apex_range_m, 100.0);
+    // 20 cm target, aim at the centre: from the muzzle to ~230 m.
+    EXPECT_DOUBLE_EQ(r.point_blank_near_m, 0.0);
+    EXPECT_GT(r.point_blank_far_m, 180.0);
+    EXPECT_LT(r.point_blank_far_m, 300.0);
+    // 10 C, 990 hPa, 50 %: the session air.
+    EXPECT_NEAR(r.density_altitude_m, DensityAltitude({0.0, 99000.0, units::CToK(10.0), 0.5}), 1e-6);
+    EXPECT_NEAR(r.pressure_hpa, 990.0, 1e-9);
+    EXPECT_TRUE(r.warnings.empty());
+
+    SessionConditions big = AtZero(300.0);
+    big.target_height_cm = 50.0;
+    EXPECT_GT(Summarize(p, big, AngleUnit::kMrad).point_blank_far_m, r.point_blank_far_m + 50.0);
+}
+
+TEST_F(AppLogic, DensityAltitudeSetsThePressure) {
+    const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    SessionConditions s = AtZero(600.0);
+    s.density_altitude_m = 1500.0;
+    const SolutionSummary r = Summarize(p, s, AngleUnit::kMrad);
+    ASSERT_TRUE(r.ok);
+    EXPECT_NEAR(r.density_altitude_m, 1500.0, 0.1);
+    EXPECT_LT(r.pressure_hpa, 900.0);
+    // Thinner air: less elevation than at the typed 990 hPa.
+    EXPECT_LT(r.elevation, Summarize(p, AtZero(600.0), AngleUnit::kMrad).elevation);
+}
+
+TEST_F(AppLogic, WarningsFollowTheirThresholds) {
+    storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
+    double v = 0.0;
+
+    SessionConditions hot = AtZero(300.0);
+    hot.temperature_c = 30.0;
+    EXPECT_TRUE(Has(Summarize(p, hot, AngleUnit::kMrad), kWarnZeroTemperature, &v));
+    EXPECT_NEAR(v, 20.0, 1e-9);
+    hot.temperature_c = 24.0; // 14 C off: still fine
+    EXPECT_FALSE(Has(Summarize(p, hot, AngleUnit::kMrad), kWarnZeroTemperature));
+
+    SessionConditions high = AtZero(300.0);
+    high.pressure_hpa = 900.0;
+    EXPECT_TRUE(Has(Summarize(p, high, AngleUnit::kMrad), kWarnZeroPressure, &v));
+    EXPECT_NEAR(v, -90.0, 1e-9);
+
+    SessionConditions old = AtZero(300.0);
+    old.weather_at_unix = 1.0e9;
+    EXPECT_FALSE(Has(Summarize(p, old, AngleUnit::kMrad, 1.0e9 + 3600.0), kWarnStaleWeather));
+    EXPECT_TRUE(Has(Summarize(p, old, AngleUnit::kMrad, 1.0e9 + 25 * 3600.0), kWarnStaleWeather, &v));
+    EXPECT_NEAR(v, 25.0, 1e-9);
+    EXPECT_FALSE(Has(Summarize(p, old, AngleUnit::kMrad), kWarnStaleWeather)); // no clock
+
+    const SolutionSummary far = Summarize(p, AtZero(1300.0), AngleUnit::kMrad);
+    ASSERT_TRUE(far.ok);
+    EXPECT_EQ(Has(far, kWarnSubsonic), far.mach < 1.0);
+    EXPECT_EQ(Has(far, kWarnTransonic), far.mach >= 1.0 && far.mach < 1.2);
+    EXPECT_TRUE(far.mach < 1.2);
+
+    // A slow twist for a long bullet.
+    p.rifle.twist_m = units::InchToM(16.0);
+    const SolutionSummary slow = Summarize(p, AtZero(300.0), AngleUnit::kMrad);
+    ASSERT_GT(slow.stability, 0.0);
+    ASSERT_LT(slow.stability, kMarginalStability);
+    EXPECT_TRUE(Has(slow, slow.stability < 1.0 ? kWarnUnstable : kWarnLowStability, &v));
+    EXPECT_DOUBLE_EQ(v, slow.stability);
+}
+
+TEST_F(AppLogic, SessionKeepsTheNewFields) {
+    SessionConditions s;
+    s.density_altitude_m = 1234.0;
+    s.target_height_cm = 35.0;
+    s.weather_at_unix = 1.7e9;
+    ASSERT_TRUE(SaveSession(db_, s).ok());
+    const SessionConditions g = LoadSession(db_).value();
+    EXPECT_EQ(g.density_altitude_m, 1234.0);
+    EXPECT_DOUBLE_EQ(g.target_height_cm, 35.0);
+    EXPECT_DOUBLE_EQ(g.weather_at_unix, 1.7e9);
+    s.density_altitude_m.reset();
+    ASSERT_TRUE(SaveSession(db_, s).ok());
+    EXPECT_FALSE(LoadSession(db_).value().density_altitude_m.has_value());
 }
 
 } // namespace
