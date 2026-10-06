@@ -39,6 +39,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.core.Api
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
+import org.vetalguru.balcalc.ui.ArmoryNav
+import org.vetalguru.balcalc.ui.ArmoryScreen
 import org.vetalguru.balcalc.ui.ConditionsScreen
 import org.vetalguru.balcalc.ui.SolutionScreen
 import org.vetalguru.balcalc.ui.TableScreen
@@ -61,7 +63,7 @@ private val BlueGrey = Color(0xFF607D8B)
  * on phones. [startup] opens the platform's database (once per core).
  */
 @Composable
-fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, dark: Boolean = false) {
+fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, dark: Boolean = false) {
     val scheme = if (dark) {
         darkColorScheme(primary = Orange, secondary = BlueGrey)
     } else {
@@ -72,6 +74,9 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, dark: Boolean = false)
         val model = remember(api) { AppModel(api, scope) }
         LaunchedEffect(model) { model.start(startup) }
         var page by rememberSaveable { mutableIntStateOf(0) }
+        val armory = remember { ArmoryNav() }
+        // Back: an inner page first (handled by it), then to the solution, then out.
+        BackHandler(enabled = page != 0) { page = 0 }
         val snackbar = remember { SnackbarHostState() }
         LaunchedEffect(model.message) {
             model.message?.let {
@@ -80,6 +85,7 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, dark: Boolean = false)
             }
         }
 
+        androidx.compose.runtime.CompositionLocalProvider(LocalPlatform provides platform) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val wide = maxWidth >= 840.dp
             Scaffold(
@@ -124,11 +130,13 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, dark: Boolean = false)
                             0 -> SolutionScreen(model, onEditArmory = { page = 3 })
                             1 -> TableScreen(model, onRangeChosen = { page = 0 })
                             2 -> ConditionsScreen(model)
+                            3 -> ArmoryScreen(model, armory, onChosen = { page = 0 })
                             else -> ComingSoon()
                         }
                     }
                 }
             }
+        }
         }
     }
 }

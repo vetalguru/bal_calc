@@ -10,11 +10,20 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.vetalguru.balcalc.core.Api
+import org.vetalguru.balcalc.core.ApiException
+import org.vetalguru.balcalc.core.BulletForm
+import org.vetalguru.balcalc.core.BulletItem
+import org.vetalguru.balcalc.core.CartridgeForm
+import org.vetalguru.balcalc.core.CartridgeItem
+import org.vetalguru.balcalc.core.ExportedJson
+import org.vetalguru.balcalc.core.ReticleItem
+import org.vetalguru.balcalc.core.RifleForm
 import org.vetalguru.balcalc.core.AppState
 import org.vetalguru.balcalc.core.Conditions
 import org.vetalguru.balcalc.core.RangeTable
@@ -100,6 +109,66 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
             put("rifleName", rifleName)
             put("cartridgeName", cartridgeName)
         })
+        recompute()
+    }
+
+    // ---- Rifles, cartridges, library -----------------------------------
+
+    private fun id(value: Long) = buildJsonObject { put("id", value) }
+    private inline fun <reified T> formArgs(form: T) =
+        buildJsonObject { put("form", Api.json.encodeToJsonElement(form)) }
+
+    suspend fun rifleForm(id: Long): RifleForm = api.get("rifleForm", id(id))
+    suspend fun cartridgeForm(id: Long): CartridgeForm = api.get("cartridgeForm", id(id))
+    suspend fun bulletForm(id: Long): BulletForm = api.get("bulletForm", id(id))
+    suspend fun reticles(): List<ReticleItem> = api.get("reticles")
+    suspend fun libraryBullets(filter: String): List<BulletItem> =
+        api.get("libraryBullets", buildJsonObject { put("filter", filter) })
+    suspend fun libraryCartridges(filter: String): List<CartridgeItem> =
+        api.get("libraryCartridges", buildJsonObject { put("filter", filter) })
+    suspend fun cartridgeFormFromLibrary(id: Long): CartridgeForm = api.get("cartridgeFormFromLibrary", id(id))
+    suspend fun cartridgeFormWithBullet(form: CartridgeForm, bulletId: Long): CartridgeForm =
+        api.get("cartridgeFormWithBullet", buildJsonObject {
+            put("form", Api.json.encodeToJsonElement(form))
+            put("bulletId", bulletId)
+        })
+
+    /**
+     * Saves a form; the saved record becomes current. Returns the core's
+     * error (a validation sentence) or null.
+     */
+    suspend fun saveRifle(form: RifleForm): String? = saveForm("saveRifle", formArgs(form))
+    suspend fun saveCartridge(form: CartridgeForm): String? = saveForm("saveCartridge", formArgs(form))
+    suspend fun saveBullet(form: BulletForm): String? = saveForm("saveBullet", formArgs(form))
+
+    private suspend fun saveForm(method: String, args: JsonObject): String? = try {
+        api.call(method, args)
+        state = api.get("state")
+        recompute()
+        null
+    } catch (e: ApiException) {
+        e.message
+    }
+
+    fun deleteRifle(id: Long) = act { state = api.get("deleteRifle", id(id)); recompute() }
+    fun deleteCartridge(id: Long) = act { state = api.get("deleteCartridge", id(id)); recompute() }
+    suspend fun deleteBullet(id: Long): String? = try {
+        api.call("deleteBullet", id(id))
+        null
+    } catch (e: ApiException) {
+        e.message
+    }
+
+    /** A rifle or cartridge as a file: (JSON, suggested file name). */
+    suspend fun exportJson(kind: String, id: Long): ExportedJson =
+        api.get("exportJson", buildJsonObject {
+            put("kind", kind)
+            put("id", id)
+        })
+
+    /** A shared rifle/cartridge (or old profile) file; what it brought becomes current. */
+    suspend fun importShared(text: String) {
+        state = api.get("importShared", buildJsonObject { put("text", text) })
         recompute()
     }
 

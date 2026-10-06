@@ -1,6 +1,7 @@
 package org.vetalguru.balcalc
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -21,6 +22,7 @@ fun main() {
             BalCalcApp(
                 api = core,
                 startup = { start(desktopDatabasePath()) { desktopSeed() } },
+                platform = remember { DesktopPlatform { window } },
                 dark = isSystemInDarkTheme(),
             )
         }

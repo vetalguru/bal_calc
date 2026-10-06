@@ -143,3 +143,78 @@ fun Fields(wide: Boolean, vararg fields: @Composable (Modifier) -> Unit) {
         fields.forEach { it(Modifier.fillMaxWidth()) }
     }
 }
+
+/** A labelled drop-down of [options] (value to text). */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun <T> ChoiceField(
+    label: String,
+    options: List<Pair<T, String>>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var open by remember { mutableStateOf(false) }
+    androidx.compose.material3.ExposedDropdownMenuBox(expanded = open, onExpandedChange = { open = it }, modifier = modifier) {
+        OutlinedTextField(
+            value = options.firstOrNull { it.first == selected }?.second ?: "",
+            onValueChange = {},
+            readOnly = true,
+            singleLine = true,
+            label = { Text(label, maxLines = 1) },
+            trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = open) },
+            modifier = Modifier
+                .menuAnchor(androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth(),
+        )
+        ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            options.forEach { (value, text) ->
+                androidx.compose.material3.DropdownMenuItem(text = { Text(text) }, onClick = {
+                    open = false
+                    onSelect(value)
+                })
+            }
+        }
+    }
+}
+
+/** A plain text input with a label. */
+@Composable
+fun TextInput(
+    label: String,
+    value: String,
+    onChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    tag: String? = null,
+) {
+    val focus = LocalFocusManager.current
+    OutlinedTextField(
+        value = value,
+        onValueChange = onChange,
+        label = { Text(label, maxLines = 1) },
+        singleLine = true,
+        enabled = enabled,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
+        modifier = modifier.fillMaxWidth().let { m -> if (tag != null) m.testTag(tag) else m },
+    )
+}
+
+/** Cancel - title - Save, the top of an editor. */
+@Composable
+fun EditorBar(title: String, cancel: String, save: String, onCancel: () -> Unit, onSave: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        androidx.compose.material3.TextButton(onClick = onCancel) { Text(cancel) }
+        Text(
+            title,
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.weight(1f),
+        )
+        androidx.compose.material3.Button(onClick = onSave, modifier = Modifier.testTag("save")) { Text(save) }
+    }
+}

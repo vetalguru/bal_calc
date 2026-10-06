@@ -106,6 +106,103 @@
     <string name="chart_drift">drift (right +)</string>
     <string name="chart_range">range, m</string>
 
+    <!-- Rifles and cartridges -->
+    <string name="bullets">Bullets</string>
+    <string name="import_action">Import</string>
+    <string name="from_file">From file…</string>
+    <string name="from_clipboard">From clipboard</string>
+    <string name="imported">Imported.</string>
+    <string name="new_action">New</string>
+    <string name="empty_cartridge">Empty cartridge</string>
+    <string name="copy_factory">Copy a factory cartridge…</string>
+    <string name="rifles_count">Rifles (%1$s)</string>
+    <string name="cartridges_count">Cartridges (%1$s)</string>
+    <string name="no_rifles_hint">No rifles yet. A rifle holds its scope and its zero; tap New to add one.</string>
+    <string name="no_cartridges_hint">No cartridges yet. Tap New to describe your load or copy a factory one.</string>
+    <string name="edit">Edit</string>
+    <string name="mps_value">%1$s m/s</string>
+    <string name="shot_log">Shot log and truing</string>
+    <string name="export_file">Export to file…</string>
+    <string name="copy_clipboard">Copy to clipboard</string>
+    <string name="copied">Copied. Paste it into a message or a file.</string>
+    <string name="delete">Delete</string>
+    <string name="saved">Saved.</string>
+    <string name="delete_rifle_q">Delete rifle?</string>
+    <string name="delete_cartridge_q">Delete cartridge?</string>
+    <string name="delete_rifle_note">Its shot logs and truing with every cartridge are deleted too.</string>
+    <string name="delete_cartridge_note">Its shot logs and truing with every rifle are deleted too.</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+
+    <!-- Rifle editor -->
+    <string name="edit_rifle">Edit rifle</string>
+    <string name="new_rifle">New rifle</string>
+    <string name="rifle">Rifle</string>
+    <string name="rifle_name_hint">Name, e.g. Tikka T3x</string>
+    <string name="caliber_hint">Caliber, e.g. .308 Win</string>
+    <string name="sight_height">Sight height over bore</string>
+    <string name="twist">Twist rate, 1 turn in (0 = unknown)</string>
+    <string name="unit_in">in</string>
+    <string name="unit_gr">gr</string>
+    <string name="left_twist">Left-hand twist</string>
+    <string name="scope">Scope</string>
+    <string name="turret_units">Turret units</string>
+    <string name="one_click">One click</string>
+    <string name="click_smoa">inch / 100 yd</string>
+    <string name="click_cm100m">cm / 100 m</string>
+    <string name="reticle">Reticle</string>
+    <string name="reticle_none">None (plain crosshair)</string>
+    <string name="focal_plane">Focal plane</string>
+    <string name="ffp">First (FFP)</string>
+    <string name="sfp">Second (SFP)</string>
+    <string name="mag_from">Magnification from</string>
+    <string name="mag_to">Magnification to</string>
+    <string name="sfp_reference">SFP: marks are true at</string>
+    <string name="zero">Zero</string>
+    <string name="zero_note">Where and in what air the rifle was zeroed. A cartridge that hits elsewhere at the zero distance gets its own shift in its shot log.</string>
+    <string name="zero_distance">Zero distance</string>
+    <string name="zero_temperature">Temperature when zeroed</string>
+    <string name="zero_pressure">Station pressure when zeroed</string>
+    <string name="zero_altitude">Altitude when zeroed</string>
+    <string name="zero_humidity">Humidity when zeroed</string>
+
+    <!-- Cartridge editor -->
+    <string name="edit_cartridge">Edit cartridge</string>
+    <string name="new_cartridge">New cartridge</string>
+    <string name="cartridge">Cartridge</string>
+    <string name="cartridge_name_hint">Name, e.g. Handload SMK 175 / 43.5 gr Varget</string>
+    <string name="bullet">Bullet</string>
+    <string name="from_library_named">From the library: %1$s</string>
+    <string name="own_bullet">Own bullet of this cartridge</string>
+    <string name="change">Change</string>
+    <string name="from_library">From library</string>
+    <string name="edit_as_own">Edit as own</string>
+    <string name="bullet_hint">Bullet, e.g. Sierra MatchKing 175 gr</string>
+    <string name="drag_model">Drag model</string>
+    <string name="bc">Ballistic coefficient</string>
+    <string name="weight">Weight</string>
+    <string name="diameter">Diameter</string>
+    <string name="length_spin">Length (for spin drift)</string>
+    <string name="measured_at_powder">Measured at powder temperature</string>
+    <string name="powder_sensitivity">Powder sensitivity</string>
+    <string name="unit_pct_per_c">%/°C</string>
+
+    <!-- Factory cartridges and the bullet library -->
+    <string name="factory_cartridges">Factory cartridges</string>
+    <string name="search_name_caliber">Search by name or caliber</string>
+    <string name="nothing_found">Nothing found.</string>
+    <string name="no_factory">No factory cartridges. Import .ammo files in the bullet library.</string>
+    <string name="choose_bullet">Choose a bullet</string>
+    <string name="bullet_library">Bullet library</string>
+    <string name="search_bullets">Search by name, maker or caliber</string>
+    <string name="library_empty">The library is empty. Add bullets here to reuse them in several cartridges.</string>
+    <string name="gr_value">%1$s gr</string>
+    <string name="own_curve">own drag curve</string>
+    <string name="bands_count">(%1$s bands)</string>
+
     <!-- Not yet moved from the Qt app (phase 4) -->
     <string name="coming_soon">This screen is being moved to the new app.</string>
 </resources>

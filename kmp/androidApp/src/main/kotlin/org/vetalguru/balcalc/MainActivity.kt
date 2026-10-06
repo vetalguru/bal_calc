@@ -15,10 +15,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val app = applicationContext
+        val platform = AndroidPlatform(this) // registers its launchers: before start
         setContent {
             BalCalcApp(
                 api = core,
                 startup = { start(androidDatabasePath(app)) { androidSeed(app) } },
+                platform = platform,
                 dark = isSystemInDarkTheme(),
             )
         }
