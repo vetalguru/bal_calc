@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <!-- The app works offline on its own data. The QR scanner (zxing-android-embedded)
-         brings the camera permission; it is asked for only when scanning. -->
+    <!-- No internet: the app works offline on its own data. Location only
+         when the shooter taps "My location" (altitude, latitude, true north).
+         The QR scanner (zxing-android-embedded) brings the camera permission;
+         it is asked for only when scanning or taking a photo. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-feature android:name="android.hardware.location" android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.barometer" android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.compass" android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
