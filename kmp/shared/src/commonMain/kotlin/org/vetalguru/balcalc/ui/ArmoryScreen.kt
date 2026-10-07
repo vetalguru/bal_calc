@@ -46,6 +46,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.BackHandler
 import org.vetalguru.balcalc.LocalPlatform
@@ -159,9 +160,9 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     val photoKind = if (nav.tab == 0) "rifle" else "cartridge"
     var thumbs by remember { mutableStateOf(emptyMap<Long, ImageBitmap>()) }
     LaunchedEffect(photoKind, model.photosRevision, st.rifles, st.cartridges) {
-        thumbs = runCatching {
+        thumbs = loadOr(emptyMap()) {
             model.photos(photoKind).mapNotNull { (id, b) -> pictureOf(b)?.let { id to it } }.toMap()
-        }.getOrDefault(emptyMap())
+        }
     }
     val imported = stringResource(Res.string.imported)
     val copied = stringResource(Res.string.copied)
@@ -676,7 +677,7 @@ private fun <T> SearchList(
 ) {
     var filter by rememberSaveable { mutableStateOf("") }
     var items by remember { mutableStateOf(emptyList<T>()) }
-    LaunchedEffect(filter, reloadKey) { items = runCatching { load(filter) }.getOrDefault(emptyList()) }
+    LaunchedEffect(filter, reloadKey) { items = loadOr(emptyList()) { load(filter) } }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }

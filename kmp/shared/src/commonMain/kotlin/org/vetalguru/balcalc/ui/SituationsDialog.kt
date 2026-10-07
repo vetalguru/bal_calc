@@ -29,6 +29,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.core.SituationItem
 import org.vetalguru.balcalc.res.Res
@@ -44,7 +45,7 @@ fun SituationsDialog(model: AppModel, onClose: () -> Unit) {
     var list by remember { mutableStateOf<List<SituationItem>>(emptyList()) }
     var name by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(Unit) { list = runCatching { model.situations() }.getOrDefault(emptyList()) }
+    LaunchedEffect(Unit) { list = loadOr(emptyList()) { model.situations() } }
 
     AlertDialog(
         onDismissRequest = onClose,
