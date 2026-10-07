@@ -181,7 +181,7 @@ private fun Viewer(
     val sampleCartridge = stringResource(Res.string.sample_cartridge_name)
     // The target card, with the solution: holds follow the current target.
     var targets by remember { mutableStateOf(emptyList<TargetItem>()) }
-    LaunchedEffect(model.revision) { targets = loadOr(emptyList()) { model.targets() } }
+    LaunchedEffect(model.revision) { targets = loadOr(emptyList()) { model.targets.list() } }
     // The others: the current target is the big mark already.
     val marks = targets.filter { it.ok && (abs(it.holdX - sol.targetX) > 0.05 || abs(it.holdY - sol.targetY) > 0.05) }
         .map { ReticleMark(it.holdX, it.holdY, it.name) }
@@ -221,7 +221,7 @@ private fun Viewer(
                                     if (st.rifles.isEmpty()) Res.string.add_rifle else Res.string.add_cartridge,
                                 ),
                                 onAdd = onEditArmory,
-                                onSample = { model.addSample(sampleRifle, sampleCartridge) },
+                                onSample = { model.armory.addSample(sampleRifle, sampleCartridge) },
                             )
                         }
                         if (sol.ok) {

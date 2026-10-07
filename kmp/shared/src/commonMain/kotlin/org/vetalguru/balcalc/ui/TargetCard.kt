@@ -66,7 +66,7 @@ fun TargetCard(model: AppModel, targets: List<TargetItem>, unit: String) {
                 Row(
                     Modifier.fillMaxWidth()
                         .then(if (current) Modifier.background(selected) else Modifier)
-                        .clickable { model.selectTarget(i) }
+                        .clickable { model.targets.select(i) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .testTag("target:${t.name}"),
                     verticalAlignment = Alignment.CenterVertically,
@@ -162,7 +162,7 @@ private fun TargetsDialog(model: AppModel, initial: List<TargetItem>, onClose: (
         confirmButton = {
             Button(onClick = {
                 scope.launch {
-                    error = model.saveTargets(rows.toList())
+                    error = model.targets.save(rows.toList())
                     if (error == null) onClose()
                 }
             }, modifier = Modifier.testTag("saveTargets")) { Text(stringResource(Res.string.save)) }

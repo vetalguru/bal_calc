@@ -4,71 +4,56 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.double
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.long
 import kotlinx.serialization.json.put
-import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.putJsonArray
-import org.vetalguru.balcalc.core.ImportReport
-import org.vetalguru.balcalc.core.Info
-import org.vetalguru.balcalc.core.NamedText
-import org.vetalguru.balcalc.core.PairOption
-import org.vetalguru.balcalc.core.DsfPointIn
-import org.vetalguru.balcalc.core.DsfResult
-import org.vetalguru.balcalc.core.BcCalc
-import org.vetalguru.balcalc.core.WezResult
-import org.vetalguru.balcalc.core.WezSettings
-import org.vetalguru.balcalc.core.SeedReport
-import org.vetalguru.balcalc.core.Shot
-import org.vetalguru.balcalc.core.TruingResult
 import org.vetalguru.balcalc.core.Api
 import org.vetalguru.balcalc.core.ApiException
-import org.vetalguru.balcalc.core.BulletForm
-import org.vetalguru.balcalc.core.BulletItem
-import org.vetalguru.balcalc.core.CartridgeForm
-import org.vetalguru.balcalc.core.CartridgeItem
-import org.vetalguru.balcalc.core.ExportedJson
-import org.vetalguru.balcalc.core.LibraryRifle
-import org.vetalguru.balcalc.core.LibraryScope
-import org.vetalguru.balcalc.core.ReticleItem
-import org.vetalguru.balcalc.core.RifleForm
 import org.vetalguru.balcalc.core.AppState
 import org.vetalguru.balcalc.core.Conditions
+import org.vetalguru.balcalc.core.Info
+import org.vetalguru.balcalc.core.PairOption
 import org.vetalguru.balcalc.core.RangeTable
-import org.vetalguru.balcalc.core.SituationItem
+import org.vetalguru.balcalc.core.SeedReport
 import org.vetalguru.balcalc.core.Solution
-import org.vetalguru.balcalc.core.TargetItem
 import org.vetalguru.balcalc.core.UiPrefs
 
 /** A typed call: the result decoded as [T]. */
 suspend inline fun <reified T> Api.get(method: String, args: JsonObject = JsonObject(emptyMap())): T =
     Api.json.decodeFromJsonElement(call(method, args))
 
+internal fun idArgs(value: Long) = buildJsonObject { put("id", value) }
+
+internal inline fun <reified T> formArgs(form: T) =
+    buildJsonObject { put("form", Api.json.encodeToJsonElement(form)) }
+
 /**
  * What the screens show and change: the core's state (selection, settings,
  * conditions) and the solution for it. Edits update the screen at once and
  * reach the core in order; the solution follows the latest edit only.
+ *
+ * The topics are models of their own on top of this one ([armory],
+ * [library], [photos], [truing], [targets]): one state and one solution
+ * queue for all of them, so they cannot race each other.
  */
 class AppModel(val api: Api, private val scope: CoroutineScope) {
     var ready by mutableStateOf(false)
         private set
     var state by mutableStateOf(AppState())
-        private set
+        internal set
     var solution by mutableStateOf(Solution())
         private set
     /** Bumps whenever results may have changed (tables reload on it). */
@@ -79,6 +64,12 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
 
     /** The last failure of an action, for a snackbar; the screen clears it. */
     var message by mutableStateOf<String?>(null)
+
+    val photos = PhotoModel(this)
+    val armory = ArmoryModel(this)
+    val library = LibraryModel(this)
+    val truing = TruingModel(this)
+    val targets = TargetsModel(this)
 
     // Solution requests, conflated: one fetch at a time, and one more after
     // the last request. A fetch reads the core as it is, so the solution
@@ -116,7 +107,7 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
         }
     }
 
-    private fun recompute() {
+    internal fun recompute() {
         solutionRequests.trySend(Unit)
     }
 
@@ -125,7 +116,26 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
      * solution) even if the screen that asked is gone meanwhile, e.g. a tab
      * switched right after Save.
      */
-    private suspend fun <T> detached(block: suspend () -> T): T = scope.async { block() }.await()
+    internal suspend fun <T> detached(block: suspend () -> T): T = scope.async { block() }.await()
+
+    /**
+     * Saves a form; the saved record becomes current. [then] gets the core's
+     * answer before the state reloads. Returns the core's error (a
+     * validation sentence) or null.
+     */
+    internal suspend fun saveForm(method: String, args: JsonObject, then: suspend (JsonElement) -> Unit = {}): String? =
+        detached {
+            try {
+                then(api.call(method, args))
+                state = api.get("state")
+                recompute()
+                null
+            } catch (e: ApiException) {
+                e.message
+            }
+        }
+
+    // ---- Conditions, selection, settings -------------------------------------
 
     fun updateConditions(change: (Conditions) -> Conditions) {
         val c = change(state.conditions)
@@ -162,335 +172,22 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
         }
     }
 
-    fun addSample(rifleName: String, cartridgeName: String) = act {
-        state = api.get("addSample", buildJsonObject {
-            put("rifleName", rifleName)
-            put("cartridgeName", cartridgeName)
-        })
-        recompute()
-    }
-
-    // ---- Rifles, cartridges, library -----------------------------------
-
-    private fun id(value: Long) = buildJsonObject { put("id", value) }
-    private inline fun <reified T> formArgs(form: T) =
-        buildJsonObject { put("form", Api.json.encodeToJsonElement(form)) }
-
-    suspend fun rifleForm(id: Long): RifleForm = api.get("rifleForm", id(id))
-    suspend fun cartridgeForm(id: Long): CartridgeForm = api.get("cartridgeForm", id(id))
-    suspend fun bulletForm(id: Long): BulletForm = api.get("bulletForm", id(id))
-    suspend fun reticles(): List<ReticleItem> = api.get("reticles")
-    suspend fun libraryBullets(filter: String): List<BulletItem> =
-        api.get("libraryBullets", buildJsonObject { put("filter", filter) })
-    suspend fun libraryCartridges(filter: String): List<CartridgeItem> =
-        api.get("libraryCartridges", buildJsonObject { put("filter", filter) })
-    /** Miller Sg at standard air; 0 when an input is missing. */
-    suspend fun stability(twistIn: Double, massGr: Double, diameterIn: Double, lengthIn: Double, velocityMps: Double): Double =
-        api.call("stability", buildJsonObject {
-            put("twistIn", twistIn)
-            put("massGr", massGr)
-            put("diameterIn", diameterIn)
-            put("lengthIn", lengthIn)
-            put("velocityMps", velocityMps)
-        }).jsonObject.getValue("sg").jsonPrimitive.double
-
-    suspend fun libraryScopes(filter: String): List<LibraryScope> =
-        api.get("libraryScopes", buildJsonObject { put("filter", filter) })
-    suspend fun libraryRifles(filter: String): List<LibraryRifle> =
-        api.get("libraryRifles", buildJsonObject { put("filter", filter) })
-    suspend fun cartridgeFormFromLibrary(id: Long): CartridgeForm = api.get("cartridgeFormFromLibrary", id(id))
-    suspend fun cartridgeFormWithBullet(form: CartridgeForm, bulletId: Long): CartridgeForm =
-        api.get("cartridgeFormWithBullet", buildJsonObject {
-            put("form", Api.json.encodeToJsonElement(form))
-            put("bulletId", bulletId)
-        })
-
-    /**
-     * Saves a form; the saved record becomes current. Returns the core's
-     * error (a validation sentence) or null.
-     */
-    suspend fun saveRifle(form: RifleForm, photo: PhotoChange? = null): String? =
-        saveForm("saveRifle", formArgs(form), "rifle", photo)
-    suspend fun saveCartridge(form: CartridgeForm, photo: PhotoChange? = null): String? =
-        saveForm("saveCartridge", formArgs(form), "cartridge", photo)
-    suspend fun saveBullet(form: BulletForm): String? = saveForm("saveBullet", formArgs(form))
-
-    private suspend fun saveForm(method: String, args: JsonObject, kind: String = "", photo: PhotoChange? = null): String? = detached {
-        try {
-            val saved = api.call(method, args)
-            if (photo != null) {
-                setPhoto(kind, saved.jsonObject.getValue("id").jsonPrimitive.long, photo.image)
-            }
-            state = api.get("state")
-            recompute()
-            null
-        } catch (e: ApiException) {
-            e.message
-        }
-    }
-
-    // ---- Pictures of rifles and cartridges ---------------------------------
-
-    /** Bumps when a picture changed (the lists reload theirs). */
-    var photosRevision by mutableIntStateOf(0)
-        private set
-
-    /** The pictures of all rifles or cartridges ([kind] "rifle" | "cartridge"), by id. */
-    @OptIn(ExperimentalEncodingApi::class)
-    suspend fun photos(kind: String): Map<Long, ByteArray> {
-        val all = api.call("photos", buildJsonObject { put("kind", kind) }).jsonObject
-        return all.entries.associate { (id, data) -> id.toLong() to Base64.decode(data.jsonPrimitive.content) }
-    }
-
-    @OptIn(ExperimentalEncodingApi::class)
-    suspend fun photo(kind: String, id: Long): ByteArray? {
-        val data = api.call("photo", buildJsonObject { put("kind", kind); put("id", id) }).jsonPrimitive.content
-        return if (data.isEmpty()) null else Base64.decode(data)
-    }
-
-    /** Stores [image] as the record's picture (null removes it). */
-    @OptIn(ExperimentalEncodingApi::class)
-    private suspend fun setPhoto(kind: String, id: Long, image: ByteArray?) {
-        api.call("setPhoto", buildJsonObject {
-            put("kind", kind)
-            put("id", id)
-            put("image", image?.let { Base64.encode(it) } ?: "")
-        })
-        photosRevision++
-    }
-
-    fun deleteRifle(id: Long) = act { state = api.get("deleteRifle", id(id)); recompute() }
-    fun deleteCartridge(id: Long) = act { state = api.get("deleteCartridge", id(id)); recompute() }
-    suspend fun deleteBullet(id: Long): String? = detached {
-        try {
-            api.call("deleteBullet", id(id))
-            recompute() // lists reload on the revision
-            null
-        } catch (e: ApiException) {
-            e.message
-        }
-    }
-
-    /** A rifle or cartridge as a file: (JSON, suggested file name). */
-    suspend fun exportJson(kind: String, id: Long): ExportedJson =
-        api.get("exportJson", buildJsonObject {
-            put("kind", kind)
-            put("id", id)
-        })
-
-    /** A shared rifle/cartridge (or old profile) file; what it brought becomes current. */
-    suspend fun importShared(text: String) = detached {
-        state = api.get("importShared", buildJsonObject { put("text", text) })
-        recompute()
-    }
-
-    // ---- Shot log and truing (the current rifle + cartridge) -------------
-
-    /** Bumps when the shot log or the pair's truing changed. */
-    var shotsRevision by mutableIntStateOf(0)
-        private set
-
-    suspend fun shots(): List<Shot> = api.get("shots")
-
-    /** Angles in the current unit; returns the core's error or null. */
-    suspend fun logShot(rangeM: Double, elevation: Double, windage: Double?, notes: String): String? = detached {
-        try {
-            api.call("logShot", buildJsonObject {
-                put("rangeM", rangeM)
-                put("elevation", elevation)
-                put("hasWindage", windage != null)
-                put("windage", windage ?: 0.0)
-                put("notes", notes)
-            })
-            shotsRevision++
-            null
-        } catch (e: ApiException) {
-            e.message
-        }
-    }
-
-    fun deleteShot(id: Long) = act { api.call("deleteShot", id(id)); shotsRevision++ }
-
-    fun setShotUsed(id: Long, used: Boolean) = act {
-        api.call("setShotUsed", buildJsonObject {
-            put("id", id)
-            put("used", used)
-        })
-        shotsRevision++
-    }
-
-    suspend fun computeTruing(): TruingResult = api.get("computeTruing")
-
-    suspend fun applyTruing(): String? = detached {
-        try {
-            api.call("applyTruing")
-            shotsRevision++
-            recompute()
-            null
-        } catch (e: ApiException) {
-            e.message
-        }
-    }
-
-    fun resetTruing() = act { api.call("resetTruing"); shotsRevision++; recompute() }
-
-    suspend fun computeDsf(): DsfResult = api.get("computeDsf")
-
-    /** Applies the last fitted DSF table, or sets `points`; returns the core's error or null. */
-    suspend fun applyDsf(points: List<DsfPointIn>? = null): String? = detached {
-        try {
-            if (points == null) {
-                api.call("applyDsf")
-            } else {
-                api.call("setDsf", buildJsonObject {
-                    put("points", kotlinx.serialization.json.buildJsonArray {
-                        points.forEach { p -> add(buildJsonObject { put("mach", p.mach); put("factor", p.factor) }) }
-                    })
-                })
-            }
-            recompute()
-            null
-        } catch (e: ApiException) {
-            e.message
-        }
-    }
-
-    fun resetDsf() = act { api.call("resetDsf"); recompute() }
-
-    /** The rifle and shooter's precision for the hit chance, as a 5-shot group (MOA). */
-    suspend fun setRiflePrecision(groupMoa: Double) = detached {
-        val current = wez(null, 100.0, 100.0).settings
-        wez(current.copy(groupMoa = (groupMoa * 100).roundToInt() / 100.0), 100.0, 100.0)
-    }
-
-    /** Hit probability over the range; `settings` (when given) are saved first. */
-    suspend fun wez(settings: WezSettings?, toM: Double, stepM: Double): WezResult =
-        api.get("wez", buildJsonObject {
-            put("toM", toM)
-            put("stepM", stepM)
-            if (settings != null) put("settings", Api.json.encodeToJsonElement(WezSettings.serializer(), settings))
-        })
-
-    /** The BC from two chronograph readings, or from the elevation that hit (current unit). */
-    suspend fun bcFromChronograph(table: String, vNear: Double, vFar: Double, distanceM: Double): BcCalc =
-        api.get("bcCalculator", buildJsonObject {
-            put("mode", "chronograph")
-            put("table", table)
-            put("vNearMps", vNear)
-            put("vFarMps", vFar)
-            put("distanceM", distanceM)
-        })
-
-    suspend fun bcFromHit(table: String, rangeM: Double, elevation: Double): BcCalc =
-        api.get("bcCalculator", buildJsonObject {
-            put("mode", "hit")
-            put("table", table)
-            put("rangeM", rangeM)
-            put("elevation", elevation)
-        })
-
-    /** Where this cartridge hits at the rifle's zero; returns the core's error or null. */
-    suspend fun setZeroOffset(upCm: Double, rightCm: Double): String? = detached {
-        try {
-            api.call("setZeroOffset", buildJsonObject {
-                put("upCm", upCm)
-                put("rightCm", rightCm)
-            })
-            state = api.get("state")
-            recompute()
-            null
-        } catch (e: ApiException) {
-            e.message
-        }
-    }
-
-    // ---- Target card ---------------------------------------------------------
-
-    suspend fun targets(): List<TargetItem> = api.get("targets")
-
-    /** Replaces the target list; returns the core's error or null. */
-    suspend fun saveTargets(list: List<TargetItem>): String? = detached {
-        try {
-            api.call("saveTargets", buildJsonObject {
-                putJsonArray("targets") {
-                    list.forEach { t ->
-                        addJsonObject {
-                            put("name", t.name)
-                            put("rangeM", t.rangeM)
-                            put("lookAngleDeg", t.lookAngleDeg)
-                            put("windSpeed", t.windSpeed)
-                            put("windFromDeg", t.windFromDeg)
-                        }
-                    }
-                }
-            })
-            recompute() // the card reloads on the revision
-            null
-        } catch (e: ApiException) {
-            e.message
-        }
-    }
-
-    /** Makes a target current: its range, angle and wind. */
-    fun selectTarget(index: Int) = act {
-        state = api.get("selectTarget", buildJsonObject { put("index", index) })
-        recompute()
-    }
-
-    // ---- Situations ---------------------------------------------------------
-
-    suspend fun situations(): List<SituationItem> = api.get("situations")
-
-    /** Saves the current rifle, cartridge and conditions; returns the list, or the core's error. */
-    suspend fun saveSituation(name: String): Result<List<SituationItem>> = detached {
-        try {
-            Result.success(api.get<List<SituationItem>>("saveSituation", buildJsonObject { put("name", name) }))
-        } catch (e: ApiException) {
-            Result.failure(e)
-        }
-    }
-
-    /** Makes a situation current; returns the core's error or null. */
-    suspend fun applySituation(name: String): String? = detached {
-        try {
-            state = api.get("applySituation", buildJsonObject { put("name", name) })
-            recompute()
-            null
-        } catch (e: ApiException) {
-            e.message
-        }
-    }
-
-    suspend fun deleteSituation(name: String): List<SituationItem> =
-        detached { api.get("deleteSituation", buildJsonObject { put("name", name) }) }
-
-    // ---- Files, settings, about -------------------------------------------
-
-    /** .ammo / .drg / .reticle / bullet-list / rifle / cartridge files into the library. */
-    suspend fun importFiles(files: List<NamedText>): ImportReport = detached {
-        val report: ImportReport = api.get("importFiles", buildJsonObject {
-            putJsonArray("files") {
-                files.forEach { f ->
-                    addJsonObject {
-                        put("name", f.name)
-                        put("content", f.content)
-                    }
-                }
-            }
-        })
-        state = api.get("state")
-        recompute()
-        report
-    }
+    fun setAngleUnit(unit: String) = setSettings(buildJsonObject { put("angleUnit", unit) })
+    fun setHoldMode(mode: String) = setSettings(buildJsonObject { put("holdMode", mode) })
+    fun setLanguage(language: String) = setSettings(buildJsonObject { put("language", language) })
 
     suspend fun info(): Info = api.get("info")
 
     val seedReport: SeedReport?
         get() = api.seedResult?.let { Api.json.decodeFromJsonElement(SeedReport.serializer(), it) }
 
-    fun setAngleUnit(unit: String) = setSettings(buildJsonObject { put("angleUnit", unit) })
-    fun setHoldMode(mode: String) = setSettings(buildJsonObject { put("holdMode", mode) })
-    fun setLanguage(language: String) = setSettings(buildJsonObject { put("language", language) })
+    suspend fun stationPressure(qnhHpa: Double, altitudeM: Double): Double =
+        api.call("stationPressure", buildJsonObject {
+            put("qnhHpa", qnhHpa)
+            put("altitudeM", altitudeM)
+        }).jsonPrimitive.double
+
+    // ---- Results beside the solution: tables and curves ---------------------
 
     /** The range card; with [windSpeeds] a windage column for each (computed in full). */
     suspend fun rangeTable(windSpeeds: List<Double> = emptyList()): RangeTable =
@@ -518,10 +215,4 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
         })
 
     suspend fun pairOptions(): List<PairOption> = api.get("pairOptions")
-
-    suspend fun stationPressure(qnhHpa: Double, altitudeM: Double): Double =
-        api.call("stationPressure", buildJsonObject {
-            put("qnhHpa", qnhHpa)
-            put("altitudeM", altitudeM)
-        }).jsonPrimitive.double
 }

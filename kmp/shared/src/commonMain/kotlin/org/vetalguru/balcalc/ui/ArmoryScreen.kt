@@ -101,7 +101,7 @@ internal open class WithPhoto {
         if (photoLoaded) return
         photoLoaded = true
         if (id <= 0) return
-        val stored = model.photo(kind, id)
+        val stored = model.photos.one(kind, id)
         // A picture chosen while this loaded wins: the stored one is older.
         if (!photoChanged) photo = stored
     }
@@ -129,13 +129,13 @@ fun ArmoryScreen(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
         is Route.Cartridge -> CartridgeEditor(model, r, nav)
         is Route.Factory -> FactoryCartridges(model, onBack = nav::back) { id ->
             nav.back()
-            model.act { nav.push(Route.Cartridge(model.cartridgeFormFromLibrary(id))) }
+            model.act { nav.push(Route.Cartridge(model.library.cartridgeFormFromFactory(id))) }
         }
         is Route.Bullets -> BulletList(
             model,
             picker = r.pick != null,
             onBack = nav::back,
-            onEdit = { id -> model.act { nav.push(Route.Bullet(model.bulletForm(id))) } },
+            onEdit = { id -> model.act { nav.push(Route.Bullet(model.library.bulletForm(id))) } },
         ) { id ->
             nav.back()
             r.pick?.invoke(id)
@@ -159,9 +159,9 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     // The pictures of the shown list, as small images.
     val photoKind = if (nav.tab == 0) "rifle" else "cartridge"
     var thumbs by remember { mutableStateOf(emptyMap<Long, ImageBitmap>()) }
-    LaunchedEffect(photoKind, model.photosRevision, st.rifles, st.cartridges) {
+    LaunchedEffect(photoKind, model.photos.revision, st.rifles, st.cartridges) {
         thumbs = loadOr(emptyMap()) {
-            model.photos(photoKind).mapNotNull { (id, b) -> pictureOf(b)?.let { id to it } }.toMap()
+            model.photos.all(photoKind).mapNotNull { (id, b) -> pictureOf(b)?.let { id to it } }.toMap()
         }
     }
     val imported = stringResource(Res.string.imported)
@@ -174,7 +174,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     if (qrImport) QrImportDialog(model, onImported = { qrImport = false; model.message = imported }) { qrImport = false }
 
     fun share(kind: String, id: Long, toFile: Boolean) = model.act {
-        val e = model.exportJson(kind, id)
+        val e = model.armory.exportJson(kind, id)
         if (toFile) {
             if (platform.files.saveText(e.fileName, e.json)) model.message = saved
         } else {
@@ -184,7 +184,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     }
 
     fun showQr(kind: String, id: Long, title: String) = model.act {
-        qr = title to QrShare.parts(model.exportJson(kind, id).json)
+        qr = title to QrShare.parts(model.armory.exportJson(kind, id).json)
     }
 
     // Read here, not only inside BoxWithConstraints: its subcomposition alone
@@ -210,7 +210,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                             importMenu = false
                             model.act {
                                 platform.files.openTexts(listOf("json"), multiple = false).firstOrNull()?.let {
-                                    model.importShared(it.content)
+                                    model.armory.importShared(it.content)
                                     model.message = imported
                                 }
                             }
@@ -218,7 +218,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                         DropdownMenuItem({ Text(stringResource(Res.string.from_clipboard)) }, onClick = {
                             importMenu = false
                             model.act {
-                                model.importShared(platform.clipboard.pasteText().orEmpty())
+                                model.armory.importShared(platform.clipboard.pasteText().orEmpty())
                                 model.message = imported
                             }
                         }, modifier = Modifier.testTag("importClipboard"))
@@ -230,12 +230,12 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                 }
                 Box {
                     Button(onClick = {
-                        if (nav.tab == 0) model.act { nav.push(Route.Rifle(model.rifleForm(0))) } else newMenu = true
+                        if (nav.tab == 0) model.act { nav.push(Route.Rifle(model.armory.rifleForm(0))) } else newMenu = true
                     }, modifier = Modifier.testTag("new")) { Text(stringResource(Res.string.new_action)) }
                     DropdownMenu(newMenu, { newMenu = false }) {
                         DropdownMenuItem({ Text(stringResource(Res.string.empty_cartridge)) }, onClick = {
                             newMenu = false
-                            model.act { nav.push(Route.Cartridge(model.cartridgeForm(0))) }
+                            model.act { nav.push(Route.Cartridge(model.armory.cartridgeForm(0))) }
                         }, modifier = Modifier.testTag("newEmptyCartridge"))
                         DropdownMenuItem({ Text(stringResource(Res.string.copy_factory)) }, onClick = {
                             newMenu = false
@@ -259,7 +259,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                         model.selectRifle(id)
                         nav.tab = 1 // now the cartridge
                     },
-                    onEdit = { id -> model.act { nav.push(Route.Rifle(model.rifleForm(id))) } },
+                    onEdit = { id -> model.act { nav.push(Route.Rifle(model.armory.rifleForm(id))) } },
                     onShare = ::share,
                     onQr = ::showQr,
                     thumbs = thumbList,
@@ -284,7 +284,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                         model.selectCartridge(id)
                         onChosen()
                     },
-                    onEdit = { id -> model.act { nav.push(Route.Cartridge(model.cartridgeForm(id))) } },
+                    onEdit = { id -> model.act { nav.push(Route.Cartridge(model.armory.cartridgeForm(id))) } },
                     onShare = ::share,
                     onQr = ::showQr,
                     thumbs = thumbList,
@@ -308,7 +308,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
             confirmButton = {
                 TextButton(onClick = {
                     deleting = null
-                    if (kind == "rifle") model.deleteRifle(id) else model.deleteCartridge(id)
+                    if (kind == "rifle") model.armory.deleteRifle(id) else model.armory.deleteCartridge(id)
                 }, modifier = Modifier.testTag("confirmDelete")) { Text(stringResource(Res.string.yes)) }
             },
             dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(Res.string.no)) } },
@@ -430,17 +430,17 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
     val onDone = nav::back
     var error by remember { mutableStateOf<String?>(null) }
     var reticles by remember { mutableStateOf(emptyList<ReticleItem>()) }
-    LaunchedEffect(Unit) { reticles = model.reticles() }
+    LaunchedEffect(Unit) { reticles = model.library.reticles() }
     val reticleList = reticles // read outside the editor's BoxWithConstraints (see TruingScreen)
     // Stability with the current cartridge, as the twist is edited.
     val currentCartridge = model.state.currentCartridgeId
     var partner by remember { mutableStateOf<CartridgeForm?>(null) }
     LaunchedEffect(currentCartridge) {
-        partner = if (currentCartridge > 0) loadOr(null) { model.cartridgeForm(currentCartridge) } else null
+        partner = if (currentCartridge > 0) loadOr(null) { model.armory.cartridgeForm(currentCartridge) } else null
     }
     var sg by remember { mutableStateOf<Double?>(null) }
     LaunchedEffect(f.twistIn, partner) {
-        sg = partner?.let { p -> loadOr(null) { model.stability(f.twistIn, p.massGr, p.diameterIn, p.lengthIn, p.muzzleVelocity) } }
+        sg = partner?.let { p -> loadOr(null) { model.armory.stability(f.twistIn, p.massGr, p.diameterIn, p.lengthIn, p.muzzleVelocity) } }
     }
     val stability = sg
     val partnerName = partner?.name.orEmpty()
@@ -454,7 +454,7 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
         title = stringResource(if (f.rifleId > 0) Res.string.edit_rifle else Res.string.new_rifle),
         error = error,
         onCancel = onDone,
-        onSave = { scope.launch { error = model.saveRifle(f, route.photoChange); if (error == null) onDone() } },
+        onSave = { scope.launch { error = model.armory.saveRifle(f, route.photoChange); if (error == null) onDone() } },
     ) { wide ->
         Section(stringResource(Res.string.rifle)) {
             LibraryButton("rifleFromLibrary") {
@@ -540,11 +540,11 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
     val currentRifle = model.state.currentRifleId
     var partner by remember { mutableStateOf<RifleForm?>(null) }
     LaunchedEffect(currentRifle) {
-        partner = if (currentRifle > 0) loadOr(null) { model.rifleForm(currentRifle) } else null
+        partner = if (currentRifle > 0) loadOr(null) { model.armory.rifleForm(currentRifle) } else null
     }
     var sg by remember { mutableStateOf<Double?>(null) }
     LaunchedEffect(f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity, partner) {
-        sg = partner?.let { r -> loadOr(null) { model.stability(r.twistIn, f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity) } }
+        sg = partner?.let { r -> loadOr(null) { model.armory.stability(r.twistIn, f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity) } }
     }
     val stability = sg
     val partnerName = partner?.name.orEmpty()
@@ -553,7 +553,7 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
         title = stringResource(if (f.cartridgeId > 0) Res.string.edit_cartridge else Res.string.new_cartridge),
         error = error,
         onCancel = nav::back,
-        onSave = { scope.launch { error = model.saveCartridge(f, route.photoChange); if (error == null) nav.back() } },
+        onSave = { scope.launch { error = model.armory.saveCartridge(f, route.photoChange); if (error == null) nav.back() } },
     ) { wide ->
         Section(stringResource(Res.string.cartridge)) {
             TextInput(stringResource(Res.string.cartridge_name_hint), f.name, { f = f.copy(name = it) }, tag = "cartridgeName")
@@ -568,7 +568,7 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
                     modifier = Modifier.weight(1f),
                 )
                 TextButton(onClick = {
-                    nav.push(Route.Bullets { id -> model.act { f = model.cartridgeFormWithBullet(f, id) } })
+                    nav.push(Route.Bullets { id -> model.act { f = model.armory.cartridgeFormWithBullet(f, id) } })
                 }, modifier = Modifier.testTag("chooseBullet")) {
                     Text(stringResource(if (fromLibrary) Res.string.change else Res.string.from_library))
                 }
@@ -642,7 +642,7 @@ private fun LibraryRifles(model: AppModel, onBack: () -> Unit, onPick: (LibraryR
         stringResource(Res.string.library_rifles),
         stringResource(Res.string.library_search_rifle),
         stringResource(Res.string.catalog_empty),
-        model::libraryRifles,
+        model.library::rifles,
         onBack,
         header = { LibraryNote() },
     ) { r ->
@@ -665,7 +665,7 @@ private fun LibraryScopes(model: AppModel, onBack: () -> Unit, onPick: (LibraryS
         stringResource(Res.string.library_scopes),
         stringResource(Res.string.library_search_scope),
         stringResource(Res.string.catalog_empty),
-        { filter -> model.libraryScopes(filter).flatMap { s -> s.clicks.map { s to it } } },
+        { filter -> model.library.scopes(filter).flatMap { s -> s.clicks.map { s to it } } },
         onBack,
         header = { LibraryNote() },
     ) { (s, c) ->
@@ -750,7 +750,7 @@ private fun FactoryCartridges(model: AppModel, onBack: () -> Unit, onPick: (Long
         stringResource(Res.string.factory_cartridges),
         stringResource(Res.string.search_name_caliber),
         stringResource(Res.string.no_factory),
-        model::libraryCartridges,
+        model.library::factoryCartridges,
         onBack,
     ) { c ->
         TwoLines(
@@ -778,7 +778,7 @@ fun BulletList(model: AppModel, picker: Boolean, onBack: () -> Unit, onEdit: (Lo
         stringResource(if (picker) Res.string.choose_bullet else Res.string.bullet_library),
         stringResource(Res.string.search_bullets),
         stringResource(Res.string.library_empty),
-        model::libraryBullets,
+        model.library::bullets,
         onBack,
         reloadKey = model.revision,
         actions = {
@@ -786,7 +786,7 @@ fun BulletList(model: AppModel, picker: Boolean, onBack: () -> Unit, onEdit: (Lo
                 model.act {
                     val files = platform.files.openTexts(listOf("ammo", "drg", "reticle", "json"), multiple = true)
                     if (files.isNotEmpty()) {
-                        val r = model.importFiles(files)
+                        val r = model.library.importFiles(files)
                         report = (listOf(importedFiles.replace("%s", r.imported.toString())) +
                             r.problems.map { "${it.file}: ${it.message}" }).joinToString("\n")
                     }

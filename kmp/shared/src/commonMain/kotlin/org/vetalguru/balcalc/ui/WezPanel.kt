@@ -68,7 +68,7 @@ fun WezPanel(model: AppModel, toM: Double, modifier: Modifier) {
     var edit by remember { mutableStateOf<WezSettings?>(null) }
     LaunchedEffect(model.revision, toM, edit) {
         if (!model.ready) return@LaunchedEffect
-        result = loadOr(null) { model.wez(edit, toM, 50.0) }
+        result = loadOr(null) { model.truing.wez(edit, toM, 50.0) }
     }
     val r = result
     val s = r?.settings ?: WezSettings()

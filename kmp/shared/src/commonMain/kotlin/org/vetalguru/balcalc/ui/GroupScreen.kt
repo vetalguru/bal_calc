@@ -168,11 +168,11 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
                     Text(stringResource(Res.string.group_zero_hint, pair.zeroRangeM.roundToInt()),
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                     OutlinedButton(onClick = {
-                        scope.launch { saved = model.setZeroOffset(stats.centreUpCm, stats.centreRightCm) == null }
+                        scope.launch { saved = model.truing.setZeroOffset(stats.centreUpCm, stats.centreRightCm) == null }
                     }, modifier = Modifier.testTag("groupZero")) { Text(stringResource(Res.string.group_zero)) }
                 }
                 OutlinedButton(onClick = {
-                    scope.launch { saved = runCatching { model.setRiflePrecision(stats.equivalentFiveShotMoa) }.isSuccess }
+                    scope.launch { saved = runCatching { model.truing.setRiflePrecision(stats.equivalentFiveShotMoa) }.isSuccess }
                 }, modifier = Modifier.testTag("groupWez")) {
                     Text(stringResource(Res.string.group_wez, stats.equivalentFiveShotMoa.fixed(2)))
                 }

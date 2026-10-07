@@ -45,7 +45,7 @@ fun BulletEditor(model: AppModel, initial: BulletForm, onDone: () -> Unit) {
     val inch = stringResource(Res.string.unit_in)
     val mps = stringResource(Res.string.unit_mps)
     fun save() = scope.launch {
-        error = model.saveBullet(f.copy(bands = if (banded) f.bands else emptyList()))
+        error = model.library.saveBullet(f.copy(bands = if (banded) f.bands else emptyList()))
         if (error == null) onDone()
     }
     BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -118,7 +118,7 @@ fun BulletEditor(model: AppModel, initial: BulletForm, onDone: () -> Unit) {
                     if (f.id > 0) {
                         TextButton(onClick = {
                             scope.launch {
-                                error = model.deleteBullet(f.id)
+                                error = model.library.deleteBullet(f.id)
                                 if (error == null) onDone()
                             }
                         }) { Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error) }
