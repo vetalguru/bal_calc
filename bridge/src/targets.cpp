@@ -16,7 +16,7 @@ al::SessionConditions Api::Impl::SessionFor(const json& t) const {
     al::SessionConditions s = Session();
     s.target_range_m = t.value("rangeM", s.target_range_m);
     s.look_angle_deg = t.value("lookAngleDeg", 0.0);
-    s.winds = {al::WindInput{t.value("windSpeed", 0.0), t.value("windFromDeg", 90.0), 0.0}};
+    s.winds = {al::WindInput{t.value("windSpeed", 0.0), t.value("windFromDeg", 0.0), 0.0}};
     s.wind_gust_mps = 0.0;
     s.target_speed_mps = 0.0;
     return s;
@@ -51,7 +51,7 @@ json Api::Impl::Targets() {
                      {"rangeM", t.value("rangeM", 0.0)},
                      {"lookAngleDeg", t.value("lookAngleDeg", 0.0)},
                      {"windSpeed", t.value("windSpeed", 0.0)},
-                     {"windFromDeg", t.value("windFromDeg", 90.0)},
+                     {"windFromDeg", t.value("windFromDeg", 0.0)},
                      {"ok", false}};
         if (p) {
             const al::SolutionSummary r = al::Summarize(*p, SessionFor(t), Unit());
@@ -101,7 +101,7 @@ json Api::Impl::SaveTargets(const json& list) {
                          {"rangeM", range},
                          {"lookAngleDeg", std::clamp(Num(t, "lookAngleDeg"), -60.0, 60.0)},
                          {"windSpeed", std::clamp(Num(t, "windSpeed"), 0.0, 40.0)},
-                         {"windFromDeg", Num(t, "windFromDeg", 90.0)}});
+                         {"windFromDeg", Num(t, "windFromDeg", 0.0)}});
     }
     Put(kTargetsKey, clean.dump());
     return Targets();
@@ -118,7 +118,7 @@ json Api::Impl::SelectTarget(std::size_t index) {
     c["targetRangeM"] = t.value("rangeM", 300.0);
     c["lookAngleDeg"] = t.value("lookAngleDeg", 0.0);
     c["windSpeed"] = t.value("windSpeed", 0.0);
-    c["windFromDeg"] = t.value("windFromDeg", 90.0);
+    c["windFromDeg"] = t.value("windFromDeg", 0.0);
     c["windZones"] = json::array();
     SetConditions(c);
     return State();

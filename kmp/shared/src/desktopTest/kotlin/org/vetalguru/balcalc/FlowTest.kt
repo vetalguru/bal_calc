@@ -652,13 +652,15 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("windageGust") }
         shot("wind-gust")
 
-        // Calm near the shooter, 8 m/s further out, then a third zone.
+        // Calm near the shooter, 8 m/s from the right further out, then a third zone.
         onNodeWithTag("navConditions").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("windZonesOn") }
         onNodeWithTag("windZonesOn").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { exists("zoneSpeed1") }
         onNodeWithTag("zoneSpeed1").performScrollTo()
         type("zoneSpeed1", "8")
+        onNodeWithTag("zoneFrom1").performScrollTo()
+        type("zoneFrom1", "90")
         onNodeWithTag("addZone").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { exists("zoneSpeed2") }
         onNodeWithTag("zoneSpeed2").performScrollTo()

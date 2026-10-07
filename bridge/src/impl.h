@@ -77,7 +77,7 @@ struct Api::Impl {
     bool powder_follows_air = true;
     double powder_c = 15.0;
     double wind_speed = 0.0;
-    double wind_from_deg = 90.0;
+    double wind_from_deg = 0.0; // 12 o'clock: from the target
     double wind_until_m = 0.0;       // end of the first zone when there are more
     std::vector<al::WindInput> wind_zones; // the zones after the first, in order
     double wind_gust_mps = 0.0;
