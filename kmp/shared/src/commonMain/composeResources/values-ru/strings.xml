@@ -64,11 +64,9 @@
     <string name="powder_follows_air">Температура пороха = температура воздуха</string>
     <string name="powder_temperature">Температура пороха</string>
     <string name="wind">Ветер</string>
-    <string name="speed">Скорость</string>
-    <string name="wind_from_degrees">Направление ветра (0 = от цели, 90 = справа)</string>
     <string name="angles">Углы</string>
     <string name="shot_angle">Угол места цели (вверх +, вниз −)</string>
-    <string name="cant">Завал оружия (по часовой +)</string>
+    <string name="cant">Завал оружия</string>
     <string name="coriolis_section">Вращение Земли (Кориолис)</string>
     <string name="coriolis_on">Учитывать вращение Земли</string>
     <string name="latitude">Широта (север +)</string>
@@ -280,7 +278,7 @@
     <string name="enter_density_altitude">Ввожу плотностную высоту вместо давления</string>
     <string name="target_section">Цель</string>
     <string name="target_height">Высота цели (для прямого выстрела)</string>
-    <string name="wind_gust">Порывы: вторая скорость (0 = нет)</string>
+    <string name="wind_gust">Скорость в порывах</string>
     <string name="gust_windage">При %1$s м/с: %2$s</string>
     <string name="wind_zones_on">Ветер разный вдоль дистанции (зоны)</string>
     <string name="zone_title">Зона %1$s</string>
@@ -511,4 +509,9 @@
     <string name="compass_magnetic">От магнитного севера: для истинного сначала возьмите «Моё место».</string>
     <string name="compass_true">От истинного севера.</string>
     <string name="compass_calibrate">Компас плохо откалиброван: поводите телефоном восьмёркой.</string>
+    <string name="wind_gust_hint">0 — без порывов</string>
+    <string name="shot_angle_hint">Вверх +, вниз −</string>
+    <string name="cant_hint">По часовой стрелке +</string>
+    <string name="wind_direction_hint">0° — от цели, 90° — справа, 270° — слева</string>
+    <string name="wind_clock_short">%1$s ч.</string>
 </resources>

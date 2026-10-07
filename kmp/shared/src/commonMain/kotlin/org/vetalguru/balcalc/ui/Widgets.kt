@@ -74,6 +74,8 @@ fun NumberField(
     to: Double = 1e9,
     tag: String? = null,
     unitMenu: UnitMenu? = null,
+    /** A small explanation under the field (what the numbers mean), instead of a long label. */
+    hint: String? = null,
 ) {
     var text by remember { mutableStateOf(formatNumber(value, decimals)) }
     var focused by remember { mutableStateOf(false) }
@@ -100,6 +102,7 @@ fun NumberField(
             unitMenu == null -> ({ Text(unit) })
             else -> ({ UnitPicker(unit, unitMenu, tag) })
         },
+        supportingText = hint?.let { h -> { Text(h) } },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
@@ -173,20 +176,25 @@ fun StepperField(
     /** Narrower than the space there is (the steps stay beside it); unspecified: all of it. */
     fieldMaxWidth: Dp = Dp.Unspecified,
     stepWidth: Dp = 50.dp,
+    hint: String? = null,
+    /** Steps go round (a direction: 345 + 15 = 0) instead of stopping at [to]. */
+    wrap: Boolean = false,
+    decimals: Int = 1,
 ) {
     fun by(d: Double) {
-        val v = (value + d).coerceIn(from, to)
+        val v = if (wrap) ((value + d) % to + to) % to else (value + d).coerceIn(from, to)
         if (v != value) onEdited(v)
     }
-    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Box(Modifier.testTag("${tag}Minus")) { Step("−${formatNumber(step, 0)}", stepWidth) { by(-step) } }
+    // Top-aligned with the steps level with the box (a hint under the field adds height).
+    Row(modifier, verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(Modifier.padding(top = 16.dp).testTag("${tag}Minus")) { Step("−${formatNumber(step, 0)}", stepWidth) { by(-step) } }
         val field = if (fieldMaxWidth == Dp.Unspecified) {
             Modifier.weight(1f)
         } else {
             Modifier.weight(1f, fill = false).widthIn(max = fieldMaxWidth)
         }
-        NumberField(label, value, onEdited, field, unit, from = from, to = to, tag = tag, unitMenu = unitMenu)
-        Box(Modifier.testTag("${tag}Plus")) { Step("+${formatNumber(step, 0)}", stepWidth) { by(step) } }
+        NumberField(label, value, onEdited, field, unit, decimals, from, to, tag, unitMenu, hint)
+        Box(Modifier.padding(top = 16.dp).testTag("${tag}Plus")) { Step("+${formatNumber(step, 0)}", stepWidth) { by(step) } }
     }
 }
 
