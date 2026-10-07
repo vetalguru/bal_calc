@@ -503,7 +503,7 @@ private fun ReticleCard(model: AppModel, sol: Solution, wide: Boolean, marks: Li
     var curve by remember { mutableStateOf(emptyList<Pair<Double, Double>>()) }
     LaunchedEffect(showRanges, model.revision) {
         if (showRanges) {
-            curve = runCatching { model.trajectory(2500.0, 250) }.getOrNull()
+            curve = loadOr(null) { model.trajectory(2500.0, 250) }
                 ?.takeIf { it.ok }?.rows?.map { it.rangeM to it.elevation }.orEmpty()
         }
     }
