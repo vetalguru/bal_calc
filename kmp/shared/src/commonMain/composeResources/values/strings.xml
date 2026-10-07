@@ -45,7 +45,8 @@
     <string name="trued">Trued: velocity ×%1$s, drag ×%2$s</string>
     <string name="not_trued">Not trued yet: log hits to true this rifle and cartridge.</string>
     <string name="wind_speed">Wind speed</string>
-    <string name="wind_from">Wind from</string>
+    <string name="wind_from">Wind direction</string>
+    <string name="wind_direction_clock">Wind direction: %1$s o'clock</string>
     <string name="wind_clock">%1$s o'clock</string>
     <string name="wind_clock_hint">12 = from the target, 3 = from the right</string>
     <string name="velocity">Velocity</string>
@@ -72,7 +73,7 @@
     <string name="powder_temperature">Powder temperature</string>
     <string name="wind">Wind</string>
     <string name="speed">Speed</string>
-    <string name="wind_from_degrees">Blowing from (0 = from the target, 90 = from the right)</string>
+    <string name="wind_from_degrees">Wind direction (0 = from the target, 90 = from the right)</string>
     <string name="angles">Angles</string>
     <string name="shot_angle">Shot angle (uphill +, downhill −)</string>
     <string name="cant">Cant (clockwise +)</string>
@@ -481,7 +482,7 @@
     <string name="view_corrections">Dope</string>
     <string name="view_reticle">Reticle</string>
     <string name="view_more">More</string>
-    <string name="look_angle_short">Angle</string>
+    <string name="look_angle_short">Angle to target</string>
     <string name="corrections_format">Corrections</string>
     <string name="correction_style">Direction</string>
     <string name="style_words">Words: UP, LEFT</string>

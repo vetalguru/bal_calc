@@ -1,6 +1,15 @@
 package org.vetalguru.balcalc.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Column
@@ -92,6 +101,22 @@ fun NumberField(
             }
             .let { m -> if (tag != null) m.testTag(tag) else m },
     )
+}
+
+/** [content] that shows [hint] in a small bubble when tapped (or hovered with a mouse). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Hint(hint: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val state = rememberTooltipState(isPersistent = false)
+    val scope = rememberCoroutineScope()
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(hint) } },
+        state = state,
+        modifier = modifier,
+    ) {
+        Box(Modifier.clickable { scope.launch { state.show() } }) { content() }
+    }
 }
 
 /** A [NumberField] with − and + beside it: set by thumb, or typed. */
