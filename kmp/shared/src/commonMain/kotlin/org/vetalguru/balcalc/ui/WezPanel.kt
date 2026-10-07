@@ -30,6 +30,7 @@ import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.core.WezResult
 import org.vetalguru.balcalc.core.WezSettings
 import org.vetalguru.balcalc.coreText
@@ -67,7 +68,7 @@ fun WezPanel(model: AppModel, toM: Double, modifier: Modifier) {
     var edit by remember { mutableStateOf<WezSettings?>(null) }
     LaunchedEffect(model.revision, toM, edit) {
         if (!model.ready) return@LaunchedEffect
-        result = runCatching { model.wez(edit, toM, 50.0) }.getOrNull()
+        result = loadOr(null) { model.wez(edit, toM, 50.0) }
     }
     val r = result
     val s = r?.settings ?: WezSettings()
