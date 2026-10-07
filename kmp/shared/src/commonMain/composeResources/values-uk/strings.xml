@@ -473,4 +473,8 @@
     <string name="core_37">Введіть назву кожної цілі.</string>
     <string name="core_38">Дальність цілі має бути від 10 до 3000 м.</string>
     <string name="core_39">Не більше 20 цілей.</string>
+    <string name="reticle_fullscreen">На весь екран</string>
+    <string name="ranges_at_marks">Дальність біля кожної риски</string>
+    <string name="dialed_clicks">Виставлено на барабані вгору</string>
+    <string name="clicks_unit">кліків</string>
 </resources>

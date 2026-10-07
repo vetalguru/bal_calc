@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
@@ -41,8 +42,12 @@ import org.vetalguru.balcalc.core.Api
  * so the target and its surroundings fit. No drawing: a crosshair with
  * 1 mrad ticks.
  */
-/** Another target's hold drawn on the reticle (reticle mrad, y up). */
-data class ReticleMark(val x: Double, val y: Double, val label: String)
+/**
+ * Something drawn on the reticle at (x, y) in reticle mrad, y up: another
+ * target's hold (a ring and its name), or with [ring] false a label only
+ * (the range at a mark).
+ */
+data class ReticleMark(val x: Double, val y: Double, val label: String, val ring: Boolean = true)
 
 @Composable
 fun ReticleView(
@@ -51,6 +56,7 @@ fun ReticleView(
     targetY: Double,
     modifier: Modifier = Modifier,
     marks: List<ReticleMark> = emptyList(),
+    zoom: Float = 1f,
 ) {
     val drawing = remember(definition) {
         if (definition.isEmpty()) null
@@ -58,12 +64,12 @@ fun ReticleView(
     }
     val measurer = rememberTextMeasurer()
     val colors = appColors
-    Canvas(modifier.testTag("reticle")) {
-        val reach = (marks.map { max(abs(it.x), abs(it.y)) } + max(abs(targetX), abs(targetY))).max()
+    Canvas(modifier.clipToBounds().testTag("reticle")) {
+        val reach = (marks.filter { it.ring }.map { max(abs(it.x), abs(it.y)) } + max(abs(targetX), abs(targetY))).max()
         val sizeArr = drawing?.get("size")?.jsonArray
         val half = if (sizeArr != null && sizeArr.size >= 2) max(sizeArr[0].jsonPrimitive.double, sizeArr[1].jsonPrimitive.double) / 2 else 10.0
         // The reticle around the centre, widened when the target needs room.
-        val span = maxOf(2.5, min(half, 6.0), reach * 1.25 + 1)
+        val span = maxOf(2.5, min(half, 6.0), reach * 1.25 + 1) / zoom.coerceIn(0.25f, 20f)
 
         val side = min(size.width, size.height)
         val cx = size.width / 2
@@ -85,7 +91,8 @@ fun ReticleView(
         val small = TextStyle(color = colors.target, fontSize = (11f).sp)
         for (m in marks) {
             val o = Offset(x(m.x), y(m.y))
-            drawCircle(colors.target.copy(alpha = 0.7f), 5f, o, style = Stroke(1.5f))
+            if ((o - Offset(cx, cy)).getDistance() > side / 2 - 8) continue // outside the field of view
+            if (m.ring) drawCircle(colors.target.copy(alpha = 0.7f), 5f, o, style = Stroke(1.5f))
             val label = measurer.measure(m.label, small)
             drawText(label, topLeft = Offset(o.x + 7f, o.y - label.size.height / 2f))
         }
