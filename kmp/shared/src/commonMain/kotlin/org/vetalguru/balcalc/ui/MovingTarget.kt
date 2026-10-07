@@ -36,6 +36,9 @@ import org.vetalguru.balcalc.res.*
 
 private const val KMH = 3.6 // km/h per m/s
 
+/** The fastest target the app takes: 150 km/h. */
+private const val MAX_TARGET_MPS = 150.0 / KMH
+
 /**
  * Speed of a target that covered `distance` in `seconds`: metres, or an
  * angle on the reticle (MRAD/MOA) seen at `rangeM`.
@@ -54,7 +57,7 @@ fun stopwatchSpeed(distance: Double, unit: String, rangeM: Double, seconds: Doub
 @Composable
 fun MovingTargetCard(model: AppModel, sol: Solution, unit: String) {
     val c = model.state.conditions
-    val kmh = c.targetSpeedUnit != "mps"
+    val speedUnit = WindUnit.of(c.targetSpeedUnit)
     // The heading as the shooter sees it: a side and an angle to the line of fire.
     val right = c.targetHeadingDeg <= 180.0
     val angle = if (right) c.targetHeadingDeg else 360.0 - c.targetHeadingDeg
@@ -70,23 +73,13 @@ fun MovingTargetCard(model: AppModel, sol: Solution, unit: String) {
     Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("movingTarget")) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(Res.string.moving_target), fontWeight = FontWeight.Bold)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                NumberField(
-                    stringResource(Res.string.target_speed),
-                    if (kmh) c.targetSpeedMps * KMH else c.targetSpeedMps,
-                    { v -> model.updateConditions { it.copy(targetSpeedMps = if (kmh) v / KMH else v) } },
-                    Modifier.weight(1f),
-                    stringResource(if (kmh) Res.string.unit_kmh else Res.string.unit_mps),
-                    from = 0.0, to = if (kmh) 150.0 else 40.0, tag = "targetSpeed",
-                )
-                ChoiceField(
-                    "",
-                    listOf("kmh" to stringResource(Res.string.unit_kmh), "mps" to stringResource(Res.string.unit_mps)),
-                    if (kmh) "kmh" else "mps",
-                    { u -> model.updateConditions { it.copy(targetSpeedUnit = u) } },
-                    Modifier.weight(0.7f),
-                )
-            }
+            // The unit is in the field: tap it for km/h, m/s or mph.
+            WindSpeedField(
+                stringResource(Res.string.target_speed), c.targetSpeedMps,
+                { v -> model.updateConditions { it.copy(targetSpeedMps = v) } },
+                speedUnit, { u -> model.updateConditions { it.copy(targetSpeedUnit = u.key) } },
+                tag = "targetSpeed", fieldMaxWidth = 200.dp, maxMps = MAX_TARGET_MPS,
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(
                     selected = !right,
@@ -101,10 +94,12 @@ fun MovingTargetCard(model: AppModel, sol: Solution, unit: String) {
                     modifier = Modifier.testTag("movesRight"),
                 )
             }
-            NumberField(
+            StepperField(
                 stringResource(Res.string.target_angle), angle,
                 { a -> model.updateConditions { it.copy(targetHeadingDeg = heading(right, a)) } },
-                Modifier.fillMaxWidth(), stringResource(Res.string.unit_deg), decimals = 0, from = 0.0, to = 180.0,
+                unit = stringResource(Res.string.unit_deg), step = 15.0, from = 0.0, to = 180.0, tag = "targetAngle",
+                fieldMaxWidth = 200.dp, hint = stringResource(Res.string.target_angle_hint),
+                hintPicture = { HeadingPicture(right) }, decimals = 0,
             )
             OutlinedButton(onClick = { timing = true }, modifier = Modifier.testTag("stopwatch")) {
                 Text(stringResource(Res.string.stopwatch))

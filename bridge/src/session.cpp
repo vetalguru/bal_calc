@@ -166,7 +166,7 @@ void Api::Impl::SetConditions(const json& a) {
     num("windGustMps", wind_gust_mps);
     num("targetSpeedMps", target_speed_mps);
     num("targetHeadingDeg", target_heading_deg);
-    if (const std::string u = Str(a, "targetSpeedUnit"); (u == "kmh" || u == "mps") && u != target_speed_unit) {
+    if (const std::string u = Str(a, "targetSpeedUnit"); (u == "kmh" || u == "mps" || u == "mph") && u != target_speed_unit) {
         target_speed_unit = u;
         Put(kTargetSpeedUnitKey, u);
     }

@@ -687,6 +687,22 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("lead") && shown("lead").contains("RIGHT") }
         onNodeWithTag("movesLeft").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { shown("lead").contains("LEFT") }
+        // The angle: ±15, its meaning drawn behind the ⓘ.
+        onNodeWithTag("targetAngleMinus").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("targetAngle") == "75" }
+        onNodeWithTag("targetAnglePlus").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("targetAngle") == "90" }
+        onNodeWithTag("targetAngleInfo").performClick()
+        waitUntil(timeoutMillis = 5_000) { exists("headingPicture") }
+        shot("moving-target-angle-hint")
+        onNodeWithTag("movingTarget").performClick() // closes the hint
+        // The unit in the field: 15 km/h is 4.2 m/s.
+        onNodeWithTag("targetSpeedUnit").performScrollTo().performClick()
+        onNodeWithTag("targetSpeedUnit-mps").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("targetSpeed") == "4.2" }
+        onNodeWithTag("targetSpeedUnit").performClick()
+        onNodeWithTag("targetSpeedUnit-kmh").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("targetSpeed") == "15" }
         onNodeWithTag("movingTarget").performScrollTo()
         shotOf("movingTarget", "moving-target")
 

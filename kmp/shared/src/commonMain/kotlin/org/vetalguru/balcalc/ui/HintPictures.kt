@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -74,6 +75,53 @@ fun CantPicture() {
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.align(Alignment.TopCenter).offset(x = 36.dp, y = (-4).dp),
+        )
+    }
+}
+
+/**
+ * A moving target from above: you at the bottom, the line of fire up to the
+ * target, the way it moves at an angle to that line (0° away, 90° across);
+ * mirrored when it moves to the left.
+ */
+@Composable
+fun HeadingPicture(toRight: Boolean = true) {
+    val line = LocalContentColor.current
+    val accent = MaterialTheme.colorScheme.inversePrimary
+    val angle = 60.0
+    Box(Modifier.size(190.dp, 150.dp).padding(bottom = 6.dp).testTag("headingPicture")) {
+        Canvas(Modifier.fillMaxSize().graphicsLayer { scaleX = if (toRight) 1f else -1f }) {
+            val thin = 2.dp.toPx()
+            val you = Offset(size.width * 0.3f, size.height - 8.dp.toPx())
+            val target = Offset(size.width * 0.3f, size.height * 0.42f)
+            // The line of fire, on past the target (where "0°, away" points).
+            drawLine(line, you, target, thin)
+            drawLine(
+                line.copy(alpha = 0.6f), target, Offset(target.x, 4.dp.toPx()), thin,
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f)),
+            )
+            drawCircle(line, 5.dp.toPx(), you)
+            drawCircle(accent, 7.dp.toPx(), target, style = Stroke(thin))
+            // Where the target goes: [angle] clockwise from "away".
+            val a = (angle - 90.0) * PI / 180
+            val len = size.width * 0.5f
+            val dir = Offset(cos(a).toFloat(), sin(a).toFloat())
+            val tip = target + dir * len
+            drawLine(accent, target + dir * 9.dp.toPx(), tip, 2.5.dp.toPx())
+            val back = dir * -10.dp.toPx()
+            val side = Offset(-dir.y, dir.x) * 6.dp.toPx()
+            drawLine(accent, tip, tip + back + side, 2.5.dp.toPx())
+            drawLine(accent, tip, tip + back - side, 2.5.dp.toPx())
+            // The angle between them.
+            val ar = 28.dp.toPx()
+            drawArc(line, -90f, angle.toFloat(), false, Offset(target.x - ar, target.y - ar), Size(ar * 2, ar * 2), style = Stroke(thin))
+        }
+        Text(
+            "α",
+            color = line,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.align(Alignment.TopStart).offset(x = if (toRight) 70.dp else 110.dp, y = 14.dp),
         )
     }
 }

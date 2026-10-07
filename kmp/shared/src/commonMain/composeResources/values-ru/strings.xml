@@ -293,7 +293,7 @@
     <string name="unit_mph">mph</string>
     <string name="moves_left">← Влево</string>
     <string name="moves_right">Вправо →</string>
-    <string name="target_angle">Угол к линии огня (90 = поперёк)</string>
+    <string name="target_angle">Угол движения</string>
     <string name="lead_value">Упреждение: %1$s</string>
     <string name="lead_moves">За время полёта цель сместится на %1$s м.</string>
     <string name="lead_total">По горизонтали с упреждением: %1$s</string>
@@ -514,4 +514,5 @@
     <string name="cant_hint">Наклон оружия вбок: по часовой стрелке +</string>
     <string name="wind_direction_hint">Откуда дует ветер: 0° — от цели (в лицо), 90° — справа, 180° — в спину, 270° — слева</string>
     <string name="wind_clock_short">%1$s ч.</string>
+    <string name="target_angle_hint">Угол α между линией огня и тем, куда идёт цель: 0° — от вас, 90° — поперёк, 180° — на вас. Сторону задают кнопки «Влево» и «Вправо»</string>
 </resources>

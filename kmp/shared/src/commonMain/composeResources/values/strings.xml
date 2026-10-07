@@ -323,7 +323,7 @@
     <string name="unit_mph">mph</string>
     <string name="moves_left">← To the left</string>
     <string name="moves_right">To the right →</string>
-    <string name="target_angle">Angle to the line of fire (90 = straight across)</string>
+    <string name="target_angle">Angle of movement</string>
     <string name="lead_value">Lead: %1$s</string>
     <string name="lead_moves">The target moves %1$s m during the flight.</string>
     <string name="lead_total">Windage with the lead: %1$s</string>
@@ -544,4 +544,5 @@
     <string name="cant_hint">The rifle tilted sideways: clockwise +</string>
     <string name="wind_direction_hint">Where the wind blows from: 0° from the target (in your face), 90° from the right, 180° from behind, 270° from the left</string>
     <string name="wind_clock_short">%1$s o'clock</string>
+    <string name="target_angle_hint">The angle α between the line of fire and where the target goes: 0° away from you, 90° straight across, 180° toward you. The side is set by Left and Right</string>
 </resources>
