@@ -14,6 +14,9 @@ interface Platform {
     suspend fun copyText(text: String)
 
     suspend fun pasteText(): String?
+
+    /** The phone's sensors; null where there are none (desktops). */
+    val sensors: PhoneSensors? get() = null
 }
 
 /** The system Back action (Android key or gesture); nothing on desktops. */
