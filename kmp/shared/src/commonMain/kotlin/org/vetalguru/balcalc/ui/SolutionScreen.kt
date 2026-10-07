@@ -73,9 +73,11 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.CorrectionText
 import org.vetalguru.balcalc.core.Solution
+import org.vetalguru.balcalc.core.TargetItem
 import org.vetalguru.balcalc.core.UiPrefs
 import org.vetalguru.balcalc.formatCorrection
 import org.vetalguru.balcalc.core.Warning
@@ -104,11 +106,11 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
             Pickers(model)
             if (wide) {
                 Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Viewer(model, sol, unit, wide, narrow, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1.3f))
+                    Viewer(model, sol, unit, wide, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1.3f))
                     Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) { Controller(model, narrow = false) }
                 }
             } else {
-                Viewer(model, sol, unit, wide, narrow, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1f))
+                Viewer(model, sol, unit, wide, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1f))
                 Controller(model, narrow)
             }
         }
@@ -145,6 +147,7 @@ private class ViewPage(val title: StringResource, val tag: String)
 private val viewPages = listOf(
     ViewPage(Res.string.view_corrections, "viewCorrections"),
     ViewPage(Res.string.view_reticle, "viewReticle"),
+    ViewPage(Res.string.view_targets, "viewTargets"),
     ViewPage(Res.string.view_more, "viewMore"),
 )
 
@@ -155,7 +158,6 @@ private fun Viewer(
     sol: Solution,
     unit: String,
     wide: Boolean,
-    narrow: Boolean,
     onEditArmory: () -> Unit,
     onLogHit: () -> Unit,
     onSituations: () -> Unit,
@@ -166,6 +168,12 @@ private fun Viewer(
     val scope = rememberCoroutineScope()
     val sampleRifle = stringResource(Res.string.sample_rifle_name)
     val sampleCartridge = stringResource(Res.string.sample_cartridge_name)
+    // The target card, with the solution: holds follow the current target.
+    var targets by remember { mutableStateOf(emptyList<TargetItem>()) }
+    LaunchedEffect(model.revision) { targets = loadOr(emptyList()) { model.targets() } }
+    // The others: the current target is the big mark already.
+    val marks = targets.filter { it.ok && (abs(it.holdX - sol.targetX) > 0.05 || abs(it.holdY - sol.targetY) > 0.05) }
+        .map { ReticleMark(it.holdX, it.holdY, it.name) }
     Column(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             SecondaryTabRow(selectedTabIndex = pager.currentPage, modifier = Modifier.weight(1f)) {
@@ -173,14 +181,9 @@ private fun Viewer(
                     Tab(
                         selected = pager.currentPage == i,
                         onClick = { scope.launch { pager.animateScrollToPage(i) } },
-                        text = { Text(stringResource(p.title), maxLines = 1) },
+                        text = { Text(stringResource(p.title), maxLines = 1, style = MaterialTheme.typography.labelMedium) },
                         modifier = Modifier.testTag(p.tag),
                     )
-                }
-            }
-            if (st.rifles.isNotEmpty() && !narrow) {
-                TextButton(onClick = onSituations, modifier = Modifier.testTag("situations")) {
-                    Text(stringResource(Res.string.situations), maxLines = 1)
                 }
             }
         }
@@ -212,7 +215,7 @@ private fun Viewer(
                         }
                         if (sol.ok) {
                             Corrections(sol, st.prefs, st.moa, st.conditions.windGustMps)
-                            DetailsLine(sol) { scope.launch { pager.animateScrollToPage(2) } }
+                            DetailsLine(sol) { scope.launch { pager.animateScrollToPage(viewPages.lastIndex) } }
                             Warnings(sol.warnings)
                             Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Text(
@@ -230,13 +233,17 @@ private fun Viewer(
                             }
                         }
                     }
-                    1 -> if (sol.ok) ReticleCard(model, sol, wide)
-                    else -> {
-                        if (st.rifles.isNotEmpty() && narrow) {
+                    1 -> if (sol.ok) ReticleCard(model, sol, wide, marks)
+                    2 -> {
+                        // Saved situations live by the targets: both switch what is shot at.
+                        if (st.rifles.isNotEmpty()) {
                             OutlinedButton(onClick = onSituations, modifier = Modifier.padding(horizontal = 12.dp).testTag("situations")) {
                                 Text(stringResource(Res.string.situations))
                             }
                         }
+                        TargetCard(model, targets, unit)
+                    }
+                    else -> {
                         MovingTargetCard(model, sol, unit)
                         if (sol.ok) Details(sol, st.conditions.targetHeightCm, wide)
                     }
@@ -482,9 +489,9 @@ private fun CorrectionTile(
 
 /** The reticle with the hold, the hold mode and the turret settings. */
 @Composable
-private fun ReticleCard(model: AppModel, sol: Solution, wide: Boolean) {
+private fun ReticleCard(model: AppModel, sol: Solution, wide: Boolean, marks: List<ReticleMark> = emptyList()) {
     val reticle: @Composable (Modifier) -> Unit = { m ->
-        ReticleView(if (sol.hasReticle) sol.reticleDefinition else "", sol.targetX, sol.targetY, m.aspectRatio(1f))
+        ReticleView(if (sol.hasReticle) sol.reticleDefinition else "", sol.targetX, sol.targetY, m.aspectRatio(1f), marks)
     }
     val text: @Composable (Modifier) -> Unit = { m ->
         Column(m, verticalArrangement = Arrangement.spacedBy(6.dp)) {

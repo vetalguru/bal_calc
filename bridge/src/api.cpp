@@ -69,6 +69,8 @@
 //   stationPressure {qnhHpa, altitudeM} → hPa
 //   stability {twistIn, massGr, diameterIn, lengthIn, velocityMps} → {sg} (standard air)
 //   photos {kind} → {id: base64} / photo {kind, id} → base64 / setPhoto {kind, id, image} (empty removes)
+//   targets → [{name, rangeM, lookAngleDeg, windSpeed, windFromDeg, ok, elevation, windage, *Clicks, holdX, holdY}]
+//   saveTargets {targets} → targets / selectTarget {index} → state
 //   situations / saveSituation {name} / applySituation {name} → state / deleteSituation {name}
 //   compareCurves {maxRangeM, points, pairs:[{rifleId, cartridgeId}]} → [table + label]
 //   pairOptions                     → [{rifleId, rifleName, cartridges:[{id, name}]}]
@@ -96,6 +98,8 @@ constexpr std::size_t kMaxExtraWindZones = 2; // three wind zones in all
 constexpr const char* kTargetSpeedUnitKey = "ui.target_speed_unit";
 constexpr const char* kHoldModeKey = "ui.hold_mode";
 constexpr const char* kSituationsKey = "ui.situations";
+constexpr const char* kTargetsKey = "ui.targets";
+constexpr std::size_t kMaxTargets = 20;
 // The app sends pictures shrunk to about 640 px; this only stops mistakes.
 constexpr std::size_t kMaxPhotoBytes = 2u << 20;
 constexpr const char* kTableFromKey = "ui.table.from_m";
@@ -780,6 +784,127 @@ struct Api::Impl {
         return true;
     }
 
+    // ---- Targets: up to 20 named ranges with their angle and wind ----------
+
+    json TargetsStored() {
+        const auto text = Setting(kTargetsKey);
+        json list = text ? json::parse(*text, nullptr, false) : json::array();
+        return list.is_array() ? list : json::array();
+    }
+
+    // The session with a target's range, angle and wind (one zone).
+    al::SessionConditions SessionFor(const json& t) const {
+        al::SessionConditions s = Session();
+        s.target_range_m = t.value("rangeM", s.target_range_m);
+        s.look_angle_deg = t.value("lookAngleDeg", 0.0);
+        s.winds = {al::WindInput{t.value("windSpeed", 0.0), t.value("windFromDeg", 90.0), 0.0}};
+        s.wind_gust_mps = 0.0;
+        s.target_speed_mps = 0.0;
+        return s;
+    }
+
+    // Every target with its corrections and where to hold it on the reticle
+    // with the turrets as set for the current target (the hold mode).
+    json Targets() {
+        json out = json::array();
+        const json list = TargetsStored();
+        std::optional<bs::LoadedProfile> p;
+        if (profile_id != 0) {
+            if (auto loaded = bs::LoadProfile(db, profile_id)) {
+                p = std::move(loaded).value();
+            }
+        }
+        double dial_e = 0.0;
+        double dial_w = 0.0;
+        double zoom = 0.0;
+        if (p && p->scope) {
+            zoom = magnification > 0.0 ? magnification : p->scope->max_magnification;
+            const al::SolutionSummary now = al::Summarize(*p, Session(), Unit());
+            if (now.ok) {
+                const al::ReticleHold h = al::ComputeReticleHold(now.elevation * UnitRad(), now.windage * UnitRad(),
+                                                                 *p->scope, zoom, al::HoldModeFromString(hold_mode));
+                dial_e = h.dial_elevation_rad;
+                dial_w = h.dial_windage_rad;
+            }
+        }
+        for (const json& t : list) {
+            json item = {{"name", t.value("name", "")},
+                         {"rangeM", t.value("rangeM", 0.0)},
+                         {"lookAngleDeg", t.value("lookAngleDeg", 0.0)},
+                         {"windSpeed", t.value("windSpeed", 0.0)},
+                         {"windFromDeg", t.value("windFromDeg", 90.0)},
+                         {"ok", false}};
+            if (p) {
+                const al::SolutionSummary r = al::Summarize(*p, SessionFor(t), Unit());
+                item["ok"] = r.ok;
+                if (r.ok) {
+                    item["elevation"] = r.elevation;
+                    item["windage"] = r.windage;
+                    item["elevationClicks"] = r.elevation_clicks;
+                    item["windageClicks"] = r.windage_clicks;
+                    // Held, not dialled: the rest after the turrets, in reticle mrad.
+                    const double e = r.elevation * UnitRad() - dial_e;
+                    const double w = r.windage * UnitRad() - dial_w;
+                    double x = -u::RadToMrad(w);
+                    double y = -u::RadToMrad(e);
+                    if (p->scope) {
+                        const al::ReticleHold h = al::ComputeReticleHold(e, w, *p->scope, zoom, al::HoldMode::kHoldAll);
+                        x = h.target_x;
+                        y = h.target_y;
+                    }
+                    item["holdX"] = x;
+                    item["holdY"] = y;
+                }
+            }
+            out.push_back(item);
+        }
+        return out;
+    }
+
+    json SaveTargets(const json& list) {
+        if (!list.is_array()) {
+            throw Failure("Targets must be a list.");
+        }
+        if (list.size() > kMaxTargets) {
+            throw Failure("At most 20 targets.");
+        }
+        json clean = json::array();
+        for (const json& t : list) {
+            const std::string name = Trim(Str(t, "name"));
+            const double range = Num(t, "rangeM");
+            if (name.empty()) {
+                throw Failure("Enter a name for each target.");
+            }
+            if (range < 10.0 || range > 3000.0) {
+                throw Failure("A target range must be between 10 and 3000 m.");
+            }
+            clean.push_back({{"name", name},
+                             {"rangeM", range},
+                             {"lookAngleDeg", std::clamp(Num(t, "lookAngleDeg"), -60.0, 60.0)},
+                             {"windSpeed", std::clamp(Num(t, "windSpeed"), 0.0, 40.0)},
+                             {"windFromDeg", Num(t, "windFromDeg", 90.0)}});
+        }
+        Put(kTargetsKey, clean.dump());
+        return Targets();
+    }
+
+    // Makes a target current: its range, angle and wind go into the conditions.
+    json SelectTarget(std::size_t index) {
+        const json list = TargetsStored();
+        if (index >= list.size()) {
+            throw Failure("No such target.");
+        }
+        const json& t = list.at(index);
+        json c = Conditions();
+        c["targetRangeM"] = t.value("rangeM", 300.0);
+        c["lookAngleDeg"] = t.value("lookAngleDeg", 0.0);
+        c["windSpeed"] = t.value("windSpeed", 0.0);
+        c["windFromDeg"] = t.value("windFromDeg", 90.0);
+        c["windZones"] = json::array();
+        SetConditions(c);
+        return State();
+    }
+
     // ---- Situations: a rifle, a cartridge and the conditions, by name -------
 
     json SituationsStored() {
@@ -1229,6 +1354,13 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
                       a.contains("cartridgeId") ? IdOf(a, "cartridgeId") : s.cartridge_id);
              return s.State();
          }},
+        {"targets", [](I& s, const json&) -> json { return s.Targets(); }},
+        {"saveTargets", [](I& s, const json& a) -> json { return s.SaveTargets(a.value("targets", json::array())); }},
+        {"selectTarget",
+         [](I& s, const json& a) -> json {
+             const double i = Num(a, "index", -1.0);
+             return s.SelectTarget(i < 0.0 ? kMaxTargets : static_cast<std::size_t>(i));
+         }},
         {"situations", [](I& s, const json&) -> json { return s.Situations(); }},
         {"saveSituation", [](I& s, const json& a) -> json { return s.SaveSituation(Trim(Str(a, "name"))); }},
         {"applySituation", [](I& s, const json& a) -> json { return s.ApplySituation(Str(a, "name")); }},
@@ -1328,7 +1460,6 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
         // air, for the editors: 0 when an input is missing.
         {"stability",
          [](I&, const json& a) -> json {
-             namespace u = ballistics::units;
              const double sg = ballistics::MillerStability(
                  u::GrainToKg(Num(a, "massGr")), u::InchToM(Num(a, "diameterIn")), u::InchToM(Num(a, "lengthIn")),
                  u::InchToM(Num(a, "twistIn")), Num(a, "velocityMps"), 288.15, 101325.0);

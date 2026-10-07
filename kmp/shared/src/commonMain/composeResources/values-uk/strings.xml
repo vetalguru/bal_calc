@@ -464,6 +464,15 @@
     <string name="sg_marginal">на межі, купчастість може постраждати</string>
     <string name="sg_unstable">нестабільна, куля може перекидатися</string>
     <string name="sg_missing">Стабільність з %1$s: введіть крок нарізів і довжину кулі.</string>
+    <string name="view_targets">Цілі</string>
+    <string name="targets">Цілі</string>
+    <string name="targets_empty">Цілей ще немає. Картка цілей тримає до 20 цілей з дальністю, кутом і вітром: торкніться цілі, щоб стріляти по ній, і бачте, де тримати інші.</string>
+    <string name="targets_edit">Змінити цілі</string>
+    <string name="target_add">Додати ціль</string>
+    <string name="target_n">Ціль %1$s</string>
+    <string name="core_37">Введіть назву кожної цілі.</string>
+    <string name="core_38">Дальність цілі має бути від 10 до 3000 м.</string>
+    <string name="core_39">Не більше 20 цілей.</string>
     <string name="sensor_barometer">З барометра</string>
     <string name="sensor_location">Моє місце</string>
     <string name="sensor_angles">Виміряти телефоном</string>

@@ -51,6 +51,7 @@ import org.vetalguru.balcalc.core.Conditions
 import org.vetalguru.balcalc.core.RangeTable
 import org.vetalguru.balcalc.core.SituationItem
 import org.vetalguru.balcalc.core.Solution
+import org.vetalguru.balcalc.core.TargetItem
 import org.vetalguru.balcalc.core.UiPrefs
 
 /** A typed call: the result decoded as [T]. */
@@ -400,6 +401,39 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
         } catch (e: ApiException) {
             e.message
         }
+    }
+
+    // ---- Target card ---------------------------------------------------------
+
+    suspend fun targets(): List<TargetItem> = api.get("targets")
+
+    /** Replaces the target list; returns the core's error or null. */
+    suspend fun saveTargets(list: List<TargetItem>): String? = detached {
+        try {
+            api.call("saveTargets", buildJsonObject {
+                putJsonArray("targets") {
+                    list.forEach { t ->
+                        addJsonObject {
+                            put("name", t.name)
+                            put("rangeM", t.rangeM)
+                            put("lookAngleDeg", t.lookAngleDeg)
+                            put("windSpeed", t.windSpeed)
+                            put("windFromDeg", t.windFromDeg)
+                        }
+                    }
+                }
+            })
+            recompute() // the card reloads on the revision
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
+    }
+
+    /** Makes a target current: its range, angle and wind. */
+    fun selectTarget(index: Int) = act {
+        state = api.get("selectTarget", buildJsonObject { put("index", index) })
+        recompute()
     }
 
     // ---- Situations ---------------------------------------------------------

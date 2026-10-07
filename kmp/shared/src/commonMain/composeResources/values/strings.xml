@@ -478,7 +478,7 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_night">Night (red)</string>
     <string name="keep_screen_on">Keep the screen on</string>
-    <string name="view_corrections">Corrections</string>
+    <string name="view_corrections">Dope</string>
     <string name="view_reticle">Reticle</string>
     <string name="view_more">More</string>
     <string name="look_angle_short">Angle</string>
@@ -494,6 +494,15 @@
     <string name="sg_marginal">marginal, accuracy may suffer</string>
     <string name="sg_unstable">unstable, the bullet may tumble</string>
     <string name="sg_missing">Stability with %1$s: enter the twist and the bullet length.</string>
+    <string name="view_targets">Targets</string>
+    <string name="targets">Targets</string>
+    <string name="targets_empty">No targets yet. A target card keeps up to 20 targets with their range, angle and wind: tap one to shoot it, and see where to hold the others.</string>
+    <string name="targets_edit">Edit the targets</string>
+    <string name="target_add">Add a target</string>
+    <string name="target_n">Target %1$s</string>
+    <string name="core_37">Enter a name for each target.</string>
+    <string name="core_38">A target range must be between 10 and 3000 m.</string>
+    <string name="core_39">At most 20 targets.</string>
     <string name="sensor_barometer">From the barometer</string>
     <string name="sensor_location">My location</string>
     <string name="sensor_angles">Measure with the phone</string>

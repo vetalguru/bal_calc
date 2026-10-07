@@ -464,6 +464,15 @@
     <string name="sg_marginal">на грани, кучность может пострадать</string>
     <string name="sg_unstable">нестабильна, пуля может кувыркаться</string>
     <string name="sg_missing">Стабильность с %1$s: введите шаг нарезов и длину пули.</string>
+    <string name="view_targets">Цели</string>
+    <string name="targets">Цели</string>
+    <string name="targets_empty">Целей пока нет. Карточка целей хранит до 20 целей с дальностью, углом и ветром: коснитесь цели, чтобы стрелять по ней, и видите, где держать остальные.</string>
+    <string name="targets_edit">Изменить цели</string>
+    <string name="target_add">Добавить цель</string>
+    <string name="target_n">Цель %1$s</string>
+    <string name="core_37">Введите название каждой цели.</string>
+    <string name="core_38">Дальность цели должна быть от 10 до 3000 м.</string>
+    <string name="core_39">Не больше 20 целей.</string>
     <string name="sensor_barometer">С барометра</string>
     <string name="sensor_location">Моё место</string>
     <string name="sensor_angles">Измерить телефоном</string>
