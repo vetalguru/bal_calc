@@ -17,6 +17,9 @@ interface Platform {
 
     /** Asks for a picture (a target photo); its bytes, or null when cancelled. */
     suspend fun openImage(): ByteArray? = null
+
+    /** The phone's sensors; null where there are none (desktops). */
+    val sensors: PhoneSensors? get() = null
 }
 
 /** The system Back action (Android key or gesture); nothing on desktops. */
