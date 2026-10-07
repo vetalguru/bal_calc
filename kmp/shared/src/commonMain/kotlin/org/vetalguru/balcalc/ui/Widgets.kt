@@ -79,6 +79,8 @@ fun NumberField(
     hint: String? = null,
     /** A drawing shown with [hint] (what cant looks like, ...). */
     hintPicture: (@Composable () -> Unit)? = null,
+    /** After every commit (Done or focus lost), changed or not. */
+    onCommitted: (() -> Unit)? = null,
 ) {
     var text by remember { mutableStateOf(formatNumber(value, decimals)) }
     var focused by remember { mutableStateOf(false) }
@@ -94,6 +96,7 @@ fun NumberField(
             text = formatNumber(v, decimals)
             if (v != value) onEdited(v)
         }
+        onCommitted?.invoke()
     }
     val focus = LocalFocusManager.current
     OutlinedTextField(
@@ -133,7 +136,7 @@ class UnitMenu(val options: List<Pair<String, String>>, val onPick: (String) -> 
 
 /** A field's unit that opens the list of the others when tapped. */
 @Composable
-private fun UnitPicker(unit: String, menu: UnitMenu, tag: String?) {
+internal fun UnitPicker(unit: String, menu: UnitMenu, tag: String?) {
     var open by remember { mutableStateOf(false) }
     Box {
         Text(

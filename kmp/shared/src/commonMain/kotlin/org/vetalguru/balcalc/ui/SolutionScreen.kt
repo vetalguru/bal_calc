@@ -69,18 +69,19 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
     // changes below. Side by side on wide screens.
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 600.dp
-        // Small phones (under 380 dp): the controller drops its big steps.
-        val narrow = maxWidth < 380.dp
+        // The ring: as wide as the screen allows, but at most ~40% of its height
+        // so the corrections above keep their room.
+        val ring = minOf(maxWidth - 16.dp, maxHeight * 0.42f, 320.dp)
         Column(Modifier.fillMaxSize()) {
             Pickers(model)
             if (wide) {
                 Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Viewer(model, sol, unit, wide, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1.3f))
-                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) { Controller(model, narrow = false) }
+                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) { Controller(model, 320.dp) }
                 }
             } else {
                 Viewer(model, sol, unit, wide, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1f))
-                Controller(model, narrow)
+                Controller(model, ring)
             }
         }
     }

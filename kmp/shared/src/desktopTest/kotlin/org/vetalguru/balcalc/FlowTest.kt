@@ -117,8 +117,17 @@ class FlowTest {
     }
 
     private fun ComposeUiTest.type(tag: String, value: String) {
-        onNodeWithTag(tag).performTextReplacement(value)
-        onNodeWithTag(tag).performImeAction()
+        // A wheel of the ring is no text field: a tap on it opens one ("<tag>Input").
+        val editable = onNodeWithTag(tag).fetchSemanticsNode().config
+            .getOrNull(androidx.compose.ui.semantics.SemanticsProperties.EditableText) != null
+        val field = if (editable) tag else "${tag}Input"
+        if (!editable) {
+            onNodeWithTag(tag).performClick()
+            waitUntil(timeoutMillis = 10_000) { exists(field) }
+        }
+        onNodeWithTag(field).performTextReplacement(value)
+        onNodeWithTag(field).performImeAction()
+        if (!editable) waitUntil(timeoutMillis = 10_000) { !exists(field) }
     }
 
     private fun ComposeUiTest.count(prefix: String): Int {
@@ -1175,10 +1184,11 @@ class FlowTest {
     fun lookAngleArrowAndHint() = runDesktopComposeUiTest(320, 640) {
         val db = startWithSample()
         assertEquals("0°", shown("lookAngle"))
-        onAllNodesWithText("+1").onLast().performClick() // the angle's, below the wind's
+        onNodeWithTag("lookAngleNext").performClick() // the wheel's value below: one up
         waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "↑1°" }
-        onAllNodesWithText("−1").onLast().performClick()
-        onAllNodesWithText("−1").onLast().performClick()
+        onNodeWithTag("lookAnglePrev").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "0°" }
+        onNodeWithTag("lookAnglePrev").performClick()
         waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "↓1°" }
         onNodeWithTag("lookAngleHint").performClick()
         waitUntil(timeoutMillis = 5_000) { hasText("Shot angle (uphill +, downhill −)") }
@@ -1196,7 +1206,7 @@ class FlowTest {
             onNodeWithTag("windSpeedUnit").performClick()
             onNodeWithTag("windSpeedUnit-kmh").performClick()
             waitUntil(timeoutMillis = 10_000) { shown("windSpeed") == "18" }
-            onNodeWithTag("windSpeedPlus").performClick()
+            onNodeWithTag("windSpeedNext").performClick()
             waitUntil(timeoutMillis = 10_000) { shown("windSpeed") == "19" }
             shotOf("quickWind", "wind-units-$w-kmh")
             onNodeWithTag("windSpeedUnit").performClick()
@@ -1239,6 +1249,25 @@ class FlowTest {
         onAllNodesWithText("Elevation correction").onLast().performClick()
         waitUntil(timeoutMillis = 10_000) { onAllNodesWithText("Elevation correction").fetchSemanticsNodes().size == 1 }
         shot("chart-elevation")
+        db.delete()
+    }
+
+    /** The ring: a tap on its band sets where the wind blows from (2 o'clock here); its centre is the wheels'. */
+    @Test
+    fun ringSetsTheWind() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        type("windSpeed", "5")
+        onNodeWithTag("windDial").performTouchInput {
+            val r = minOf(width, height) / 2f * 0.8f
+            val a = Math.toRadians(60.0)
+            click(androidx.compose.ui.geometry.Offset(width / 2f + r * kotlin.math.sin(a).toFloat(), height / 2f - r * kotlin.math.cos(a).toFloat()))
+        }
+        waitUntil(timeoutMillis = 10_000) { shown("windDirectionText").contains("2 o'clock") }
+        waitUntil(timeoutMillis = 10_000) { shown("windage").isNotEmpty() && hasText("RIGHT") }
+        shotOf("quickWind", "ring-wind-2-oclock")
+        // A tap on a wheel's neighbour steps it: 300 → 310 m.
+        onNodeWithTag("rangeNext").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("range") == "310" }
         db.delete()
     }
 }
