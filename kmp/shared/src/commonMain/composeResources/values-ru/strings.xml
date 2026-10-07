@@ -459,4 +459,25 @@
     <string name="style_signs">Знаками: + −</string>
     <string name="round_to_clicks">Округлять до целых кликов</string>
     <string name="show_second_unit">Также другая единица и см на цели</string>
+    <string name="sensor_barometer">С барометра</string>
+    <string name="sensor_location">Моё место</string>
+    <string name="sensor_angles">Измерить телефоном</string>
+    <string name="sensor_compass">С компаса</string>
+    <string name="sensor_reading">Измеряю…</string>
+    <string name="sensor_no_pressure">Барометр не дал показаний.</string>
+    <string name="sensor_no_location">Нет места: проверьте, что геолокация включена и разрешена для BalCalc.</string>
+    <string name="sensor_pressure_set">Барометр: %1$s гПа</string>
+    <string name="sensor_location_set">Место (±%1$s м): высота %2$s м, широта %3$s°</string>
+    <string name="sensor_location_no_alt">Место (±%1$s м): широта %2$s°; высоту телефон не дал</string>
+    <string name="tilt_title">Угол выстрела и завал</string>
+    <string name="tilt_hint">Положите телефон на прицел или планку экраном вверх, верхом к цели, и держите неподвижно.</string>
+    <string name="tilt_now">Угол выстрела %1$s°, завал %2$s°</string>
+    <string name="tilt_unsteady">Держите неподвижно: гуляет на %1$s°</string>
+    <string name="tilt_steady">Устойчиво</string>
+    <string name="sensor_use">Взять</string>
+    <string name="compass_title">Азимут выстрела</string>
+    <string name="compass_hint">Положите телефон на оружие верхом к цели, подальше от металла и магнитов.</string>
+    <string name="compass_magnetic">От магнитного севера: для истинного сначала возьмите «Моё место».</string>
+    <string name="compass_true">От истинного севера.</string>
+    <string name="compass_calibrate">Компас плохо откалиброван: поводите телефоном восьмёркой.</string>
 </resources>

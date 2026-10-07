@@ -72,6 +72,9 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     /** Bumps whenever results may have changed (tables reload on it). */
     var revision by mutableIntStateOf(0)
         private set
+    /** The last location taken with the sensors (true north for the compass); not kept. */
+    var lastFix by mutableStateOf<GeoFix?>(null)
+
     /** The last failure of an action, for a snackbar; the screen clears it. */
     var message by mutableStateOf<String?>(null)
 
