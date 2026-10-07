@@ -44,7 +44,6 @@ inline constexpr std::size_t kMaxPhotoBytes = 2u << 20;
 inline constexpr const char* kTableFromKey = "ui.table.from_m";
 inline constexpr const char* kTableToKey = "ui.table.to_m";
 inline constexpr const char* kTableStepKey = "ui.table.step_m";
-inline constexpr const char* kWindNoonKey = "ui.wind_noon"; // the old 3 o'clock default moved to 12 once
 
 // A failure reported to the caller as {"ok": false, "error": message}.
 struct Failure : std::runtime_error {

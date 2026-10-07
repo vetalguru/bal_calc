@@ -785,30 +785,27 @@ TEST(BridgeErrors, CallsFailCleanly) {
                 954.6, 0.5);
 }
 
-// A database from before the 12 o'clock default: a calm wind at 3 o'clock
-// (the old default) moves to 12 once; a wind that blows keeps its direction.
-TEST(BridgeFile, OldDefaultWindMovesToNoonOnce) {
-    for (const double speed : {0.0, 5.0}) {
-        const auto path = (std::filesystem::temp_directory_path() / "balcalc_wind.db").string();
-        std::filesystem::remove(path);
-        {
-            ballistics::storage::Database db;
-            ASSERT_TRUE(db.Open(path).ok());
-            ballistics::applogic::SessionConditions s;
-            s.winds = {{speed, 90.0, 0.0}};
-            ASSERT_TRUE(ballistics::applogic::SaveSession(db, s).ok());
-        }
-        const double expected = speed == 0.0 ? 0.0 : 90.0;
-        for (int start = 0; start < 2; ++start) {
-            Api api;
-            api.Call("open", json{{"path", path}}.dump());
-            const json c = json::parse(api.Call("state", "")).at("result").at("conditions");
-            EXPECT_EQ(c.at("windFromDeg"), start == 0 ? expected : 90.0) << speed;
-            // Once: 3 o'clock chosen after the move stays.
-            api.Call("setConditions", R"({"windFromDeg": 90})");
-        }
-        std::filesystem::remove(path);
+// Every start begins with the wind from 12 o'clock, whatever was saved;
+// the speed stays.
+TEST(BridgeFile, WindStartsFromNoon) {
+    const auto path = (std::filesystem::temp_directory_path() / "balcalc_wind.db").string();
+    std::filesystem::remove(path);
+    {
+        ballistics::storage::Database db;
+        ASSERT_TRUE(db.Open(path).ok());
+        ballistics::applogic::SessionConditions s;
+        s.winds = {{5.0, 90.0, 0.0}};
+        ASSERT_TRUE(ballistics::applogic::SaveSession(db, s).ok());
     }
+    for (int start = 0; start < 2; ++start) {
+        Api api;
+        api.Call("open", json{{"path", path}}.dump());
+        const json c = json::parse(api.Call("state", "")).at("result").at("conditions");
+        EXPECT_EQ(c.at("windFromDeg"), 0.0) << start;
+        EXPECT_EQ(c.at("windSpeed"), 5.0) << start;
+        api.Call("setConditions", R"({"windFromDeg": 90})"); // not kept to the next start
+    }
+    std::filesystem::remove(path);
 }
 
 } // namespace
