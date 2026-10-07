@@ -1,0 +1,498 @@
+{
+ "bullets": [
+  {
+   "name": "Naturalis N566 50 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".224",
+   "weight_gr": 50.0,
+   "diameter_in": 0.224,
+   "g1": 0.197,
+   "reference": "lapua.com product page, N PL 5001 (checked 2026-10)"
+  },
+  {
+   "name": "FMJ S569 55 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".224",
+   "weight_gr": 55.0,
+   "diameter_in": 0.224,
+   "g1": 0.255,
+   "reference": "lapua.com product page, 4 PL/HL 5017 (checked 2026-10)"
+  },
+  {
+   "name": "Soft Point E539 55 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".224",
+   "weight_gr": 55.0,
+   "diameter_in": 0.224,
+   "g1": 0.185,
+   "reference": "lapua.com product page, 4 PL 5006 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB544 69 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".224",
+   "weight_gr": 69.0,
+   "diameter_in": 0.224,
+   "g1": 0.341,
+   "g7": 0.171,
+   "reference": "lapua.com product page, 4 PL/HL 5015 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB545 77 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".224",
+   "weight_gr": 77.0,
+   "diameter_in": 0.224,
+   "g1": 0.386,
+   "g7": 0.193,
+   "reference": "lapua.com product page, 4 PL/HL 5016 (checked 2026-10)"
+  },
+  {
+   "name": "Naturalis N509 90 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6mm",
+   "weight_gr": 90.0,
+   "diameter_in": 0.243,
+   "g1": 0.23,
+   "reference": "lapua.com product page, N PL 6201 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB543 90 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6mm",
+   "weight_gr": 90.0,
+   "diameter_in": 0.243,
+   "g1": 0.434,
+   "g7": 0.216,
+   "reference": "lapua.com product page, 4 PL/HL 6055 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar OTM GB504 100 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 100.0,
+   "diameter_in": 0.264,
+   "g1": 0.424,
+   "g7": 0.212,
+   "reference": "lapua.com product page, 4 PL/HL 6033 (checked 2026-10)"
+  },
+  {
+   "name": "FMJ S341 100 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 100.0,
+   "diameter_in": 0.264,
+   "g1": 0.25,
+   "reference": "lapua.com product page, 4 PL/HL 6014 (checked 2026-10)"
+  },
+  {
+   "name": "OT Cutting Edge G477 100 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 100.0,
+   "diameter_in": 0.308,
+   "g1": 0.17,
+   "reference": "lapua.com product page, 4 PL/HL 7224 (checked 2026-10)"
+  },
+  {
+   "name": "Open Tip G580 100 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 100.0,
+   "diameter_in": 0.308,
+   "g1": 0.2,
+   "reference": "lapua.com product page, 4 PL/HL 7225 (checked 2026-10)"
+  },
+  {
+   "name": "FMJ Cutting Edge S496 100 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 100.0,
+   "diameter_in": 0.264,
+   "g1": 0.25,
+   "reference": "lapua.com product page, 4 PL/HL 6015 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB542 105 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6mm",
+   "weight_gr": 105.0,
+   "diameter_in": 0.243,
+   "g1": 0.472,
+   "g7": 0.236,
+   "reference": "lapua.com product page, 4 PL/HL 6050 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar OTM GB464 108 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 108.0,
+   "diameter_in": 0.264,
+   "g1": 0.465,
+   "g7": 0.231,
+   "reference": "lapua.com product page, 4 PL/HL 6020 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB547 120 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 120.0,
+   "diameter_in": 0.264,
+   "g1": 0.497,
+   "g7": 0.246,
+   "reference": "lapua.com product page, 4 PL/HL 6021 (checked 2026-10)"
+  },
+  {
+   "name": "TRX N583 120 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 120.0,
+   "diameter_in": 0.264,
+   "length_in": 1.378,
+   "g1": 0.428,
+   "g7": 0.212,
+   "reference": "lapua.com product page, NPL6204 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar OTM GB489 123 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 123.0,
+   "diameter_in": 0.264,
+   "g1": 0.527,
+   "g7": 0.263,
+   "reference": "lapua.com product page, 4 PL/HL 6032 (checked 2026-10)"
+  },
+  {
+   "name": "FMJ S405 123 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".311",
+   "weight_gr": 123.0,
+   "diameter_in": 0.311,
+   "g1": 0.257,
+   "reference": "lapua.com product page, 4 PL/HL 7045 (checked 2026-10)"
+  },
+  {
+   "name": "FMJ S374 123 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 123.0,
+   "diameter_in": 0.308,
+   "g1": 0.27,
+   "reference": "lapua.com product page, 4 PL/HL 7003 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB546 136 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 136.0,
+   "diameter_in": 0.264,
+   "g1": 0.545,
+   "g7": 0.274,
+   "reference": "lapua.com product page, 4 PL/HL 6019 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar OTM GB458 139 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 139.0,
+   "diameter_in": 0.264,
+   "g1": 0.578,
+   "g7": 0.29,
+   "reference": "lapua.com product page, 4 PL/HL 6018 (checked 2026-10)"
+  },
+  {
+   "name": "Naturalis N563 140 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.264,
+   "g1": 0.201,
+   "reference": "lapua.com product page, N PL 6203 (checked 2026-10)"
+  },
+  {
+   "name": "MaxRange Target OTM GB582 144 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 144.0,
+   "diameter_in": 0.264,
+   "g1": 0.67,
+   "g7": 0.335,
+   "reference": "lapua.com product page, 4 PL 6022 (checked 2026-10)"
+  },
+  {
+   "name": "FMJ B343 144 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 144.0,
+   "diameter_in": 0.264,
+   "g1": 0.636,
+   "reference": "lapua.com product page, 4 PL/HL 6000 (checked 2026-10)"
+  },
+  {
+   "name": "TRX N585 150 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 150.0,
+   "diameter_in": 0.308,
+   "length_in": 1.323,
+   "g1": 0.384,
+   "g7": 0.19,
+   "reference": "lapua.com product page, NPL7251 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB553 150 gr",
+   "manufacturer": "Lapua",
+   "caliber": "7mm",
+   "weight_gr": 150.0,
+   "diameter_in": 0.284,
+   "g1": 0.526,
+   "g7": 0.26,
+   "reference": "lapua.com product page, 4 PL/HL 7400 (checked 2026-10)"
+  },
+  {
+   "name": "Mega SP E469 150 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 150.0,
+   "diameter_in": 0.308,
+   "g1": 0.33,
+   "reference": "lapua.com product page, 4 PL 7057 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB552 155 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 155.0,
+   "diameter_in": 0.308,
+   "g1": 0.46,
+   "g7": 0.23,
+   "reference": "lapua.com product page, 4 PL/HL 7063 (checked 2026-10)"
+  },
+  {
+   "name": "Mega SP E471 156 gr",
+   "manufacturer": "Lapua",
+   "caliber": "6.5mm",
+   "weight_gr": 156.0,
+   "diameter_in": 0.264,
+   "g1": 0.377,
+   "reference": "lapua.com product page, 4 PL 6010 (checked 2026-10)"
+  },
+  {
+   "name": "Naturalis N564 156 gr",
+   "manufacturer": "Lapua",
+   "caliber": "7mm",
+   "weight_gr": 156.0,
+   "diameter_in": 0.284,
+   "g1": 0.28,
+   "reference": "lapua.com product page, N PL 7027 (checked 2026-10)"
+  },
+  {
+   "name": "TRX N584 165 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 165.0,
+   "diameter_in": 0.308,
+   "length_in": 1.4807,
+   "g1": 0.49,
+   "g7": 0.243,
+   "reference": "lapua.com product page, NPL7250 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar OTM GB422 167 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 167.0,
+   "diameter_in": 0.308,
+   "g1": 0.446,
+   "g7": 0.223,
+   "reference": "lapua.com product page, 4 PL/HL 7069 (checked 2026-10)"
+  },
+  {
+   "name": "Naturalis N558 170 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 170.0,
+   "diameter_in": 0.308,
+   "g1": 0.354,
+   "g7": 0.177,
+   "reference": "lapua.com product page, N PL 7105 (checked 2026-10)"
+  },
+  {
+   "name": "Lock Base B476 170 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 170.0,
+   "diameter_in": 0.308,
+   "g1": 0.498,
+   "g7": 0.249,
+   "reference": "lapua.com product page, 4 PL/HL 7086 (checked 2026-10)"
+  },
+  {
+   "name": "MaxRange Target OTM GB581 175 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 175.0,
+   "diameter_in": 0.308,
+   "g1": 0.581,
+   "g7": 0.286,
+   "reference": "lapua.com product page, 4PL 7080 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB550 175 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 175.0,
+   "diameter_in": 0.308,
+   "g1": 0.49,
+   "g7": 0.247,
+   "reference": "lapua.com product page, 4 PL/HL 7061 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB554 180 gr",
+   "manufacturer": "Lapua",
+   "caliber": "7mm",
+   "weight_gr": 180.0,
+   "diameter_in": 0.284,
+   "g1": 0.661,
+   "g7": 0.332,
+   "reference": "lapua.com product page, 4 PL/HL 7401 (checked 2026-10)"
+  },
+  {
+   "name": "Naturalis N559 180 gr",
+   "manufacturer": "Lapua",
+   "caliber": "8mm",
+   "weight_gr": 180.0,
+   "diameter_in": 0.323,
+   "g1": 0.357,
+   "g7": 0.179,
+   "reference": "lapua.com product page, N PL 8009 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar OTM GB432 185 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 185.0,
+   "diameter_in": 0.308,
+   "g1": 0.482,
+   "g7": 0.242,
+   "reference": "lapua.com product page, 4 PL/HL 7071 (checked 2026-10)"
+  },
+  {
+   "name": "D46 FMJBT 185 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 185.0,
+   "diameter_in": 0.308,
+   "g1": 0.506,
+   "g7": 0.254,
+   "reference": "lapua.com product page, 4 PL/HL 7019 (checked 2026-10)"
+  },
+  {
+   "name": "Mega SP E415 185 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 185.0,
+   "diameter_in": 0.308,
+   "g1": 0.319,
+   "reference": "lapua.com product page, 4 PL 7213 (checked 2026-10)"
+  },
+  {
+   "name": "Mega SP E401 200 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 200.0,
+   "diameter_in": 0.308,
+   "g1": 0.344,
+   "reference": "lapua.com product page, 4 PL 7047 (checked 2026-10)"
+  },
+  {
+   "name": "Subsonic FMJBT B416 200 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 200.0,
+   "diameter_in": 0.308,
+   "g1": 0.518,
+   "g7": 0.235,
+   "reference": "lapua.com product page, 4 PL 7060 (checked 2026-10)"
+  },
+  {
+   "name": "D166 FMJBT 200 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 200.0,
+   "diameter_in": 0.31,
+   "g1": 0.448,
+   "g7": 0.224,
+   "reference": "lapua.com product page, 4 PL/HL 7005 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar-L OTM GB551 220 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".308",
+   "weight_gr": 220.0,
+   "diameter_in": 0.308,
+   "g1": 0.647,
+   "g7": 0.324,
+   "reference": "lapua.com product page, 4 PL/HL 7062 (checked 2026-10)"
+  },
+  {
+   "name": "Naturalis N508 231 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".338",
+   "weight_gr": 231.0,
+   "diameter_in": 0.338,
+   "g1": 0.373,
+   "reference": "lapua.com product page, N PL 8020 (checked 2026-10)"
+  },
+  {
+   "name": "Naturalis N560 250 gr",
+   "manufacturer": "Lapua",
+   "caliber": "9.3mm",
+   "weight_gr": 250.0,
+   "diameter_in": 0.366,
+   "g1": 0.419,
+   "g7": 0.215,
+   "reference": "lapua.com product page, N PL 9204 (checked 2026-10)"
+  },
+  {
+   "name": "Lock Base FMJBT B408 250 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".338",
+   "weight_gr": 250.0,
+   "diameter_in": 0.338,
+   "g1": 0.625,
+   "g7": 0.31,
+   "reference": "lapua.com product page, 4 PL/HL 8012 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar OTM GB488 250 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".338",
+   "weight_gr": 250.0,
+   "diameter_in": 0.338,
+   "g1": 0.648,
+   "g7": 0.322,
+   "reference": "lapua.com product page, 4 PL 8017 (checked 2026-10)"
+  },
+  {
+   "name": "Mega SP E433 285 gr",
+   "manufacturer": "Lapua",
+   "caliber": "9.3mm",
+   "weight_gr": 285.0,
+   "diameter_in": 0.366,
+   "g1": 0.339,
+   "reference": "lapua.com product page, 4 PL 9017 (checked 2026-10)"
+  },
+  {
+   "name": "Scenar OTM GB528 300 gr",
+   "manufacturer": "Lapua",
+   "caliber": ".338",
+   "weight_gr": 300.0,
+   "diameter_in": 0.338,
+   "g1": 0.736,
+   "g7": 0.368,
+   "reference": "lapua.com product page, 4 PL 8013 (checked 2026-10)"
+  }
+ ]
+}

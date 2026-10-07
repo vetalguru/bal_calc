@@ -1,0 +1,1372 @@
+{
+ "bullets": [
+  {
+   "name": "ELD Match 73 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".224",
+   "weight_gr": 73.0,
+   "diameter_in": 0.224,
+   "g1": 0.389,
+   "g7": 0.195,
+   "g7_bands": [
+    [
+     2512,
+     0.2
+    ],
+    [
+     2233,
+     0.195
+    ],
+    [
+     1954,
+     0.192
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 75 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".224",
+   "weight_gr": 75.0,
+   "diameter_in": 0.224,
+   "g1": 0.459,
+   "g7": 0.23,
+   "g7_bands": [
+    [
+     2512,
+     0.235
+    ],
+    [
+     2233,
+     0.23
+    ],
+    [
+     1954,
+     0.222
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 80 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".224",
+   "weight_gr": 80.0,
+   "diameter_in": 0.224,
+   "g1": 0.477,
+   "g7": 0.239,
+   "g7_bands": [
+    [
+     2512,
+     0.244
+    ],
+    [
+     2233,
+     0.239
+    ],
+    [
+     1954,
+     0.232
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 88 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".224",
+   "weight_gr": 88.0,
+   "diameter_in": 0.224,
+   "g1": 0.534,
+   "g7": 0.268,
+   "g7_bands": [
+    [
+     2512,
+     0.274
+    ],
+    [
+     2233,
+     0.268
+    ],
+    [
+     1954,
+     0.266
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 108 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6mm",
+   "weight_gr": 108.0,
+   "diameter_in": 0.243,
+   "g1": 0.526,
+   "g7": 0.264,
+   "g7_bands": [
+    [
+     2512,
+     0.27
+    ],
+    [
+     2233,
+     0.264
+    ],
+    [
+     1954,
+     0.261
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 100 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 100.0,
+   "diameter_in": 0.264,
+   "g1": 0.377,
+   "g7": 0.189,
+   "g7_bands": [
+    [
+     2512,
+     0.194
+    ],
+    [
+     2233,
+     0.189
+    ],
+    [
+     1954,
+     0.186
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 120 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 120.0,
+   "diameter_in": 0.264,
+   "g1": 0.465,
+   "g7": 0.233,
+   "g7_bands": [
+    [
+     2512,
+     0.245
+    ],
+    [
+     2233,
+     0.233
+    ],
+    [
+     1954,
+     0.227
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 123 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 123.0,
+   "diameter_in": 0.264,
+   "g1": 0.493,
+   "g7": 0.247,
+   "g7_bands": [
+    [
+     2512,
+     0.255
+    ],
+    [
+     2233,
+     0.247
+    ],
+    [
+     1954,
+     0.242
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 130 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 130.0,
+   "diameter_in": 0.264,
+   "g1": 0.542,
+   "g7": 0.272,
+   "g7_bands": [
+    [
+     2512,
+     0.279
+    ],
+    [
+     2233,
+     0.272
+    ],
+    [
+     1954,
+     0.269
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 140 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.264,
+   "g1": 0.637,
+   "g7": 0.32,
+   "g7_bands": [
+    [
+     2512,
+     0.326
+    ],
+    [
+     2233,
+     0.32
+    ],
+    [
+     1954,
+     0.31
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 147 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 147.0,
+   "diameter_in": 0.264,
+   "g1": 0.662,
+   "g7": 0.332,
+   "g7_bands": [
+    [
+     2512,
+     0.351
+    ],
+    [
+     2233,
+     0.332
+    ],
+    [
+     1954,
+     0.321
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 162 gr",
+   "manufacturer": "Hornady",
+   "caliber": "7mm",
+   "weight_gr": 162.0,
+   "diameter_in": 0.284,
+   "g1": 0.655,
+   "g7": 0.329,
+   "g7_bands": [
+    [
+     2512,
+     0.338
+    ],
+    [
+     2233,
+     0.329
+    ],
+    [
+     1954,
+     0.32
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 180 gr (1:8.75 twist)",
+   "manufacturer": "Hornady",
+   "caliber": "7mm",
+   "weight_gr": 180.0,
+   "diameter_in": 0.284,
+   "g1": 0.748,
+   "g7": 0.376,
+   "g7_bands": [
+    [
+     2512,
+     0.391
+    ],
+    [
+     2233,
+     0.376
+    ],
+    [
+     1954,
+     0.368
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 180 gr (1:7.5 twist)",
+   "manufacturer": "Hornady",
+   "caliber": "7mm",
+   "weight_gr": 180.0,
+   "diameter_in": 0.284,
+   "g1": 0.812,
+   "g7": 0.408,
+   "g7_bands": [
+    [
+     2512,
+     0.411
+    ],
+    [
+     2233,
+     0.408
+    ],
+    [
+     1954,
+     0.394
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 155 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 155.0,
+   "diameter_in": 0.308,
+   "g1": 0.451,
+   "g7": 0.227,
+   "g7_bands": [
+    [
+     2512,
+     0.232
+    ],
+    [
+     2233,
+     0.227
+    ],
+    [
+     1954,
+     0.221
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 168 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 168.0,
+   "diameter_in": 0.308,
+   "g1": 0.516,
+   "g7": 0.259,
+   "g7_bands": [
+    [
+     2512,
+     0.263
+    ],
+    [
+     2233,
+     0.259
+    ],
+    [
+     1954,
+     0.251
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 178 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 178.0,
+   "diameter_in": 0.308,
+   "g1": 0.527,
+   "g7": 0.265,
+   "g7_bands": [
+    [
+     2512,
+     0.275
+    ],
+    [
+     2233,
+     0.265
+    ],
+    [
+     1954,
+     0.254
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 195 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 195.0,
+   "diameter_in": 0.308,
+   "g1": 0.573,
+   "g7": 0.288,
+   "g7_bands": [
+    [
+     2512,
+     0.294
+    ],
+    [
+     2233,
+     0.288
+    ],
+    [
+     1954,
+     0.285
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 208 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 208.0,
+   "diameter_in": 0.308,
+   "g1": 0.683,
+   "g7": 0.343,
+   "g7_bands": [
+    [
+     2512,
+     0.348
+    ],
+    [
+     2233,
+     0.343
+    ],
+    [
+     1954,
+     0.337
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 225 gr (1:10 twist)",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 225.0,
+   "diameter_in": 0.308,
+   "g1": 0.752,
+   "g7": 0.378,
+   "g7_bands": [
+    [
+     2512,
+     0.391
+    ],
+    [
+     2233,
+     0.378
+    ],
+    [
+     1954,
+     0.362
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 225 gr (1:7 twist)",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 225.0,
+   "diameter_in": 0.308,
+   "g1": 0.782,
+   "g7": 0.393,
+   "g7_bands": [
+    [
+     2512,
+     0.402
+    ],
+    [
+     2233,
+     0.393
+    ],
+    [
+     1954,
+     0.377
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 285 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".338",
+   "weight_gr": 285.0,
+   "diameter_in": 0.338,
+   "g1": 0.814,
+   "g7": 0.409,
+   "g7_bands": [
+    [
+     2512,
+     0.417
+    ],
+    [
+     2233,
+     0.409
+    ],
+    [
+     1954,
+     0.4
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD Match 134 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".257",
+   "weight_gr": 134.0,
+   "diameter_in": 0.257,
+   "g1": 0.638,
+   "g7": 0.32,
+   "g7_bands": [
+    [
+     2512,
+     0.325
+    ],
+    [
+     2233,
+     0.32
+    ],
+    [
+     1954,
+     0.318
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 90 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6mm",
+   "weight_gr": 90.0,
+   "diameter_in": 0.243,
+   "g1": 0.402,
+   "g7": 0.202,
+   "g7_bands": [
+    [
+     2512,
+     0.206
+    ],
+    [
+     2233,
+     0.202
+    ],
+    [
+     1954,
+     0.201
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 103 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6mm",
+   "weight_gr": 103.0,
+   "diameter_in": 0.243,
+   "g1": 0.505,
+   "g7": 0.253,
+   "g7_bands": [
+    [
+     2512,
+     0.258
+    ],
+    [
+     2233,
+     0.253
+    ],
+    [
+     1954,
+     0.251
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 110 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".257",
+   "weight_gr": 110.0,
+   "diameter_in": 0.257,
+   "g1": 0.457,
+   "g7": 0.229,
+   "g7_bands": [
+    [
+     2512,
+     0.234
+    ],
+    [
+     2233,
+     0.229
+    ],
+    [
+     1954,
+     0.227
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 143 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 143.0,
+   "diameter_in": 0.264,
+   "g1": 0.604,
+   "g7": 0.303,
+   "g7_bands": [
+    [
+     2512,
+     0.314
+    ],
+    [
+     2233,
+     0.303
+    ],
+    [
+     1954,
+     0.294
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 145 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".277",
+   "weight_gr": 145.0,
+   "diameter_in": 0.277,
+   "g1": 0.521,
+   "g7": 0.262,
+   "g7_bands": [
+    [
+     2512,
+     0.27
+    ],
+    [
+     2233,
+     0.262
+    ],
+    [
+     1954,
+     0.257
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 150 gr",
+   "manufacturer": "Hornady",
+   "caliber": "7mm",
+   "weight_gr": 150.0,
+   "diameter_in": 0.284,
+   "g1": 0.563,
+   "g7": 0.283,
+   "g7_bands": [
+    [
+     2512,
+     0.289
+    ],
+    [
+     2233,
+     0.283
+    ],
+    [
+     1954,
+     0.281
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 162 gr",
+   "manufacturer": "Hornady",
+   "caliber": "7mm",
+   "weight_gr": 162.0,
+   "diameter_in": 0.284,
+   "g1": 0.626,
+   "g7": 0.314,
+   "g7_bands": [
+    [
+     2512,
+     0.318
+    ],
+    [
+     2233,
+     0.314
+    ],
+    [
+     1954,
+     0.308
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 175 gr",
+   "manufacturer": "Hornady",
+   "caliber": "7mm",
+   "weight_gr": 175.0,
+   "diameter_in": 0.284,
+   "g1": 0.683,
+   "g7": 0.343,
+   "g7_bands": [
+    [
+     2512,
+     0.347
+    ],
+    [
+     2233,
+     0.343
+    ],
+    [
+     1954,
+     0.341
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 178 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 178.0,
+   "diameter_in": 0.308,
+   "g1": 0.543,
+   "g7": 0.273,
+   "g7_bands": [
+    [
+     2512,
+     0.278
+    ],
+    [
+     2233,
+     0.273
+    ],
+    [
+     1954,
+     0.271
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 200 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 200.0,
+   "diameter_in": 0.308,
+   "g1": 0.588,
+   "g7": 0.295,
+   "g7_bands": [
+    [
+     2512,
+     0.301
+    ],
+    [
+     2233,
+     0.295
+    ],
+    [
+     1954,
+     0.291
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 212 gr (1:10 twist)",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 212.0,
+   "diameter_in": 0.308,
+   "g1": 0.649,
+   "g7": 0.326,
+   "g7_bands": [
+    [
+     2512,
+     0.334
+    ],
+    [
+     2233,
+     0.326
+    ],
+    [
+     1954,
+     0.324
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 212 gr (1:7 twist)",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 212.0,
+   "diameter_in": 0.308,
+   "g1": 0.686,
+   "g7": 0.345,
+   "g7_bands": [
+    [
+     2512,
+     0.354
+    ],
+    [
+     2233,
+     0.345
+    ],
+    [
+     1954,
+     0.341
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 220 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 220.0,
+   "diameter_in": 0.308,
+   "g1": 0.643,
+   "g7": 0.323,
+   "g7_bands": [
+    [
+     2512,
+     0.329
+    ],
+    [
+     2233,
+     0.323
+    ],
+    [
+     1954,
+     0.323
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 230 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".338",
+   "weight_gr": 230.0,
+   "diameter_in": 0.338,
+   "g1": 0.616,
+   "g7": 0.309,
+   "g7_bands": [
+    [
+     2512,
+     0.31
+    ],
+    [
+     2233,
+     0.309
+    ],
+    [
+     1954,
+     0.306
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-X 270 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".338",
+   "weight_gr": 270.0,
+   "diameter_in": 0.338,
+   "g1": 0.745,
+   "g7": 0.374,
+   "g7_bands": [
+    [
+     2512,
+     0.381
+    ],
+    [
+     2233,
+     0.374
+    ],
+    [
+     1954,
+     0.372
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 76 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".224",
+   "weight_gr": 76.0,
+   "diameter_in": 0.224,
+   "g1": 0.405,
+   "g7": 0.203,
+   "g7_bands": [
+    [
+     2512,
+     0.208
+    ],
+    [
+     2233,
+     0.203
+    ],
+    [
+     1954,
+     0.199
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 90 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".224",
+   "weight_gr": 90.0,
+   "diameter_in": 0.224,
+   "g1": 0.575,
+   "g7": 0.289,
+   "g7_bands": [
+    [
+     2512,
+     0.295
+    ],
+    [
+     2233,
+     0.289
+    ],
+    [
+     1954,
+     0.28
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 110 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6mm",
+   "weight_gr": 110.0,
+   "diameter_in": 0.243,
+   "g1": 0.595,
+   "g7": 0.299,
+   "g7_bands": [
+    [
+     2512,
+     0.304
+    ],
+    [
+     2233,
+     0.299
+    ],
+    [
+     1954,
+     0.294
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 120 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6mm",
+   "weight_gr": 120.0,
+   "diameter_in": 0.243,
+   "g1": 0.664,
+   "g7": 0.333,
+   "g7_bands": [
+    [
+     2512,
+     0.34
+    ],
+    [
+     2233,
+     0.333
+    ],
+    [
+     1954,
+     0.328
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 135 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 135.0,
+   "diameter_in": 0.264,
+   "g1": 0.626,
+   "g7": 0.314,
+   "g7_bands": [
+    [
+     2512,
+     0.321
+    ],
+    [
+     2233,
+     0.314
+    ],
+    [
+     1954,
+     0.309
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 153 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 153.0,
+   "diameter_in": 0.264,
+   "g1": 0.698,
+   "g7": 0.351,
+   "g7_bands": [
+    [
+     2512,
+     0.355
+    ],
+    [
+     2233,
+     0.351
+    ],
+    [
+     1954,
+     0.346
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 166 gr",
+   "manufacturer": "Hornady",
+   "caliber": "7mm",
+   "weight_gr": 166.0,
+   "diameter_in": 0.284,
+   "g1": 0.653,
+   "g7": 0.326,
+   "g7_bands": [
+    [
+     2512,
+     0.332
+    ],
+    [
+     2233,
+     0.326
+    ],
+    [
+     1954,
+     0.325
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 190 gr",
+   "manufacturer": "Hornady",
+   "caliber": "7mm",
+   "weight_gr": 190.0,
+   "diameter_in": 0.284,
+   "g1": 0.83,
+   "g7": 0.417,
+   "g7_bands": [
+    [
+     2512,
+     0.422
+    ],
+    [
+     2233,
+     0.417
+    ],
+    [
+     1954,
+     0.414
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 176 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 176.0,
+   "diameter_in": 0.308,
+   "g1": 0.552,
+   "g7": 0.277,
+   "g7_bands": [
+    [
+     2512,
+     0.284
+    ],
+    [
+     2233,
+     0.277
+    ],
+    [
+     1954,
+     0.272
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 177 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 177.0,
+   "diameter_in": 0.308,
+   "g1": 0.556,
+   "g7": 0.279,
+   "g7_bands": [
+    [
+     2512,
+     0.285
+    ],
+    [
+     2233,
+     0.279
+    ],
+    [
+     1954,
+     0.276
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 230 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 230.0,
+   "diameter_in": 0.308,
+   "g1": 0.813,
+   "g7": 0.408,
+   "g7_bands": [
+    [
+     2512,
+     0.414
+    ],
+    [
+     2233,
+     0.408
+    ],
+    [
+     1954,
+     0.408
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 250 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 250.0,
+   "diameter_in": 0.308,
+   "g1": 0.877,
+   "g7": 0.44,
+   "g7_bands": [
+    [
+     2512,
+     0.442
+    ],
+    [
+     2233,
+     0.44
+    ],
+    [
+     1954,
+     0.439
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 300 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".338",
+   "weight_gr": 300.0,
+   "diameter_in": 0.338,
+   "g1": 0.86,
+   "g7": 0.432,
+   "g7_bands": [
+    [
+     2512,
+     0.435
+    ],
+    [
+     2233,
+     0.432
+    ],
+    [
+     1954,
+     0.428
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 390 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".375",
+   "weight_gr": 390.0,
+   "diameter_in": 0.375,
+   "g1": 0.974,
+   "g7": 0.489,
+   "g7_bands": [
+    [
+     2512,
+     0.497
+    ],
+    [
+     2233,
+     0.489
+    ],
+    [
+     1954,
+     0.488
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "A-Tip Match 500 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".416",
+   "weight_gr": 500.0,
+   "diameter_in": 0.416,
+   "g1": 0.964,
+   "g7": 0.484,
+   "g7_bands": [
+    [
+     2512,
+     0.493
+    ],
+    [
+     2233,
+     0.484
+    ],
+    [
+     1954,
+     0.476
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-VT 62 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".224",
+   "weight_gr": 62.0,
+   "diameter_in": 0.224,
+   "g1": 0.389,
+   "g7": 0.195,
+   "g7_bands": [
+    [
+     2512,
+     0.199
+    ],
+    [
+     2233,
+     0.195
+    ],
+    [
+     1954,
+     0.194
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-VT 80 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6mm",
+   "weight_gr": 80.0,
+   "diameter_in": 0.243,
+   "g1": 0.406,
+   "g7": 0.204,
+   "g7_bands": [
+    [
+     2512,
+     0.206
+    ],
+    [
+     2233,
+     0.204
+    ],
+    [
+     1954,
+     0.203
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-VT 100 gr",
+   "manufacturer": "Hornady",
+   "caliber": "6.5mm",
+   "weight_gr": 100.0,
+   "diameter_in": 0.264,
+   "g1": 0.441,
+   "g7": 0.222,
+   "g7_bands": [
+    [
+     2512,
+     0.226
+    ],
+    [
+     2233,
+     0.222
+    ],
+    [
+     1954,
+     0.218
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  },
+  {
+   "name": "ELD-VT 174 gr",
+   "manufacturer": "Hornady",
+   "caliber": ".308",
+   "weight_gr": 174.0,
+   "diameter_in": 0.308,
+   "g1": 0.564,
+   "g7": 0.283,
+   "g7_bands": [
+    [
+     2512,
+     0.289
+    ],
+    [
+     2233,
+     0.283
+    ],
+    [
+     1954,
+     0.283
+    ]
+   ],
+   "reference": "hornady.com/BC, Doppler BCs at Mach 2.25/2.0/1.75 (checked 2026-10)"
+  }
+ ]
+}

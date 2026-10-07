@@ -5,10 +5,13 @@ folder (D:/Projects/ballistic_calc/Data/libs by default).
 
 * ammo/     - BallisticCalculator legacy cartridges (*.ammo, LGPL-2.1)
 * reticle/  - BallisticCalculator reticles (*.reticle, LGPL-2.1)
-* drg/      - Doppler-radar drag functions (*.drg): Lapua (newest copy of
-              each bullet wins) and the readable small-arms curves of
-              Exterior Ballistics' "Others"; encoded and artillery files
-              are left out.
+* drg/      - Doppler-radar drag functions (*.drg): the readable small-arms
+              curves of Exterior Ballistics' "Others"; encoded and artillery
+              files are left out. Lapua's curves are not bundled: Lapua gave
+              no general permission to redistribute them (users import the
+              files they download from Lapua).
+
+published_bullets.json is built by collect_bullets.py.
 """
 
 import pathlib
@@ -20,8 +23,6 @@ HERE = pathlib.Path(__file__).resolve().parent
 LIBS = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "D:/Projects/ballistic_calc/Data/libs")
 BC = LIBS / "BallisticCalculator1" / "data"
 EB = LIBS / "artill" / "misc" / "extra" / "Exterior Ballistics 2.5" / "Drag Functions"
-LAPUA_DIRS = [EB / "Lapua - November 2015", LIBS / "artill" / "misc" / "extra" / "lapua" / "drag",
-              EB / "Lapua - old"]
 SMALL_ARMS_MAX_DIAMETER_M = 0.0155  # up to 14.5 mm
 
 
@@ -87,17 +88,6 @@ def main():
 
     seen = set()
     drg = 0
-    for d in LAPUA_DIRS:
-        for f in sorted(d.glob("*.drg")):
-            header = drg_header(f)
-            if "Encoded" in header:
-                continue
-            _, name, _, _, _ = drg_fields(header)
-            if name in seen:
-                continue
-            seen.add(name)
-            shutil.copyfile(f, HERE / "drg" / (safe(name) + ".drg"))
-            drg += 1
     for f in sorted((EB / "Others").glob("*.drg")):
         header = drg_header(f)
         if "Encoded" in header:

@@ -1,0 +1,424 @@
+{
+ "bullets": [
+  {
+   "name": "RDF 70 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 70.0,
+   "diameter_in": 0.224,
+   "length_in": 0.965,
+   "g1": 0.416,
+   "g7": 0.211,
+   "reference": "nosler.com product page, #53066 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 77 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 77.0,
+   "diameter_in": 0.224,
+   "length_in": 1.07,
+   "g1": 0.454,
+   "g7": 0.228,
+   "reference": "nosler.com product page, #53452 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 85 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 85.0,
+   "diameter_in": 0.224,
+   "length_in": 1.135,
+   "g1": 0.498,
+   "g7": 0.245,
+   "reference": "nosler.com product page, #53441 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 105 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 105.0,
+   "diameter_in": 0.243,
+   "length_in": 1.25,
+   "g1": 0.571,
+   "g7": 0.28,
+   "reference": "nosler.com product page, #53410 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 115 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 115.0,
+   "diameter_in": 0.243,
+   "g1": 0.634,
+   "g7": 0.312,
+   "reference": "nosler.com product page, #53507 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 130 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 130.0,
+   "diameter_in": 0.264,
+   "length_in": 1.333,
+   "g1": 0.615,
+   "g7": 0.307,
+   "reference": "nosler.com product page, #53505 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.264,
+   "length_in": 1.42,
+   "g1": 0.658,
+   "g7": 0.33,
+   "reference": "nosler.com product page, #49824 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 185 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 185.0,
+   "diameter_in": 0.284,
+   "length_in": 1.54,
+   "g1": 0.719,
+   "g7": 0.357,
+   "reference": "nosler.com product page, #53432 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 168.0,
+   "diameter_in": 0.308,
+   "g1": 0.505,
+   "g7": 0.253,
+   "reference": "nosler.com product page, #53182 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 175 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 175.0,
+   "diameter_in": 0.308,
+   "length_in": 1.33,
+   "g1": 0.536,
+   "g7": 0.27,
+   "reference": "nosler.com product page, #53170 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 210 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 210.0,
+   "diameter_in": 0.308,
+   "length_in": 1.516,
+   "g1": 0.707,
+   "g7": 0.348,
+   "reference": "nosler.com product page, #53434 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 300 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 300.0,
+   "diameter_in": 0.338,
+   "g1": 0.826,
+   "g7": 0.415,
+   "reference": "nosler.com product page, #53445 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 129 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 129.0,
+   "diameter_in": 0.264,
+   "length_in": 1.37,
+   "g1": 0.53,
+   "g7": 0.267,
+   "reference": "nosler.com product page, #58943 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 142 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 142.0,
+   "diameter_in": 0.264,
+   "length_in": 1.445,
+   "g1": 0.625,
+   "g7": 0.315,
+   "reference": "nosler.com product page, #58922 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 150.0,
+   "diameter_in": 0.264,
+   "length_in": 1.495,
+   "g1": 0.634,
+   "g7": 0.319,
+   "reference": "nosler.com product page, #58930 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 150.0,
+   "diameter_in": 0.277,
+   "length_in": 1.39,
+   "g1": 0.591,
+   "g7": 0.298,
+   "reference": "nosler.com product page, #58836 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 150.0,
+   "diameter_in": 0.284,
+   "length_in": 1.4,
+   "g1": 0.546,
+   "g7": 0.275,
+   "reference": "nosler.com product page, #58734 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 168.0,
+   "diameter_in": 0.284,
+   "length_in": 1.5,
+   "g1": 0.616,
+   "g7": 0.31,
+   "reference": "nosler.com product page, #58623 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 175 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 175.0,
+   "diameter_in": 0.284,
+   "length_in": 1.54,
+   "g1": 0.648,
+   "g7": 0.326,
+   "reference": "nosler.com product page, #58517 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 168.0,
+   "diameter_in": 0.308,
+   "length_in": 1.365,
+   "g1": 0.525,
+   "g7": 0.265,
+   "reference": "nosler.com product page, #58455 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 190 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 190.0,
+   "diameter_in": 0.308,
+   "length_in": 1.48,
+   "g1": 0.597,
+   "g7": 0.301,
+   "reference": "nosler.com product page, #58456 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 210 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 210.0,
+   "diameter_in": 0.308,
+   "length_in": 1.57,
+   "g1": 0.661,
+   "g7": 0.333,
+   "reference": "nosler.com product page, #58317 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 265 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 265.0,
+   "diameter_in": 0.338,
+   "length_in": 1.7,
+   "g1": 0.732,
+   "g7": 0.369,
+   "reference": "nosler.com product page, #58454 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond Long Range 300 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 300.0,
+   "diameter_in": 0.338,
+   "length_in": 1.875,
+   "g1": 0.785,
+   "g7": 0.394,
+   "reference": "nosler.com product page, #58518 (checked 2026-10)"
+  },
+  {
+   "name": "Custom Competition HPBT 52 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 52.0,
+   "diameter_in": 0.224,
+   "length_in": 0.73,
+   "g1": 0.22,
+   "reference": "nosler.com product page, #53294 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 69 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 69.0,
+   "diameter_in": 0.224,
+   "length_in": 0.9,
+   "g1": 0.305,
+   "reference": "nosler.com product page, #17101 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 77 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 77.0,
+   "diameter_in": 0.224,
+   "length_in": 0.98,
+   "g1": 0.34,
+   "reference": "nosler.com product page, #22421 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 80 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 80.0,
+   "diameter_in": 0.224,
+   "length_in": 1.065,
+   "g1": 0.415,
+   "reference": "nosler.com product page, #25116 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 107 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 107.0,
+   "diameter_in": 0.243,
+   "length_in": 1.24,
+   "g1": 0.525,
+   "reference": "nosler.com product page, #49742 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 123 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 123.0,
+   "diameter_in": 0.264,
+   "length_in": 1.2,
+   "g1": 0.51,
+   "reference": "nosler.com product page, #53415 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.264,
+   "length_in": 1.307,
+   "g1": 0.529,
+   "reference": "nosler.com product page, #26725 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 115 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 115.0,
+   "diameter_in": 0.277,
+   "length_in": 0.965,
+   "g1": 0.375,
+   "reference": "nosler.com product page, #45357 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 168.0,
+   "diameter_in": 0.284,
+   "length_in": 1.29,
+   "g1": 0.52,
+   "reference": "nosler.com product page, #53418 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 155 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 155.0,
+   "diameter_in": 0.308,
+   "length_in": 1.145,
+   "g1": 0.45,
+   "reference": "nosler.com product page, #53155 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 168.0,
+   "diameter_in": 0.308,
+   "length_in": 1.2,
+   "g1": 0.462,
+   "reference": "nosler.com product page, #53164 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 175 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 175.0,
+   "diameter_in": 0.308,
+   "length_in": 1.24,
+   "g1": 0.505,
+   "reference": "nosler.com product page, #53952 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 190 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 190.0,
+   "diameter_in": 0.308,
+   "length_in": 1.343,
+   "g1": 0.53,
+   "reference": "nosler.com product page, #53412 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 220 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 220.0,
+   "diameter_in": 0.308,
+   "g1": 0.69,
+   "reference": "nosler.com product page, #53154 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 200 gr",
+   "manufacturer": "Nosler",
+   "caliber": "8mm",
+   "weight_gr": 200.0,
+   "diameter_in": 0.323,
+   "length_in": 1.325,
+   "g1": 0.52,
+   "reference": "nosler.com product page, #49524 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 300 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 300.0,
+   "diameter_in": 0.338,
+   "length_in": 1.725,
+   "g1": 0.8,
+   "reference": "nosler.com product page, #53515 (checked 2026-10)"
+  }
+ ]
+}
