@@ -181,6 +181,10 @@ TEST_F(Bridge, MovingTarget) {
     const json table = Ok("rangeTable");
     EXPECT_LT(table.at("rows").back().at("lead").get<double>(), sol.at("lead").get<double>());
     EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mps");
+    Ok("setConditions", {{"targetSpeedUnit", "mph"}});
+    EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mph");
+    Ok("setConditions", {{"targetSpeedUnit", "knots"}}); // not a unit the app has: kept as it was
+    EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mph");
 }
 
 TEST_F(Bridge, CompareCurves) {
@@ -541,7 +545,7 @@ TEST_F(Bridge, ShareRifleAndCartridge) {
     const json st = Sample();
     const int rifle = st.at("currentRifleId");
     const json e = Ok("exportJson", {{"kind", "rifle"}, {"id", rifle}});
-    EXPECT_EQ(e.at("fileName"), "Rifle.balcalc.json");
+    EXPECT_EQ(e.at("fileName"), "Rifle.holdmark.json");
     EXPECT_NE(e.at("json").get<std::string>().find("balcalc-rifle"), std::string::npos);
     const json after = Ok("importShared", {{"text", e.at("json")}});
     EXPECT_EQ(after.at("rifles").size(), 2U);

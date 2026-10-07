@@ -44,7 +44,7 @@ object QrShare {
         val have get() = if (plain != null) 1 else parts.size
         val complete get() = plain != null || (total > 0 && parts.size == total)
 
-        /** False when [text] is not a BalCalc code (or belongs to another set of parts). */
+        /** False when [text] is not a Holdmark code (or belongs to another set of parts). */
         fun add(text: String): Boolean {
             val t = text.trim()
             if (t.startsWith("{")) {

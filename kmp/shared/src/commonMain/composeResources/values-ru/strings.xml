@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Ported from app/i18n/balcalc_ru.ts; see values/strings.xml. -->
 <resources>
-    <string name="app_name">BalCalc</string>
+    <string name="app_name">Holdmark</string>
     <string name="nav_solution">Решение</string>
     <string name="nav_solution_short">Решение</string>
     <string name="nav_table">Таблица дистанций</string>
@@ -293,7 +293,7 @@
     <string name="unit_mph">mph</string>
     <string name="moves_left">← Влево</string>
     <string name="moves_right">Вправо →</string>
-    <string name="target_angle">Угол к линии огня (90 = поперёк)</string>
+    <string name="target_angle">Угол движения</string>
     <string name="lead_value">Упреждение: %1$s</string>
     <string name="lead_moves">За время полёта цель сместится на %1$s м.</string>
     <string name="lead_total">По горизонтали с упреждением: %1$s</string>
@@ -433,7 +433,7 @@
     <string name="qr_scan">Сканировать камерой</string>
     <string name="qr_picture">С картинки</string>
     <string name="qr_progress">Прочитано частей: %1$s из %2$s — сканируйте следующую.</string>
-    <string name="qr_not_found">QR-код BalCalc не найден.</string>
+    <string name="qr_not_found">QR-код Holdmark не найден.</string>
     <string name="photo">Фото</string>
     <string name="photo_choose">Выбрать картинку</string>
     <string name="photo_take">Сфотографировать</string>
@@ -494,7 +494,7 @@
     <string name="sensor_compass">С компаса</string>
     <string name="sensor_reading">Измеряю…</string>
     <string name="sensor_no_pressure">Барометр не дал показаний.</string>
-    <string name="sensor_no_location">Нет места: проверьте, что геолокация включена и разрешена для BalCalc.</string>
+    <string name="sensor_no_location">Нет места: проверьте, что геолокация включена и разрешена для Holdmark.</string>
     <string name="sensor_pressure_set">Барометр: %1$s гПа</string>
     <string name="sensor_location_set">Место (±%1$s м): высота %2$s м, широта %3$s°</string>
     <string name="sensor_location_no_alt">Место (±%1$s м): широта %2$s°; высоту телефон не дал</string>
@@ -514,6 +514,7 @@
     <string name="cant_hint">Наклон оружия вбок: по часовой стрелке +</string>
     <string name="wind_direction_hint">Откуда дует ветер: 0° — от цели (в лицо), 90° — справа, 180° — в спину, 270° — слева</string>
     <string name="wind_clock_short">%1$s ч.</string>
+    <string name="target_angle_hint">Угол α между линией огня и тем, куда идёт цель: 0° — от вас, 90° — поперёк, 180° — на вас. Сторону задают кнопки «Влево» и «Вправо»</string>
     <string name="chart_computing">Считаю…</string>
     <string name="chart_no_data">Нет данных для графика: выберите винтовку и патрон</string>
     <string name="chart_target">дальность до цели</string>

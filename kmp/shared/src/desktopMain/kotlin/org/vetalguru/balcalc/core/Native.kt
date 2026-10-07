@@ -29,11 +29,11 @@ fun desktopEngine(): Engine {
 }
 
 /**
- * Same file as the Qt version (QStandardPaths::AppDataLocation for
- * organisation "vetalguru", application "BalCalc"); BALCALC_DB overrides.
+ * The app's data folder (%APPDATA% on Windows, XDG_DATA_HOME on Linux), in
+ * vetalguru/Holdmark; HOLDMARK_DB (or the older BALCALC_DB) overrides.
  */
 fun desktopDatabasePath(): String {
-    System.getenv("BALCALC_DB")?.let { return it }
+    (System.getenv("HOLDMARK_DB") ?: System.getenv("BALCALC_DB"))?.let { return it }
     val windows = System.getProperty("os.name").startsWith("Windows")
     val base = if (windows) {
         File(System.getenv("APPDATA"))
@@ -41,9 +41,25 @@ fun desktopDatabasePath(): String {
         System.getenv("XDG_DATA_HOME")?.let(::File)
             ?: File(System.getProperty("user.home"), ".local/share")
     }
-    val dir = File(base, "vetalguru/BalCalc")
+    return databaseIn(base)
+}
+
+/**
+ * vetalguru/Holdmark/holdmark.db under [base]. The app was BalCalc before:
+ * the first start copies its database (and SQLite's journal files) over, so
+ * rifles and cartridges stay; the old folder is left as it was.
+ */
+fun databaseIn(base: File): String {
+    val dir = File(base, "vetalguru/Holdmark")
     dir.mkdirs()
-    return File(dir, "balcalc.db").path
+    val db = File(dir, "holdmark.db")
+    val old = File(base, "vetalguru/BalCalc/balcalc.db")
+    if (!db.exists() && old.exists()) {
+        for (suffix in listOf("", "-wal", "-shm")) {
+            File(old.path + suffix).takeIf { it.exists() }?.copyTo(File(db.path + suffix))
+        }
+    }
+    return db.path
 }
 
 /** data/seed copied into the resources under seed/. */

@@ -17,7 +17,7 @@ comes with the wrapper.
 .\tools\android-release.ps1 -Aab       # ... plus the Google Play bundle
 ```
 
-The script keeps its settings in `%APPDATA%\BalCalc\android-signing.json`:
+The script keeps its settings in `%APPDATA%\Holdmark\android-signing.json`:
 keystore path, alias and the password encrypted with Windows DPAPI (only your
 Windows account on this PC can decrypt it). Nothing goes into the repository.
 Back up the keystore file and remember its password: an app update must be
@@ -54,9 +54,11 @@ emulators and testing (`kmp/androidApp/build/outputs/apk/debug/`).
 
 ## Notes
 
-- The app has the same `applicationId` (`org.vetalguru.balcalc`) as the Qt
-  version and installs over it when signed with the same key: its database
-  (`files/balcalc.db`), selection, units and language carry over.
+- Since the rename to Holdmark the `applicationId` is `org.vetalguru.holdmark`:
+  it installs as a new app beside BalCalc (`org.vetalguru.balcalc`, up to
+  0.4.x), which Android cannot hand its database to. Move rifles and
+  cartridges over with Share → file or QR in BalCalc and Import in Holdmark,
+  then uninstall BalCalc.
 - Version: `versionName` follows `project(VERSION)` of the top-level
   `CMakeLists.txt`; `versionCode` in `kmp/androidApp/build.gradle.kts` must
   grow with every release uploaded to Google Play.

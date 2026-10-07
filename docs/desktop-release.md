@@ -19,10 +19,10 @@ cd kmp
 
 Results in `kmp\desktopApp\build\compose\binaries\main\`:
 
-- `msi\BalCalc-<version>.msi` - installer (Start-menu and desktop shortcuts,
+- `msi\Holdmark-<version>.msi` - installer (Start-menu and desktop shortcuts,
   uninstall in Settings -> Apps); a newer MSI replaces the installed version;
-- `zip\BalCalc-<version>-windows-x64.zip` - portable: unpack anywhere and run
-  `BalCalc\BalCalc.exe`.
+- `zip\Holdmark-<version>-windows-x64.zip` - portable: unpack anywhere and run
+  `Holdmark\Holdmark.exe`.
 
 ## Ubuntu: DEB and ZIP
 
@@ -33,21 +33,22 @@ cd kmp
 ```
 
 Results in `kmp/desktopApp/build/compose/binaries/main/`:
-`deb/balcalc_<version>_amd64.deb` (installs to `/opt/balcalc`, menu entry
-"BalCalc") and `zip/BalCalc-<version>-linux-x64.zip`.
+`deb/holdmark_<version>_amd64.deb` (installs to `/opt/holdmark`, menu entry
+"Holdmark") and `zip/Holdmark-<version>-linux-x64.zip`.
 
 ```bash
-sudo apt install ./kmp/desktopApp/build/compose/binaries/main/deb/balcalc_*_amd64.deb
-sudo apt remove balcalc
+sudo apt install ./kmp/desktopApp/build/compose/binaries/main/deb/holdmark_*_amd64.deb
+sudo apt remove holdmark
 ```
 
 ## Data
 
-The database is the same file the Qt version used, so an update keeps
-rifles, cartridges, shot logs and settings:
-`%APPDATA%\vetalguru\BalCalc\balcalc.db` on Windows,
-`~/.local/share/vetalguru/BalCalc/balcalc.db` on Linux (`BALCALC_DB`
-points the app at another file).
+An update keeps rifles, cartridges, shot logs and settings in
+`%APPDATA%\vetalguru\Holdmark\holdmark.db` on Windows,
+`~/.local/share/vetalguru/Holdmark/holdmark.db` on Linux (`HOLDMARK_DB`
+points the app at another file). On the first start after the rename from
+BalCalc the app copies `vetalguru/BalCalc/balcalc.db` there; the old folder
+stays untouched.
 
 ## Running from the sources
 

@@ -1,4 +1,4 @@
-"""Draws the BalCalc icon and writes every platform size.
+"""Draws the Holdmark icon and writes every platform size.
 
     pip install pillow
     python make_icons.py

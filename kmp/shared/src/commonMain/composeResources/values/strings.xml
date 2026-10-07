@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Navigation -->
-    <string name="app_name">BalCalc</string>
+    <string name="app_name">Holdmark</string>
     <string name="nav_solution">Solution</string>
     <string name="nav_solution_short">Solve</string>
     <string name="nav_table">Range table</string>
@@ -323,7 +323,7 @@
     <string name="unit_mph">mph</string>
     <string name="moves_left">← To the left</string>
     <string name="moves_right">To the right →</string>
-    <string name="target_angle">Angle to the line of fire (90 = straight across)</string>
+    <string name="target_angle">Angle of movement</string>
     <string name="lead_value">Lead: %1$s</string>
     <string name="lead_moves">The target moves %1$s m during the flight.</string>
     <string name="lead_total">Windage with the lead: %1$s</string>
@@ -463,7 +463,7 @@
     <string name="qr_scan">Scan with the camera</string>
     <string name="qr_picture">From a picture</string>
     <string name="qr_progress">%1$s of %2$s parts read: scan the next one.</string>
-    <string name="qr_not_found">No BalCalc QR code found.</string>
+    <string name="qr_not_found">No Holdmark QR code found.</string>
     <string name="photo">Photo</string>
     <string name="photo_choose">Choose a picture</string>
     <string name="photo_take">Take a photo</string>
@@ -524,7 +524,7 @@
     <string name="sensor_compass">From the compass</string>
     <string name="sensor_reading">Reading…</string>
     <string name="sensor_no_pressure">The barometer gave no reading.</string>
-    <string name="sensor_no_location">No location: check that it is on and allowed for BalCalc.</string>
+    <string name="sensor_no_location">No location: check that it is on and allowed for Holdmark.</string>
     <string name="sensor_pressure_set">Barometer: %1$s hPa</string>
     <string name="sensor_location_set">Location (±%1$s m): altitude %2$s m, latitude %3$s°</string>
     <string name="sensor_location_no_alt">Location (±%1$s m): latitude %2$s°; the phone gave no altitude</string>
@@ -544,6 +544,7 @@
     <string name="cant_hint">The rifle tilted sideways: clockwise +</string>
     <string name="wind_direction_hint">Where the wind blows from: 0° from the target (in your face), 90° from the right, 180° from behind, 270° from the left</string>
     <string name="wind_clock_short">%1$s o'clock</string>
+    <string name="target_angle_hint">The angle α between the line of fire and where the target goes: 0° away from you, 90° straight across, 180° toward you. The side is set by Left and Right</string>
     <string name="chart_computing">Calculating…</string>
     <string name="chart_no_data">Nothing to plot: choose a rifle and a cartridge</string>
     <string name="chart_target">range to the target</string>
