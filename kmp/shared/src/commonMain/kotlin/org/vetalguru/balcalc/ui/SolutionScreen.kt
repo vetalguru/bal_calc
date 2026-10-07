@@ -79,6 +79,8 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
     val sampleCartridge = stringResource(Res.string.sample_cartridge_name)
     var logging by remember { mutableStateOf(false) }
     if (logging) LogShotDialog(model, st.conditions.targetRangeM, sol.elevation) { logging = false }
+    var situations by remember { mutableStateOf(false) }
+    if (situations) SituationsDialog(model) { situations = false }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 600.dp
@@ -102,6 +104,12 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
                     onSelect = model::selectCartridge,
                     modifier = Modifier.weight(1f).testTag("cartridgeBox"),
                 )
+            }
+            if (st.rifles.isNotEmpty()) {
+                TextButton(
+                    onClick = { situations = true },
+                    modifier = Modifier.align(Alignment.End).padding(end = 8.dp).testTag("situations"),
+                ) { Text(stringResource(Res.string.situations)) }
             }
 
             Column(

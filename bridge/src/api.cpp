@@ -63,6 +63,7 @@
 //   importShared {text}               → state
 //   importFiles {files:[{name, content}]} → {imported, problems:[{file, message}]}
 //   stationPressure {qnhHpa, altitudeM} → hPa
+//   situations / saveSituation {name} / applySituation {name} → state / deleteSituation {name}
 //   compareCurves {maxRangeM, points, pairs:[{rifleId, cartridgeId}]} → [table + label]
 //   pairOptions                     → [{rifleId, rifleName, cartridges:[{id, name}]}]
 //
@@ -87,6 +88,7 @@ constexpr const char* kLanguageKey = "ui.language";
 constexpr std::size_t kMaxExtraWindZones = 2; // three wind zones in all
 constexpr const char* kTargetSpeedUnitKey = "ui.target_speed_unit";
 constexpr const char* kHoldModeKey = "ui.hold_mode";
+constexpr const char* kSituationsKey = "ui.situations";
 constexpr const char* kTableFromKey = "ui.table.from_m";
 constexpr const char* kTableToKey = "ui.table.to_m";
 constexpr const char* kTableStepKey = "ui.table.step_m";
@@ -122,6 +124,11 @@ Id IdOf(const json& j, const char* key = "id") {
 }
 std::string Str(const json& j, const char* key, const std::string& fallback = "") {
     return j.contains(key) && j.at(key).is_string() ? j.at(key).get<std::string>() : fallback;
+}
+std::string Trim(const std::string& s) {
+    const auto first = s.find_first_not_of(" \t\r\n");
+    const auto last = s.find_last_not_of(" \t\r\n");
+    return first == std::string::npos ? std::string{} : s.substr(first, last - first + 1);
 }
 bool Bool(const json& j, const char* key, bool fallback = false) {
     return j.contains(key) && j.at(key).is_boolean() ? j.at(key).get<bool>() : fallback;
@@ -640,6 +647,92 @@ struct Api::Impl {
         UpdatePair();
     }
 
+    // ---- Situations: a rifle, a cartridge and the conditions, by name -------
+
+    json SituationsStored() {
+        const auto text = Setting(kSituationsKey);
+        if (!text) {
+            return json::array();
+        }
+        json list = json::parse(*text, nullptr, false);
+        return list.is_array() ? list : json::array();
+    }
+
+    bool Exists(Id rifle, Id cartridge) {
+        const auto r = bs::Repository<bs::RifleRecord>(db).Get(rifle);
+        const auto c = bs::Repository<bs::CartridgeRecord>(db).Get(cartridge);
+        return r && r.value() && c && c.value();
+    }
+
+    json Situations() {
+        json out = json::array();
+        for (const json& s : SituationsStored()) {
+            const Id rifle = s.value("rifleId", Id{0});
+            const Id cartridge = s.value("cartridgeId", Id{0});
+            const bool ok = Exists(rifle, cartridge);
+            const auto r = bs::Repository<bs::RifleRecord>(db).Get(rifle);
+            const auto c = bs::Repository<bs::CartridgeRecord>(db).Get(cartridge);
+            out.push_back({{"name", s.value("name", "")},
+                           {"rifleName", ok ? r.value()->name : ""},
+                           {"cartridgeName", ok ? c.value()->name : ""},
+                           {"rangeM", s.value("conditions", json::object()).value("targetRangeM", 0.0)},
+                           {"available", ok}});
+        }
+        return out;
+    }
+
+    json SaveSituation(const std::string& name) {
+        if (name.empty()) {
+            throw Failure("Enter a name for the situation.");
+        }
+        if (profile_id == 0) {
+            throw Failure("Choose a rifle and a cartridge.");
+        }
+        json list = json::array();
+        for (const json& s : SituationsStored()) {
+            if (s.value("name", "") != name) {
+                list.push_back(s);
+            }
+        }
+        list.push_back({{"name", name},
+                        {"rifleId", rifle_id},
+                        {"cartridgeId", cartridge_id},
+                        {"holdMode", hold_mode},
+                        {"conditions", Conditions()}});
+        Put(kSituationsKey, list.dump());
+        return Situations();
+    }
+
+    json ApplySituation(const std::string& name) {
+        for (const json& s : SituationsStored()) {
+            if (s.value("name", "") != name) {
+                continue;
+            }
+            const Id rifle = s.value("rifleId", Id{0});
+            const Id cartridge = s.value("cartridgeId", Id{0});
+            if (!Exists(rifle, cartridge)) {
+                throw Failure("The rifle or cartridge of this situation was deleted.");
+            }
+            Select(rifle, cartridge);
+            SetConditions(s.value("conditions", json::object()));
+            hold_mode = al::ToString(al::HoldModeFromString(s.value("holdMode", hold_mode)));
+            Put(kHoldModeKey, hold_mode);
+            return State();
+        }
+        throw Failure("No situation of this name.");
+    }
+
+    json DeleteSituation(const std::string& name) {
+        json list = json::array();
+        for (const json& s : SituationsStored()) {
+            if (s.value("name", "") != name) {
+                list.push_back(s);
+            }
+        }
+        Put(kSituationsKey, list.dump());
+        return Situations();
+    }
+
     // After the lists changed: reorder for the current rifle, keep valid.
     void Refresh() {
         ReloadArmory();
@@ -996,6 +1089,10 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
                       a.contains("cartridgeId") ? IdOf(a, "cartridgeId") : s.cartridge_id);
              return s.State();
          }},
+        {"situations", [](I& s, const json&) -> json { return s.Situations(); }},
+        {"saveSituation", [](I& s, const json& a) -> json { return s.SaveSituation(Trim(Str(a, "name"))); }},
+        {"applySituation", [](I& s, const json& a) -> json { return s.ApplySituation(Str(a, "name")); }},
+        {"deleteSituation", [](I& s, const json& a) -> json { return s.DeleteSituation(Str(a, "name")); }},
         {"setConditions",
          [](I& s, const json& a) -> json {
              s.SetConditions(a);

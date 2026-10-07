@@ -436,6 +436,17 @@
     <string name="group_zero_hint">Shot at the rifle's zero range (%1$s m): the centre is where this cartridge hits.</string>
     <string name="group_wez">Rifle precision for Hit chance: %1$s MOA (5 shots)</string>
     <string name="group_saved">Saved.</string>
+    <string name="core_32">Enter a name for the situation.</string>
+    <string name="core_33">No situation of this name.</string>
+    <string name="core_34">The rifle or cartridge of this situation was deleted.</string>
+    <string name="situations">Situations</string>
+    <string name="situations_hint">A situation keeps the rifle, the cartridge, the hold mode and all the conditions: switch between a match, a hunt and a zeroing day in one tap.</string>
+    <string name="situations_empty">No saved situations yet.</string>
+    <string name="situation_name">Name</string>
+    <string name="situation_save">Save current</string>
+    <string name="situation_line">%1$s · %2$s · %3$s m</string>
+    <string name="situation_missing">The rifle or cartridge was deleted</string>
+    <string name="close">Close</string>
     <string name="sensor_barometer">From the barometer</string>
     <string name="sensor_location">My location</string>
     <string name="sensor_angles">Measure with the phone</string>

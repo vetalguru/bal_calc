@@ -270,6 +270,44 @@ TEST_F(Bridge, DensityAltitudeAndWarnings) {
     EXPECT_TRUE(found) << warnings.dump();
 }
 
+TEST_F(Bridge, SituationsRestoreTheRifleCartridgeAndConditions) {
+    const json st = Sample();
+    const int cartridge = st.at("currentCartridgeId");
+    EXPECT_TRUE(Ok("situations").empty());
+    EXPECT_EQ(Fails("saveSituation", {{"name", "  "}}), "Enter a name for the situation.");
+
+    Ok("setConditions", {{"targetRangeM", 650}, {"windSpeed", 4}, {"temperatureC", -5}});
+    Ok("setSettings", {{"holdMode", "dial"}});
+    json list = Ok("saveSituation", {{"name", " Winter match "}});
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0].at("name"), "Winter match");
+    EXPECT_EQ(list[0].at("rifleName"), "Rifle");
+    EXPECT_EQ(list[0].at("cartridgeName"), "Load");
+    EXPECT_EQ(list[0].at("rangeM"), 650.0);
+    EXPECT_TRUE(list[0].at("available").get<bool>());
+
+    // The same name again replaces it.
+    Ok("setConditions", {{"targetRangeM", 700}});
+    EXPECT_EQ(Ok("saveSituation", {{"name", "Winter match"}}).size(), 1U);
+    EXPECT_EQ(Ok("situations")[0].at("rangeM"), 700.0);
+
+    Ok("setConditions", {{"targetRangeM", 300}, {"windSpeed", 0}, {"temperatureC", 25}});
+    Ok("setSettings", {{"holdMode", "hold"}});
+    const json applied = Ok("applySituation", {{"name", "Winter match"}});
+    EXPECT_EQ(applied.at("conditions").at("targetRangeM"), 700.0);
+    EXPECT_EQ(applied.at("conditions").at("windSpeed"), 4.0);
+    EXPECT_EQ(applied.at("conditions").at("temperatureC"), -5.0);
+    EXPECT_EQ(applied.at("holdMode"), "dial");
+    EXPECT_EQ(applied.at("currentCartridgeId"), cartridge);
+    EXPECT_EQ(Fails("applySituation", {{"name", "Summer"}}), "No situation of this name.");
+
+    Ok("deleteCartridge", {{"id", cartridge}});
+    EXPECT_FALSE(Ok("situations")[0].at("available").get<bool>());
+    EXPECT_EQ(Fails("applySituation", {{"name", "Winter match"}}),
+              "The rifle or cartridge of this situation was deleted.");
+    EXPECT_TRUE(Ok("deleteSituation", {{"name", "Winter match"}}).empty());
+}
+
 TEST_F(Bridge, RangeTableAndCurve) {
     Sample();
     Ok("setSettings", {{"tableFromM", 0}, {"tableToM", 1000}, {"tableStepM", 100}});

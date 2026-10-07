@@ -44,6 +44,7 @@ import org.vetalguru.balcalc.core.RifleForm
 import org.vetalguru.balcalc.core.AppState
 import org.vetalguru.balcalc.core.Conditions
 import org.vetalguru.balcalc.core.RangeTable
+import org.vetalguru.balcalc.core.SituationItem
 import org.vetalguru.balcalc.core.Solution
 
 /** A typed call: the result decoded as [T]. */
@@ -336,6 +337,33 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
             e.message
         }
     }
+
+    // ---- Situations ---------------------------------------------------------
+
+    suspend fun situations(): List<SituationItem> = api.get("situations")
+
+    /** Saves the current rifle, cartridge and conditions; returns the list, or the core's error. */
+    suspend fun saveSituation(name: String): Result<List<SituationItem>> = detached {
+        try {
+            Result.success(api.get<List<SituationItem>>("saveSituation", buildJsonObject { put("name", name) }))
+        } catch (e: ApiException) {
+            Result.failure(e)
+        }
+    }
+
+    /** Makes a situation current; returns the core's error or null. */
+    suspend fun applySituation(name: String): String? = detached {
+        try {
+            state = api.get("applySituation", buildJsonObject { put("name", name) })
+            recompute()
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
+    }
+
+    suspend fun deleteSituation(name: String): List<SituationItem> =
+        detached { api.get("deleteSituation", buildJsonObject { put("name", name) }) }
 
     // ---- Files, settings, about -------------------------------------------
 

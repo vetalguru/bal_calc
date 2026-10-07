@@ -223,6 +223,33 @@ class FlowTest {
     }
 
     @Test
+    fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(650)
+        val far = elevation()
+
+        onNodeWithTag("situations").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("saveSituation") }
+        onNodeWithTag("saveSituation").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("situationError") }
+        assertEquals("Enter a name for the situation.", shown("situationError"))
+        onNodeWithTag("situationName").performTextReplacement("Match")
+        onNodeWithTag("saveSituation").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("applySituation:Match") }
+        shot("situations")
+        onAllNodesWithText("Close").onFirst().performClick()
+
+        setRange(200)
+        onNodeWithTag("situations").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("applySituation:Match") }
+        onNodeWithTag("applySituation:Match").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("solvedFor:650") && !exists("saveSituation") }
+        waitForIdle()
+        assertEquals(far, elevation())
+        db.delete()
+    }
+
+    @Test
     fun logHitsTrueAndShift() = runDesktopComposeUiTest(1100, 900) {
         val db = startWithSample()
         // The reticle card is there (plain crosshair: no reticle chosen).

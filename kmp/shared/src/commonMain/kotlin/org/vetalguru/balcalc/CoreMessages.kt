@@ -43,6 +43,9 @@ private val coreMessages: Map<String, StringResource> = mapOf(
     "Enter the distance and two velocities, the far one lower." to Res.string.core_29,
     "No BC between 0.02 and 2 gives these measurements." to Res.string.core_30,
     "No BC between 0.02 and 2 gives this correction." to Res.string.core_31,
+    "Enter a name for the situation." to Res.string.core_32,
+    "No situation of this name." to Res.string.core_33,
+    "The rifle or cartridge of this situation was deleted." to Res.string.core_34,
 )
 
 /** A message from the core in the app's language (unknown ones as they are). */

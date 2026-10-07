@@ -254,3 +254,13 @@ data class WezResult(
     val shots80: Int = 0,
     val shots95: Int = 0,
 )
+
+/** A saved rifle, cartridge and conditions; [available] is false once one is deleted. */
+@Serializable
+data class SituationItem(
+    val name: String = "",
+    val rifleName: String = "",
+    val cartridgeName: String = "",
+    val rangeM: Double = 0.0,
+    val available: Boolean = false,
+)
