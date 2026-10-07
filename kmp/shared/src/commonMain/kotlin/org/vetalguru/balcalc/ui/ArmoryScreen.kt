@@ -46,6 +46,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.BackHandler
 import org.vetalguru.balcalc.LocalPlatform
@@ -159,9 +160,9 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     val photoKind = if (nav.tab == 0) "rifle" else "cartridge"
     var thumbs by remember { mutableStateOf(emptyMap<Long, ImageBitmap>()) }
     LaunchedEffect(photoKind, model.photosRevision, st.rifles, st.cartridges) {
-        thumbs = runCatching {
+        thumbs = loadOr(emptyMap()) {
             model.photos(photoKind).mapNotNull { (id, b) -> pictureOf(b)?.let { id to it } }.toMap()
-        }.getOrDefault(emptyMap())
+        }
     }
     val imported = stringResource(Res.string.imported)
     val copied = stringResource(Res.string.copied)
@@ -430,11 +431,11 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
     val currentCartridge = model.state.currentCartridgeId
     var partner by remember { mutableStateOf<CartridgeForm?>(null) }
     LaunchedEffect(currentCartridge) {
-        partner = if (currentCartridge > 0) runCatching { model.cartridgeForm(currentCartridge) }.getOrNull() else null
+        partner = if (currentCartridge > 0) loadOr(null) { model.cartridgeForm(currentCartridge) } else null
     }
     var sg by remember { mutableStateOf<Double?>(null) }
     LaunchedEffect(f.twistIn, partner) {
-        sg = partner?.let { p -> runCatching { model.stability(f.twistIn, p.massGr, p.diameterIn, p.lengthIn, p.muzzleVelocity) }.getOrNull() }
+        sg = partner?.let { p -> loadOr(null) { model.stability(f.twistIn, p.massGr, p.diameterIn, p.lengthIn, p.muzzleVelocity) } }
     }
     val stability = sg
     val partnerName = partner?.name.orEmpty()
@@ -533,11 +534,11 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
     val currentRifle = model.state.currentRifleId
     var partner by remember { mutableStateOf<RifleForm?>(null) }
     LaunchedEffect(currentRifle) {
-        partner = if (currentRifle > 0) runCatching { model.rifleForm(currentRifle) }.getOrNull() else null
+        partner = if (currentRifle > 0) loadOr(null) { model.rifleForm(currentRifle) } else null
     }
     var sg by remember { mutableStateOf<Double?>(null) }
     LaunchedEffect(f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity, partner) {
-        sg = partner?.let { r -> runCatching { model.stability(r.twistIn, f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity) }.getOrNull() }
+        sg = partner?.let { r -> loadOr(null) { model.stability(r.twistIn, f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity) } }
     }
     val stability = sg
     val partnerName = partner?.name.orEmpty()
@@ -702,7 +703,7 @@ private fun <T> SearchList(
 ) {
     var filter by rememberSaveable { mutableStateOf("") }
     var items by remember { mutableStateOf(emptyList<T>()) }
-    LaunchedEffect(filter, reloadKey) { items = runCatching { load(filter) }.getOrDefault(emptyList()) }
+    LaunchedEffect(filter, reloadKey) { items = loadOr(emptyList()) { load(filter) } }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
