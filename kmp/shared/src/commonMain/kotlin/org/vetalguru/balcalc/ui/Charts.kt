@@ -43,6 +43,7 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.core.PairOption
 import org.vetalguru.balcalc.core.RangeTable
 import org.vetalguru.balcalc.core.TableRow
@@ -143,7 +144,7 @@ fun ChartPanel(model: AppModel, curve: RangeTable, maxRangeM: Double, modifier: 
 @Composable
 private fun ComparePicker(model: AppModel, onDismiss: () -> Unit, onChosen: (Pair<Long, Long>) -> Unit) {
     var options by remember { mutableStateOf(emptyList<PairOption>()) }
-    LaunchedEffect(Unit) { options = runCatching { model.pairOptions() }.getOrDefault(emptyList()) }
+    LaunchedEffect(Unit) { options = loadOr(emptyList()) { model.pairOptions() } }
     var rifle by remember { mutableStateOf(0L) }
     var picked by remember { mutableStateOf(0L) }
     LaunchedEffect(options) {
