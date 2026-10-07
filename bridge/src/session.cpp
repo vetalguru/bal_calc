@@ -36,6 +36,15 @@ void Api::Impl::LoadSettings() {
     if (auto session = al::LoadSession(db)) {
         ApplySession(session.value());
     }
+    // The default wind used to come from 3 o'clock; a calm wind still
+    // there is that default, not a choice: it moves to 12 once.
+    if (!Setting(kWindNoonKey)) {
+        if (wind_speed == 0.0 && wind_from_deg == 90.0) {
+            wind_from_deg = 0.0;
+            al::SaveSession(db, Session()).ok();
+        }
+        Put(kWindNoonKey, "1");
+    }
 }
 
 al::SessionConditions Api::Impl::Session() const {

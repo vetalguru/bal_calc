@@ -1,6 +1,7 @@
 package org.vetalguru.balcalc.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -91,6 +92,30 @@ fun NumberField(
             }
             .let { m -> if (tag != null) m.testTag(tag) else m },
     )
+}
+
+/** A [NumberField] with − and + beside it: set by thumb, or typed. */
+@Composable
+fun StepperField(
+    label: String,
+    value: Double,
+    onEdited: (Double) -> Unit,
+    modifier: Modifier = Modifier,
+    unit: String = "",
+    step: Double = 1.0,
+    from: Double = -1e9,
+    to: Double = 1e9,
+    tag: String? = null,
+) {
+    fun by(d: Double) {
+        val v = (value + d).coerceIn(from, to)
+        if (v != value) onEdited(v)
+    }
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(Modifier.testTag("${tag}Minus")) { Step("−${formatNumber(step, 0)}") { by(-step) } }
+        NumberField(label, value, onEdited, Modifier.weight(1f), unit, from = from, to = to, tag = tag)
+        Box(Modifier.testTag("${tag}Plus")) { Step("+${formatNumber(step, 0)}") { by(step) } }
+    }
 }
 
 @Composable

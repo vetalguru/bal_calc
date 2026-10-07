@@ -152,10 +152,10 @@ fun ConditionsScreen(model: AppModel) {
                 Fields(
                     wide,
                     { m ->
-                        NumberField(
+                        StepperField(
                             stringResource(Res.string.speed), c.windSpeed,
                             { v -> model.updateConditions { it.copy(windSpeed = v) } },
-                            m, stringResource(Res.string.unit_mps), from = 0.0, to = 40.0,
+                            m, stringResource(Res.string.unit_mps), from = 0.0, to = 40.0, tag = "conditionsWindSpeed",
                         )
                     },
                     { m ->
@@ -174,7 +174,7 @@ fun ConditionsScreen(model: AppModel) {
                         tag = "zoneUntil0",
                     )
                 }
-                NumberField(
+                StepperField(
                     stringResource(Res.string.wind_gust), c.windGustMps,
                     { v -> model.updateConditions { it.copy(windGustMps = v) } },
                     unit = stringResource(Res.string.unit_mps), from = 0.0, to = 40.0, tag = "windGust",
@@ -221,7 +221,7 @@ fun ConditionsScreen(model: AppModel) {
                     Fields(
                         wide,
                         { m ->
-                            NumberField(
+                            StepperField(
                                 stringResource(Res.string.speed), z.speedMps,
                                 { v -> change { it.copy(speedMps = v) } },
                                 m, stringResource(Res.string.unit_mps), from = 0.0, to = 40.0, tag = "zoneSpeed${i + 1}",
