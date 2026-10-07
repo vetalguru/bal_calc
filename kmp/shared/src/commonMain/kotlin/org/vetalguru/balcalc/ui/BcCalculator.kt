@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.core.BcCalc
 import org.vetalguru.balcalc.core.CartridgeForm
 import org.vetalguru.balcalc.coreText
@@ -45,7 +46,7 @@ fun BcCalculatorDialog(model: AppModel, onClose: () -> Unit) {
     val sol = model.solution
     var form by remember { mutableStateOf<CartridgeForm?>(null) }
     LaunchedEffect(model.state.currentCartridgeId) {
-        form = runCatching { model.cartridgeForm(model.state.currentCartridgeId) }.getOrNull()
+        form = loadOr(null) { model.cartridgeForm(model.state.currentCartridgeId) }
     }
     var hitMode by remember { mutableStateOf(false) }
     var table by remember { mutableStateOf("G7") }
