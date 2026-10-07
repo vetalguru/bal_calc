@@ -514,4 +514,7 @@
     <string name="cant_hint">Наклон оружия вбок: по часовой стрелке +</string>
     <string name="wind_direction_hint">Откуда дует ветер: 0° — от цели (в лицо), 90° — справа, 180° — в спину, 270° — слева</string>
     <string name="wind_clock_short">%1$s ч.</string>
+    <string name="chart_computing">Считаю…</string>
+    <string name="chart_no_data">Нет данных для графика: выберите винтовку и патрон</string>
+    <string name="chart_target">дальность до цели</string>
 </resources>

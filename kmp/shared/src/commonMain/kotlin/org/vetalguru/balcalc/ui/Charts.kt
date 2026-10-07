@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.InputChip
@@ -22,6 +23,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import org.vetalguru.balcalc.coreText
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -60,7 +63,7 @@ internal class Series(val label: String, val color: Color, val points: List<Pair
 
 /** The chart tab: a quantity along the range, for this rifle and cartridge and up to two more. */
 @Composable
-fun ChartPanel(model: AppModel, curve: RangeTable, maxRangeM: Double, modifier: Modifier) {
+fun ChartPanel(model: AppModel, curve: RangeTable, loading: Boolean, maxRangeM: Double, modifier: Modifier) {
     val st = model.state
     val c = st.conditions
     val angle = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
@@ -104,7 +107,10 @@ fun ChartPanel(model: AppModel, curve: RangeTable, maxRangeM: Double, modifier: 
     val heightLabel = stringResource(Res.string.chart_height)
     val driftLabel = stringResource(Res.string.chart_drift)
     val series = buildList {
-        fun points(t: RangeTable, f: (TableRow) -> Double) = if (t.ok) t.rows.map { it.rangeM to f(it) } else emptyList()
+        // Angles start at 25 m: nearer, the sight height over a few metres is a spike of 10+ mrad.
+        val from = if (q.unit == angle) 25.0 else 0.0
+        fun points(t: RangeTable, f: (TableRow) -> Double) =
+            if (t.ok) t.rows.filter { it.rangeM >= from }.map { it.rangeM to f(it) } else emptyList()
         if (q.key == "trajectory" && compared.isEmpty()) {
             add(Series(heightLabel, Transonic, points(curve) { it.dropCm }))
             add(Series(driftLabel, DriftColor, points(curve) { it.windageCm }))
@@ -133,10 +139,26 @@ fun ChartPanel(model: AppModel, curve: RangeTable, maxRangeM: Double, modifier: 
                 }
             }
         }
-        LineChart(
-            series, if (q.key == "trajectory") cm else q.unit, q.unit == cm || q.key == "trajectory", c.targetRangeM,
-            Modifier.fillMaxSize(), withZero = q.key !in setOf("velocity", "energy", "mach"),
-        )
+        if (series.all { it.points.size < 2 }) {
+            // Never a blank page: what is happening instead of the chart.
+            Box(Modifier.fillMaxSize().padding(24.dp).testTag("chartEmpty"), contentAlignment = Alignment.Center) {
+                Text(
+                    when {
+                        loading -> stringResource(Res.string.chart_computing)
+                        curve.error.isNotEmpty() -> coreText(curve.error)
+                        else -> stringResource(Res.string.chart_no_data)
+                    },
+                    color = if (!loading && curve.error.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        } else {
+            LineChart(
+                series, if (q.key == "trajectory") cm else q.unit, q.unit == cm || q.key == "trajectory", c.targetRangeM,
+                Modifier.fillMaxSize(), withZero = q.key !in setOf("velocity", "energy", "mach"),
+                targetLabel = stringResource(Res.string.chart_target),
+            )
+        }
     }
 }
 
@@ -184,6 +206,7 @@ internal fun LineChart(
     targetM: Double,
     modifier: Modifier,
     withZero: Boolean = true, // false: the axis spans the values only (velocity, energy)
+    targetLabel: String? = null, // a legend line for the target's mark
 ) {
     val measurer = rememberTextMeasurer()
     val fg = MaterialTheme.colorScheme.onSurface
@@ -210,6 +233,8 @@ internal fun LineChart(
         fun x(r: Double) = (left + (right - left) * r / maxR).toFloat()
         fun y(v: Double) = (top + (bottom - top) * (maxY - v) / (maxY - minY)).toFloat()
         fun label(text: String, at: Offset, color: Color = fg) = drawText(measurer, text, at, style.copy(color = color))
+        // Spacing from the text itself: fixed pixels overlapped on dense phone screens.
+        val lineH = measurer.measure("Ag", style).size.height.toFloat()
 
         val grid = fg.copy(alpha = 0.15f)
         val stepR = if (maxR > 1500) 250.0 else if (maxR > 600) 100.0 else 50.0
@@ -233,11 +258,11 @@ internal fun LineChart(
         var yv = ceil(minY * scale / stepY) * stepY
         while (yv <= maxY * scale) {
             drawLine(grid, Offset(left, y(yv / scale)), Offset(right, y(yv / scale)))
-            label(yv.fixed(decimals), Offset(4f, y(yv / scale) - 8f))
+            label(yv.fixed(decimals), Offset(4f, y(yv / scale) - lineH / 2))
             yv += stepY
         }
         label(if (meters) labelM else unit, Offset(4f, 0f))
-        label(labelRange, Offset(right - 70f, bottom + 18f))
+        label(labelRange, Offset(right - measurer.measure(labelRange, style).size.width, bottom + lineH + 4f))
 
         // Zero line and target.
         if (minY < 0 && maxY > 0) {
@@ -253,7 +278,10 @@ internal fun LineChart(
                 if (k == 0) p.moveTo(x(range), y(v)) else p.lineTo(x(range), y(v))
             }
             drawPath(p, s.color, style = Stroke(width = 2.5.dp.toPx()))
-            label("● ${s.label}", Offset(left + 8f, top + 4f + 18f * i), s.color)
+            label("● ${s.label}", Offset(left + 8f, top + 4f + lineH * i), s.color)
+        }
+        if (targetLabel != null && targetM <= maxR) {
+            label("│ $targetLabel", Offset(left + 8f, top + 4f + lineH * series.count { it.points.size >= 2 }), accent)
         }
     }
 }

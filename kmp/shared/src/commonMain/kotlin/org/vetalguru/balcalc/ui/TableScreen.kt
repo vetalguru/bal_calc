@@ -2,6 +2,7 @@ package org.vetalguru.balcalc.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
+import kotlin.coroutines.cancellation.CancellationException
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -157,12 +158,20 @@ fun TableScreen(model: AppModel, onRangeChosen: () -> Unit) {
     var tab by rememberSaveable { mutableStateOf(0) }
     var table by remember { mutableStateOf(RangeTable()) }
     var curve by remember { mutableStateOf(RangeTable()) }
-    LaunchedEffect(model.revision, st.tableFromM, st.tableToM, st.tableStepM, st.prefs.tableWinds) {
+    // Until the first result: "calculating", not an empty page.
+    var tableLoading by remember { mutableStateOf(true) }
+    var curveLoading by remember { mutableStateOf(true) }
+    // Each on its own: a table that fails does not leave the chart empty too.
+    LaunchedEffect(model.ready, model.revision, st.tableFromM, st.tableToM, st.tableStepM, st.prefs.tableWinds) {
         if (!model.ready) return@LaunchedEffect
-        runCatching {
-            table = model.rangeTable(st.prefs.tableWinds)
-            curve = model.trajectory(max(st.tableToM, st.conditions.targetRangeM), 250)
-        }
+        table = loadTable { model.rangeTable(st.prefs.tableWinds) }
+        tableLoading = false
+    }
+    val curveTo = max(st.tableToM, st.conditions.targetRangeM)
+    LaunchedEffect(model.ready, model.revision, curveTo) {
+        if (!model.ready) return@LaunchedEffect
+        curve = loadTable { model.trajectory(curveTo, 250) }
+        curveLoading = false
     }
     fun span(key: String, v: Double) = model.setSettings(buildJsonObject { put(key, v) })
     val m = stringResource(Res.string.unit_m)
@@ -180,7 +189,7 @@ fun TableScreen(model: AppModel, onRangeChosen: () -> Unit) {
             NumberField(stringResource(Res.string.to), st.tableToM, { span("tableToM", it) }, Modifier.weight(1f), m, 0, 10.0, 3000.0)
             NumberField(stringResource(Res.string.step), st.tableStepM, { span("tableStepM", it) }, Modifier.weight(1f), m, 0, 5.0, 500.0)
         }
-        if (!table.ok && model.ready) {
+        if (!table.ok && !tableLoading && tab == 0) {
             Text(coreText(table.error), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(12.dp))
         }
         when (tab) {
@@ -188,7 +197,7 @@ fun TableScreen(model: AppModel, onRangeChosen: () -> Unit) {
                 model.setTargetRange(r)
                 onRangeChosen()
             }
-            1 -> ChartPanel(model, curve, max(st.tableToM, st.conditions.targetRangeM), Modifier.fillMaxSize())
+            1 -> ChartPanel(model, curve, curveLoading, curveTo, Modifier.fillMaxSize())
             else -> WezPanel(model, max(st.tableToM, st.conditions.targetRangeM), Modifier.fillMaxSize())
         }
     }
@@ -333,3 +342,13 @@ private fun ColumnsDialog(model: AppModel, onClose: () -> Unit) {
         dismissButton = { TextButton(onClick = onClose) { Text(stringResource(Res.string.cancel)) } },
     )
 }
+
+/** A table or curve from the core; a failed call becomes its error, shown like the core's own. */
+private suspend fun loadTable(load: suspend () -> RangeTable): RangeTable =
+    try {
+        load()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        RangeTable(error = e.message.orEmpty())
+    }
