@@ -447,4 +447,25 @@
     <string name="situation_line">%1$s · %2$s · %3$s m</string>
     <string name="situation_missing">The rifle or cartridge was deleted</string>
     <string name="close">Close</string>
+    <string name="sensor_barometer">From the barometer</string>
+    <string name="sensor_location">My location</string>
+    <string name="sensor_angles">Measure with the phone</string>
+    <string name="sensor_compass">From the compass</string>
+    <string name="sensor_reading">Reading…</string>
+    <string name="sensor_no_pressure">The barometer gave no reading.</string>
+    <string name="sensor_no_location">No location: check that it is on and allowed for BalCalc.</string>
+    <string name="sensor_pressure_set">Barometer: %1$s hPa</string>
+    <string name="sensor_location_set">Location (±%1$s m): altitude %2$s m, latitude %3$s°</string>
+    <string name="sensor_location_no_alt">Location (±%1$s m): latitude %2$s°; the phone gave no altitude</string>
+    <string name="tilt_title">Shot angle and cant</string>
+    <string name="tilt_hint">Lay the phone on the scope or rail, screen up, its top towards the target, and hold still.</string>
+    <string name="tilt_now">Shot angle %1$s°, cant %2$s°</string>
+    <string name="tilt_unsteady">Hold still: it moves by %1$s°</string>
+    <string name="tilt_steady">Steady</string>
+    <string name="sensor_use">Use</string>
+    <string name="compass_title">Azimuth of the shot</string>
+    <string name="compass_hint">Lay the phone on the rifle, its top towards the target, away from metal and magnets.</string>
+    <string name="compass_magnetic">From magnetic north: take My location first for true north.</string>
+    <string name="compass_true">From true north.</string>
+    <string name="compass_calibrate">The compass is poorly calibrated: wave the phone in a figure 8.</string>
 </resources>
