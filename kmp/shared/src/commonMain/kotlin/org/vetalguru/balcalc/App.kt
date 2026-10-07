@@ -43,6 +43,8 @@ import org.vetalguru.balcalc.ui.BalCalcTheme
 import org.vetalguru.balcalc.ui.ConditionsScreen
 import org.vetalguru.balcalc.ui.SolutionScreen
 import org.vetalguru.balcalc.ui.TableScreen
+import org.vetalguru.balcalc.ui.clicksText
+import org.vetalguru.balcalc.ui.correctionTexts
 
 private class Page(val title: StringResource, val short: StringResource, val tag: String)
 
@@ -145,22 +147,18 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
 private fun WidgetFeed(model: AppModel, platform: Platform) {
     val st = model.state
     val sol = model.solution
-    val unit = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
-    val other = stringResource(if (st.moa) Res.string.unit_mrad else Res.string.unit_moa)
     val metres = stringResource(Res.string.unit_m)
-    val cm = stringResource(Res.string.unit_cm)
-    val words = listOf(Res.string.up, Res.string.down, Res.string.right, Res.string.left).map { stringResource(it) }
     val lines = if (!sol.ok || !model.ready) null else {
-        val click = { v: Double -> v.takeIf { sol.hasScope } }
-        val e = formatCorrection(sol.elevation, click(sol.clickElevation), st.moa, sol.rangeM, st.prefs.roundToClicks, words[0], words[1], other, cm)
-        val w = formatCorrection(sol.windage, click(sol.clickWindage), st.moa, sol.rangeM, st.prefs.roundToClicks, words[2], words[3], other, cm)
-        val eClicks = e.clicks?.let { " · " + stringResource(Res.string.clicks, it) }.orEmpty()
-        val wClicks = w.clicks?.let { " · " + stringResource(Res.string.clicks, it) }.orEmpty()
+        // In words whatever the screen's style: the widget stands alone.
+        val c = correctionTexts(sol, st, style = "words")
+        val upClicks = c.elevation.clicksText()
+        val sideClicks = c.windage.clicksText()
+        fun line(t: CorrectionText, clicks: String?) = "${t.direction} ${t.value} ${c.unit}".trim() + (clicks?.let { " · $it" }.orEmpty())
         SolutionLines(
             st.currentPair?.let { "${it.rifleName} · ${it.cartridgeName}" }.orEmpty(),
             "${sol.rangeM.roundToInt()} $metres",
-            "${e.direction} ${e.value} $unit".trim() + eClicks,
-            "${w.direction} ${w.value} $unit".trim() + wClicks,
+            line(c.elevation, upClicks),
+            line(c.windage, sideClicks),
         )
     }
     LaunchedEffect(lines) { platform.widget?.publish(lines) }
