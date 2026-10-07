@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -17,6 +19,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.putJsonArray
@@ -184,19 +187,54 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
      * Saves a form; the saved record becomes current. Returns the core's
      * error (a validation sentence) or null.
      */
-    suspend fun saveRifle(form: RifleForm): String? = saveForm("saveRifle", formArgs(form))
-    suspend fun saveCartridge(form: CartridgeForm): String? = saveForm("saveCartridge", formArgs(form))
+    suspend fun saveRifle(form: RifleForm, photo: PhotoChange? = null): String? =
+        saveForm("saveRifle", formArgs(form), "rifle", photo)
+    suspend fun saveCartridge(form: CartridgeForm, photo: PhotoChange? = null): String? =
+        saveForm("saveCartridge", formArgs(form), "cartridge", photo)
     suspend fun saveBullet(form: BulletForm): String? = saveForm("saveBullet", formArgs(form))
 
-    private suspend fun saveForm(method: String, args: JsonObject): String? = detached {
+    private suspend fun saveForm(method: String, args: JsonObject, kind: String = "", photo: PhotoChange? = null): String? = detached {
         try {
-            api.call(method, args)
+            val saved = api.call(method, args)
+            if (photo != null) {
+                setPhoto(kind, saved.jsonObject.getValue("id").jsonPrimitive.long, photo.image)
+            }
             state = api.get("state")
             recompute()
             null
         } catch (e: ApiException) {
             e.message
         }
+    }
+
+    // ---- Pictures of rifles and cartridges ---------------------------------
+
+    /** Bumps when a picture changed (the lists reload theirs). */
+    var photosRevision by mutableIntStateOf(0)
+        private set
+
+    /** The pictures of all rifles or cartridges ([kind] "rifle" | "cartridge"), by id. */
+    @OptIn(ExperimentalEncodingApi::class)
+    suspend fun photos(kind: String): Map<Long, ByteArray> {
+        val all = api.call("photos", buildJsonObject { put("kind", kind) }).jsonObject
+        return all.entries.associate { (id, data) -> id.toLong() to Base64.decode(data.jsonPrimitive.content) }
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    suspend fun photo(kind: String, id: Long): ByteArray? {
+        val data = api.call("photo", buildJsonObject { put("kind", kind); put("id", id) }).jsonPrimitive.content
+        return if (data.isEmpty()) null else Base64.decode(data)
+    }
+
+    /** Stores [image] as the record's picture (null removes it). */
+    @OptIn(ExperimentalEncodingApi::class)
+    private suspend fun setPhoto(kind: String, id: Long, image: ByteArray?) {
+        api.call("setPhoto", buildJsonObject {
+            put("kind", kind)
+            put("id", id)
+            put("image", image?.let { Base64.encode(it) } ?: "")
+        })
+        photosRevision++
     }
 
     fun deleteRifle(id: Long) = act { state = api.get("deleteRifle", id(id)); recompute() }

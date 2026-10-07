@@ -1,17 +1,21 @@
 package org.vetalguru.balcalc
 
+import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.core.content.ContextCompat
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -88,6 +92,32 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
                 .setOrientationLocked(false)
                 .setPrompt(""),
         )
+    }
+
+    private var onPermission: ((Boolean) -> Unit)? = null
+    private val askCamera: ActivityResultLauncher<String> =
+        activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { onPermission?.invoke(it) }
+    private var onPicture: ((Bitmap?) -> Unit)? = null
+    private val takePicture: ActivityResultLauncher<Void?> =
+        activity.registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { onPicture?.invoke(it) }
+
+    override val canTakePhoto: Boolean get() = canScanQr
+
+    // The app declares the camera (for the QR scanner), so the system camera
+    // app may be started only once the permission is granted.
+    override suspend fun takePhoto(): ByteArray? {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            val granted = suspendCancellableCoroutine<Boolean> { c ->
+                onPermission = { c.resume(it) }
+                askCamera.launch(Manifest.permission.CAMERA)
+            }
+            if (!granted) return null
+        }
+        val picture = suspendCancellableCoroutine<Bitmap?> { c ->
+            onPicture = { c.resume(it) }
+            takePicture.launch(null)
+        } ?: return null
+        return ByteArrayOutputStream().also { picture.compress(Bitmap.CompressFormat.JPEG, 90, it) }.toByteArray()
     }
 
     override suspend fun openImage(): ByteArray? {

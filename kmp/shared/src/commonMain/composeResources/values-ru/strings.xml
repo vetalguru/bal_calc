@@ -434,6 +434,13 @@
     <string name="qr_picture">С картинки</string>
     <string name="qr_progress">Прочитано частей: %1$s из %2$s — сканируйте следующую.</string>
     <string name="qr_not_found">QR-код BalCalc не найден.</string>
+    <string name="photo">Фото</string>
+    <string name="photo_choose">Выбрать картинку</string>
+    <string name="photo_take">Сфотографировать</string>
+    <string name="photo_remove">Убрать фото</string>
+    <string name="photo_bad">Этот файл — не картинка.</string>
+    <string name="core_35">Картинка слишком большая.</string>
+    <string name="core_36">Картинка повреждена.</string>
     <string name="sensor_barometer">С барометра</string>
     <string name="sensor_location">Моё место</string>
     <string name="sensor_angles">Измерить телефоном</string>

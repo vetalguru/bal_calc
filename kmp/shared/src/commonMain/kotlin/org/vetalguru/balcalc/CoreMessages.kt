@@ -46,6 +46,8 @@ private val coreMessages: Map<String, StringResource> = mapOf(
     "Enter a name for the situation." to Res.string.core_32,
     "No situation of this name." to Res.string.core_33,
     "The rifle or cartridge of this situation was deleted." to Res.string.core_34,
+    "The picture is too large." to Res.string.core_35,
+    "The picture is damaged." to Res.string.core_36,
 )
 
 /** A message from the core in the app's language (unknown ones as they are). */

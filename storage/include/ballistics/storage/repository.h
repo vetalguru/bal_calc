@@ -1,6 +1,7 @@
 #ifndef BALLISTICS_STORAGE_REPOSITORY_H
 #define BALLISTICS_STORAGE_REPOSITORY_H
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
@@ -44,6 +45,14 @@ private:
 // Key-value application settings.
 Result<std::optional<std::string>> GetSetting(Database& db, const std::string& key);
 Status SetSetting(Database& db, const std::string& key, const std::string& value);
+
+// The picture of a rifle or cartridge (kind "rifle" | "cartridge"): image
+// file bytes. Deleting the owner deletes it.
+Result<std::optional<std::vector<std::uint8_t>>> GetPhoto(Database& db, const std::string& kind, Id owner);
+// An empty image removes the picture.
+Status SetPhoto(Database& db, const std::string& kind, Id owner, const std::vector<std::uint8_t>& image);
+// The owners of the pictures of this kind.
+Result<std::vector<Id>> PhotoOwners(Database& db, const std::string& kind);
 
 } // namespace ballistics::storage
 

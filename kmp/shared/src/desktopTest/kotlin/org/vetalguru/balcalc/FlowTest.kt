@@ -298,6 +298,42 @@ class FlowTest {
     }
 
     @Test
+    fun photoOfARifle() = runDesktopComposeUiTest(412, 915) {
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
+        val platform = FakePlatform().apply { image = pngOf(1600, 1200) }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        waitUntil("sample button", 30_000) { exists("sample") }
+        onNodeWithTag("sample").performClick()
+        waitUntil("first solution", 10_000) { exists("elevation") }
+        onNodeWithTag("navArmory").performClick()
+        val name = "Sample .308 Win"
+        waitUntil("rifle in the list", 10_000) { exists("rifle:$name") }
+        // The picture sits inside the clickable row: in the unmerged tree.
+        fun thumb(): Boolean {
+            announce()
+            return onAllNodes(hasTestTag("thumb:$name"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+        }
+        assertTrue(!thumb())
+
+        onAllNodesWithText("Edit").onFirst().performClick()
+        waitUntil("rifle editor", 10_000) { exists("photoChoose") }
+        onNodeWithTag("photoChoose").performClick()
+        waitUntil("picture in the editor", 10_000) { exists("photo") }
+        shot("photo-editor")
+        onNodeWithTag("save").performClick()
+        waitUntil("thumbnail after saving", 10_000) { thumb() }
+        shot("photo-list")
+
+        // Opened again: the picture is there; removed: gone from the list too.
+        onAllNodesWithText("Edit").onFirst().performClick()
+        waitUntil("editor with the picture again", 10_000) { exists("photoRemove") }
+        onNodeWithTag("photoRemove").performClick()
+        onNodeWithTag("save").performClick()
+        waitUntil("thumbnail gone", 10_000) { exists("rifle:$name") && !thumb() }
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)
