@@ -86,6 +86,8 @@ TEST_F(Bridge, SampleGivesTheKnownSolution) {
     EXPECT_TRUE(sol.at("hasScope").get<bool>());
     EXPECT_FALSE(sol.at("hasReticle").get<bool>());
     EXPECT_EQ(sol.at("holdMode"), "dial_elevation");
+    EXPECT_NEAR(sol.at("clickElevation").get<double>(), 0.1, 1e-9); // the sample scope: 0.1 mrad clicks
+    EXPECT_NEAR(sol.at("clickWindage").get<double>(), 0.1, 1e-9);
 }
 
 TEST_F(Bridge, ConditionsAndSettingsChangeTheSolution) {

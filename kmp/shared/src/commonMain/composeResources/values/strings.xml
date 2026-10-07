@@ -482,4 +482,11 @@
     <string name="view_reticle">Reticle</string>
     <string name="view_more">More</string>
     <string name="look_angle_short">Angle</string>
+    <string name="corrections_format">Corrections</string>
+    <string name="correction_style">Direction</string>
+    <string name="style_words">Words: UP, LEFT</string>
+    <string name="style_arrows">Arrows: ↑ ←</string>
+    <string name="style_signs">Signs: + −</string>
+    <string name="round_to_clicks">Round to whole clicks</string>
+    <string name="show_second_unit">Also the other unit and cm at the target</string>
 </resources>

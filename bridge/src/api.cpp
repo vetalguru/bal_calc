@@ -982,6 +982,9 @@ struct Api::Impl {
                    {"elevationClicks", r.elevation_clicks},
                    {"windageClicks", r.windage_clicks},
                    {"hasScope", p.value().scope.has_value()},
+                   // One click in the angle unit (0 without a scope): for rounding to clicks.
+                   {"clickElevation", p.value().scope ? al::FromRad(p.value().scope->click_vertical_rad, Unit()) : 0.0},
+                   {"clickWindage", p.value().scope ? al::FromRad(p.value().scope->click_horizontal_rad, Unit()) : 0.0},
                    {"dropCm", r.drop_cm},
                    {"windageCm", r.windage_cm},
                    {"velocity", r.velocity_mps},

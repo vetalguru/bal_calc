@@ -61,6 +61,25 @@ fun SettingsScreen(model: AppModel) {
                 st.language, model::setLanguage, Modifier.testTag("language"),
             )
         }
+        Section(stringResource(Res.string.corrections_format)) {
+            ChoiceField(
+                stringResource(Res.string.correction_style),
+                listOf(
+                    "words" to stringResource(Res.string.style_words),
+                    "arrows" to stringResource(Res.string.style_arrows),
+                    "signs" to stringResource(Res.string.style_signs),
+                ),
+                st.prefs.correctionStyle, { v -> model.setPrefs { it.copy(correctionStyle = v) } }, Modifier.testTag("correctionStyle"),
+            )
+            SwitchRow(
+                stringResource(Res.string.round_to_clicks), st.prefs.roundToClicks,
+                { on -> model.setPrefs { it.copy(roundToClicks = on) } }, Modifier.testTag("roundToClicks"),
+            )
+            SwitchRow(
+                stringResource(Res.string.show_second_unit), st.prefs.showSecondUnit,
+                { on -> model.setPrefs { it.copy(showSecondUnit = on) } }, Modifier.testTag("showSecondUnit"),
+            )
+        }
         Section(stringResource(Res.string.display)) {
             ChoiceField(
                 stringResource(Res.string.theme),
