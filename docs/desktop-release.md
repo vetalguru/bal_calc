@@ -8,33 +8,29 @@ Requirements: JDK 17, CMake, and a C++ compiler — Visual Studio 2022 on
 Windows, GCC and Ninja on Linux. Gradle comes with the wrapper; it builds the
 C++ core by itself (`:desktopApp:buildNative`).
 
-## Windows: MSI and ZIP
+## Windows: MSI
 
 The MSI needs the WiX Toolset 3 (`winget install --id WiXToolset.WiXToolset -e`).
 
 ```powershell
 cd kmp
-.\gradlew.bat :desktopApp:packageMsi :desktopApp:packageZip
+.\gradlew.bat :desktopApp:packageMsi
 ```
 
-Results in `kmp\desktopApp\build\compose\binaries\main\`:
+Result: `kmp\desktopApp\build\compose\binaries\main\msi\Holdmark-<version>.msi`,
+an installer (Start-menu and desktop shortcuts, uninstall in Settings ->
+Apps); a newer MSI replaces the installed version.
 
-- `msi\Holdmark-<version>.msi` - installer (Start-menu and desktop shortcuts,
-  uninstall in Settings -> Apps); a newer MSI replaces the installed version;
-- `zip\Holdmark-<version>-windows-x64.zip` - portable: unpack anywhere and run
-  `Holdmark\Holdmark.exe`.
-
-## Ubuntu: DEB and ZIP
+## Ubuntu: DEB
 
 ```bash
 sudo apt install openjdk-17-jdk ninja-build fakeroot   # or 21
 cd kmp
-./gradlew :desktopApp:packageDeb :desktopApp:packageZip
+./gradlew :desktopApp:packageDeb
 ```
 
-Results in `kmp/desktopApp/build/compose/binaries/main/`:
-`deb/holdmark_<version>_amd64.deb` (installs to `/opt/holdmark`, menu entry
-"Holdmark") and `zip/Holdmark-<version>-linux-x64.zip`.
+Result: `kmp/desktopApp/build/compose/binaries/main/deb/holdmark_<version>_amd64.deb`
+(installs to `/opt/holdmark`, menu entry "Holdmark").
 
 ```bash
 sudo apt install ./kmp/desktopApp/build/compose/binaries/main/deb/holdmark_*_amd64.deb

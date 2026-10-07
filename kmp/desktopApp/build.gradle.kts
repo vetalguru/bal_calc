@@ -113,12 +113,3 @@ val mergedResources = tasks.register<Sync>("mergedResources") {
     into(layout.buildDirectory.dir("mergedResources"))
 }
 
-// Portable package: the app folder (with its own Java runtime) as a ZIP.
-tasks.register<Zip>("packageZip") {
-    group = "compose desktop"
-    dependsOn("createDistributable")
-    val os = if (System.getProperty("os.name").startsWith("Windows")) "windows" else "linux"
-    from(layout.buildDirectory.dir("compose/binaries/main/app"))
-    archiveFileName.set("Holdmark-${rootProject.extra["appVersion"]}-$os-x64.zip")
-    destinationDirectory.set(layout.buildDirectory.dir("compose/binaries/main/zip"))
-}
