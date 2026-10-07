@@ -61,6 +61,22 @@ fun SettingsScreen(model: AppModel) {
                 st.language, model::setLanguage, Modifier.testTag("language"),
             )
         }
+        Section(stringResource(Res.string.display)) {
+            ChoiceField(
+                stringResource(Res.string.theme),
+                listOf(
+                    Themes.SYSTEM to stringResource(Res.string.theme_system),
+                    Themes.LIGHT to stringResource(Res.string.theme_light),
+                    Themes.DARK to stringResource(Res.string.theme_dark),
+                    Themes.NIGHT to stringResource(Res.string.theme_night),
+                ),
+                st.prefs.theme, { t -> model.setPrefs { it.copy(theme = t) } }, Modifier.testTag("theme"),
+            )
+            SwitchRow(
+                stringResource(Res.string.keep_screen_on), st.prefs.keepScreenOn,
+                { on -> model.setPrefs { it.copy(keepScreenOn = on) } }, Modifier.testTag("keepScreenOn"),
+            )
+        }
         Section(stringResource(Res.string.about)) {
             Text(stringResource(Res.string.engine_versions, info.engineVersion, info.sqliteVersion))
             Text(stringResource(Res.string.about_model), color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -75,6 +75,7 @@ data class AppState(
     val tableToM: Double = 1000.0,
     val tableStepM: Double = 50.0,
     val conditions: Conditions = Conditions(),
+    val prefs: UiPrefs = UiPrefs(),
 ) {
     val moa: Boolean get() = angleUnit == "moa"
     val hasPair: Boolean get() = currentProfileId != 0L
@@ -291,4 +292,12 @@ data class LibraryRifle(
     val twistIn: Double = 0.0,
     val barrelsIn: List<Double> = emptyList(),
     val source: String = "",
+)
+
+/** Interface preferences (the core keeps them in "ui.prefs"). */
+@Serializable
+data class UiPrefs(
+    /** "system" | "light" | "dark" | "night" (red on black). */
+    val theme: String = "system",
+    val keepScreenOn: Boolean = false,
 )

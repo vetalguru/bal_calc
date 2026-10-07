@@ -334,6 +334,26 @@ class FlowTest {
     }
 
     @Test
+    fun themes() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(600)
+        for ((label, name) in listOf("Dark" to "dark", "Night (red)" to "night", "Light" to "light")) {
+            onNodeWithTag("navSettings").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("theme") }
+            onNodeWithTag("theme").performClick()
+            onAllNodesWithText(label).onLast().performClick()
+            waitUntil(timeoutMillis = 10_000) { testApi!!.let { api -> kotlinx.coroutines.runBlocking { api.call("state") } }.toString().contains("\"theme\":\"$name\"") }
+            onNodeWithTag("navSolution").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+            shot("theme-$name")
+        }
+        onNodeWithTag("navSettings").performClick()
+        onNodeWithTag("keepScreenOn").performClick()
+        waitUntil(timeoutMillis = 10_000) { testApi!!.let { api -> kotlinx.coroutines.runBlocking { api.call("state") } }.toString().contains("\"keepScreenOn\":true") }
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)

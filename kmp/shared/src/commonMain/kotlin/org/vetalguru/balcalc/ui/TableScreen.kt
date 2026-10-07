@@ -58,8 +58,6 @@ import org.vetalguru.balcalc.fixed
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
 
-val Transonic = Color(0xFFEF6C00) // below Mach 1.2
-val DriftColor = Color(0xFF00897B)
 
 private class TableCol(val title: String, val decimals: Int, val angle: Boolean, val value: (TableRow) -> Double)
 

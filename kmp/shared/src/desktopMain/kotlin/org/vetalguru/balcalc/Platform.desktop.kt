@@ -61,3 +61,6 @@ class DesktopPlatform(private val owner: () -> Frame?) : Platform {
     }.getOrNull()
 }
 
+
+@Composable
+actual fun KeepScreenOn(enabled: Boolean) = Unit

@@ -51,6 +51,7 @@ import org.vetalguru.balcalc.core.Conditions
 import org.vetalguru.balcalc.core.RangeTable
 import org.vetalguru.balcalc.core.SituationItem
 import org.vetalguru.balcalc.core.Solution
+import org.vetalguru.balcalc.core.UiPrefs
 
 /** A typed call: the result decoded as [T]. */
 suspend inline fun <reified T> Api.get(method: String, args: JsonObject = JsonObject(emptyMap())): T =
@@ -145,6 +146,15 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     fun setSettings(args: JsonObject) = act {
         state = api.get("setSettings", args)
         recompute()
+    }
+
+    /** Changes interface preferences: shown at once, kept by the core. */
+    fun setPrefs(change: (UiPrefs) -> UiPrefs) {
+        val prefs = change(state.prefs)
+        state = state.copy(prefs = prefs)
+        act {
+            api.call("setSettings", buildJsonObject { put("prefs", Api.json.encodeToJsonElement(UiPrefs.serializer(), prefs)) })
+        }
     }
 
     fun addSample(rifleName: String, cartridgeName: String) = act {

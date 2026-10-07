@@ -441,4 +441,11 @@
     <string name="photo_bad">Цей файл — не картинка.</string>
     <string name="core_35">Картинка завелика.</string>
     <string name="core_36">Картинку пошкоджено.</string>
+    <string name="display">Екран</string>
+    <string name="theme">Тема</string>
+    <string name="theme_system">Як у системі</string>
+    <string name="theme_light">Світла</string>
+    <string name="theme_dark">Темна</string>
+    <string name="theme_night">Нічна (червона)</string>
+    <string name="keep_screen_on">Не вимикати екран</string>
 </resources>
