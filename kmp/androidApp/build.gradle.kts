@@ -17,7 +17,7 @@ android {
         applicationId = "org.vetalguru.balcalc"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 2 // the Qt version was 1; grow with every release
+        versionCode = 3 // the Qt version was 1; grow with every release
         versionName = rootProject.extra["appVersion"] as String
 
         ndk { abiFilters += listOf("arm64-v8a") }
