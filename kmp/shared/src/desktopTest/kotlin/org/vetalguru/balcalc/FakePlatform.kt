@@ -13,4 +13,6 @@ class FakePlatform(var files: List<NamedText> = emptyList(), override val sensor
     override suspend fun openTexts(extensions: List<String>, multiple: Boolean) = files
     override suspend fun copyText(text: String) { clipboard = text }
     override suspend fun pasteText() = clipboard
+    var image: ByteArray? = null
+    override suspend fun openImage() = image
 }

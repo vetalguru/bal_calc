@@ -69,6 +69,7 @@ internal sealed interface Route {
     class Bullets(val pick: ((Long) -> Unit)?) : Route
     class Bullet(val form: org.vetalguru.balcalc.core.BulletForm) : Route
     data object Truing : Route
+    data object Group : Route
 }
 
 /** The open inner page of the Rifles tab, so Back can close it first. */
@@ -103,7 +104,8 @@ fun ArmoryScreen(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
             r.pick?.invoke(id)
         }
         is Route.Bullet -> BulletEditor(model, r.form) { nav.back() }
-        Route.Truing -> TruingScreen(model, onBack = nav::back)
+        Route.Truing -> TruingScreen(model, onBack = nav::back, onGroup = { nav.push(Route.Group) })
+        Route.Group -> GroupScreen(model, onBack = nav::back)
     }
 }
 

@@ -42,6 +42,17 @@ class DesktopPlatform(private val owner: () -> Frame?) : Platform {
         return withContext(Dispatchers.IO) { files.map { NamedText(it.name, it.readText()) } }
     }
 
+    override suspend fun openImage(): ByteArray? {
+        val file = withContext(Dispatchers.Main) {
+            FileDialog(owner(), null, FileDialog.LOAD).run {
+                setFilenameFilter { _, name -> listOf(".jpg", ".jpeg", ".png", ".webp", ".bmp").any { name.lowercase().endsWith(it) } }
+                isVisible = true
+                this.files.firstOrNull()
+            }
+        } ?: return null
+        return withContext(Dispatchers.IO) { file.readBytes() }
+    }
+
     override suspend fun copyText(text: String) =
         Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
 

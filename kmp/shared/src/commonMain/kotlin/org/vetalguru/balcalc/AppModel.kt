@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -288,6 +289,12 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     }
 
     fun resetDsf() = act { api.call("resetDsf"); recompute() }
+
+    /** The rifle and shooter's precision for the hit chance, as a 5-shot group (MOA). */
+    suspend fun setRiflePrecision(groupMoa: Double) = detached {
+        val current = wez(null, 100.0, 100.0).settings
+        wez(current.copy(groupMoa = (groupMoa * 100).roundToInt() / 100.0), 100.0, 100.0)
+    }
 
     /** Hit probability over the range; `settings` (when given) are saved first. */
     suspend fun wez(settings: WezSettings?, toM: Double, stepM: Double): WezResult =
