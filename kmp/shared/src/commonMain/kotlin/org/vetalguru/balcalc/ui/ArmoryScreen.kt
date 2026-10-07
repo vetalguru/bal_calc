@@ -46,6 +46,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.BackHandler
 import org.vetalguru.balcalc.LocalPlatform
@@ -159,9 +160,9 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     val photoKind = if (nav.tab == 0) "rifle" else "cartridge"
     var thumbs by remember { mutableStateOf(emptyMap<Long, ImageBitmap>()) }
     LaunchedEffect(photoKind, model.photosRevision, st.rifles, st.cartridges) {
-        thumbs = runCatching {
+        thumbs = loadOr(emptyMap()) {
             model.photos(photoKind).mapNotNull { (id, b) -> pictureOf(b)?.let { id to it } }.toMap()
-        }.getOrDefault(emptyMap())
+        }
     }
     val imported = stringResource(Res.string.imported)
     val copied = stringResource(Res.string.copied)
@@ -185,6 +186,10 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     fun showQr(kind: String, id: Long, title: String) = model.act {
         qr = title to QrShare.parts(model.exportJson(kind, id).json)
     }
+
+    // Read here, not only inside BoxWithConstraints: its subcomposition alone
+    // does not recompose for state written by the LaunchedEffect above.
+    val thumbList = thumbs
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val showTitle = maxWidth >= 520.dp // the tabs say it on a phone
@@ -257,7 +262,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                     onEdit = { id -> model.act { nav.push(Route.Rifle(model.rifleForm(id))) } },
                     onShare = ::share,
                     onQr = ::showQr,
-                    thumbs = thumbs,
+                    thumbs = thumbList,
                     onDelete = { id, name -> deleting = Triple("rifle", id, name) },
                 )
             } else {
@@ -282,7 +287,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                     onEdit = { id -> model.act { nav.push(Route.Cartridge(model.cartridgeForm(id))) } },
                     onShare = ::share,
                     onQr = ::showQr,
-                    thumbs = thumbs,
+                    thumbs = thumbList,
                     onDelete = { id, name -> deleting = Triple("cartridge", id, name) },
                     onShotLog = { id ->
                         model.selectCartridge(id)
@@ -421,6 +426,7 @@ private fun EditorPage(
 private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
     var f by route::form
     LaunchedEffect(route) { route.load(model, "rifle", route.form.rifleId) }
+    val photo = route.photo // read outside EditorPage's BoxWithConstraints (see TruingScreen)
     val onDone = nav::back
     var error by remember { mutableStateOf<String?>(null) }
     var reticles by remember { mutableStateOf(emptyList<ReticleItem>()) }
@@ -444,7 +450,7 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
             }
             TextInput(stringResource(Res.string.rifle_name_hint), f.name, { f = f.copy(name = it) }, tag = "rifleName")
             TextInput(stringResource(Res.string.caliber_hint), f.caliber, { f = f.copy(caliber = it) }, tag = "rifleCaliber")
-            PhotoRow(route.photo, route::change)
+            PhotoRow(photo, route::change)
             Fields(
                 wide,
                 { mod -> NumberField(stringResource(Res.string.sight_height), f.sightHeightCm, { f = f.copy(sightHeightCm = it) }, mod, cm, from = 0.0, to = 20.0) },
@@ -513,6 +519,7 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
 private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: ArmoryNav) {
     var f by route::form
     LaunchedEffect(route) { route.load(model, "cartridge", route.form.cartridgeId) }
+    val photo = route.photo // read outside EditorPage's BoxWithConstraints (see TruingScreen)
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val fromLibrary = f.libraryBulletId > 0
@@ -526,7 +533,7 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
         Section(stringResource(Res.string.cartridge)) {
             TextInput(stringResource(Res.string.cartridge_name_hint), f.name, { f = f.copy(name = it) }, tag = "cartridgeName")
             TextInput(stringResource(Res.string.caliber_hint), f.caliber, { f = f.copy(caliber = it) }, tag = "cartridgeCaliber")
-            PhotoRow(route.photo, route::change)
+            PhotoRow(photo, route::change)
         }
         Section(stringResource(Res.string.bullet)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -676,7 +683,7 @@ private fun <T> SearchList(
 ) {
     var filter by rememberSaveable { mutableStateOf("") }
     var items by remember { mutableStateOf(emptyList<T>()) }
-    LaunchedEffect(filter, reloadKey) { items = runCatching { load(filter) }.getOrDefault(emptyList()) }
+    LaunchedEffect(filter, reloadKey) { items = loadOr(emptyList()) { load(filter) } }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }

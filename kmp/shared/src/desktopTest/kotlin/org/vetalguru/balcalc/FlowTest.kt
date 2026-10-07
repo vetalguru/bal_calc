@@ -91,7 +91,7 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }
         onNodeWithTag("elevation").assertTextEquals("1.61")
         shot("$name-solution")
-        onNodeWithTag("quickWind").performScrollTo()
+        assertTrue(exists("quickWind")) // the controller: always on screen
         shotOf("quickWind", "$name-wind")
 
         // Colder air: more elevation.
@@ -301,7 +301,8 @@ class FlowTest {
     fun photoOfARifle() = runDesktopComposeUiTest(412, 915) {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val platform = FakePlatform().apply { image = pngOf(1600, 1200) }
-        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        val api = Api(desktopEngine())
+        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = platform) }
         waitUntil("sample button", 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil("first solution", 10_000) { exists("elevation") }
@@ -321,7 +322,21 @@ class FlowTest {
         waitUntil("picture in the editor", 10_000) { exists("photo") }
         shot("photo-editor")
         onNodeWithTag("save").performClick()
-        waitUntil("thumbnail after saving", 10_000) { thumb() }
+        try {
+            waitUntil("thumbnail after saving", 10_000) { thumb() }
+        } catch (e: androidx.compose.ui.test.ComposeTimeoutException) {
+            // Where it stopped: still in the editor (an error?), the picture in
+            // the core or not, what the list shows.
+            val stored = kotlinx.coroutines.runBlocking {
+                api.call("photos", buildJsonObject { put("kind", "rifle") }).toString().take(80)
+            }
+            val error = if (exists("formError")) shown("formError") else "none"
+            throw AssertionError(
+                "No thumbnail: editor open=${exists("photoChoose")}, form error=$error, " +
+                    "list shown=${exists("rifle:$name")}, core photos=$stored, picture size=" +
+                    "${platform.image?.size}", e,
+            )
+        }
         shot("photo-list")
 
         // Opened again: the picture is there; removed: gone from the list too.
@@ -485,7 +500,7 @@ class FlowTest {
         assertTrue(!exists("addZone")) // three zones in all
         onNodeWithTag("navSolution").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("windage") && shown("windage") != calm }
-        onNodeWithTag("quickWind").performScrollTo()
+        assertTrue(exists("quickWind")) // the controller: always on screen
         assertTrue(hasText("Zone 1 of 3", substring = true))
         db.delete()
     }
@@ -495,6 +510,7 @@ class FlowTest {
         val db = startWithSample()
         setRange(500)
         assertTrue(!exists("lead"))
+        onNodeWithTag("viewMore").performClick()
 
         // 15 km/h to the right (the default direction): lead to the right.
         onNodeWithTag("targetSpeed").performScrollTo()
@@ -521,7 +537,8 @@ class FlowTest {
         // The range card gets a lead column.
         onNodeWithTag("navTable").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("rangeTable") }
-        assertTrue(hasText("Lead", substring = true))
+        // The table loads after the screen: wait for its lead column.
+        waitUntil("lead column in the range card", 10_000) { hasText("Lead", substring = true) }
         shot("table-lead")
         db.delete()
     }

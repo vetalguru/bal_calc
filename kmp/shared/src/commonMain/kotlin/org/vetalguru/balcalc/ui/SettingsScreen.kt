@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.core.Info
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
@@ -33,7 +34,7 @@ import org.vetalguru.balcalc.res.*
 fun SettingsScreen(model: AppModel) {
     val st = model.state
     var info by remember { mutableStateOf(Info()) }
-    LaunchedEffect(Unit) { info = runCatching { model.info() }.getOrDefault(Info()) }
+    LaunchedEffect(Unit) { info = loadOr(Info()) { model.info() } }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
