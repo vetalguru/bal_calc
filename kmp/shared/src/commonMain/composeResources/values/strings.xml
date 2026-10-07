@@ -544,4 +544,7 @@
     <string name="cant_hint">Clockwise +</string>
     <string name="wind_direction_hint">0° from the target, 90° from the right, 270° from the left</string>
     <string name="wind_clock_short">%1$s o'clock</string>
+    <string name="chart_computing">Calculating…</string>
+    <string name="chart_no_data">Nothing to plot: choose a rifle and a cartridge</string>
+    <string name="chart_target">range to the target</string>
 </resources>

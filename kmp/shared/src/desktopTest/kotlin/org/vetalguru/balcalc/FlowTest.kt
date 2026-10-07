@@ -112,7 +112,7 @@ class FlowTest {
         onNodeWithTag("chartTab").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("chart") }
         shot("$name-chart")
-        assertTrue(exists("chart"))
+        assertTrue(!exists("chartEmpty")) // drawn, not a message
         db.delete()
     }
 
@@ -1188,5 +1188,33 @@ class FlowTest {
             }, 1e-6)
             db.delete()
         }
+    }
+
+    /** No rifle yet: the chart says why it is empty instead of a blank page. */
+    @Test
+    fun chartWithoutRifleExplains() = runDesktopComposeUiTest(412, 915) {
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform()) }
+        waitUntil(timeoutMillis = 30_000) { exists("navTable") }
+        onNodeWithTag("navTable").performClick()
+        onNodeWithTag("chartTab").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("chartEmpty") && !hasText("Calculating…") }
+        assertTrue(!exists("chart"))
+        shot("chart-without-rifle")
+        db.delete()
+    }
+
+    /** The elevation chart: from 25 m, without the spike of the sight height over the first metres. */
+    @Test
+    fun elevationChart() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        onNodeWithTag("navTable").performClick()
+        onNodeWithTag("chartTab").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("chart") }
+        onNodeWithTag("chartQuantity").performClick()
+        onAllNodesWithText("Elevation correction").onLast().performClick()
+        waitUntil(timeoutMillis = 10_000) { onAllNodesWithText("Elevation correction").fetchSemanticsNodes().size == 1 }
+        shot("chart-elevation")
+        db.delete()
     }
 }
