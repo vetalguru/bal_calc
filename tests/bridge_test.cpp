@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <set>
 #include <sstream>
 #include <string>
@@ -57,6 +58,31 @@ protected:
 
     Api api_;
 };
+
+// Every JSON method the app calls is registered (the method table is
+// assembled from the topic files: none may be lost when code moves).
+TEST_F(Bridge, EveryMethodIsThere) {
+    const char* methods[] = {
+        "open", "seed", "info", "state", "select", "targets", "saveTargets", "selectTarget",
+        "situations", "saveSituation", "applySituation", "deleteSituation", "setConditions",
+        "setSettings", "solution", "rangeTable", "compareCurves", "pairOptions", "trajectoryCurve",
+        "rifleForm", "saveRifle", "deleteRifle", "cartridgeForm", "saveCartridge", "deleteCartridge",
+        "stability", "photos", "photo", "setPhoto", "cartridgeFormWithBullet", "libraryScopes",
+        "libraryRifles", "libraryCartridges", "cartridgeFormFromLibrary", "setZeroOffset", "addSample",
+        "shots", "logShot", "deleteShot", "setShotUsed", "computeTruing", "applyTruing", "resetTruing",
+        "wez", "bcCalculator", "computeDsf", "applyDsf", "setDsf", "resetDsf", "reticles",
+        "libraryBullets", "bulletForm", "saveBullet", "deleteBullet", "exportJson", "importShared",
+        "importFiles", "stationPressure",
+    };
+    EXPECT_EQ(std::size(methods), 58U);
+    for (const char* m : methods) {
+        const json r = json::parse(api_.Call(m, "{}"));
+        if (!r.at("ok").get<bool>()) {
+            EXPECT_EQ(r.at("error").get<std::string>().rfind("Unknown method", 0), std::string::npos) << m;
+        }
+    }
+    EXPECT_EQ(Fails("noSuchMethod"), "Unknown method: noSuchMethod");
+}
 
 TEST_F(Bridge, EmptyDatabaseNeedsARifleAndCartridge) {
     const json st = Ok("state");

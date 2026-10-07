@@ -1,6 +1,17 @@
 # JSON facade over applogic for UIs that are not C++ (the Kotlin app via
 # JNI); the session logic the Qt Backend used to hold, toolkit-free.
-add_library(ballistics_bridge STATIC src/api.cpp src/forms_json.cpp src/util.cpp)
+add_library(ballistics_bridge STATIC
+    src/api.cpp
+    src/armory.cpp
+    src/forms_json.cpp
+    src/library.cpp
+    src/photos.cpp
+    src/session.cpp
+    src/sharing.cpp
+    src/solution.cpp
+    src/targets.cpp
+    src/truing.cpp
+    src/util.cpp)
 target_include_directories(ballistics_bridge PUBLIC include)
 target_link_libraries(ballistics_bridge
     PUBLIC ballistics_applogic
