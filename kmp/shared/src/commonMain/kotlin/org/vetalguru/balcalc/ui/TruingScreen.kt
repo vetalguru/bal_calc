@@ -75,7 +75,7 @@ fun LogShotDialog(model: AppModel, rangeGuess: Double, elevationGuess: Double, o
         confirmButton = {
             TextButton(onClick = {
                 scope.launch {
-                    error = model.logShot(range, elevation, if (withWindage) windage else null, notes)
+                    error = model.truing.logShot(range, elevation, if (withWindage) windage else null, notes)
                     if (error == null) onClose()
                 }
             }, modifier = Modifier.testTag("saveHit")) { Text(stringResource(Res.string.save)) }
@@ -99,8 +99,8 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
     var bcCalc by remember { mutableStateOf(false) }
     var offsetError by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    LaunchedEffect(model.shotsRevision, st.currentProfileId, st.angleUnit) {
-        shots = loadOr(emptyList()) { model.shots() }
+    LaunchedEffect(model.truing.revision, st.currentProfileId, st.angleUnit) {
+        shots = loadOr(emptyList()) { model.truing.shots() }
         result = null
     }
     val unit = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
@@ -135,7 +135,7 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
 
                 if (pair != null && st.hasPair) {
                     Section(stringResource(Res.string.poi_title, pair.zeroRangeM.roundToInt())) {
-                        fun set(up: Double, right: Double) = scope.launch { offsetError = model.setZeroOffset(up, right) }
+                        fun set(up: Double, right: Double) = scope.launch { offsetError = model.truing.setZeroOffset(up, right) }
                         Fields(
                             wide,
                             { m -> NumberField(stringResource(Res.string.poi_up), pair.offsetUpCm, { set(it, pair.offsetRightCm) }, m, cm, from = -100.0, to = 100.0, tag = "offsetUp") },
@@ -151,7 +151,7 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
                 }
                 shotList.forEach { s ->
                     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp).testTag("shotRow"), verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(s.used, { model.setShotUsed(s.id, it) })
+                        Checkbox(s.used, { model.truing.setShotUsed(s.id, it) })
                         Column(Modifier.weight(1f)) {
                             Text(stringResource(Res.string.shot_line, s.rangeM.roundToInt(), s.observed.fixed(2), unit), fontSize = 16.sp)
                             Text(
@@ -164,16 +164,16 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
                                 color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             )
                         }
-                        TextButton(onClick = { model.deleteShot(s.id) }) { Text("✕") }
+                        TextButton(onClick = { model.truing.deleteShot(s.id) }) { Text("✕") }
                     }
                 }
 
                 Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { scope.launch { result = runCatching { model.computeTruing() }.getOrNull() } },
+                    Button(onClick = { scope.launch { result = runCatching { model.truing.computeTruing() }.getOrNull() } },
                         enabled = shotList.isNotEmpty(), modifier = Modifier.testTag("computeTruing")) {
                         Text(stringResource(Res.string.calculate_truing))
                     }
-                    TextButton(onClick = { model.resetTruing() }, enabled = trued, modifier = Modifier.testTag("resetTruing")) {
+                    TextButton(onClick = { model.truing.resetTruing() }, enabled = trued, modifier = Modifier.testTag("resetTruing")) {
                         Text(stringResource(Res.string.reset_truing))
                     }
                 }
@@ -184,7 +184,7 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
 
                 truing?.let { r -> TruingResultCard(r, unit) {
                     scope.launch {
-                        val error = model.applyTruing()
+                        val error = model.truing.applyTruing()
                         result = if (error == null) null else r.copy(ok = false, error = error)
                     }
                 } }

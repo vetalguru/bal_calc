@@ -96,7 +96,7 @@ fun QrImportDialog(model: AppModel, onImported: () -> Unit, onClose: () -> Unit)
         if (collector.complete) {
             scope.launch {
                 try {
-                    model.importShared(collector.json())
+                    model.armory.importShared(collector.json())
                     onImported()
                 } catch (e: Exception) {
                     error = e.message

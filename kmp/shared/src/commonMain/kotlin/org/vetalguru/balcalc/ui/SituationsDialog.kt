@@ -45,7 +45,7 @@ fun SituationsDialog(model: AppModel, onClose: () -> Unit) {
     var list by remember { mutableStateOf<List<SituationItem>>(emptyList()) }
     var name by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(Unit) { list = loadOr(emptyList()) { model.situations() } }
+    LaunchedEffect(Unit) { list = loadOr(emptyList()) { model.targets.situations() } }
 
     AlertDialog(
         onDismissRequest = onClose,
@@ -73,13 +73,13 @@ fun SituationsDialog(model: AppModel, onClose: () -> Unit) {
                         if (s.available) {
                             TextButton(onClick = {
                                 scope.launch {
-                                    error = model.applySituation(s.name)
+                                    error = model.targets.applySituation(s.name)
                                     if (error == null) onClose()
                                 }
                             }, modifier = Modifier.testTag("applySituation:${s.name}")) { Text(stringResource(Res.string.apply)) }
                         }
                         TextButton(onClick = {
-                            scope.launch { list = runCatching { model.deleteSituation(s.name) }.getOrDefault(list) }
+                            scope.launch { list = runCatching { model.targets.deleteSituation(s.name) }.getOrDefault(list) }
                         }, modifier = Modifier.testTag("deleteSituation:${s.name}")) { Text(stringResource(Res.string.delete)) }
                     }
                 }
@@ -92,7 +92,7 @@ fun SituationsDialog(model: AppModel, onClose: () -> Unit) {
                 )
                 Button(onClick = {
                     scope.launch {
-                        model.saveSituation(name).fold(
+                        model.targets.saveSituation(name).fold(
                             { list = it; name = ""; error = null },
                             { error = it.message },
                         )

@@ -68,7 +68,7 @@ fun DsfSection(model: AppModel, hasShots: Boolean, unit: String) {
                 modifier = Modifier.testTag("dsfAdd"),
             ) { Text(stringResource(Res.string.dsf_add)) }
             if (edited) {
-                Button(onClick = { scope.launch { error = model.applyDsf(rows) } }, modifier = Modifier.testTag("dsfSave")) {
+                Button(onClick = { scope.launch { error = model.truing.applyDsf(rows) } }, modifier = Modifier.testTag("dsfSave")) {
                     Text(stringResource(Res.string.dsf_save))
                 }
             }
@@ -76,17 +76,17 @@ fun DsfSection(model: AppModel, hasShots: Boolean, unit: String) {
         error?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error) }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
-                onClick = { scope.launch { fit = runCatching { model.computeDsf() }.getOrNull() } },
+                onClick = { scope.launch { fit = runCatching { model.truing.computeDsf() }.getOrNull() } },
                 enabled = hasShots, modifier = Modifier.testTag("dsfFit"),
             ) { Text(stringResource(Res.string.dsf_fit)) }
-            TextButton(onClick = { model.resetDsf(); fit = null }, enabled = stored.isNotEmpty(), modifier = Modifier.testTag("dsfReset")) {
+            TextButton(onClick = { model.truing.resetDsf(); fit = null }, enabled = stored.isNotEmpty(), modifier = Modifier.testTag("dsfReset")) {
                 Text(stringResource(Res.string.dsf_reset))
             }
         }
         fit?.let { r ->
             DsfFitCard(r, unit) {
                 scope.launch {
-                    error = model.applyDsf()
+                    error = model.truing.applyDsf()
                     if (error == null) fit = null
                 }
             }

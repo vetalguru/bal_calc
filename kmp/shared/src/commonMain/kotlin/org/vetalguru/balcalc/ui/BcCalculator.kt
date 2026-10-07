@@ -46,7 +46,7 @@ fun BcCalculatorDialog(model: AppModel, onClose: () -> Unit) {
     val sol = model.solution
     var form by remember { mutableStateOf<CartridgeForm?>(null) }
     LaunchedEffect(model.state.currentCartridgeId) {
-        form = loadOr(null) { model.cartridgeForm(model.state.currentCartridgeId) }
+        form = loadOr(null) { model.armory.cartridgeForm(model.state.currentCartridgeId) }
     }
     var hitMode by remember { mutableStateOf(false) }
     var table by remember { mutableStateOf("G7") }
@@ -94,8 +94,8 @@ fun BcCalculatorDialog(model: AppModel, onClose: () -> Unit) {
                         scope.launch {
                             saveError = null
                             result = runCatching {
-                                if (hitMode) model.bcFromHit(table, range, elevation)
-                                else model.bcFromChronograph(table, vNear, vFar, distance)
+                                if (hitMode) model.truing.bcFromHit(table, range, elevation)
+                                else model.truing.bcFromChronograph(table, vNear, vFar, distance)
                             }.getOrNull()
                         }
                     },
@@ -123,7 +123,7 @@ fun BcCalculatorDialog(model: AppModel, onClose: () -> Unit) {
                     val f = form ?: return@TextButton
                     val bc = r ?: return@TextButton
                     scope.launch {
-                        saveError = model.saveCartridge(f.copy(libraryBulletId = 0, dragTable = bc.table, bc = bc.bc))
+                        saveError = model.armory.saveCartridge(f.copy(libraryBulletId = 0, dragTable = bc.table, bc = bc.bc))
                         if (saveError == null) onClose()
                     }
                 },
