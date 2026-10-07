@@ -223,6 +223,43 @@ class FlowTest {
     }
 
     @Test
+    fun rifleAndScopeFromTheLibrary() = runDesktopComposeUiTest(412, 915) {
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform()) }
+        waitUntil(timeoutMillis = 30_000) { exists("sample") }
+        onNodeWithTag("navArmory").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("new") }
+        onNodeWithTag("new").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("rifleFromLibrary") }
+
+        onNodeWithTag("rifleFromLibrary").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("search") }
+        onNodeWithTag("search").performTextReplacement("tikka ctr 6.5 creedmoor")
+        waitUntil(timeoutMillis = 10_000) { count("libraryRifle:") == 1 }
+        shot("library-rifles")
+        onNodeWithTag("libraryRifle:Tikka T3x CTR 6.5 Creedmoor 8").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("rifleName") }
+        assertEquals("Tikka T3x CTR 6.5 Creedmoor", shown("rifleName"))
+        assertEquals("6.5 Creedmoor", shown("rifleCaliber"))
+        assertEquals("8", shown("twist"))
+
+        onNodeWithTag("scopeFromLibrary").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("search") }
+        onNodeWithTag("search").performTextReplacement("atacr 7-35 f1")
+        waitUntil(timeoutMillis = 10_000) { count("libraryScope:") == 2 } // MOA and MRAD turrets
+        shot("library-scopes")
+        onNodeWithTag("libraryScope:Nightforce ATACR 7-35x56 F1 mrad0.1").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("clickValue") }
+        assertEquals("0.1", shown("clickValue"))
+        assertEquals("35", shown("magTo"))
+        assertEquals("Tikka T3x CTR 6.5 Creedmoor", shown("rifleName")) // the rifle part kept
+
+        onNodeWithTag("save").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("rifle:Tikka T3x CTR 6.5 Creedmoor") }
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)

@@ -417,6 +417,14 @@
     <string name="situation_line">%1$s · %2$s · %3$s м</string>
     <string name="situation_missing">Гвинтівку або патрон видалено</string>
     <string name="close">Закрити</string>
+    <string name="library_rifles">Бібліотека гвинтівок</string>
+    <string name="library_scopes">Бібліотека прицілів</string>
+    <string name="library_search_rifle">Виробник, модель або калібр</string>
+    <string name="library_search_scope">Виробник або модель</string>
+    <string name="catalog_empty">Бібліотека порожня.</string>
+    <string name="library_rifle_line">Крок нарізів 1:%1$s″ · ствол %2$s″</string>
+    <string name="library_scope_line">%1$s–%2$s× %3$s · клік %4$s %5$s</string>
+    <string name="library_note">Так, як публікує виробник: звірте крок нарізів і ціну кліку зі своєю гвинтівкою та прицілом.</string>
     <string name="sensor_barometer">З барометра</string>
     <string name="sensor_location">Моє місце</string>
     <string name="sensor_angles">Виміряти телефоном</string>

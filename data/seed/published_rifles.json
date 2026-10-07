@@ -1,0 +1,1310 @@
+{
+ "format": "balcalc-rifles",
+ "version": 1,
+ "rifles": [
+  {
+   "maker": "Bergara",
+   "model": "B-14 HMR",
+   "caliber": ".22-250 Rem",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 HMR",
+   "caliber": ".300 PRC",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 HMR",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 HMR",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 HMR",
+   "caliber": ".450 Bushmaster",
+   "twistIn": 24.0,
+   "barrelsIn": [
+    20.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 HMR",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 HMR",
+   "caliber": "6.5 PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 HMR",
+   "caliber": "7mm PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": ".22-250 Rem",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": ".243 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": ".270 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": ".30-06 Sprg",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": "7mm PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": "7mm Rem Mag",
+   "twistIn": 9.5,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Hunter",
+   "caliber": "7mm-08 Rem",
+   "twistIn": 9.5,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/hunter-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": ".22-250 Rem",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": ".223 Rem",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    18.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": ".243 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": ".270 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": ".30-06 Sprg",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": ".300 PRC",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    18.0,
+    20.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": ".450 Bushmaster",
+   "twistIn": 24.0,
+   "barrelsIn": [
+    20.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    18.0,
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": "6.5 PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": "7mm PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": "7mm Rem Mag",
+   "twistIn": 9.5,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Ridge",
+   "caliber": "7mm-08 Rem",
+   "twistIn": 9.5,
+   "barrelsIn": [
+    22.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14/ridge-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Wilderness HMR",
+   "caliber": ".300 PRC",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Wilderness HMR",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Wilderness HMR",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Wilderness HMR",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Wilderness HMR",
+   "caliber": "6.5 PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Wilderness HMR",
+   "caliber": "7mm PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "B-14 Wilderness HMR",
+   "caliber": "7mm Rem Mag",
+   "twistIn": 9.5,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier Competition Elite",
+   "caliber": ".22 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/competition-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier Competition Elite",
+   "caliber": ".25 Creedmoor",
+   "twistIn": 7.5,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/competition-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier Competition Elite",
+   "caliber": ".308 Win",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/competition-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier Competition Elite",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/competition-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier Competition Elite",
+   "caliber": "6mm Creedmoor",
+   "twistIn": 7.5,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/competition-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier Competition Elite",
+   "caliber": "6mm Dasher",
+   "twistIn": 7.5,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/competition-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier Competition Elite",
+   "caliber": "6mm GT",
+   "twistIn": 7.5,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/competition-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier HMR Pro",
+   "caliber": ".22-250 Rem",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier HMR Pro",
+   "caliber": ".300 PRC",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier HMR Pro",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier HMR Pro",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier HMR Pro",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier HMR Pro",
+   "caliber": "6.5 PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/"
+  },
+  {
+   "maker": "Bergara",
+   "model": "Premier HMR Pro",
+   "caliber": "7mm PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/"
+  },
+  {
+   "maker": "Ruger",
+   "model": "Precision Rifle",
+   "caliber": ".300 PRC",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://ruger.com/products/precisionRifle/specSheets/18107.html"
+  },
+  {
+   "maker": "Ruger",
+   "model": "Precision Rifle",
+   "caliber": ".300 Win Mag",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://ruger.com/products/precisionRifle/specSheets/18106.html"
+  },
+  {
+   "maker": "Ruger",
+   "model": "Precision Rifle",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0
+   ],
+   "source": "https://ruger.com/products/precisionRifle/specSheets/18104.html"
+  },
+  {
+   "maker": "Ruger",
+   "model": "Precision Rifle",
+   "caliber": ".338 Lapua Mag",
+   "twistIn": 9.375,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://ruger.com/products/precisionRifle/specSheets/18096.html"
+  },
+  {
+   "maker": "Ruger",
+   "model": "Precision Rifle",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 7.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://ruger.com/products/precisionRifle/specSheets/18103.html"
+  },
+  {
+   "maker": "Ruger",
+   "model": "Precision Rifle",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://ruger.com/products/precisionRifle/specSheets/18095.html"
+  },
+  {
+   "maker": "Ruger",
+   "model": "Precision Rifle",
+   "caliber": "6.5 PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://ruger.com/products/precisionRifle/specSheets/18105.html"
+  },
+  {
+   "maker": "Ruger",
+   "model": "Precision Rifle",
+   "caliber": "6mm Creedmoor",
+   "twistIn": 7.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://ruger.com/products/precisionRifle/specSheets/18102.html"
+  },
+  {
+   "maker": "Ruger",
+   "model": "Precision Rifle",
+   "caliber": "6mm GT",
+   "twistIn": 7.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://ruger.com/products/precisionRifle/specSheets/18097.html"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42",
+   "caliber": ".260 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    27.2
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0,
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42",
+   "caliber": ".338 Lapua Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    27.2
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42 A1",
+   "caliber": ".260 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242-a1"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42 A1",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    27.2
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242-a1"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42 A1",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242-a1"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42 A1",
+   "caliber": ".338 Lapua Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0,
+    27.2
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242-a1"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG 22/42 A1",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-2242-a1"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG M10",
+   "caliber": ".300 Norma Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    27.2
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-m10"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG M10",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    23.6,
+    27.2
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-m10"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG M10",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    16.0,
+    20.0,
+    23.6,
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-m10"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG M10",
+   "caliber": ".338 Lapua Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0,
+    27.2
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-m10"
+  },
+  {
+   "maker": "Sako",
+   "model": "TRG M10",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/sako-trg-m10"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Ace Target",
+   "caliber": ".223 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-ace-target"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Ace Target",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    23.6,
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-ace-target"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Ace Target",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    23.6,
+    26.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-ace-target"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x CTR",
+   "caliber": ".223 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-compact-tactical-rifle"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x CTR",
+   "caliber": ".223 Rem",
+   "twistIn": 12.0,
+   "barrelsIn": [
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-compact-tactical-rifle"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x CTR",
+   "caliber": ".243 Win",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-compact-tactical-rifle"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x CTR",
+   "caliber": ".260 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-compact-tactical-rifle"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x CTR",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-compact-tactical-rifle"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x CTR",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-compact-tactical-rifle"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x CTR",
+   "caliber": "6.5 PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-compact-tactical-rifle"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x CTR",
+   "caliber": "6mm Creedmoor",
+   "twistIn": 7.5,
+   "barrelsIn": [
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-compact-tactical-rifle"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x CTR",
+   "caliber": "7mm-08 Rem",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    20.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-compact-tactical-rifle"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": ".22-250 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": ".22-250 Rem",
+   "twistIn": 14.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": ".223 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": ".243 Win",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": ".270 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": ".30-06 Sprg",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": "6.5 PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": "6.5x55 SE",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": "6mm Creedmoor",
+   "twistIn": 7.5,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": "7mm PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": "7mm Rem Mag",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Super Varmint",
+   "caliber": "7mm-08 Rem",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-super-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x TACT A1",
+   "caliber": ".223 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-tact-a1"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x TACT A1",
+   "caliber": ".223 Rem",
+   "twistIn": 12.0,
+   "barrelsIn": [
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-tact-a1"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x TACT A1",
+   "caliber": ".260 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-tact-a1"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x TACT A1",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    16.0,
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-tact-a1"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x TACT A1",
+   "caliber": ".308 Win",
+   "twistIn": 11.0,
+   "barrelsIn": [
+    16.0,
+    20.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-tact-a1"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x TACT A1",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    16.0,
+    20.0,
+    24.0
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-tact-a1"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".22-250 Rem",
+   "twistIn": 14.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".222 Rem",
+   "twistIn": 14.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".223 Rem",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".223 Rem",
+   "twistIn": 12.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".243 Win",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".270 WSM",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".270 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".30-06 Sprg",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".300 WSM",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".300 Win Mag",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": ".308 Win",
+   "twistIn": 10.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": "6.5 Creedmoor",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": "6.5 PRC",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": "6.5x55 SE",
+   "twistIn": 8.0,
+   "barrelsIn": [
+    20.0,
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": "7mm Rem Mag",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  },
+  {
+   "maker": "Tikka",
+   "model": "T3x Varmint",
+   "caliber": "7mm-08 Rem",
+   "twistIn": 9.0,
+   "barrelsIn": [
+    23.6
+   ],
+   "source": "https://www.sako.global/en/rifle/t3x-varmint"
+  }
+ ]
+}

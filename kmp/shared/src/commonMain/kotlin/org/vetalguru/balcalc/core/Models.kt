@@ -264,3 +264,31 @@ data class SituationItem(
     val rangeM: Double = 0.0,
     val available: Boolean = false,
 )
+
+/** A scope as its maker publishes it (published_scopes.json). */
+@Serializable
+data class LibraryScope(
+    val maker: String = "",
+    val model: String = "",
+    val minMagnification: Double = 0.0,
+    val maxMagnification: Double = 0.0,
+    val focalPlane: String = "ffp",
+    val sfpReferenceMagnification: Double = 0.0,
+    val clicks: List<ScopeClick> = emptyList(),
+    val reticles: List<String> = emptyList(),
+    val source: String = "",
+)
+
+@Serializable
+data class ScopeClick(val units: String = "mrad", val value: Double = 0.1)
+
+/** A rifle variant as its maker publishes it (published_rifles.json). */
+@Serializable
+data class LibraryRifle(
+    val maker: String = "",
+    val model: String = "",
+    val caliber: String = "",
+    val twistIn: Double = 0.0,
+    val barrelsIn: List<Double> = emptyList(),
+    val source: String = "",
+)

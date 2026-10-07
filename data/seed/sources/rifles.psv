@@ -1,0 +1,172 @@
+# maker|model|caliber|barrel_in|twist_in|source  (one row per published variant; duplicates are merged)
+Tikka|T3x TACT A1|.308 Win|16|11|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.308 Win|20|11|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.308 Win|16|10|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.308 Win|20|10|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.308 Win|24|10|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|6.5 Creedmoor|16|8|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|6.5 Creedmoor|20|8|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|6.5 Creedmoor|24|8|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.260 Rem|20|8|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.260 Rem|24|8|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.223 Rem|20|8|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.223 Rem|24|8|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.223 Rem|20|12|https://www.sako.global/en/rifle/t3x-tact-a1
+Tikka|T3x TACT A1|.223 Rem|24|12|https://www.sako.global/en/rifle/t3x-tact-a1
+Bergara|Premier HMR Pro|.308 Win|20|10|https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/
+Bergara|Premier HMR Pro|6.5 Creedmoor|24|8|https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/
+Bergara|Premier HMR Pro|6.5 PRC|26|8|https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/
+Bergara|Premier HMR Pro|.22-250 Rem|24|9|https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/
+Bergara|Premier HMR Pro|.300 Win Mag|26|10|https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/
+Bergara|Premier HMR Pro|.300 PRC|26|9|https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/
+Bergara|Premier HMR Pro|7mm PRC|24|8|https://www.bergara.online/us/rifles/premier/hmr-pro-rifle/
+Tikka|T3x CTR|.223 Rem|20|8|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|.223 Rem|24|8|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|.223 Rem|20|12|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|.223 Rem|24|12|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|.243 Win|20|8|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|7mm-08 Rem|20|9|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|.308 Win|20|10|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|.308 Win|23.6|10|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|.260 Rem|20|8|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|.260 Rem|24|8|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|6.5 PRC|24|8|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|6mm Creedmoor|20|7.5|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|6mm Creedmoor|24|7.5|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|6.5 Creedmoor|20|8|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x CTR|6.5 Creedmoor|24|8|https://www.sako.global/en/rifle/t3x-compact-tactical-rifle
+Tikka|T3x Ace Target|.223 Rem|23.6|8|https://www.sako.global/en/rifle/t3x-ace-target
+Tikka|T3x Ace Target|.308 Win|26|10|https://www.sako.global/en/rifle/t3x-ace-target
+Tikka|T3x Ace Target|.308 Win|23.6|10|https://www.sako.global/en/rifle/t3x-ace-target
+Tikka|T3x Ace Target|6.5 Creedmoor|26|8|https://www.sako.global/en/rifle/t3x-ace-target
+Tikka|T3x Ace Target|6.5 Creedmoor|23.6|8|https://www.sako.global/en/rifle/t3x-ace-target
+Tikka|T3x Varmint|.222 Rem|23.6|14|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.222 Rem|20|14|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.223 Rem|23.6|8|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.223 Rem|23.6|12|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.223 Rem|20|8|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.22-250 Rem|23.6|14|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.22-250 Rem|20|14|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|6.5x55 SE|23.6|8|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|6.5x55 SE|20|8|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.270 Win|23.6|10|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.270 Win|20|10|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|6.5 Creedmoor|23.6|8|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|6.5 Creedmoor|20|8|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.270 WSM|23.6|10|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.243 Win|20|9|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.243 Win|23.6|9|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|7mm-08 Rem|23.6|9|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|7mm Rem Mag|23.6|9|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.308 Win|23.6|10|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.308 Win|20|10|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.30-06 Sprg|23.6|10|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.300 Win Mag|23.6|10|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|.300 WSM|23.6|10|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Varmint|6.5 PRC|23.6|8|https://www.sako.global/en/rifle/t3x-varmint
+Tikka|T3x Super Varmint|.223 Rem|20|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.223 Rem|23.6|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.22-250 Rem|20|14|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.22-250 Rem|23.6|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.22-250 Rem|23.6|14|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.243 Win|20|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.243 Win|23.6|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|6.5x55 SE|20|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|6.5x55 SE|23.6|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.270 Win|20|10|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.270 Win|23.6|10|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.300 Win Mag|23.6|10|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|6.5 Creedmoor|20|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|6.5 Creedmoor|23.6|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|6.5 PRC|23.6|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|7mm-08 Rem|20|9|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|7mm-08 Rem|23.6|9|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|7mm Rem Mag|23.6|9|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.308 Win|20|10|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.308 Win|23.6|10|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.30-06 Sprg|20|10|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|.30-06 Sprg|23.6|10|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|7mm PRC|23.6|8|https://www.sako.global/en/rifle/t3x-super-varmint
+Tikka|T3x Super Varmint|6mm Creedmoor|23.6|7.5|https://www.sako.global/en/rifle/t3x-super-varmint
+Sako|TRG 22/42 A1|.308 Win|26|10|https://www.sako.global/en/rifle/sako-trg-2242-a1
+Sako|TRG 22/42 A1|6.5 Creedmoor|26|8|https://www.sako.global/en/rifle/sako-trg-2242-a1
+Sako|TRG 22/42 A1|.300 Win Mag|27.2|10|https://www.sako.global/en/rifle/sako-trg-2242-a1
+Sako|TRG 22/42 A1|.338 Lapua Mag|27.2|10|https://www.sako.global/en/rifle/sako-trg-2242-a1
+Sako|TRG 22/42 A1|.260 Rem|26|8|https://www.sako.global/en/rifle/sako-trg-2242-a1
+Sako|TRG 22/42 A1|.338 Lapua Mag|20|10|https://www.sako.global/en/rifle/sako-trg-2242-a1
+Sako|TRG 22/42|.308 Win|20|10|https://www.sako.global/en/rifle/sako-trg-2242
+Sako|TRG 22/42|.308 Win|26|10|https://www.sako.global/en/rifle/sako-trg-2242
+Sako|TRG 22/42|.260 Rem|20|8|https://www.sako.global/en/rifle/sako-trg-2242
+Sako|TRG 22/42|.260 Rem|26|8|https://www.sako.global/en/rifle/sako-trg-2242
+Sako|TRG 22/42|6.5 Creedmoor|26|8|https://www.sako.global/en/rifle/sako-trg-2242
+Sako|TRG 22/42|.300 Win Mag|27.2|10|https://www.sako.global/en/rifle/sako-trg-2242
+Sako|TRG 22/42|.338 Lapua Mag|27.2|10|https://www.sako.global/en/rifle/sako-trg-2242
+Sako|TRG M10|.300 Win Mag|27.2|10|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|.300 Win Mag|23.6|10|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|.338 Lapua Mag|27.2|10|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|.338 Lapua Mag|20|10|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|.300 Norma Mag|27.2|10|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|6.5 Creedmoor|26|8|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|6.5 Creedmoor|20|8|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|.308 Win|23.6|10|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|.308 Win|20|10|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|.308 Win|26|10|https://www.sako.global/en/rifle/sako-trg-m10
+Sako|TRG M10|.308 Win|16|10|https://www.sako.global/en/rifle/sako-trg-m10
+Bergara|B-14 HMR|.308 Win|20|10|https://www.bergara.online/us/rifles/b14/hmr-rifle/
+Bergara|B-14 HMR|6.5 Creedmoor|22|8|https://www.bergara.online/us/rifles/b14/hmr-rifle/
+Bergara|B-14 HMR|.22-250 Rem|24|9|https://www.bergara.online/us/rifles/b14/hmr-rifle/
+Bergara|B-14 HMR|.450 Bushmaster|20|24|https://www.bergara.online/us/rifles/b14/hmr-rifle/
+Bergara|B-14 HMR|6.5 PRC|24|8|https://www.bergara.online/us/rifles/b14/hmr-rifle/
+Bergara|B-14 HMR|.300 Win Mag|26|10|https://www.bergara.online/us/rifles/b14/hmr-rifle/
+Bergara|B-14 HMR|.300 PRC|26|9|https://www.bergara.online/us/rifles/b14/hmr-rifle/
+Bergara|B-14 HMR|7mm PRC|24|8|https://www.bergara.online/us/rifles/b14/hmr-rifle/
+Bergara|Premier Competition Elite|.22 Creedmoor|26|8|https://www.bergara.online/us/rifles/premier/competition-rifle/
+Bergara|Premier Competition Elite|.25 Creedmoor|26|7.5|https://www.bergara.online/us/rifles/premier/competition-rifle/
+Bergara|Premier Competition Elite|6.5 Creedmoor|26|8|https://www.bergara.online/us/rifles/premier/competition-rifle/
+Bergara|Premier Competition Elite|6mm Creedmoor|26|7.5|https://www.bergara.online/us/rifles/premier/competition-rifle/
+Bergara|Premier Competition Elite|6mm GT|26|7.5|https://www.bergara.online/us/rifles/premier/competition-rifle/
+Bergara|Premier Competition Elite|6mm Dasher|26|7.5|https://www.bergara.online/us/rifles/premier/competition-rifle/
+Bergara|Premier Competition Elite|.308 Win|26|8|https://www.bergara.online/us/rifles/premier/competition-rifle/
+Bergara|B-14 Wilderness HMR|6.5 PRC|24|8|https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/
+Bergara|B-14 Wilderness HMR|.300 PRC|26|9|https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/
+Bergara|B-14 Wilderness HMR|6.5 Creedmoor|24|8|https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/
+Bergara|B-14 Wilderness HMR|.308 Win|20|10|https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/
+Bergara|B-14 Wilderness HMR|.300 Win Mag|26|10|https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/
+Bergara|B-14 Wilderness HMR|7mm Rem Mag|24|9.5|https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/
+Bergara|B-14 Wilderness HMR|7mm PRC|24|8|https://www.bergara.online/us/rifles/b14wilderness/hmr-rifle/
+Bergara|B-14 Ridge|.308 Win|20|10|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|6.5 Creedmoor|22|8|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|.243 Win|22|10|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|.22-250 Rem|22|9|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|.450 Bushmaster|20|24|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|7mm-08 Rem|22|9.5|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|6.5 PRC|24|8|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|.30-06 Sprg|24|10|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|.270 Win|24|10|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|.300 Win Mag|24|10|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|7mm Rem Mag|24|9.5|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|.300 PRC|24|9|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|7mm PRC|22|8|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|.308 Win|18|10|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|6.5 Creedmoor|18|8|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Ridge|.223 Rem|18|9|https://www.bergara.online/us/rifles/b14/ridge-rifle/
+Bergara|B-14 Hunter|.308 Win|22|10|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Bergara|B-14 Hunter|6.5 Creedmoor|22|8|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Bergara|B-14 Hunter|.243 Win|22|10|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Bergara|B-14 Hunter|.22-250 Rem|22|9|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Bergara|B-14 Hunter|7mm-08 Rem|22|9.5|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Bergara|B-14 Hunter|.30-06 Sprg|24|10|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Bergara|B-14 Hunter|.270 Win|24|10|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Bergara|B-14 Hunter|.300 Win Mag|24|10|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Bergara|B-14 Hunter|7mm Rem Mag|24|9.5|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Bergara|B-14 Hunter|7mm PRC|22|8|https://www.bergara.online/us/rifles/b14/hunter-rifle/
+Ruger|Precision Rifle|6.5 Creedmoor|24|8|https://ruger.com/products/precisionRifle/specSheets/18095.html
+Ruger|Precision Rifle|6mm GT|26|7|https://ruger.com/products/precisionRifle/specSheets/18097.html
+Ruger|Precision Rifle|.308 Win|20|10|https://ruger.com/products/precisionRifle/specSheets/18104.html
+Ruger|Precision Rifle|.338 Lapua Mag|26|9.375|https://ruger.com/products/precisionRifle/specSheets/18096.html
+Ruger|Precision Rifle|.300 Win Mag|26|9|https://ruger.com/products/precisionRifle/specSheets/18106.html
+Ruger|Precision Rifle|.300 PRC|26|9|https://ruger.com/products/precisionRifle/specSheets/18107.html
+Ruger|Precision Rifle|6mm Creedmoor|26|7|https://ruger.com/products/precisionRifle/specSheets/18102.html
+Ruger|Precision Rifle|6.5 Creedmoor|26|7|https://ruger.com/products/precisionRifle/specSheets/18103.html
+Ruger|Precision Rifle|6.5 PRC|26|8|https://ruger.com/products/precisionRifle/specSheets/18105.html
+Ruger|Precision Rifle|6mm GT|26|7|https://ruger.com/products/precisionRifle/specSheets/18109.html

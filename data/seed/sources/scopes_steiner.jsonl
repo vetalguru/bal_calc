@@ -1,0 +1,3 @@
+{"maker":"Steiner","model":"T6Xi 2.5-15x50","min":2.5,"max":15,"plane":"ffp","clicks":"mrad0.1,moa0.25","reticles":["SCR MIL","SCR MOA"],"source":"https://www.steiner-optics.com/products/t6xi-25-15x50"}
+{"maker":"Steiner","model":"T6Xi 3-18x56","min":3,"max":18,"plane":"ffp","clicks":"mrad0.1","reticles":["MSR2-MIL","SCR 2"],"source":"https://www.steiner-optics.com/products/t6xi-3-18x56"}
+{"maker":"Steiner","model":"T6Xi 5-30x56","min":5,"max":30,"plane":"ffp","clicks":"mrad0.1","reticles":["MSR2-MIL","SCR 2"],"source":"https://www.steiner-optics.com/products/t6xi-5-30x56"}

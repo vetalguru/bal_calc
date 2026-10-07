@@ -52,7 +52,10 @@ import org.vetalguru.balcalc.core.CartridgeForm
 import org.vetalguru.balcalc.core.CartridgeItem
 import org.vetalguru.balcalc.core.RifleForm
 import org.vetalguru.balcalc.core.BulletItem
+import org.vetalguru.balcalc.core.LibraryRifle
+import org.vetalguru.balcalc.core.LibraryScope
 import org.vetalguru.balcalc.core.ReticleItem
+import org.vetalguru.balcalc.core.ScopeClick
 import org.vetalguru.balcalc.fixed
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
@@ -60,7 +63,12 @@ import org.vetalguru.balcalc.res.*
 /** Inner pages of the Rifles tab, as a stack. */
 internal sealed interface Route {
     data object Lists : Route
-    class Rifle(val form: RifleForm) : Route
+    class Rifle(form: RifleForm) : Route {
+        var form by mutableStateOf(form)
+    }
+    /** The published scope or rifle catalogs; a pick fills the rifle form. */
+    class LibraryScopes(val pick: (LibraryScope, ScopeClick) -> Unit) : Route
+    class LibraryRifles(val pick: (LibraryRifle) -> Unit) : Route
     class Cartridge(form: CartridgeForm) : Route {
         var form by mutableStateOf(form)
     }
@@ -88,7 +96,9 @@ fun ArmoryScreen(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     BackHandler(nav.canGoBack) { nav.back() }
     when (val r = nav.top) {
         Route.Lists -> Lists(model, nav, onChosen)
-        is Route.Rifle -> RifleEditor(model, r.form) { nav.back() }
+        is Route.Rifle -> RifleEditor(model, r, nav)
+        is Route.LibraryScopes -> LibraryScopes(model, onBack = nav::back) { s, c -> nav.back(); r.pick(s, c) }
+        is Route.LibraryRifles -> LibraryRifles(model, onBack = nav::back) { rifle -> nav.back(); r.pick(rifle) }
         is Route.Cartridge -> CartridgeEditor(model, r, nav)
         is Route.Factory -> FactoryCartridges(model, onBack = nav::back) { id ->
             nav.back()
@@ -350,8 +360,9 @@ private fun EditorPage(
 }
 
 @Composable
-private fun RifleEditor(model: AppModel, initial: RifleForm, onDone: () -> Unit) {
-    var f by remember { mutableStateOf(initial) }
+private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
+    var f by route::form
+    val onDone = nav::back
     var error by remember { mutableStateOf<String?>(null) }
     var reticles by remember { mutableStateOf(emptyList<ReticleItem>()) }
     LaunchedEffect(Unit) { reticles = model.reticles() }
@@ -369,16 +380,22 @@ private fun RifleEditor(model: AppModel, initial: RifleForm, onDone: () -> Unit)
         onSave = { scope.launch { error = model.saveRifle(f); if (error == null) onDone() } },
     ) { wide ->
         Section(stringResource(Res.string.rifle)) {
+            LibraryButton("rifleFromLibrary") {
+                nav.push(Route.LibraryRifles { r -> f = f.withRifle(r) })
+            }
             TextInput(stringResource(Res.string.rifle_name_hint), f.name, { f = f.copy(name = it) }, tag = "rifleName")
             TextInput(stringResource(Res.string.caliber_hint), f.caliber, { f = f.copy(caliber = it) }, tag = "rifleCaliber")
             Fields(
                 wide,
                 { mod -> NumberField(stringResource(Res.string.sight_height), f.sightHeightCm, { f = f.copy(sightHeightCm = it) }, mod, cm, from = 0.0, to = 20.0) },
-                { mod -> NumberField(stringResource(Res.string.twist), f.twistIn, { f = f.copy(twistIn = it) }, mod, inch, 2, 0.0, 60.0) },
+                { mod -> NumberField(stringResource(Res.string.twist), f.twistIn, { f = f.copy(twistIn = it) }, mod, inch, 2, 0.0, 60.0, tag = "twist") },
             )
             SwitchRow(stringResource(Res.string.left_twist), f.twistLeft, { f = f.copy(twistLeft = it) })
         }
         Section(stringResource(Res.string.scope)) {
+            LibraryButton("scopeFromLibrary") {
+                nav.push(Route.LibraryScopes { s, c -> f = f.withScope(s, c) })
+            }
             Fields(
                 wide,
                 { mod ->
@@ -393,7 +410,7 @@ private fun RifleEditor(model: AppModel, initial: RifleForm, onDone: () -> Unit)
                         f.clickUnits, { f = f.copy(clickUnits = it) }, mod,
                     )
                 },
-                { mod -> NumberField(stringResource(Res.string.one_click), f.clickValue, { f = f.copy(clickValue = it) }, mod, decimals = 4, from = 0.0, to = 10.0) },
+                { mod -> NumberField(stringResource(Res.string.one_click), f.clickValue, { f = f.copy(clickValue = it) }, mod, decimals = 4, from = 0.0, to = 10.0, tag = "clickValue") },
                 { mod ->
                     ChoiceField(
                         stringResource(Res.string.reticle),
@@ -409,7 +426,7 @@ private fun RifleEditor(model: AppModel, initial: RifleForm, onDone: () -> Unit)
                     )
                 },
                 { mod -> NumberField(stringResource(Res.string.mag_from), f.minMagnification, { f = f.copy(minMagnification = it) }, mod, x, from = 0.0, to = 100.0) },
-                { mod -> NumberField(stringResource(Res.string.mag_to), f.maxMagnification, { f = f.copy(maxMagnification = it) }, mod, x, from = 0.0, to = 100.0) },
+                { mod -> NumberField(stringResource(Res.string.mag_to), f.maxMagnification, { f = f.copy(maxMagnification = it) }, mod, x, from = 0.0, to = 100.0, tag = "magTo") },
             )
             if (f.focalPlane == "sfp") {
                 NumberField(stringResource(Res.string.sfp_reference), f.sfpReferenceMagnification, { f = f.copy(sfpReferenceMagnification = it) }, unit = x, from = 0.0, to = 100.0)
@@ -492,6 +509,94 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
     }
 }
 
+/** "From library" at the right of an editor section. */
+@Composable
+private fun LibraryButton(tag: String, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = onClick, modifier = Modifier.testTag(tag)) { Text(stringResource(Res.string.from_library)) }
+    }
+}
+
+/** A library rifle into the form: its twist and caliber, and its name if none yet. */
+internal fun RifleForm.withRifle(r: LibraryRifle) = copy(
+    name = name.ifBlank { "${r.maker} ${r.model} ${r.caliber}" },
+    caliber = r.caliber,
+    twistIn = r.twistIn,
+)
+
+/**
+ * A library scope into the form. An SFP reticle is taken as true at the
+ * highest power unless the maker states another.
+ */
+internal fun RifleForm.withScope(s: LibraryScope, click: ScopeClick) = copy(
+    clickUnits = click.units,
+    clickValue = click.value,
+    focalPlane = s.focalPlane,
+    minMagnification = s.minMagnification,
+    maxMagnification = s.maxMagnification,
+    sfpReferenceMagnification = when {
+        s.focalPlane != "sfp" -> 0.0
+        s.sfpReferenceMagnification > 0 -> s.sfpReferenceMagnification
+        else -> s.maxMagnification
+    },
+)
+
+@Composable
+private fun LibraryRifles(model: AppModel, onBack: () -> Unit, onPick: (LibraryRifle) -> Unit) {
+    SearchList<LibraryRifle>(
+        stringResource(Res.string.library_rifles),
+        stringResource(Res.string.library_search_rifle),
+        stringResource(Res.string.catalog_empty),
+        model::libraryRifles,
+        onBack,
+        header = { LibraryNote() },
+    ) { r ->
+        TwoLines(
+            "${r.maker} ${r.model} · ${r.caliber}",
+            stringResource(Res.string.library_rifle_line, r.twistIn.trimmed(), r.barrelsIn.joinToString(", ") { it.trimmed() }),
+            "libraryRifle:${r.maker} ${r.model} ${r.caliber} ${r.twistIn.trimmed()}",
+        ) { onPick(r) }
+    }
+}
+
+/** One row per scope and click value it is sold with. */
+@Composable
+private fun LibraryScopes(model: AppModel, onBack: () -> Unit, onPick: (LibraryScope, ScopeClick) -> Unit) {
+    val ffp = stringResource(Res.string.ffp)
+    val sfp = stringResource(Res.string.sfp)
+    val mrad = stringResource(Res.string.unit_mrad)
+    val moa = stringResource(Res.string.unit_moa)
+    SearchList<Pair<LibraryScope, ScopeClick>>(
+        stringResource(Res.string.library_scopes),
+        stringResource(Res.string.library_search_scope),
+        stringResource(Res.string.catalog_empty),
+        { filter -> model.libraryScopes(filter).flatMap { s -> s.clicks.map { s to it } } },
+        onBack,
+        header = { LibraryNote() },
+    ) { (s, c) ->
+        TwoLines(
+            "${s.maker} ${s.model}",
+            stringResource(
+                Res.string.library_scope_line,
+                s.minMagnification.trimmed(), s.maxMagnification.trimmed(),
+                if (s.focalPlane == "sfp") sfp else ffp,
+                c.value.trimmed(), if (c.units == "mrad") mrad else moa,
+            ),
+            "libraryScope:${s.maker} ${s.model} ${c.units}${c.value.trimmed()}",
+        ) { onPick(s, c) }
+    }
+}
+
+@Composable
+private fun LibraryNote() = Text(
+    stringResource(Res.string.library_note),
+    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+)
+
+/** 8.0 -> "8", 9.375 -> "9.375". */
+private fun Double.trimmed(): String = if (this == kotlin.math.floor(this)) toLong().toString() else toString()
+
 // ---- Factory cartridges and bullets ---------------------------------------------
 
 /** A searchable list page with a Back bar. */
@@ -503,6 +608,7 @@ private fun <T> SearchList(
     load: suspend (String) -> List<T>,
     onBack: () -> Unit,
     reloadKey: Any? = null,
+    header: @Composable () -> Unit = {},
     actions: @Composable () -> Unit = {},
     row: @Composable (T) -> Unit,
 ) {
@@ -516,6 +622,7 @@ private fun <T> SearchList(
             actions()
         }
         TextInput(hint, filter, { filter = it }, Modifier.padding(horizontal = 12.dp), tag = "search")
+        header()
         if (items.isEmpty()) {
             Text(
                 if (filter.isNotEmpty()) stringResource(Res.string.nothing_found) else empty,
