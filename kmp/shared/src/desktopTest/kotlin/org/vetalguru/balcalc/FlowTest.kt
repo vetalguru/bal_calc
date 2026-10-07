@@ -260,6 +260,44 @@ class FlowTest {
     }
 
     @Test
+    fun rifleThroughAQrCode() = runDesktopComposeUiTest(412, 915) {
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
+        val platform = FakePlatform()
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        waitUntil(timeoutMillis = 30_000) { exists("sample") }
+        onNodeWithTag("sample").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+        onNodeWithTag("navArmory").performClick()
+        waitUntil(timeoutMillis = 10_000) { count("more:") > 0 }
+        val name = "Sample .308 Win"
+
+        onNodeWithTag("more:$name").performClick()
+        onNodeWithTag("showQr").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("qrCode") }
+        shot("qr-show")
+        onAllNodesWithText("Close").onFirst().performClick()
+
+        // The same file as the code carries, read back from pictures of its parts.
+        onNodeWithTag("more:$name").performClick()
+        onNodeWithTag("copy").performClick()
+        waitUntil(timeoutMillis = 10_000) { platform.clipboard != null }
+        val parts = QrShare.parts(platform.clipboard!!)
+        onAllNodesWithText("Import").onFirst().performClick()
+        onNodeWithTag("importQr").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("qrPicture") }
+        platform.image = qrPng("https://example.com")
+        onNodeWithTag("qrPicture").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("qrError") }
+        for (p in parts) {
+            platform.image = qrPng(p)
+            onNodeWithTag("qrPicture").performClick()
+            waitForIdle()
+        }
+        waitUntil(timeoutMillis = 10_000) { exists("rifle:$name (2)") }
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)

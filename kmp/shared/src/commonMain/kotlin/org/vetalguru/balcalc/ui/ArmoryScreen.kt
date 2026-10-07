@@ -48,6 +48,7 @@ import org.vetalguru.balcalc.AppModel
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.BackHandler
 import org.vetalguru.balcalc.LocalPlatform
+import org.vetalguru.balcalc.QrShare
 import org.vetalguru.balcalc.core.CartridgeForm
 import org.vetalguru.balcalc.core.CartridgeItem
 import org.vetalguru.balcalc.core.RifleForm
@@ -133,6 +134,11 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     val copied = stringResource(Res.string.copied)
     val saved = stringResource(Res.string.saved)
 
+    var qr by remember { mutableStateOf<Pair<String, List<String>>?>(null) }
+    var qrImport by remember { mutableStateOf(false) }
+    qr?.let { (title, parts) -> QrShowDialog(title, parts) { qr = null } }
+    if (qrImport) QrImportDialog(model, onImported = { qrImport = false; model.message = imported }) { qrImport = false }
+
     fun share(kind: String, id: Long, toFile: Boolean) = model.act {
         val e = model.exportJson(kind, id)
         if (toFile) {
@@ -141,6 +147,10 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
             platform.copyText(e.json)
             model.message = copied
         }
+    }
+
+    fun showQr(kind: String, id: Long, title: String) = model.act {
+        qr = title to QrShare.parts(model.exportJson(kind, id).json)
     }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -174,6 +184,10 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                                 model.message = imported
                             }
                         }, modifier = Modifier.testTag("importClipboard"))
+                        DropdownMenuItem({ Text(stringResource(Res.string.qr_show)) }, onClick = {
+                            importMenu = false
+                            qrImport = true
+                        }, modifier = Modifier.testTag("importQr"))
                     }
                 }
                 Box {
@@ -209,6 +223,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                     },
                     onEdit = { id -> model.act { nav.push(Route.Rifle(model.rifleForm(id))) } },
                     onShare = ::share,
+                    onQr = ::showQr,
                     onDelete = { id, name -> deleting = Triple("rifle", id, name) },
                 )
             } else {
@@ -232,6 +247,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                     },
                     onEdit = { id -> model.act { nav.push(Route.Cartridge(model.cartridgeForm(id))) } },
                     onShare = ::share,
+                    onQr = ::showQr,
                     onDelete = { id, name -> deleting = Triple("cartridge", id, name) },
                     onShotLog = { id ->
                         model.selectCartridge(id)
@@ -270,6 +286,7 @@ private fun ItemList(
     onClick: (Long) -> Unit,
     onEdit: (Long) -> Unit,
     onShare: (String, Long, Boolean) -> Unit,
+    onQr: (String, Long, String) -> Unit,
     onDelete: (Long, String) -> Unit,
     onShotLog: ((Long) -> Unit)? = null,
 ) {
@@ -315,6 +332,10 @@ private fun ItemList(
                             menu = false
                             onShare(kind, item.id, false)
                         }, modifier = Modifier.testTag("copy"))
+                        DropdownMenuItem({ Text(stringResource(Res.string.qr_show)) }, onClick = {
+                            menu = false
+                            onQr(kind, item.id, item.title)
+                        }, modifier = Modifier.testTag("showQr"))
                         DropdownMenuItem({ Text(stringResource(Res.string.delete)) }, onClick = {
                             menu = false
                             onDelete(item.id, item.title)

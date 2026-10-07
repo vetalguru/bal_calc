@@ -3,12 +3,15 @@ package org.vetalguru.balcalc
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import kotlin.coroutines.resume
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -66,6 +69,25 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
                 NamedText(displayName(uri), text)
             }
         }
+    }
+
+    private var onScanned: ((String?) -> Unit)? = null
+    private val scan: ActivityResultLauncher<ScanOptions> =
+        activity.registerForActivityResult(ScanContract()) { onScanned?.invoke(it.contents) }
+
+    override val canScanQr: Boolean
+        get() = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
+
+    // The scanner asks for the camera itself, when it opens.
+    override suspend fun scanQr(): String? = suspendCancellableCoroutine { c ->
+        onScanned = { c.resume(it) }
+        scan.launch(
+            ScanOptions()
+                .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                .setBeepEnabled(false)
+                .setOrientationLocked(false)
+                .setPrompt(""),
+        )
     }
 
     override suspend fun openImage(): ByteArray? {

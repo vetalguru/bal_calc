@@ -425,6 +425,15 @@
     <string name="library_rifle_line">Шаг нарезов 1:%1$s″ · ствол %2$s″</string>
     <string name="library_scope_line">%1$s–%2$s× %3$s · клик %4$s %5$s</string>
     <string name="library_note">Как публикует производитель: сверьте шаг нарезов и цену клика со своей винтовкой и прицелом.</string>
+    <string name="qr_show">QR-код</string>
+    <string name="qr_part">Часть %1$s из %2$s</string>
+    <string name="qr_hint">На другом телефоне: Оружие и патроны → Импорт → QR-код. Покажите все части.</string>
+    <string name="qr_import_title">Импорт из QR-кода</string>
+    <string name="qr_import_hint">Сканируйте код; винтовка с сеткой может состоять из нескольких частей, в любом порядке.</string>
+    <string name="qr_scan">Сканировать камерой</string>
+    <string name="qr_picture">С картинки</string>
+    <string name="qr_progress">Прочитано частей: %1$s из %2$s — сканируйте следующую.</string>
+    <string name="qr_not_found">QR-код BalCalc не найден.</string>
     <string name="sensor_barometer">С барометра</string>
     <string name="sensor_location">Моё место</string>
     <string name="sensor_angles">Измерить телефоном</string>
