@@ -23,6 +23,9 @@ interface Platform {
 
     /** One QR code read by the camera (asking for it first); null when cancelled. */
     suspend fun scanQr(): String? = null
+
+    /** The phone's sensors; null where there are none (desktops). */
+    val sensors: PhoneSensors? get() = null
 }
 
 /** The system Back action (Android key or gesture); nothing on desktops. */

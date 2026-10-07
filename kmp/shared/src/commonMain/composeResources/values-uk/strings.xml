@@ -434,4 +434,25 @@
     <string name="qr_picture">З картинки</string>
     <string name="qr_progress">Прочитано частин: %1$s з %2$s — скануйте наступну.</string>
     <string name="qr_not_found">QR-код BalCalc не знайдено.</string>
+    <string name="sensor_barometer">З барометра</string>
+    <string name="sensor_location">Моє місце</string>
+    <string name="sensor_angles">Виміряти телефоном</string>
+    <string name="sensor_compass">З компаса</string>
+    <string name="sensor_reading">Вимірюю…</string>
+    <string name="sensor_no_pressure">Барометр не дав показів.</string>
+    <string name="sensor_no_location">Немає місця: перевірте, що геолокацію ввімкнено й дозволено для BalCalc.</string>
+    <string name="sensor_pressure_set">Барометр: %1$s гПа</string>
+    <string name="sensor_location_set">Місце (±%1$s м): висота %2$s м, широта %3$s°</string>
+    <string name="sensor_location_no_alt">Місце (±%1$s м): широта %2$s°; висоти телефон не дав</string>
+    <string name="tilt_title">Кут пострілу і завал</string>
+    <string name="tilt_hint">Покладіть телефон на приціл або планку екраном догори, верхом до цілі, і тримайте нерухомо.</string>
+    <string name="tilt_now">Кут пострілу %1$s°, завал %2$s°</string>
+    <string name="tilt_unsteady">Тримайте нерухомо: гуляє на %1$s°</string>
+    <string name="tilt_steady">Стійко</string>
+    <string name="sensor_use">Взяти</string>
+    <string name="compass_title">Азимут пострілу</string>
+    <string name="compass_hint">Покладіть телефон на зброю верхом до цілі, подалі від металу й магнітів.</string>
+    <string name="compass_magnetic">Від магнітної півночі: для істинної спершу візьміть «Моє місце».</string>
+    <string name="compass_true">Від істинної півночі.</string>
+    <string name="compass_calibrate">Компас погано відкалібровано: поводіть телефоном вісімкою.</string>
 </resources>
