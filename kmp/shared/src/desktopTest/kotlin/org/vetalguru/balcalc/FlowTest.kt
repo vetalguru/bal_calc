@@ -1139,7 +1139,9 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "1" }
         onNodeWithTag("cantAngleMinus").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { shown("cantAngle") == "-1" }
-        onNodeWithTag("windFrom").performScrollTo()
+        // The direction's meaning behind its ⓘ.
+        onNodeWithTag("windFromInfo").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 5_000) { hasText("Where the wind blows from", substring = true) }
         shot("conditions-wind-steps")
         onNodeWithTag("navSolution").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("windSpeed") && shown("windSpeed") == "6.5" }

@@ -539,9 +539,9 @@
     <string name="compass_magnetic">From magnetic north: take My location first for true north.</string>
     <string name="compass_true">From true north.</string>
     <string name="compass_calibrate">The compass is poorly calibrated: wave the phone in a figure 8.</string>
-    <string name="wind_gust_hint">0: no gusts</string>
-    <string name="shot_angle_hint">Uphill +, downhill −</string>
-    <string name="cant_hint">Clockwise +</string>
-    <string name="wind_direction_hint">0° from the target, 90° from the right, 270° from the left</string>
+    <string name="wind_gust_hint">The wind speed in gusts: a second windage is shown for it. 0: no gusts</string>
+    <string name="shot_angle_hint">The angle to the target from the horizontal: uphill +, downhill −</string>
+    <string name="cant_hint">The rifle tilted sideways: clockwise +</string>
+    <string name="wind_direction_hint">Where the wind blows from: 0° from the target (in your face), 90° from the right, 180° from behind, 270° from the left</string>
     <string name="wind_clock_short">%1$s o'clock</string>
 </resources>

@@ -325,7 +325,7 @@ private val FIELD_MAX = 200.dp
 private fun DirectionField(fromDeg: Double, onDeg: (Double) -> Unit, modifier: Modifier, tag: String) {
     StepperField(
         stringResource(Res.string.wind_from), fromDeg, { v -> onDeg(v % 360) }, modifier,
-        "° · " + stringResource(Res.string.wind_clock_short, clockHour(fromDeg)),
+        "°·" + stringResource(Res.string.wind_clock_short, clockHour(fromDeg)),
         step = 15.0, from = 0.0, to = 360.0, tag = tag, fieldMaxWidth = FIELD_MAX,
         hint = stringResource(Res.string.wind_direction_hint), wrap = true, decimals = 0,
     )
