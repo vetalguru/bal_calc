@@ -1,4 +1,8 @@
+#include <ballistics/analysis.h>
 #include <ballistics/applogic/session.h>
+#include <ballistics/storage/repository.h>
+#include <ballistics/units.h>
+#include <sqlite_manager/transaction.h>
 
 #include <algorithm>
 #include <cmath>
@@ -6,12 +10,6 @@
 #include <sstream>
 #include <string>
 #include <utility>
-
-#include <sqlite_manager/transaction.h>
-
-#include <ballistics/analysis.h>
-#include <ballistics/storage/repository.h>
-#include <ballistics/units.h>
 
 namespace ballistics::applogic {
 
@@ -72,7 +70,7 @@ std::pair<double, double> TargetVelocity(const SessionConditions& s) {
 // bullet: 5 s of its motion.
 double LeadReachM(const SessionConditions& s) { return std::max(0.0, s.target_speed_mps) * 5.0; }
 
-} // namespace
+}  // namespace
 
 storage::ConditionsRecord ToConditions(const SessionConditions& s) {
     storage::ConditionsRecord c;
@@ -86,8 +84,8 @@ storage::ConditionsRecord ToConditions(const SessionConditions& s) {
         c.powder_temp_k = units::CToK(*s.powder_c);
     }
     for (const WindInput& w : s.winds) {
-        c.winds.push_back({w.until_m > 0.0 ? w.until_m : 1e6, w.speed_mps,
-                           units::DegToRad(w.from_deg), 0.0});
+        c.winds.push_back(
+            {w.until_m > 0.0 ? w.until_m : 1e6, w.speed_mps, units::DegToRad(w.from_deg), 0.0});
     }
     c.look_angle_rad = units::DegToRad(s.look_angle_deg);
     c.cant_rad = units::DegToRad(s.cant_deg);
@@ -264,8 +262,8 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
                 out.gust_windage = FromRad(gp->hold_windage_rad, unit);
                 out.gust_windage_cm = gp->windage_m * 100.0;
                 if (profile.scope) {
-                    out.gust_windage_clicks =
-                        storage::ToClicks(gp->hold_windage_rad, profile.scope->click_horizontal_rad);
+                    out.gust_windage_clicks = storage::ToClicks(
+                        gp->hold_windage_rad, profile.scope->click_horizontal_rad);
                 }
             }
         }
@@ -352,7 +350,8 @@ RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionC
         SessionConditions no_rotation = s;
         no_rotation.latitude_deg.reset();
         no_rotation.azimuth_deg.reset();
-        if (auto r = storage::Solve(profile, ToConditions(no_rotation), to_m + LeadReachM(s) + 1.0)) {
+        if (auto r =
+                storage::Solve(profile, ToConditions(no_rotation), to_m + LeadReachM(s) + 1.0)) {
             still = std::move(r.value());
         }
     }
@@ -404,4 +403,4 @@ RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionC
     return table;
 }
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic

@@ -1,10 +1,10 @@
 #include <ballistics/bridge/api.h>
 
-#include "impl.h"
-
 #include <memory>
 #include <string>
 #include <utility>
+
+#include "impl.h"
 
 // Methods (arguments → result):
 //
@@ -18,14 +18,14 @@
 //                                        tableFromM, tableToM, tableStepM, conditions}
 //   select {rifleId?, cartridgeId?}   → state
 //   setConditions {any condition keys} → conditions
-//   setSettings {angleUnit?, holdMode?, language?, tableFromM?, tableToM?, tableStepM?, prefs? (merged into the interface preferences)}
+//   setSettings {angleUnit?, holdMode?, language?, tableFromM?, tableToM?, tableStepM?, prefs?
+//   (merged into the interface preferences)}
 //                                     → state
 //   solution                          → {ok, error, rangeM, elevation, windage, ...}
-//   rangeTable {windSpeeds?}          → {ok, error, hasScope, computeMs, rows, windSpeeds}; rows carry windages for each speed
-//   trajectoryCurve {maxRangeM, points} → as rangeTable
-//   rifleForm {id} / saveRifle {form} / deleteRifle {id}
-//   cartridgeForm {id} / saveCartridge {form} / deleteCartridge {id}
-//   cartridgeFormWithBullet {form, bulletId} / libraryCartridges {filter}
+//   rangeTable {windSpeeds?}          → {ok, error, hasScope, computeMs, rows, windSpeeds}; rows
+//   carry windages for each speed trajectoryCurve {maxRangeM, points} → as rangeTable rifleForm
+//   {id} / saveRifle {form} / deleteRifle {id} cartridgeForm {id} / saveCartridge {form} /
+//   deleteCartridge {id} cartridgeFormWithBullet {form, bulletId} / libraryCartridges {filter}
 //   cartridgeFormFromLibrary {id}
 //   setZeroOffset {upCm, rightCm} / addSample {rifleName, cartridgeName}
 //   shots / logShot {rangeM, elevation, hasWindage, windage, notes}
@@ -42,9 +42,9 @@
 //   importFiles {files:[{name, content}]} → {imported, problems:[{file, message}]}
 //   stationPressure {qnhHpa, altitudeM} → hPa
 //   stability {twistIn, massGr, diameterIn, lengthIn, velocityMps} → {sg} (standard air)
-//   photos {kind} → {id: base64} / photo {kind, id} → base64 / setPhoto {kind, id, image} (empty removes)
-//   targets → [{name, rangeM, lookAngleDeg, windSpeed, windFromDeg, ok, elevation, windage, *Clicks, holdX, holdY}]
-//   saveTargets {targets} → targets / selectTarget {index} → state
+//   photos {kind} → {id: base64} / photo {kind, id} → base64 / setPhoto {kind, id, image} (empty
+//   removes) targets → [{name, rangeM, lookAngleDeg, windSpeed, windFromDeg, ok, elevation,
+//   windage, *Clicks, holdX, holdY}] saveTargets {targets} → targets / selectTarget {index} → state
 //   situations / saveSituation {name} / applySituation {name} → state / deleteSituation {name}
 //   compareCurves {maxRangeM, points, pairs:[{rifleId, cartridgeId}]} → [table + label]
 //   pairOptions                     → [{rifleId, rifleName, cartridges:[{id, name}]}]
@@ -100,4 +100,4 @@ std::string Api::Call(const std::string& method, const std::string& args_json) {
     }
 }
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge

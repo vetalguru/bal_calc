@@ -4,9 +4,6 @@
 #include <ballistics/effects.h>
 #include <ballistics/solver.h>
 #include <ballistics/units.h>
-
-#include "reference/reference_setup.h"
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -15,6 +12,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include "reference/reference_setup.h"
 
 namespace ballistics {
 namespace {
@@ -43,7 +42,7 @@ struct Setup {
     const char* cartridge;
     const char* atmosphere;
     double twist_in;
-    std::vector<WindZone> winds; // until m, speed m/s, from rad
+    std::vector<WindZone> winds;  // until m, speed m/s, from rad
     std::optional<double> latitude_deg;
     std::optional<double> azimuth_deg;
 };
@@ -158,9 +157,9 @@ Shot Level308() {
 
 TEST(PhysicsEffects, CantMovesImpactTowardsCantAndLow) {
     Shot level = Level308();
-    level.elevation_rad += units::MradToRad(10.0); // dialled for long range
+    level.elevation_rad += units::MradToRad(10.0);  // dialled for long range
     Shot canted = level;
-    canted.cant_rad = DegToRad(5.0); // top to the right
+    canted.cant_rad = DegToRad(5.0);  // top to the right
     const auto a = Fly(level, 1010.0).AtSlantRange(1000.0);
     const auto b = Fly(canted, 1010.0).AtSlantRange(1000.0);
     ASSERT_TRUE(a && b);
@@ -201,10 +200,9 @@ TEST(PhysicsEffects, MillerStabilityKnownValue) {
     // .308 175gr SMK, 1.24", 1:10, 2600 fps, standard air. By hand:
     // 30*175 / (32.47^2 * 0.308^3 * 4.026 * (1 + 4.026^2)) = 2.459,
     // times (2600/2800)^(1/3) = 0.9756 -> 2.399.
-    const double sg = MillerStability(units::GrainToKg(175.0), units::InchToM(0.308),
-                                      units::InchToM(1.24), units::InchToM(10.0),
-                                      units::FpsToMps(2600.0), units::FToK(59.0),
-                                      units::InHgToPa(29.92));
+    const double sg = MillerStability(
+        units::GrainToKg(175.0), units::InchToM(0.308), units::InchToM(1.24), units::InchToM(10.0),
+        units::FpsToMps(2600.0), units::FToK(59.0), units::InHgToPa(29.92));
     EXPECT_NEAR(sg, 2.399, 0.002);
 }
 
@@ -224,9 +222,9 @@ TEST(PhysicsEffects, PowderSensitivity) {
 
     p.table = {{units::CToK(-20.0), 770.0}, {units::CToK(0.0), 790.0}, {units::CToK(30.0), 812.0}};
     EXPECT_NEAR(MuzzleVelocityAt(p, units::CToK(15.0)), 801.0, 1e-9);
-    EXPECT_NEAR(MuzzleVelocityAt(p, units::CToK(-30.0)), 760.0, 1e-9); // extrapolated
+    EXPECT_NEAR(MuzzleVelocityAt(p, units::CToK(-30.0)), 760.0, 1e-9);  // extrapolated
     EXPECT_NEAR(MuzzleVelocityAt(p, units::CToK(40.0)), 819.3333333333, 1e-6);
 }
 
-} // namespace
-} // namespace ballistics
+}  // namespace
+}  // namespace ballistics

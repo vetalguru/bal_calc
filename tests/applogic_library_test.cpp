@@ -1,11 +1,10 @@
-#include <ballistics/applogic/library.h>
 #include <ballistics/applogic/armory.h>
+#include <ballistics/applogic/library.h>
 #include <ballistics/applogic/profile_io.h>
 #include <ballistics/applogic/session.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 namespace ballistics::applogic {
@@ -15,7 +14,7 @@ using storage::BulletRecord;
 using storage::Repository;
 
 class AppLibrary : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override { ASSERT_TRUE(db_.Open(":memory:").ok()); }
 
     Id AddLibraryBullet(const std::string& name, double bc) {
@@ -72,7 +71,7 @@ TEST_F(AppLibrary, BandedBulletRoundTripAndSearch) {
     const Id id = SaveBulletForm(db_, b).value();
     const BulletForm g = LoadBulletForm(db_, id).value();
     ASSERT_EQ(g.bands.size(), 3U);
-    EXPECT_DOUBLE_EQ(g.bands[0].velocity_mps, 869.0); // fastest first
+    EXPECT_DOUBLE_EQ(g.bands[0].velocity_mps, 869.0);  // fastest first
     EXPECT_DOUBLE_EQ(g.bc, 0.0);
 
     AddLibraryBullet("ELD-M 178", 0.275);
@@ -115,7 +114,7 @@ TEST_F(AppLibrary, CartridgeUsesLibraryBulletWithoutChangingIt) {
     EXPECT_EQ(f.library_bullet_id, lib);
     EXPECT_DOUBLE_EQ(f.bc, 0.243);
     EXPECT_NEAR(f.mass_gr, 175.0, 1e-9);
-    f.bc = 0.9; // ignored: library bullets are not edited from a cartridge
+    f.bc = 0.9;  // ignored: library bullets are not edited from a cartridge
     const Id cid = SaveCartridgeForm(db_, f).value();
 
     EXPECT_EQ(LoadCartridgeForm(db_, cid).value().library_bullet_id, lib);
@@ -197,9 +196,9 @@ TEST_F(AppLibrary, RifleAndCartridgeJsonRoundTripGivesTheSameSolution) {
 
     SessionConditions s;
     s.target_range_m = 900.0;
-    const auto sa = Summarize(
-        storage::LoadProfile(db_, EnsureProfile(db_, rifle, cartridge).value()).value(), s,
-        AngleUnit::kMrad);
+    const auto sa =
+        Summarize(storage::LoadProfile(db_, EnsureProfile(db_, rifle, cartridge).value()).value(),
+                  s, AngleUnit::kMrad);
     const auto sb = Summarize(
         storage::LoadProfile(db_, EnsureProfile(db_, r.rifle_id, c.cartridge_id).value()).value(),
         s, AngleUnit::kMrad);
@@ -224,7 +223,7 @@ TEST_F(AppLibrary, LegacyProfileFileImportsAsRifleCartridgeAndPair) {
       "cartridge": {"name": "Old load", "muzzle_velocity_mps": 800.0},
       "bullet": {"name": "b", "caliber": ".308", "diameter_m": 0.0078, "mass_kg": 0.0113,
                  "drag_kind": "bc", "drag_table": "G7", "bc": 0.25}})")
-                              .value();
+                            .value();
     ASSERT_NE(im.profile_id, 0);
     const auto p = storage::LoadProfile(db_, im.profile_id).value();
     EXPECT_EQ(p.rifle.name, "Old rifle");
@@ -232,7 +231,7 @@ TEST_F(AppLibrary, LegacyProfileFileImportsAsRifleCartridgeAndPair) {
     EXPECT_DOUBLE_EQ(p.rifle.zero_powder_temp_k, 280.0);
     EXPECT_DOUBLE_EQ(p.rifle.zero_atmosphere.pressure_pa, 98000.0);
     ASSERT_TRUE(p.scope.has_value());
-    EXPECT_EQ(p.cartridge.caliber, ".308 Win"); // taken from the rifle
+    EXPECT_EQ(p.cartridge.caliber, ".308 Win");  // taken from the rifle
     EXPECT_DOUBLE_EQ(p.profile.zero_offset_up_m, 0.01);
     EXPECT_DOUBLE_EQ(p.profile.velocity_scale, 1.02);
     EXPECT_DOUBLE_EQ(p.profile.drag_scale, 0.97);
@@ -256,5 +255,5 @@ TEST_F(AppLibrary, ImportRejectsGarbageAndRollsBack) {
     EXPECT_TRUE(Repository<BulletRecord>(db_).List().value().empty());
 }
 
-} // namespace
-} // namespace ballistics::applogic
+}  // namespace
+}  // namespace ballistics::applogic

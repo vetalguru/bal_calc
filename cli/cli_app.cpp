@@ -1,18 +1,5 @@
 #include "cli_app.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstdio>
-#include <map>
-#include <optional>
-#include <ostream>
-#include <string>
-#include <vector>
-
-#include <filesystem>
-#include <fstream>
-#include <sstream>
-
 #include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/importers.h>
 #include <ballistics/atmosphere.h>
@@ -23,6 +10,18 @@
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
 #include <ballistics/version.h>
+
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <filesystem>
+#include <fstream>
+#include <map>
+#include <optional>
+#include <ostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace balcli {
 
@@ -65,7 +64,7 @@ Output:
 // Command line split into flags and repeated --wind values.
 struct Args {
     std::string command;
-    std::vector<std::string> files; // positional arguments after the command
+    std::vector<std::string> files;  // positional arguments after the command
     std::map<std::string, std::string> opts;
     std::vector<std::string> winds;
     bool csv = false;
@@ -140,7 +139,8 @@ bool ReadConditions(const Args& a, bs::ConditionsRecord& c, std::ostream& err) {
     if (pressure) {
         c.atmosphere.pressure_pa = u::HpaToPa(*pressure);
     } else if (qnh) {
-        c.atmosphere.pressure_pa = ballistics::StationPressureFromSeaLevel(u::HpaToPa(*qnh), altitude);
+        c.atmosphere.pressure_pa =
+            ballistics::StationPressureFromSeaLevel(u::HpaToPa(*qnh), altitude);
     }
     c.atmosphere.humidity = humidity.value_or(0.0) / 100.0;
     if (powder) {
@@ -221,12 +221,12 @@ void PrintTable(const Trajectory& traj, const TableSpec& spec, const bs::ScopeRe
         row.push_back(r > 0.0 ? Fixed(angle(pt->hold_elevation_rad), 2) : "-");
         row.push_back(r > 0.0 ? Fixed(angle(pt->hold_windage_rad), 2) : "-");
         if (scope) {
-            row.push_back(r > 0.0 ? Fixed(bs::ToClicks(pt->hold_elevation_rad,
-                                                       scope->click_vertical_rad), 0)
-                                  : "-");
-            row.push_back(r > 0.0 ? Fixed(bs::ToClicks(pt->hold_windage_rad,
-                                                       scope->click_horizontal_rad), 0)
-                                  : "-");
+            row.push_back(
+                r > 0.0 ? Fixed(bs::ToClicks(pt->hold_elevation_rad, scope->click_vertical_rad), 0)
+                        : "-");
+            row.push_back(
+                r > 0.0 ? Fixed(bs::ToClicks(pt->hold_windage_rad, scope->click_horizontal_rad), 0)
+                        : "-");
         }
         row.push_back(Fixed(pt->drop_m * 100.0, 1));
         row.push_back(Fixed(pt->windage_m * 100.0, 1));
@@ -330,8 +330,8 @@ int CmdTable(const Args& a, std::ostream& out, std::ostream& err) {
     }
     out << loaded.value().rifle.name << " / " << loaded.value().cartridge.name << "\n";
     PrintSummary(sol.value().shot, sol.value().trajectory, sol.value().zero, out);
-    PrintTable(sol.value().trajectory, spec, loaded.value().scope ? &*loaded.value().scope : nullptr,
-               a.csv, out);
+    PrintTable(sol.value().trajectory, spec,
+               loaded.value().scope ? &*loaded.value().scope : nullptr, a.csv, out);
     return 0;
 }
 
@@ -452,8 +452,8 @@ int CmdDemo(const Args& a, std::ostream& out, std::ostream& err) {
     b.length_m = u::InchToM(1.240);
     b.drag_kind = bs::kDragKindMultiBc;
     b.drag_table = "G1";
-    b.bc_bands = {{u::FpsToMps(2800.0), 0.505}, {u::FpsToMps(1800.0), 0.496},
-                  {u::FpsToMps(1500.0), 0.485}};
+    b.bc_bands = {
+        {u::FpsToMps(2800.0), 0.505}, {u::FpsToMps(1800.0), 0.496}, {u::FpsToMps(1500.0), 0.485}};
     b.source = "demo";
     bs::CartridgeRecord c;
     c.name = "M118LR (demo)";
@@ -490,8 +490,8 @@ int CmdDemo(const Args& a, std::ostream& out, std::ostream& err) {
         err << pair.error().message << "\n";
         return 1;
     }
-    out << "demo rifle " << r.id << ", cartridge " << c.id << " created (profile "
-        << pair.value() << ")\n";
+    out << "demo rifle " << r.id << ", cartridge " << c.id << " created (profile " << pair.value()
+        << ")\n";
     return 0;
 }
 
@@ -586,7 +586,7 @@ int CmdSeed(const Args& a, std::ostream& out, std::ostream& err) {
     return 0;
 }
 
-} // namespace
+}  // namespace
 
 bool ParseWind(const std::string& text, WindSpec& wind) {
     const auto at = text.find('@');
@@ -632,8 +632,8 @@ int Run(const std::vector<std::string>& args, std::ostream& out, std::ostream& e
         return 2;
     }
     if (a.command == "version") {
-        out << "ballistics " << ballistics::version() << " (SQLite "
-            << bs::SqliteVersion() << ")\n";
+        out << "ballistics " << ballistics::version() << " (SQLite " << bs::SqliteVersion()
+            << ")\n";
         return 0;
     }
     if (a.command == "table") {
@@ -658,4 +658,4 @@ int Run(const std::vector<std::string>& args, std::ostream& out, std::ostream& e
     return 2;
 }
 
-} // namespace balcli
+}  // namespace balcli

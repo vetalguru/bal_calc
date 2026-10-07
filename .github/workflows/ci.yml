@@ -59,6 +59,28 @@ jobs:
       - name: Test
         run: ctest --test-dir build/windows-msvc -C Debug --output-on-failure
 
+  cpp-format:
+    name: "C++: clang-format"
+    runs-on: ubuntu-24.04
+    # The same clang-format as on the developer's Ubuntu 26.04 (21.x): another
+    # version formats some lines differently.
+    container: ubuntu:26.04
+    steps:
+      - name: Install clang-format
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends clang-format git ca-certificates
+
+      - uses: actions/checkout@v4
+
+      - name: Check the formatting (.clang-format; .clang-format-ignore lists the exceptions)
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          clang-format --version
+          git ls-files '*.cpp' '*.h' | xargs clang-format --dry-run --Werror
+
   # --- Kotlin app: checks ---------------------------------------------------
 
   desktop-tests-linux:

@@ -17,7 +17,7 @@
 namespace ballistics::bridge {
 
 class Api {
-public:
+   public:
     Api();
     ~Api();
     Api(const Api&) = delete;
@@ -25,11 +25,11 @@ public:
 
     std::string Call(const std::string& method, const std::string& args_json);
 
-private:
+   private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge
 
-#endif // BALLISTICS_BRIDGE_API_H
+#endif  // BALLISTICS_BRIDGE_API_H

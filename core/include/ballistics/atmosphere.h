@@ -5,10 +5,10 @@ namespace ballistics {
 
 // Measured air at the firing point (SI).
 struct Atmosphere {
-    double altitude_m = 0.0;         // above mean sea level
-    double pressure_pa = 101325.0;   // absolute (station) pressure, not QNH
+    double altitude_m = 0.0;        // above mean sea level
+    double pressure_pa = 101325.0;  // absolute (station) pressure, not QNH
     double temperature_k = 288.15;
-    double humidity = 0.0;           // relative humidity, 0..1
+    double humidity = 0.0;  // relative humidity, 0..1
 };
 
 // How the speed of sound is computed from the air state.
@@ -63,7 +63,7 @@ double StationPressureFromDensityAltitude(double density_altitude_m, double temp
 // formula and the water-vapour content of the firing-point air (capped at
 // saturation).
 class AtmosphereModel final {
-public:
+   public:
     explicit AtmosphereModel(const Atmosphere& base,
                              SoundSpeedModel sound = SoundSpeedModel::kHumidAir);
 
@@ -75,13 +75,13 @@ public:
     // Air at `altitude_m` above mean sea level.
     AirState At(double altitude_m) const;
 
-private:
+   private:
     Atmosphere base_;
     SoundSpeedModel sound_;
-    double base_vapor_; // water vapour mole fraction at the firing point
+    double base_vapor_;  // water vapour mole fraction at the firing point
     AirState base_state_;
 };
 
-} // namespace ballistics
+}  // namespace ballistics
 
-#endif // BALLISTICS_ATMOSPHERE_H
+#endif  // BALLISTICS_ATMOSPHERE_H

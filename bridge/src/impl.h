@@ -3,22 +3,6 @@
 #ifndef BALLISTICS_BRIDGE_IMPL_H
 #define BALLISTICS_BRIDGE_IMPL_H
 
-#include <ballistics/bridge/api.h>
-#include <algorithm>
-#include <cctype>
-#include <chrono>
-#include <cstdint>
-#include <cmath>
-#include <functional>
-#include <map>
-#include <optional>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <tuple>
-#include <utility>
-#include <vector>
-#include <nlohmann/json.hpp>
 #include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/importers.h>
 #include <ballistics/applogic/library.h>
@@ -28,12 +12,29 @@
 #include <ballistics/applogic/truing.h>
 #include <ballistics/applogic/wez.h>
 #include <ballistics/atmosphere.h>
+#include <ballistics/bridge/api.h>
 #include <ballistics/effects.h>
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
 #include <ballistics/version.h>
+
+#include <algorithm>
+#include <cctype>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <functional>
+#include <map>
+#include <nlohmann/json.hpp>
+#include <optional>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "internal.h"
 
@@ -61,7 +62,7 @@ struct Api::Impl {
     // Settings (persisted).
     std::string angle_unit = "mrad";
     std::string hold_mode = "dial_elevation";
-    std::string language; // "" = system
+    std::string language;  // "" = system
     // Interface preferences of the app (theme, screen, display format): the
     // core keeps them for it, as one JSON object.
     json ui_prefs = json::object();
@@ -77,13 +78,13 @@ struct Api::Impl {
     bool powder_follows_air = true;
     double powder_c = 15.0;
     double wind_speed = 0.0;
-    double wind_from_deg = 0.0; // 12 o'clock: from the target
-    double wind_until_m = 0.0;       // end of the first zone when there are more
-    std::vector<al::WindInput> wind_zones; // the zones after the first, in order
+    double wind_from_deg = 0.0;             // 12 o'clock: from the target
+    double wind_until_m = 0.0;              // end of the first zone when there are more
+    std::vector<al::WindInput> wind_zones;  // the zones after the first, in order
     double wind_gust_mps = 0.0;
     double target_speed_mps = 0.0;
     double target_heading_deg = 90.0;
-    std::string target_speed_unit = "kmh"; // how the app shows it: "kmh" or "mps"
+    std::string target_speed_unit = "kmh";  // how the app shows it: "kmh" or "mps"
     double look_angle_deg = 0.0;
     double cant_deg = 0.0;
     bool coriolis = false;
@@ -222,6 +223,6 @@ struct Api::Impl {
     std::string ExportFileName(const std::string& kind, Id id) const;
 };
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge
 
-#endif // BALLISTICS_BRIDGE_IMPL_H
+#endif  // BALLISTICS_BRIDGE_IMPL_H

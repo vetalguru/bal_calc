@@ -5,7 +5,6 @@
 
 #include <ballistics/solver.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <string_view>
@@ -59,10 +58,10 @@ inline Shot MakeShot(std::string_view cartridge, std::string_view atmosphere) {
     shot.sight_height_m = c.sight_cm / 100.0;
     shot.atmosphere = AtmosphereNamed(atmosphere);
     shot.sound_speed = SoundSpeedModel::kDryAir;
-    shot.aerodynamic_jump = false; // not modelled by the reference
+    shot.aerodynamic_jump = false;  // not modelled by the reference
     return shot;
 }
 
-} // namespace ballistics::reference
+}  // namespace ballistics::reference
 
-#endif // BALLISTICS_TESTS_REFERENCE_SETUP_H
+#endif  // BALLISTICS_TESTS_REFERENCE_SETUP_H

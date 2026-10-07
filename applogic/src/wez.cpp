@@ -1,13 +1,11 @@
 #include <ballistics/applogic/wez.h>
+#include <ballistics/storage/repository.h>
+#include <ballistics/units.h>
+#include <sqlite_manager/transaction.h>
 
 #include <algorithm>
 #include <cstdio>
 #include <optional>
-
-#include <sqlite_manager/transaction.h>
-
-#include <ballistics/storage/repository.h>
-#include <ballistics/units.h>
 
 namespace ballistics::applogic {
 
@@ -17,7 +15,7 @@ constexpr const char* kPrefix = "wez.";
 
 struct NumField {
     const char* key;
-    double WezSettings::*value;
+    double WezSettings::* value;
 };
 
 const NumField kNumFields[] = {
@@ -38,7 +36,7 @@ const NumField kNumFields[] = {
     {"target_height_cm", &WezSettings::target_height_cm},
 };
 
-} // namespace
+}  // namespace
 
 Result<WezSettings> LoadWezSettings(storage::Database& db) {
     WezSettings w;
@@ -162,4 +160,4 @@ WezResult ComputeWez(const storage::LoadedProfile& profile, const SessionConditi
     return out;
 }
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic

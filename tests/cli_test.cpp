@@ -1,11 +1,11 @@
-#include "cli_app.h"
-
 #include <gtest/gtest.h>
 
 #include <filesystem>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "cli_app.h"
 
 namespace balcli {
 namespace {
@@ -75,8 +75,7 @@ TEST(CliRun, QuickRejectsBadInput) {
 }
 
 TEST(CliRun, ImportAndSeed) {
-    const auto db =
-        (std::filesystem::temp_directory_path() / "balcalc_cli_import.db").string();
+    const auto db = (std::filesystem::temp_directory_path() / "balcalc_cli_import.db").string();
     std::filesystem::remove(db);
     const std::string seed = BALLISTICS_SEED_DIR;
     std::string out, err;
@@ -94,8 +93,7 @@ TEST(CliRun, ImportAndSeed) {
 }
 
 TEST(CliRun, DemoProfileTable) {
-    const auto db =
-        (std::filesystem::temp_directory_path() / "balcalc_cli_test.db").string();
+    const auto db = (std::filesystem::temp_directory_path() / "balcalc_cli_test.db").string();
     std::filesystem::remove(db);
     std::string out, err;
     ASSERT_EQ(RunCli({"--db", db, "demo"}, out, err), 0) << err;
@@ -105,21 +103,21 @@ TEST(CliRun, DemoProfileTable) {
     EXPECT_NE(out.find("M24 (demo)  .308  (zero 100 m)"), std::string::npos) << out;
     ASSERT_EQ(RunCli({"--db", db, "cartridges"}, out, err), 0) << err;
     EXPECT_NE(out.find("M118LR (demo)  .308  790 m/s"), std::string::npos) << out;
-    ASSERT_EQ(RunCli({"--db", db, "table", "--rifle", "1", "--cartridge", "1", "--to", "800"},
-                     out, err),
-              0)
+    ASSERT_EQ(
+        RunCli({"--db", db, "table", "--rifle", "1", "--cartridge", "1", "--to", "800"}, out, err),
+        0)
         << err;
     EXPECT_NE(out.find("M24 (demo) / M118LR (demo)"), std::string::npos);
-    ASSERT_EQ(RunCli({"--db", db, "table", "--profile", "1", "--to", "800", "--temp", "-5",
-                      "--alt", "400", "--humidity", "60", "--units", "moa"},
+    ASSERT_EQ(RunCli({"--db", db, "table", "--profile", "1", "--to", "800", "--temp", "-5", "--alt",
+                      "400", "--humidity", "60", "--units", "moa"},
                      out, err),
               0)
         << err;
-    EXPECT_NE(out.find("Elev clk"), std::string::npos); // the profile has a scope
+    EXPECT_NE(out.find("Elev clk"), std::string::npos);  // the profile has a scope
     EXPECT_NE(out.find("Sg "), std::string::npos);
     EXPECT_EQ(RunCli({"--db", db, "table", "--profile", "42"}, out, err), 1);
     std::filesystem::remove(db);
 }
 
-} // namespace
-} // namespace balcli
+}  // namespace
+}  // namespace balcli

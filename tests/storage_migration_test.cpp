@@ -4,14 +4,12 @@
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
-
 #include <gtest/gtest.h>
+#include <sqlite_manager/connection.h>
+#include <sqlite_manager/statement.h>
 
 #include <filesystem>
 #include <string>
-
-#include <sqlite_manager/connection.h>
-#include <sqlite_manager/statement.h>
 
 #include "../storage/src/schema.h"
 
@@ -71,7 +69,7 @@ INSERT INTO dope_log (profile_id, range_m, observed_elevation_rad, altitude_m, p
         EXPECT_DOUBLE_EQ(tikka.profile.zero_offset_up_m, 0.01);
         EXPECT_DOUBLE_EQ(tikka.profile.velocity_scale, 1.01);
         EXPECT_DOUBLE_EQ(tikka.profile.drag_scale, 0.98);
-        EXPECT_TRUE(tikka.profile.dsf.empty()); // v4: no DSF yet
+        EXPECT_TRUE(tikka.profile.dsf.empty());  // v4: no DSF yet
         // Calibre: the rifle's, or the bullet's when the rifle has none.
         EXPECT_EQ(tikka.cartridge.caliber, ".308 Win");
         const LoadedProfile bergara = LoadProfile(db, 2).value();
@@ -122,7 +120,7 @@ TEST(StorageMigration, ProfileKeepsItsDsfTable) {
 
     const ProfileRecord back = *Repository<ProfileRecord>(db).Get(id).value();
     ASSERT_EQ(back.dsf.size(), 3u);
-    EXPECT_DOUBLE_EQ(back.dsf[0].mach, 0.9); // sorted by Mach
+    EXPECT_DOUBLE_EQ(back.dsf[0].mach, 0.9);  // sorted by Mach
     EXPECT_DOUBLE_EQ(back.dsf[0].factor, 1.08);
     EXPECT_DOUBLE_EQ(back.dsf[2].mach, 1.2);
 
@@ -135,7 +133,7 @@ TEST(StorageMigration, ProfileKeepsItsDsfTable) {
         return Solve(lp, air, m + 1).value().trajectory.AtSlantRange(m)->hold_elevation_rad;
     };
     EXPECT_NEAR(at(with, 300.0), at(without, 300.0), 1e-12);
-    EXPECT_GT(at(with, 1200.0), at(without, 1200.0) + 3e-5); // ~0.05 mrad, Mach 0.85 there
+    EXPECT_GT(at(with, 1200.0), at(without, 1200.0) + 3e-5);  // ~0.05 mrad, Mach 0.85 there
 
     // Saving the profile again rewrites the table; deleting it removes it.
     ProfileRecord edit = back;
@@ -143,11 +141,12 @@ TEST(StorageMigration, ProfileKeepsItsDsfTable) {
     ASSERT_TRUE(Repository<ProfileRecord>(db).Save(edit).ok());
     EXPECT_EQ(Repository<ProfileRecord>(db).Get(id).value()->dsf.size(), 1u);
     ASSERT_TRUE(Repository<ProfileRecord>(db).Remove(id).ok());
-    auto count = sqlite_manager::Statement::Prepare(db.connection(), "SELECT count(*) FROM profile_dsf");
+    auto count =
+        sqlite_manager::Statement::Prepare(db.connection(), "SELECT count(*) FROM profile_dsf");
     ASSERT_TRUE(count.ok());
     ASSERT_TRUE(count.value().Step().ok());
     EXPECT_EQ(count.value().ColumnInt64(0), 0);
 }
 
-} // namespace
-} // namespace ballistics::storage
+}  // namespace
+}  // namespace ballistics::storage

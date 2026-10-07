@@ -1,13 +1,14 @@
-#include "internal.h"
-
 #include <cctype>
 #include <chrono>
 #include <sstream>
 
+#include "internal.h"
+
 namespace ballistics::bridge::detail {
 
 double NowUnix() {
-    return std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
+    return std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch())
+        .count();
 }
 
 double Num(const json& j, const char* key, double fallback) {
@@ -44,8 +45,8 @@ json Matching(const json& catalog, const std::string& filter) {
     }
     json out = json::array();
     for (const json& item : catalog) {
-        const std::string text = Lower(item.value("maker", "") + " " + item.value("model", "") + " " +
-                                       item.value("caliber", ""));
+        const std::string text = Lower(item.value("maker", "") + " " + item.value("model", "") +
+                                       " " + item.value("caliber", ""));
         bool all = true;
         for (const std::string& w : words) {
             all = all && text.find(w) != std::string::npos;
@@ -59,7 +60,8 @@ json Matching(const json& catalog, const std::string& filter) {
 
 // Pictures travel through the JSON as base64 (RFC 4648, with padding).
 std::string ToBase64(const std::vector<std::uint8_t>& data) {
-    static constexpr char kAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    static constexpr char kAlphabet[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     std::string out;
     out.reserve((data.size() + 2) / 3 * 4);
     for (std::size_t i = 0; i < data.size(); i += 3) {
@@ -131,4 +133,4 @@ bool Contains(const json& list, Id id) {
                        [id](const json& v) { return v.at("id").get<Id>() == id; });
 }
 
-} // namespace ballistics::bridge::detail
+}  // namespace ballistics::bridge::detail

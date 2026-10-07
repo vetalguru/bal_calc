@@ -50,4 +50,4 @@ void Api::Impl::AddSharingHandlers(HandlerMap& h) {
     });
 }
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge

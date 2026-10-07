@@ -2,7 +2,6 @@
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -11,7 +10,7 @@ namespace ballistics::storage {
 namespace {
 
 class StorageSolution : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override {
         ASSERT_TRUE(db_.Open(":memory:").ok());
         BulletRecord b;
@@ -78,8 +77,8 @@ TEST_F(StorageSolution, ZeroAbsorbsSpinDriftAtZeroRange) {
     ASSERT_TRUE(at_zero);
     EXPECT_NEAR(at_zero->drop_m, 0.0, 1e-6);
     EXPECT_NEAR(at_zero->windage_m, 0.0, 1e-6);
-    EXPECT_GT(at_zero->spin_drift_m, 0.0); // right twist drifts right...
-    EXPECT_LT(sol.value().zero.windage_rad, 0.0); // ...so the zero aims left
+    EXPECT_GT(at_zero->spin_drift_m, 0.0);         // right twist drifts right...
+    EXPECT_LT(sol.value().zero.windage_rad, 0.0);  // ...so the zero aims left
     // Far out, spin drift outgrows the zero correction.
     EXPECT_GT(sol.value().trajectory.AtSlantRange(1000.0)->windage_m, 0.05);
 }
@@ -135,5 +134,5 @@ TEST(StorageClicks, RoundsToNearestClick) {
     EXPECT_DOUBLE_EQ(ToClicks(units::MoaToRad(-2.0), units::MoaToRad(0.25)), -8.0);
 }
 
-} // namespace
-} // namespace ballistics::storage
+}  // namespace
+}  // namespace ballistics::storage

@@ -1,11 +1,10 @@
 #include <ballistics/applogic/library.h>
+#include <ballistics/storage/repository.h>
+#include <ballistics/units.h>
 
 #include <algorithm>
 #include <cctype>
 #include <utility>
-
-#include <ballistics/storage/repository.h>
-#include <ballistics/units.h>
 
 namespace ballistics::applogic {
 
@@ -26,7 +25,7 @@ bool Contains(const std::string& haystack, const std::string& needle) {
     return Lower(haystack).find(needle) != std::string::npos;
 }
 
-} // namespace
+}  // namespace
 
 Result<std::vector<BulletSummary>> ListLibraryBullets(storage::Database& db,
                                                       const std::string& filter) {
@@ -38,7 +37,7 @@ Result<std::vector<BulletSummary>> ListLibraryBullets(storage::Database& db,
     std::vector<BulletSummary> out;
     for (const BulletRecord& b : all.value()) {
         if (b.source == kSourceUser) {
-            continue; // private to a profile
+            continue;  // private to a profile
         }
         if (!needle.empty() && !Contains(b.name, needle) && !Contains(b.manufacturer, needle) &&
             !Contains(b.caliber, needle)) {
@@ -154,8 +153,9 @@ Result<Id> SaveBulletForm(storage::Database& db, const BulletForm& f) {
             for (const BcBand& band : f.bands) {
                 b.bc_bands.push_back({band.velocity_mps, band.bc});
             }
-            std::sort(b.bc_bands.begin(), b.bc_bands.end(),
-                      [](const BcPoint& x, const BcPoint& y) { return x.velocity_mps > y.velocity_mps; });
+            std::sort(b.bc_bands.begin(), b.bc_bands.end(), [](const BcPoint& x, const BcPoint& y) {
+                return x.velocity_mps > y.velocity_mps;
+            });
         }
     }
     return Repository<BulletRecord>(db).Save(b);
@@ -172,4 +172,4 @@ Status DeleteBullet(storage::Database& db, Id bullet_id) {
     return sqlite_manager::Ok();
 }
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic

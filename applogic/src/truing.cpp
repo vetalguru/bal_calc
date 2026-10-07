@@ -1,13 +1,12 @@
 #include <ballistics/applogic/truing.h>
-
-#include <algorithm>
-#include <cmath>
-#include <utility>
-
 #include <ballistics/bc.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
+
+#include <algorithm>
+#include <cmath>
+#include <utility>
 
 namespace ballistics::applogic {
 
@@ -55,7 +54,7 @@ double Rms(const std::vector<double>& r) {
     return r.empty() ? 0.0 : std::sqrt(s / static_cast<double>(r.size()));
 }
 
-} // namespace
+}  // namespace
 
 Result<std::vector<DopeRecord>> ListShots(storage::Database& db, Id profile_id) {
     auto all = Repository<DopeRecord>(db).List();
@@ -300,7 +299,7 @@ namespace {
 // Elevation and Mach at a logged shot with the profile as given (its DSF
 // table included).
 std::optional<std::pair<double, double>> PredictWithMach(const storage::LoadedProfile& p,
-                                                          const DopeRecord& d) {
+                                                         const DopeRecord& d) {
     auto sol = storage::Solve(p, ConditionsOf(d), d.range_m + 1.0);
     if (!sol) {
         return std::nullopt;
@@ -318,7 +317,7 @@ std::optional<std::pair<double, double>> PredictWithMach(const storage::LoadedPr
 // 0.1 of factor weighs like a 0.01 mrad miss.
 void RefineDsf(const storage::LoadedProfile& bare, const std::vector<DopeRecord>& log,
                const std::vector<DsfShot>& shots, std::vector<DsfPoint>& points) {
-    constexpr double kSmooth = 1e-4; // rad per unit of factor difference
+    constexpr double kSmooth = 1e-4;  // rad per unit of factor difference
     std::vector<const DopeRecord*> used;
     for (const DsfShot& s : shots) {
         if (s.mach < kDsfMaxMach) {
@@ -421,8 +420,8 @@ void RefineDsf(const storage::LoadedProfile& bare, const std::vector<DopeRecord>
             }
             std::vector<DsfPoint> trial = points;
             for (std::size_t j = 0; j < n; ++j) {
-                trial[j + 1].factor =
-                    std::clamp(points[j + 1].factor + m[j][n] / m[j][j], kDsfMinFactor, kDsfMaxFactor);
+                trial[j + 1].factor = std::clamp(points[j + 1].factor + m[j][n] / m[j][j],
+                                                 kDsfMinFactor, kDsfMaxFactor);
             }
             std::vector<double> rt;
             double c2 = 0.0;
@@ -451,7 +450,7 @@ void RefineDsf(const storage::LoadedProfile& bare, const std::vector<DopeRecord>
     }
 }
 
-} // namespace
+}  // namespace
 
 DsfResult ComputeDsf(storage::Database& db, Id profile_id) {
     DsfResult out;
@@ -518,7 +517,7 @@ DsfResult ComputeDsf(storage::Database& db, Id profile_id) {
         };
         double lo = kDsfMinFactor, hi = kDsfMaxFactor;
         if (miss(lo) >= 0.0) {
-            hi = lo; // a start for the joint fit; judged after it
+            hi = lo;  // a start for the joint fit; judged after it
         } else if (miss(hi) <= 0.0) {
             lo = hi;
         }
@@ -549,7 +548,8 @@ DsfResult ComputeDsf(storage::Database& db, Id profile_id) {
         s.limited = s.mach < kDsfMaxMach &&
                     std::fabs(s.predicted_after_rad - s.observed_rad) > kDsfMissTolerance;
     }
-    if (std::all_of(order.begin(), order.end(), [&](std::size_t i) { return out.shots[i].limited; })) {
+    if (std::all_of(order.begin(), order.end(),
+                    [&](std::size_t i) { return out.shots[i].limited; })) {
         out.error = "The DSF alone cannot explain these hits: true the velocity and drag first.";
         return out;
     }
@@ -567,8 +567,9 @@ Status SetDsf(storage::Database& db, Id profile_id, std::vector<DsfPoint> points
         const DsfPoint& p = points[i];
         if (!(p.mach > 0.0 && p.mach <= 5.0) ||
             !(p.factor >= kDsfMinFactor && p.factor <= kDsfMaxFactor)) {
-            return Error(ErrorCode::kConstraint, 0,
-                         "Each DSF point needs a Mach between 0 and 5 and a factor between 0.5 and 2.");
+            return Error(
+                ErrorCode::kConstraint, 0,
+                "Each DSF point needs a Mach between 0 and 5 and a factor between 0.5 and 2.");
         }
         if (i > 0 && p.mach - points[i - 1].mach < 1e-3) {
             return Error(ErrorCode::kConstraint, 0, "Two DSF points have the same Mach.");
@@ -591,9 +592,9 @@ Status SetDsf(storage::Database& db, Id profile_id, std::vector<DsfPoint> points
 namespace {
 
 std::optional<DragTableId> TableNamed(const std::string& name) {
-    for (DragTableId id : {DragTableId::kG1, DragTableId::kG2, DragTableId::kG5, DragTableId::kG6,
-                           DragTableId::kG7, DragTableId::kG8, DragTableId::kGI, DragTableId::kGS,
-                           DragTableId::kRA4}) {
+    for (DragTableId id :
+         {DragTableId::kG1, DragTableId::kG2, DragTableId::kG5, DragTableId::kG6, DragTableId::kG7,
+          DragTableId::kG8, DragTableId::kGI, DragTableId::kGS, DragTableId::kRA4}) {
         if (name == DragTableName(id)) {
             return id;
         }
@@ -612,7 +613,7 @@ BcResult BcOrError(std::optional<double> bc, const char* error) {
     return r;
 }
 
-} // namespace
+}  // namespace
 
 BcResult BcFromChronograph(const std::string& table, double v_near_mps, double v_far_mps,
                            double distance_m, const SessionConditions& s) {
@@ -621,16 +622,15 @@ BcResult BcFromChronograph(const std::string& table, double v_near_mps, double v
         return BcOrError(std::nullopt, "Unknown drag table.");
     }
     if (!(distance_m > 0.0) || !(v_far_mps > 0.0) || !(v_near_mps > v_far_mps)) {
-        return BcOrError(std::nullopt,
-                         "Enter the distance and two velocities, the far one lower.");
+        return BcOrError(std::nullopt, "Enter the distance and two velocities, the far one lower.");
     }
-    return BcOrError(BcFromVelocities(*id, v_near_mps, v_far_mps, distance_m,
-                                      ToConditions(s).atmosphere),
-                     "No BC between 0.02 and 2 gives these measurements.");
+    return BcOrError(
+        BcFromVelocities(*id, v_near_mps, v_far_mps, distance_m, ToConditions(s).atmosphere),
+        "No BC between 0.02 and 2 gives these measurements.");
 }
 
-BcResult BcFromHit(const storage::LoadedProfile& profile, const std::string& table,
-                   double range_m, double elevation_rad, const SessionConditions& s) {
+BcResult BcFromHit(const storage::LoadedProfile& profile, const std::string& table, double range_m,
+                   double elevation_rad, const SessionConditions& s) {
     const auto id = TableNamed(table);
     if (!id) {
         return BcOrError(std::nullopt, "Unknown drag table.");
@@ -661,4 +661,4 @@ BcResult BcFromHit(const storage::LoadedProfile& profile, const std::string& tab
                      "No BC between 0.02 and 2 gives this correction.");
 }
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic

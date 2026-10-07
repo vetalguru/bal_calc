@@ -1,16 +1,16 @@
 #ifndef BALLISTICS_SOLVER_H
 #define BALLISTICS_SOLVER_H
 
-#include <optional>
-#include <vector>
-
 #include <ballistics/atmosphere.h>
 #include <ballistics/drag.h>
 #include <ballistics/vec3.h>
 
+#include <optional>
+#include <vector>
+
 namespace ballistics {
 
-inline constexpr double kStandardGravity = 9.80665; // m/s^2
+inline constexpr double kStandardGravity = 9.80665;  // m/s^2
 
 // Wind over a stretch of the range. Zones apply in order of
 // `until_range_m` (horizontal distance from the muzzle); the last zone
@@ -22,7 +22,7 @@ struct WindZone {
     // 0 = from the target (headwind, 12 o'clock), pi/2 = from the right
     // (3 o'clock), pi = from behind, 3pi/2 = from the left.
     double from_rad = 0.0;
-    double vertical_mps = 0.0; // updraft positive
+    double vertical_mps = 0.0;  // updraft positive
 };
 
 // Everything needed to fly one shot (SI units, angles in radians).
@@ -36,9 +36,9 @@ struct WindZone {
 struct Shot {
     DragModel drag;
     double muzzle_velocity_mps = 0.0;
-    double mass_kg = 0.0;           // energy output, spin effects
-    double bullet_diameter_m = 0.0; // spin effects
-    double bullet_length_m = 0.0;   // spin effects
+    double mass_kg = 0.0;            // energy output, spin effects
+    double bullet_diameter_m = 0.0;  // spin effects
+    double bullet_length_m = 0.0;    // spin effects
     // Barrel twist length, right-hand positive, left-hand negative,
     // 0 = no spin effects.
     double twist_m = 0.0;
@@ -47,7 +47,7 @@ struct Shot {
     double look_angle_rad = 0.0;
     double elevation_rad = 0.0;
     double windage_rad = 0.0;
-    double cant_rad = 0.0; // clockwise (top to the right) positive
+    double cant_rad = 0.0;  // clockwise (top to the right) positive
 
     Atmosphere atmosphere;
     SoundSpeedModel sound_speed = SoundSpeedModel::kHumidAir;
@@ -57,7 +57,7 @@ struct Shot {
     // Earth rotation (Coriolis/Eotvos), off without a latitude. Without an
     // azimuth only the horizontal (latitude) component is applied.
     std::optional<double> latitude_rad;
-    std::optional<double> azimuth_rad; // bearing of the LOS, clockwise from north
+    std::optional<double> azimuth_rad;  // bearing of the LOS, clockwise from north
 
     bool spin_drift = true;        // needs twist, diameter, length, mass
     bool aerodynamic_jump = true;  // likewise
@@ -82,16 +82,16 @@ enum class StopReason {
 // State of the projectile at one moment, plus its offsets from the LOS.
 struct TrajectoryPoint {
     double time_s = 0.0;
-    Vec3 position;          // m, shooter frame (see vec3.h)
-    Vec3 velocity;          // m/s
+    Vec3 position;  // m, shooter frame (see vec3.h)
+    Vec3 velocity;  // m/s
     double speed_mps = 0.0;
     double mach = 0.0;
     double energy_j = 0.0;  // 0 when Shot::mass_kg is not set
 
-    double slant_range_m = 0.0; // distance along the LOS
-    double drop_m = 0.0;        // offset from the LOS, up positive
-    double windage_m = 0.0;     // offset from the LOS, right positive (incl. spin drift)
-    double spin_drift_m = 0.0;  // the spin-drift part of windage_m
+    double slant_range_m = 0.0;  // distance along the LOS
+    double drop_m = 0.0;         // offset from the LOS, up positive
+    double windage_m = 0.0;      // offset from the LOS, right positive (incl. spin drift)
+    double spin_drift_m = 0.0;   // the spin-drift part of windage_m
 
     // Sight corrections to hit this point: dial/hold up and right are
     // positive, i.e. hold = -offset / slant range.
@@ -102,7 +102,7 @@ struct TrajectoryPoint {
 // A computed flight with dense output: any moment or LOS distance can be
 // sampled to integrator accuracy (quintic Hermite interpolation).
 class Trajectory final {
-public:
+   public:
     StopReason stop_reason() const { return stop_reason_; }
     // Gyroscopic stability at the muzzle (Miller), 0 if not computed.
     double stability() const { return stability_; }
@@ -126,7 +126,7 @@ public:
         Vec3 p, v, a;
     };
 
-private:
+   private:
     friend Trajectory Fly(const Shot&, double, const SolverOptions&);
 
     TrajectoryPoint Interpolate(std::size_t segment, double t) const;
@@ -135,9 +135,9 @@ private:
 
     std::vector<Node> nodes_;
     StopReason stop_reason_ = StopReason::kRangeReached;
-    Vec3 sight_;     // sight position
-    Vec3 los_;       // unit vector along the LOS
-    Vec3 los_up_;    // unit vector perpendicular to LOS, in the vertical plane
+    Vec3 sight_;   // sight position
+    Vec3 los_;     // unit vector along the LOS
+    Vec3 los_up_;  // unit vector perpendicular to LOS, in the vertical plane
     double mass_kg_ = 0.0;
     double stability_ = 0.0;
     double twist_m_ = 0.0;
@@ -152,8 +152,8 @@ Trajectory Fly(const Shot& shot, double max_slant_range_m, const SolverOptions& 
 
 struct ZeroResult {
     bool converged = false;
-    double elevation_rad = 0.0; // bore elevation relative to the LOS
-    double windage_rad = 0.0;   // bore windage relative to the LOS
+    double elevation_rad = 0.0;  // bore elevation relative to the LOS
+    double windage_rad = 0.0;    // bore windage relative to the LOS
     int iterations = 0;
 };
 
@@ -165,6 +165,6 @@ struct ZeroResult {
 ZeroResult FindZero(Shot shot, double zero_range_m, double offset_up_m = 0.0,
                     const SolverOptions& options = {}, double offset_right_m = 0.0);
 
-} // namespace ballistics
+}  // namespace ballistics
 
-#endif // BALLISTICS_SOLVER_H
+#endif  // BALLISTICS_SOLVER_H

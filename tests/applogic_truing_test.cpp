@@ -4,7 +4,6 @@
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -15,7 +14,7 @@ namespace ballistics::applogic {
 namespace {
 
 class Truing : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override {
         ASSERT_TRUE(db_.Open(":memory:").ok());
         RifleForm r;
@@ -31,8 +30,9 @@ protected:
         c.diameter_in = 0.308;
         c.length_in = 1.24;
         c.muzzle_velocity_mps = 800.0;
-        profile_ = EnsureProfile(db_, SaveRifleForm(db_, r).value(), SaveCartridgeForm(db_, c).value())
-                       .value();
+        profile_ =
+            EnsureProfile(db_, SaveRifleForm(db_, r).value(), SaveCartridgeForm(db_, c).value())
+                .value();
     }
 
     // The correction the rifle "really" needs: same profile, other scales.
@@ -65,7 +65,8 @@ TEST_F(Truing, NeedsShots) {
 TEST_F(Truing, LoggedShotStoresConditionsAndPrediction) {
     const SessionConditions s = Air(-5.0);
     const Id id = LogShot(db_, profile_, s, 600.0, units::MradToRad(4.4), units::MradToRad(0.3),
-                          "first group").value();
+                          "first group")
+                      .value();
     const auto shots = ListShots(db_, profile_).value();
     ASSERT_EQ(shots.size(), 1U);
     EXPECT_EQ(shots[0].id, id);
@@ -75,7 +76,7 @@ TEST_F(Truing, LoggedShotStoresConditionsAndPrediction) {
     EXPECT_EQ(shots[0].notes, "first group");
 
     ASSERT_TRUE(SetShotUsedForTruing(db_, id, false).ok());
-    EXPECT_FALSE(ComputeTruing(db_, profile_).ok); // the only shot is excluded
+    EXPECT_FALSE(ComputeTruing(db_, profile_).ok);  // the only shot is excluded
     ASSERT_TRUE(DeleteShot(db_, id).ok());
     EXPECT_TRUE(ListShots(db_, profile_).value().empty());
 }
@@ -95,7 +96,7 @@ TEST_F(Truing, OneShotFitsVelocityOnly) {
 
 TEST_F(Truing, RecoversVelocityWithinOneMeterPerSecondAndDrag) {
     // Plan criterion: V0 recovered within 1 m/s from synthetic data.
-    const double true_v = 1.0125; // 810 m/s instead of 800
+    const double true_v = 1.0125;  // 810 m/s instead of 800
     const double true_d = 0.96;
     for (const auto& [range, temp] : {std::pair{300.0, 10.0}, std::pair{600.0, 12.0},
                                       std::pair{900.0, 8.0}, std::pair{1200.0, 11.0}}) {
@@ -137,9 +138,11 @@ TEST_F(Truing, NoisyObservationsStillImprove) {
     }
     const TruingResult r = ComputeTruing(db_, profile_);
     ASSERT_TRUE(r.ok) << r.error;
-    std::printf("with click rounding: V0 x%.4f (true 0.985), drag x%.4f (true 1.04), rms %.3f -> %.3f mrad\n",
-                r.velocity_scale, r.drag_scale, units::RadToMrad(r.rms_before_rad),
-                units::RadToMrad(r.rms_after_rad));
+    std::printf(
+        "with click rounding: V0 x%.4f (true 0.985), drag x%.4f (true 1.04), rms %.3f -> %.3f "
+        "mrad\n",
+        r.velocity_scale, r.drag_scale, units::RadToMrad(r.rms_before_rad),
+        units::RadToMrad(r.rms_after_rad));
     EXPECT_LT(r.rms_after_rad, r.rms_before_rad / 5.0);
     EXPECT_NEAR(r.velocity_scale, true_v, 0.01);
     EXPECT_NEAR(r.drag_scale, true_d, 0.05);
@@ -156,7 +159,8 @@ double DsfTruthAt(storage::Database& db, Id profile, double range_m, const Sessi
 }
 
 TEST_F(Truing, DsfNeedsTransonicShots) {
-    ASSERT_TRUE(LogShot(db_, profile_, Air(15.0), 500.0, DsfTruthAt(db_, profile_, 500.0, Air(15.0))).ok());
+    ASSERT_TRUE(
+        LogShot(db_, profile_, Air(15.0), 500.0, DsfTruthAt(db_, profile_, 500.0, Air(15.0))).ok());
     const DsfResult r = ComputeDsf(db_, profile_);
     EXPECT_FALSE(r.ok);
     EXPECT_EQ(r.error, "Log hits where the bullet is slower than Mach 1.3 at the target.");
@@ -192,7 +196,8 @@ TEST_F(Truing, DsfFromTheShotLogReproducesTheTransonicDrop) {
     for (double range : {750.0, 1050.0, 1250.0, 1450.0}) {
         auto sol = storage::Solve(trued, ToConditions(cold), range + 1.0);
         const double got = sol.value().trajectory.AtSlantRange(range)->hold_elevation_rad;
-        EXPECT_NEAR(units::RadToMrad(got), units::RadToMrad(DsfTruthAt(db_, profile_, range, cold)), 0.05)
+        EXPECT_NEAR(units::RadToMrad(got), units::RadToMrad(DsfTruthAt(db_, profile_, range, cold)),
+                    0.05)
             << range;
     }
 }
@@ -222,7 +227,8 @@ TEST_F(Truing, DsfLeavesAVelocityErrorToTheVelocityTruing) {
         for (const DsfShot& s : r.shots) any = any || s.limited;
         EXPECT_TRUE(any);
     } else {
-        EXPECT_EQ(r.error, "The DSF alone cannot explain these hits: true the velocity and drag first.");
+        EXPECT_EQ(r.error,
+                  "The DSF alone cannot explain these hits: true the velocity and drag first.");
     }
 }
 
@@ -233,7 +239,9 @@ TEST_F(Truing, BcFromAHitIsTheBcThatMadeIt) {
         for (double range : {600.0, 1000.0}) {
             real.bullet.bc = true_bc;
             const double hit = storage::Solve(real, ToConditions(air), range + 1.0)
-                                   .value().trajectory.AtSlantRange(range)->hold_elevation_rad;
+                                   .value()
+                                   .trajectory.AtSlantRange(range)
+                                   ->hold_elevation_rad;
             const BcResult r =
                 BcFromHit(storage::LoadProfile(db_, profile_).value(), "G7", range, hit, air);
             ASSERT_TRUE(r.ok) << r.error;
@@ -259,5 +267,5 @@ TEST_F(Truing, BcCalculatorChecksItsInput) {
               "No BC between 0.02 and 2 gives this correction.");
 }
 
-} // namespace
-} // namespace ballistics::applogic
+}  // namespace
+}  // namespace ballistics::applogic

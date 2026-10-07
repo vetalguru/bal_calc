@@ -1,7 +1,6 @@
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <filesystem>
@@ -13,16 +12,17 @@ namespace {
 namespace fs = std::filesystem;
 
 class TempDbFile {
-public:
+   public:
     TempDbFile()
-        : path_(fs::temp_directory_path() /
-                ("balcalc_test_" + std::to_string(reinterpret_cast<std::uintptr_t>(this)) + ".db")) {
+        : path_(
+              fs::temp_directory_path() /
+              ("balcalc_test_" + std::to_string(reinterpret_cast<std::uintptr_t>(this)) + ".db")) {
         fs::remove(path_);
     }
     ~TempDbFile() { fs::remove(path_); }
     std::string path() const { return path_.string(); }
 
-private:
+   private:
     fs::path path_;
 };
 
@@ -68,7 +68,7 @@ TEST(StorageDatabase, ReportsBundledSqliteVersion) {
 }
 
 class StorageRepositories : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override { ASSERT_TRUE(db_.Open(":memory:").ok()); }
 
     // A bullet + cartridge + rifle + profile chain; returns the profile.
@@ -205,7 +205,7 @@ TEST_F(StorageRepositories, RifleStoresScopeAndZeroConditions) {
     EXPECT_FALSE(Repository<RifleRecord>(db_).Get(r.id).value()->scope_id.has_value());
 
     const ProfileRecord pair = *Repository<ProfileRecord>(db_).Get(p.id).value();
-    EXPECT_FALSE(pair.created_at.empty()); // filled by the database
+    EXPECT_FALSE(pair.created_at.empty());  // filled by the database
     EXPECT_FALSE(pair.last_used_at.has_value());
     // One profile per rifle + cartridge pair.
     ProfileRecord twin = pair;
@@ -226,7 +226,7 @@ TEST_F(StorageRepositories, ConditionsWithWindZones) {
     ASSERT_EQ(got.winds.size(), 2U);
     EXPECT_DOUBLE_EQ(got.winds[1].vertical_mps, 0.5);
 
-    ASSERT_TRUE(repo.Remove(c.id).ok()); // wind zones cascade
+    ASSERT_TRUE(repo.Remove(c.id).ok());  // wind zones cascade
     EXPECT_FALSE(repo.Get(c.id).value().has_value());
 }
 
@@ -241,7 +241,7 @@ TEST_F(StorageRepositories, ListFiltersByName) {
     const auto filtered = repo.List("trg").value();
     ASSERT_EQ(filtered.size(), 1U);
     EXPECT_EQ(filtered[0].name, "Sako TRG 22");
-    EXPECT_EQ(repo.List().value().front().name, "Accuracy AX"); // ordered by name
+    EXPECT_EQ(repo.List().value().front().name, "Accuracy AX");  // ordered by name
 }
 
 TEST_F(StorageRepositories, DopeLogAndCartridgeVelocityTable) {
@@ -275,5 +275,5 @@ TEST_F(StorageRepositories, UpdatingMissingRowFails) {
     EXPECT_FALSE(Repository<RifleRecord>(db_).Save(r).ok());
 }
 
-} // namespace
-} // namespace ballistics::storage
+}  // namespace
+}  // namespace ballistics::storage

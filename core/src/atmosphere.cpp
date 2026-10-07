@@ -7,17 +7,17 @@ namespace ballistics {
 
 namespace {
 
-constexpr double kGasConstant = 8.314472;       // J/(mol K), CIPM-2007
-constexpr double kMolarMassDryAir = 28.96546e-3; // kg/mol, CIPM-2007 (400 ppm CO2)
-constexpr double kMolarMassWater = 18.01528e-3;  // kg/mol
+constexpr double kGasConstant = 8.314472;         // J/(mol K), CIPM-2007
+constexpr double kMolarMassDryAir = 28.96546e-3;  // kg/mol, CIPM-2007 (400 ppm CO2)
+constexpr double kMolarMassWater = 18.01528e-3;   // kg/mol
 constexpr double kZeroCelsius = 273.15;
 
 // ICAO standard atmosphere (troposphere).
-constexpr double kSeaLevelTemperature = 288.15; // K
-constexpr double kSeaLevelPressure = 101325.0;  // Pa
-constexpr double kLapseRate = -0.0065;          // K/m
-constexpr double kPressureExponent = 5.255876;  // g0 M / (R |L|)
-constexpr double kLowestTemperature = 183.0;    // K, model floor (-90 C)
+constexpr double kSeaLevelTemperature = 288.15;  // K
+constexpr double kSeaLevelPressure = 101325.0;   // Pa
+constexpr double kLapseRate = -0.0065;           // K/m
+constexpr double kPressureExponent = 5.255876;   // g0 M / (R |L|)
+constexpr double kLowestTemperature = 183.0;     // K, model floor (-90 C)
 
 // Isobaric heat capacities in units of R (ideal gas): dry air is
 // diatomic-dominated (7/2), water vapour ~4.0 over the ambient range.
@@ -48,11 +48,12 @@ double Compressibility(double p_pa, double t_k, double xv) {
     constexpr double kD = 1.83e-11;
     constexpr double kE = -0.765e-8;
     const double pt = p_pa / t_k;
-    return 1.0 - pt * (kA0 + kA1 * t + kA2 * t * t + (kB0 + kB1 * t) * xv + (kC0 + kC1 * t) * xv * xv) +
+    return 1.0 -
+           pt * (kA0 + kA1 * t + kA2 * t * t + (kB0 + kB1 * t) * xv + (kC0 + kC1 * t) * xv * xv) +
            pt * pt * (kD + kE * xv * xv);
 }
 
-} // namespace
+}  // namespace
 
 Atmosphere StandardAtmosphere(double altitude_m) {
     Atmosphere a;
@@ -94,8 +95,8 @@ double SpeedOfSoundFromMoleFraction(double temperature_k, double xv, SoundSpeedM
 }
 
 double AirDensity(double temperature_k, double pressure_pa, double humidity) {
-    return AirDensityFromMoleFraction(
-        temperature_k, pressure_pa, WaterVaporMoleFraction(temperature_k, pressure_pa, humidity));
+    return AirDensityFromMoleFraction(temperature_k, pressure_pa,
+                                      WaterVaporMoleFraction(temperature_k, pressure_pa, humidity));
 }
 
 double SpeedOfSound(double temperature_k, double pressure_pa, double humidity,
@@ -139,7 +140,7 @@ double StandardSeaLevelDensity() {
     return AirDensity(kSeaLevelTemperature, kSeaLevelPressure, 0.0);
 }
 
-} // namespace
+}  // namespace
 
 double DensityAltitude(const Atmosphere& air) {
     const double ratio =
@@ -161,4 +162,4 @@ double StationPressureFromDensityAltitude(double density_altitude_m, double temp
     return p;
 }
 
-} // namespace ballistics
+}  // namespace ballistics

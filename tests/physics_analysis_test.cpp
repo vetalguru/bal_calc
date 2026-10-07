@@ -3,7 +3,6 @@
 #include <ballistics/drag.h>
 #include <ballistics/solver.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -99,7 +98,7 @@ TEST(PhysicsAnalysis, PointBlankMatchesDenseScan) {
 
 TEST(PhysicsAnalysis, PointBlankWithTheSightInsideStartsAtTheMuzzle) {
     const Trajectory traj = Fly(Zeroed308(200.0), 1000.0);
-    const auto pbr = PointBlankRange(traj, 0.10, 1000.0); // sight 5 cm < 10 cm
+    const auto pbr = PointBlankRange(traj, 0.10, 1000.0);  // sight 5 cm < 10 cm
     ASSERT_TRUE(pbr);
     EXPECT_DOUBLE_EQ(pbr->near_m, 0.0);
     EXPECT_GT(pbr->far_m, 200.0);
@@ -108,7 +107,7 @@ TEST(PhysicsAnalysis, PointBlankWithTheSightInsideStartsAtTheMuzzle) {
 
 TEST(PhysicsAnalysis, PointBlankBeyondTheEnd) {
     const Trajectory traj = Fly(Zeroed308(100.0), 1000.0);
-    const auto pbr = PointBlankRange(traj, 5.0, 300.0); // a 10 m tall "target"
+    const auto pbr = PointBlankRange(traj, 5.0, 300.0);  // a 10 m tall "target"
     ASSERT_TRUE(pbr);
     EXPECT_DOUBLE_EQ(pbr->far_m, 300.0);
 }
@@ -149,5 +148,5 @@ TEST(PhysicsLead, TargetGoingAwayIsMetFurther) {
     EXPECT_FALSE(MovingTargetLead(traj, 995.0, 0.0, 20.0));
 }
 
-} // namespace
-} // namespace ballistics
+}  // namespace
+}  // namespace ballistics

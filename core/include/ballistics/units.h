@@ -61,6 +61,6 @@ constexpr double RadToMoa(double rad) { return RadToDeg(rad) * 60.0; }
 // Energy
 inline constexpr double kJoulesPerFootPound = 1.3558179483314004;
 
-} // namespace ballistics::units
+}  // namespace ballistics::units
 
-#endif // BALLISTICS_UNITS_H
+#endif  // BALLISTICS_UNITS_H

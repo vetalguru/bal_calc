@@ -1,8 +1,7 @@
 #include <ballistics/applogic/reticle.h>
+#include <ballistics/units.h>
 
 #include <cmath>
-
-#include <ballistics/units.h>
 
 namespace ballistics::applogic {
 
@@ -18,9 +17,12 @@ HoldMode HoldModeFromString(const std::string& s) {
 
 const char* ToString(HoldMode mode) {
     switch (mode) {
-        case HoldMode::kHoldAll: return "hold";
-        case HoldMode::kDialAll: return "dial";
-        case HoldMode::kDialElevation: break;
+        case HoldMode::kHoldAll:
+            return "hold";
+        case HoldMode::kDialAll:
+            return "dial";
+        case HoldMode::kDialElevation:
+            break;
     }
     return "dial_elevation";
 }
@@ -45,11 +47,12 @@ ReticleHold ComputeReticleHold(double elevation_rad, double windage_rad,
             dialled = clicks * click;
         } else {
             clicks = 0.0;
-            dialled = angle; // no turret data: treat as dialled exactly
+            dialled = angle;  // no turret data: treat as dialled exactly
         }
     };
     if (mode != HoldMode::kHoldAll) {
-        dial(elevation_rad, scope.click_vertical_rad, h.dial_elevation_clicks, h.dial_elevation_rad);
+        dial(elevation_rad, scope.click_vertical_rad, h.dial_elevation_clicks,
+             h.dial_elevation_rad);
     }
     if (mode == HoldMode::kDialAll) {
         dial(windage_rad, scope.click_horizontal_rad, h.dial_windage_clicks, h.dial_windage_rad);
@@ -62,4 +65,4 @@ ReticleHold ComputeReticleHold(double elevation_rad, double windage_rad,
     return h;
 }
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic

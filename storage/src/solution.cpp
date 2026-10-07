@@ -1,12 +1,11 @@
+#include <ballistics/effects.h>
+#include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 
 #include <cmath>
 #include <exception>
 #include <string>
 #include <utility>
-
-#include <ballistics/effects.h>
-#include <ballistics/storage/repository.h>
 
 namespace ballistics::storage {
 
@@ -30,9 +29,9 @@ Result<T> Require(Database& db, Id id, const char* what) {
 }
 
 std::optional<DragTableId> TableByName(const std::string& name) {
-    for (auto id : {DragTableId::kG1, DragTableId::kG2, DragTableId::kG5, DragTableId::kG6,
-                    DragTableId::kG7, DragTableId::kG8, DragTableId::kGI, DragTableId::kGS,
-                    DragTableId::kRA4}) {
+    for (auto id :
+         {DragTableId::kG1, DragTableId::kG2, DragTableId::kG5, DragTableId::kG6, DragTableId::kG7,
+          DragTableId::kG8, DragTableId::kGI, DragTableId::kGS, DragTableId::kRA4}) {
         if (name == DragTableName(id)) {
             return id;
         }
@@ -40,7 +39,7 @@ std::optional<DragTableId> TableByName(const std::string& name) {
     return std::nullopt;
 }
 
-} // namespace
+}  // namespace
 
 Result<LoadedProfile> LoadProfile(Database& db, Id profile_id) {
     LoadedProfile p;
@@ -155,10 +154,9 @@ Result<Solution> Solve(const LoadedProfile& p, const ConditionsRecord& condition
 
     Shot shot = base;
     shot.atmosphere = conditions.atmosphere;
-    shot.muzzle_velocity_mps =
-        MuzzleVelocity(p.cartridge,
-                       conditions.powder_temp_k.value_or(conditions.atmosphere.temperature_k),
-                       p.profile.velocity_scale);
+    shot.muzzle_velocity_mps = MuzzleVelocity(
+        p.cartridge, conditions.powder_temp_k.value_or(conditions.atmosphere.temperature_k),
+        p.profile.velocity_scale);
     shot.look_angle_rad = conditions.look_angle_rad;
     shot.cant_rad = conditions.cant_rad;
     shot.winds = conditions.winds;
@@ -182,4 +180,4 @@ double ToClicks(double angle_rad, double click_rad, bool round) {
     return round ? std::round(clicks) : clicks;
 }
 
-} // namespace ballistics::storage
+}  // namespace ballistics::storage

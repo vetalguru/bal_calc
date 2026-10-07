@@ -1,10 +1,9 @@
 #include <ballistics/storage/database.h>
-
-#include <string>
-
 #include <sqlite3.h>
 #include <sqlite_manager/statement.h>
 #include <sqlite_manager/transaction.h>
+
+#include <string>
 
 #include "schema.h"
 
@@ -12,7 +11,7 @@ namespace ballistics::storage {
 
 namespace {
 constexpr int kBusyTimeoutMs = 2000;
-} // namespace
+}  // namespace
 
 Status Database::Open(const std::string& path) {
     if (Status s = conn_.Open(path); !s) {
@@ -31,9 +30,7 @@ Status Database::Open(const std::string& path) {
     return sqlite_manager::Ok();
 }
 
-std::int64_t Database::LatestSchemaVersion() {
-    return detail::Migrations().back().version;
-}
+std::int64_t Database::LatestSchemaVersion() { return detail::Migrations().back().version; }
 
 Status Database::Migrate() {
     auto current = SchemaVersion();
@@ -41,10 +38,10 @@ Status Database::Migrate() {
         return current.error();
     }
     if (current.value() > LatestSchemaVersion()) {
-        return sqlite_manager::Error(
-            sqlite_manager::ErrorCode::kSchema, 0,
-            "database schema v" + std::to_string(current.value()) +
-                " is newer than this app supports (v" + std::to_string(LatestSchemaVersion()) + ")");
+        return sqlite_manager::Error(sqlite_manager::ErrorCode::kSchema, 0,
+                                     "database schema v" + std::to_string(current.value()) +
+                                         " is newer than this app supports (v" +
+                                         std::to_string(LatestSchemaVersion()) + ")");
     }
     for (const detail::Migration& m : detail::Migrations()) {
         if (m.version <= current.value()) {
@@ -79,8 +76,6 @@ Result<std::int64_t> Database::SchemaVersion() {
     return stmt.value().ColumnInt64(0);
 }
 
-const char* SqliteVersion() {
-    return sqlite3_libversion();
-}
+const char* SqliteVersion() { return sqlite3_libversion(); }
 
-} // namespace ballistics::storage
+}  // namespace ballistics::storage

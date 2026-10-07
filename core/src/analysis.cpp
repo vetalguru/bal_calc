@@ -7,7 +7,7 @@ namespace ballistics {
 
 namespace {
 
-constexpr double kScanStepM = 1.0;    // coarse scan along the LOS
+constexpr double kScanStepM = 1.0;  // coarse scan along the LOS
 constexpr double kRangeToleranceM = 0.01;
 
 // Height above the LOS at a LOS distance; the muzzle (0) is the sight
@@ -31,7 +31,7 @@ double Boundary(double lo, double hi, Inside inside) {
     return 0.5 * (lo + hi);
 }
 
-} // namespace
+}  // namespace
 
 Apex MaxOrdinate(const Trajectory& trajectory, double max_slant_range_m) {
     const double end = std::min(max_slant_range_m, trajectory.max_slant_range_m());
@@ -107,4 +107,4 @@ std::optional<Lead> MovingTargetLead(const Trajectory& trajectory, double range_
     return lead;
 }
 
-} // namespace ballistics
+}  // namespace ballistics

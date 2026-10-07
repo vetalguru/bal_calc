@@ -31,7 +31,7 @@ void Api::Impl::AddLibraryHandlers(HandlerMap& h) {
              if (a.contains("files")) {
                  for (const json& f : a.at("files")) {
                      if (s.TakeCatalog(Str(f, "content"))) {
-                         continue; // a catalog, not a library record
+                         continue;  // a catalog, not a library record
                      }
                      files.push_back({Str(f, "name"), Str(f, "content")});
                  }
@@ -46,8 +46,10 @@ void Api::Impl::AddLibraryHandlers(HandlerMap& h) {
              s.RequireOpen();
              return {{"version", Must(al::SeededVersion(s.db))}};
          }},
-        {"libraryScopes", [](I& s, const json& a) -> json { return Matching(s.scope_catalog, Str(a, "filter")); }},
-        {"libraryRifles", [](I& s, const json& a) -> json { return Matching(s.rifle_catalog, Str(a, "filter")); }},
+        {"libraryScopes",
+         [](I& s, const json& a) -> json { return Matching(s.scope_catalog, Str(a, "filter")); }},
+        {"libraryRifles",
+         [](I& s, const json& a) -> json { return Matching(s.rifle_catalog, Str(a, "filter")); }},
         {"libraryCartridges",
          [](I& s, const json& a) -> json {
              json out = json::array();
@@ -72,7 +74,8 @@ void Api::Impl::AddLibraryHandlers(HandlerMap& h) {
         {"libraryBullets",
          [](I& s, const json& a) -> json {
              json out = json::array();
-             for (const al::BulletSummary& b : Must(al::ListLibraryBullets(s.db, Str(a, "filter")))) {
+             for (const al::BulletSummary& b :
+                  Must(al::ListLibraryBullets(s.db, Str(a, "filter")))) {
                  out.push_back({{"id", b.id},
                                 {"name", b.name},
                                 {"manufacturer", b.manufacturer},
@@ -94,8 +97,9 @@ void Api::Impl::AddLibraryHandlers(HandlerMap& h) {
          }},
         {"saveBullet",
          [](I& s, const json& a) -> json {
-             const Id id = Must(al::SaveBulletForm(s.db, BulletFrom(a.value("form", json::object()))));
-             s.ReloadArmory(); // cartridges show their bullet
+             const Id id =
+                 Must(al::SaveBulletForm(s.db, BulletFrom(a.value("form", json::object()))));
+             s.ReloadArmory();  // cartridges show their bullet
              return {{"id", id}};
          }},
         {"deleteBullet",
@@ -124,4 +128,4 @@ void Api::Impl::AddLibraryHandlers(HandlerMap& h) {
     });
 }
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge

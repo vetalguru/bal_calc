@@ -251,4 +251,4 @@ BEGIN DELETE FROM photo WHERE kind = 'cartridge' AND owner_id = OLD.id; END;
     return migrations;
 }
 
-} // namespace ballistics::storage::detail
+}  // namespace ballistics::storage::detail

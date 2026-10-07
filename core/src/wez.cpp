@@ -1,11 +1,10 @@
+#include <ballistics/units.h>
 #include <ballistics/wez.h>
 
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <utility>
-
-#include <ballistics/units.h>
 
 namespace ballistics {
 
@@ -74,7 +73,7 @@ std::pair<double, double> VerticalExtent(const Target& t) {
     return {-t.height_m / 2, t.height_m / 2};
 }
 
-} // namespace
+}  // namespace
 
 WezModel::WezModel(const Shot& shot, const ErrorSources& e, double max_slant_range_m)
     : nominal_(Fly(shot, max_slant_range_m)), errors_(e) {
@@ -120,22 +119,19 @@ WezModel::WezModel(const Shot& shot, const ErrorSources& e, double max_slant_ran
                            }});
     }
     if (e.look_angle_rad > 0) {
-        sources.push_back({"lookAngle", [&e](Shot& s, double k) {
-                               s.look_angle_rad += k * e.look_angle_rad;
-                           }});
+        sources.push_back(
+            {"lookAngle", [&e](Shot& s, double k) { s.look_angle_rad += k * e.look_angle_rad; }});
     }
     if (e.cant_rad > 0) {
         sources.push_back({"cant", [&e](Shot& s, double k) { s.cant_rad += k * e.cant_rad; }});
     }
     if (e.azimuth_rad > 0 && shot.azimuth_rad) {
-        sources.push_back({"azimuth", [&e](Shot& s, double k) {
-                               *s.azimuth_rad += k * e.azimuth_rad;
-                           }});
+        sources.push_back(
+            {"azimuth", [&e](Shot& s, double k) { *s.azimuth_rad += k * e.azimuth_rad; }});
     }
     if (e.latitude_rad > 0 && shot.latitude_rad) {
-        sources.push_back({"latitude", [&e](Shot& s, double k) {
-                               *s.latitude_rad += k * e.latitude_rad;
-                           }});
+        sources.push_back(
+            {"latitude", [&e](Shot& s, double k) { *s.latitude_rad += k * e.latitude_rad; }});
     }
     for (auto& [name, apply] : sources) {
         Shot plus = shot;
@@ -171,7 +167,8 @@ Spread WezModel::At(double slant_range_m, bool* ok) const {
         const auto a = p.plus.AtSlantRange(slant_range_m);
         const auto b = p.minus.AtSlantRange(slant_range_m);
         if (a && b) {
-            out.parts.push_back({p.source, (a->drop_m - b->drop_m) / 2, (a->windage_m - b->windage_m) / 2});
+            out.parts.push_back(
+                {p.source, (a->drop_m - b->drop_m) / 2, (a->windage_m - b->windage_m) / 2});
         }
     }
     double uu = 0, rr = 0, ur = 0;
@@ -238,4 +235,4 @@ int ShotsToHit(double p, double confidence) {
     return static_cast<int>(std::ceil(std::log(1.0 - confidence) / std::log(1.0 - p) - 1e-9));
 }
 
-} // namespace ballistics
+}  // namespace ballistics

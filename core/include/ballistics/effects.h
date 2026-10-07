@@ -48,6 +48,6 @@ struct PowderSensitivity {
 
 double MuzzleVelocityAt(const PowderSensitivity& powder, double powder_temperature_k);
 
-} // namespace ballistics
+}  // namespace ballistics
 
-#endif // BALLISTICS_EFFECTS_H
+#endif  // BALLISTICS_EFFECTS_H

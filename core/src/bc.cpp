@@ -1,5 +1,4 @@
 #include <ballistics/bc.h>
-
 #include <ballistics/solver.h>
 
 namespace ballistics {
@@ -45,4 +44,4 @@ std::optional<double> BcFromVelocities(DragTableId table, double v_near_mps, dou
         v_far_mps);
 }
 
-} // namespace ballistics
+}  // namespace ballistics

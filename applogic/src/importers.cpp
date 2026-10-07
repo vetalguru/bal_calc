@@ -1,22 +1,20 @@
 #include <ballistics/applogic/importers.h>
+#include <ballistics/applogic/library.h>
+#include <ballistics/applogic/profile_io.h>
+#include <ballistics/storage/repository.h>
+#include <ballistics/units.h>
+#include <sqlite_manager/transaction.h>
+#include <tinyxml2.h>
 
 #include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <regex>
 #include <sstream>
 #include <utility>
-
-#include <nlohmann/json.hpp>
-#include <sqlite_manager/transaction.h>
-#include <tinyxml2.h>
-
-#include <ballistics/applogic/library.h>
-#include <ballistics/applogic/profile_io.h>
-#include <ballistics/storage/repository.h>
-#include <ballistics/units.h>
 
 namespace ballistics::applogic {
 
@@ -37,7 +35,7 @@ Error Bad(const std::string& what) { return Error(ErrorCode::kFormat, 0, what); 
 // A transaction unless the caller already has one open (SQLite does not
 // nest them); Commit() is then a no-op and the caller commits.
 class Scope {
-public:
+   public:
     explicit Scope(Database& db) {
         if (!db.connection().InTransaction()) {
             auto t = sqlite_manager::Transaction::Begin(db.connection());
@@ -51,7 +49,7 @@ public:
     const std::optional<Error>& error() const { return error_; }
     Status Commit() { return txn_.IsActive() ? txn_.Commit() : sqlite_manager::Ok(); }
 
-private:
+   private:
     sqlite_manager::Transaction txn_;
     std::optional<Error> error_;
 };
@@ -221,15 +219,15 @@ double DiameterFromCaliber(const std::string& caliber) {
         return 0.0;
     }
     if (v < 1.0) {
-        return units::InchToM(v); // "0.308"
+        return units::InchToM(v);  // "0.308"
     }
     if (v <= 30.0) {
-        return v / 1000.0; // millimetres: "7.62x39", "9mm"
+        return v / 1000.0;  // millimetres: "7.62x39", "9mm"
     }
     if (v < 100.0) {
-        return units::InchToM(v / 100.0); // "45 ACP", "50 BMG"
+        return units::InchToM(v / 100.0);  // "45 ACP", "50 BMG"
     }
-    return units::InchToM(v / 1000.0); // "308 Win", "410"
+    return units::InchToM(v / 1000.0);  // "308 Win", "410"
 }
 
 // Caliber label from a diameter, e.g. 0.00782 m -> ".308".
@@ -257,12 +255,15 @@ Result<Id> ImportBulletsJson(Database& db, const json& doc, int* imported, int* 
         b.source = kSourcePublished;
         b.notes = j.value("reference", "");
         // Bands (BCs by velocity) describe the bullet better than one BC.
-        const char* bands = j.contains("g7_bands") ? "g7_bands" : j.contains("g1_bands") ? "g1_bands" : nullptr;
+        const char* bands = j.contains("g7_bands")   ? "g7_bands"
+                            : j.contains("g1_bands") ? "g1_bands"
+                                                     : nullptr;
         if (bands != nullptr) {
             b.drag_table = bands[1] == '7' ? "G7" : "G1";
             b.drag_kind = storage::kDragKindMultiBc;
             for (const json& band : j.at(bands)) {
-                b.bc_bands.push_back({units::FpsToMps(band.at(0).get<double>()), band.at(1).get<double>()});
+                b.bc_bands.push_back(
+                    {units::FpsToMps(band.at(0).get<double>()), band.at(1).get<double>()});
             }
         } else if (j.contains("g7")) {
             b.drag_table = "G7";
@@ -289,7 +290,7 @@ Result<Id> ImportBulletsJson(Database& db, const json& doc, int* imported, int* 
     return last;
 }
 
-} // namespace
+}  // namespace
 
 Result<AmmoFile> ParseAmmo(const std::string& xml) {
     tinyxml2::XMLDocument doc;
@@ -364,8 +365,8 @@ Result<DrgFile> ParseDrg(const std::string& text) {
     const std::string rest = header.substr(comma + 1);
     static const std::regex kNumber(R"([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)");
     std::vector<std::smatch> numbers;
-    for (auto it = std::sregex_iterator(rest.begin(), rest.end(), kNumber); it != std::sregex_iterator();
-         ++it) {
+    for (auto it = std::sregex_iterator(rest.begin(), rest.end(), kNumber);
+         it != std::sregex_iterator(); ++it) {
         numbers.push_back(*it);
     }
     if (numbers.size() < 3) {
@@ -375,7 +376,8 @@ Result<DrgFile> ParseDrg(const std::string& text) {
     f.kind = Trim(header.substr(0, comma));
     const std::smatch& first = numbers[numbers.size() - 3];
     f.name = Trim(rest.substr(0, static_cast<std::size_t>(first.position(0))));
-    while (!f.name.empty() && (f.name.back() == ',' || std::isspace(static_cast<unsigned char>(f.name.back())))) {
+    while (!f.name.empty() &&
+           (f.name.back() == ',' || std::isspace(static_cast<unsigned char>(f.name.back())))) {
         f.name.pop_back();
     }
     f.mass_kg = std::atof(numbers[numbers.size() - 3].str().c_str());
@@ -394,9 +396,10 @@ Result<DrgFile> ParseDrg(const std::string& text) {
     }
     std::sort(f.points.begin(), f.points.end(),
               [](const DragPoint& a, const DragPoint& b) { return a.mach < b.mach; });
-    f.points.erase(std::unique(f.points.begin(), f.points.end(),
-                               [](const DragPoint& a, const DragPoint& b) { return a.mach == b.mach; }),
-                   f.points.end());
+    f.points.erase(
+        std::unique(f.points.begin(), f.points.end(),
+                    [](const DragPoint& a, const DragPoint& b) { return a.mach == b.mach; }),
+        f.points.end());
     if (f.points.size() < 2) {
         return Bad(f.name + ": not enough drag points.");
     }
@@ -450,7 +453,8 @@ Result<ReticleRecord> ParseReticle(const std::string& xml) {
             } else if (tag == "reticle-path") {
                 json d = json::array();
                 if (const auto* steps = e->FirstChildElement("elements")) {
-                    for (const auto* s = steps->FirstChildElement(); s; s = s->NextSiblingElement()) {
+                    for (const auto* s = steps->FirstChildElement(); s;
+                         s = s->NextSiblingElement()) {
                         const std::string st = s->Name();
                         const double x = Mrad(s, "position-x");
                         const double y = Mrad(s, "position-y");
@@ -589,7 +593,7 @@ Result<Id> ImportFile(Database& db, const std::string& file_name, const std::str
 
 namespace {
 constexpr const char* kSeedVersionKey = "seed.version";
-} // namespace
+}  // namespace
 
 Result<int> SeededVersion(Database& db) {
     auto done = storage::GetSetting(db, kSeedVersionKey);
@@ -625,7 +629,7 @@ Result<SeedReport> SeedLibrary(Database& db, const std::vector<SeedFile>& files,
         } else if (EndsWith(name, ".drg")) {
             auto parsed = ParseDrg(f.content);
             if (!parsed) {
-                ++report.skipped; // encoded or unreadable
+                ++report.skipped;  // encoded or unreadable
                 continue;
             }
             if (Exists<BulletRecord>(db, parsed.value().name, kSourceDrgFile)) {
@@ -669,4 +673,4 @@ Result<SeedReport> SeedLibrary(Database& db, const std::vector<SeedFile>& files,
     return report;
 }
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic

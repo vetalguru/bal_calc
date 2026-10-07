@@ -1,11 +1,11 @@
 #ifndef BALLISTICS_BC_H
 #define BALLISTICS_BC_H
 
-#include <functional>
-#include <optional>
-
 #include <ballistics/atmosphere.h>
 #include <ballistics/drag.h>
+
+#include <functional>
+#include <optional>
 
 // Ballistic coefficient from measurements: the BC (against a standard
 // table) with which the model reproduces what was measured.
@@ -30,6 +30,6 @@ std::optional<double> FitBc(const std::function<std::optional<double>(double)>& 
 std::optional<double> BcFromVelocities(DragTableId table, double v_near_mps, double v_far_mps,
                                        double distance_m, const Atmosphere& air);
 
-} // namespace ballistics
+}  // namespace ballistics
 
-#endif // BALLISTICS_BC_H
+#endif  // BALLISTICS_BC_H

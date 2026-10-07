@@ -45,7 +45,7 @@ void Api::Impl::Select(Id rifle, Id cartridge) {
     rifle_id = rifle;
     cartridge_id = cartridge;
     if (rifle_changed) {
-        ReloadArmory(); // cartridges of the new calibre first
+        ReloadArmory();  // cartridges of the new calibre first
     }
     UpdatePair();
 }
@@ -88,8 +88,9 @@ void Api::Impl::AddArmoryHandlers(HandlerMap& h) {
          }},
         {"saveRifle",
          [](I& s, const json& a) -> json {
-             const Id id = Must(al::SaveRifleForm(s.db, RifleFrom(a.value("form", json::object()))));
-             s.rifle_id = 0; // the cartridge order follows the (maybe new) calibre
+             const Id id =
+                 Must(al::SaveRifleForm(s.db, RifleFrom(a.value("form", json::object()))));
+             s.rifle_id = 0;  // the cartridge order follows the (maybe new) calibre
              s.ReloadArmory();
              s.Select(id, s.cartridge_id);
              return {{"id", id}};
@@ -125,8 +126,9 @@ void Api::Impl::AddArmoryHandlers(HandlerMap& h) {
         {"stability",
          [](I&, const json& a) -> json {
              const double sg = ballistics::MillerStability(
-                 u::GrainToKg(Num(a, "massGr")), u::InchToM(Num(a, "diameterIn")), u::InchToM(Num(a, "lengthIn")),
-                 u::InchToM(Num(a, "twistIn")), Num(a, "velocityMps"), 288.15, 101325.0);
+                 u::GrainToKg(Num(a, "massGr")), u::InchToM(Num(a, "diameterIn")),
+                 u::InchToM(Num(a, "lengthIn")), u::InchToM(Num(a, "twistIn")),
+                 Num(a, "velocityMps"), 288.15, 101325.0);
              return {{"sg", sg}};
          }},
         {"cartridgeFormWithBullet",
@@ -142,9 +144,9 @@ void Api::Impl::AddArmoryHandlers(HandlerMap& h) {
          }},
         {"addSample",
          [](I& s, const json& a) -> json {
-             const Id pair = Must(al::CreateSampleProfile(
-                 s.db, Str(a, "rifleName", "Sample .308 Win"),
-                 Str(a, "cartridgeName", "Sample SMK 175 gr")));
+             const Id pair =
+                 Must(al::CreateSampleProfile(s.db, Str(a, "rifleName", "Sample .308 Win"),
+                                              Str(a, "cartridgeName", "Sample SMK 175 gr")));
              const auto p = Must(bs::Repository<bs::ProfileRecord>(s.db).Get(pair));
              if (p) {
                  s.rifle_id = 0;
@@ -156,4 +158,4 @@ void Api::Impl::AddArmoryHandlers(HandlerMap& h) {
     });
 }
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge
