@@ -23,8 +23,8 @@ Windows account on this PC can decrypt it). Nothing goes into the repository.
 Back up the keystore file and remember its password: an app update must be
 signed with the same key.
 
-Output: `kmp/androidApp/build/outputs/apk/release/androidApp-release.apk`
-(and `bundle/release/androidApp-release.aab`). Copy the APK to the phone
+Output: `kmp/androidApp/build/outputs/apk/release/Holdmark-<version>-android-arm64-release.apk`
+(and `bundle/release/Holdmark-<version>-android-arm64-release.aab`). Copy the APK to the phone
 (e.g. through Google Drive) or install it with `-Install`.
 
 ## By hand
@@ -50,7 +50,8 @@ Check the signature:
 ## Debug builds
 
 `.\gradlew.bat :androidApp:assembleDebug` gives a debug-signed APK for
-emulators and testing (`kmp/androidApp/build/outputs/apk/debug/`).
+emulators and testing
+(`kmp/androidApp/build/outputs/apk/debug/Holdmark-<version>-android-arm64-debug.apk`).
 
 ## Notes
 

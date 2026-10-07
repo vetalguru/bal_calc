@@ -122,7 +122,7 @@ try {
 }
 
 $outputs = Join-Path $repo 'kmp\androidApp\build\outputs'
-$apk = Get-Item "$outputs\apk\release\androidApp-release.apk" -ErrorAction SilentlyContinue
+$apk = Get-ChildItem "$outputs\apk\release\Holdmark-*-release.apk" -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $apk) { throw "No release APK in $outputs\apk\release" }
 
 $apksigner = Find-Tool 'apksigner.bat' @("$env:ANDROID_SDK_ROOT\build-tools\36.0.0", "$env:ANDROID_SDK_ROOT\build-tools\35.0.0")

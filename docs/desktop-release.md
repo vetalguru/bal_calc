@@ -17,7 +17,7 @@ cd kmp
 .\gradlew.bat :desktopApp:packageMsi
 ```
 
-Result: `kmp\desktopApp\build\compose\binaries\main\msi\Holdmark-<version>.msi`,
+Result: `kmp\desktopApp\build\compose\binaries\main\msi\Holdmark-<version>-windows-x64-release.msi`,
 an installer (Start-menu and desktop shortcuts, uninstall in Settings ->
 Apps); a newer MSI replaces the installed version.
 
@@ -29,11 +29,11 @@ cd kmp
 ./gradlew :desktopApp:packageDeb
 ```
 
-Result: `kmp/desktopApp/build/compose/binaries/main/deb/holdmark_<version>_amd64.deb`
+Result: `kmp/desktopApp/build/compose/binaries/main/deb/Holdmark-<version>-linux-amd64-release.deb`
 (installs to `/opt/holdmark`, menu entry "Holdmark").
 
 ```bash
-sudo apt install ./kmp/desktopApp/build/compose/binaries/main/deb/holdmark_*_amd64.deb
+sudo apt install ./kmp/desktopApp/build/compose/binaries/main/deb/Holdmark-*-linux-amd64-release.deb
 sudo apt remove holdmark
 ```
 
