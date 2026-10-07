@@ -57,70 +57,6 @@ import org.vetalguru.balcalc.AppModel
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
 
-/** The lower part: range, wind and angle, each changed with the thumb. */
-@Composable
-internal fun Controller(model: AppModel, narrow: Boolean) {
-    val c = model.state.conditions
-    val angle = { d: Double -> model.updateConditions { it.copy(lookAngleDeg = (it.lookAngleDeg + d).coerceIn(-60.0, 60.0)) } }
-    Card(
-        Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                if (!narrow) Step("−100") { model.setTargetRange(c.targetRangeM - 100) }
-                Step("−10") { model.setTargetRange(c.targetRangeM - 10) }
-                RangeField(c.targetRangeM, model::setTargetRange, Modifier.weight(1f), showUnit = !narrow)
-                Step("+10") { model.setTargetRange(c.targetRangeM + 10) }
-                if (!narrow) Step("+100") { model.setTargetRange(c.targetRangeM + 100) }
-            }
-            HorizontalDivider()
-            QuickWind(
-                speed = c.windSpeed,
-                unit = WindUnit.of(model.state.prefs.windUnit),
-                onUnit = { u -> model.setPrefs { it.copy(windUnit = u.key) } },
-                narrow = narrow,
-                fromDeg = c.windFromDeg,
-                onSpeed = { v -> model.updateConditions { it.copy(windSpeed = v.coerceIn(0.0, 40.0)) } },
-                onDirection = { d -> model.updateConditions { it.copy(windFromDeg = d) } },
-                zoneNote = if (c.windZones.isEmpty()) "" else stringResource(
-                    Res.string.quick_zone_note,
-                    c.windZones.size + 1,
-                    c.windUntilM.roundToInt(),
-                ),
-            )
-            HorizontalDivider()
-            // Look angle: uphill positive.
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                // The weight on a plain box: the tooltip's anchor does not pass it on.
-                Box(Modifier.padding(start = 4.dp).weight(1f)) {
-                    Hint(stringResource(Res.string.shot_angle), Modifier.testTag("lookAngleHint")) {
-                        Text(
-                            stringResource(Res.string.look_angle_short),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                        )
-                    }
-                }
-                if (!narrow) Step("−5") { angle(-5.0) }
-                Step("−1") { angle(-1.0) }
-                // An arrow tells up from down without a sign to decode.
-                val deg = c.lookAngleDeg.roundToInt()
-                Text(
-                    (if (deg > 0) "↑" else if (deg < 0) "↓" else "") + "${kotlin.math.abs(deg)}°",
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    modifier = Modifier.width(64.dp).testTag("lookAngle"),
-                )
-                Step("+1") { angle(1.0) }
-                if (!narrow) Step("+5") { angle(5.0) }
-            }
-        }
-    }
-}
-
 /** A small ± button of the controller. */
 @Composable
 internal fun Step(label: String, width: Dp = 50.dp, onClick: () -> Unit) {
@@ -153,80 +89,8 @@ internal fun RangeField(rangeM: Double, onRange: (Double) -> Unit, modifier: Mod
     )
 }
 
-@Composable
-internal fun QuickWind(
-    speed: Double,
-    unit: WindUnit,
-    onUnit: (WindUnit) -> Unit,
-    narrow: Boolean,
-    fromDeg: Double,
-    onSpeed: (Double) -> Unit,
-    onDirection: (Double) -> Unit,
-    zoneNote: String = "",
-) {
-    // The dial on the left; the speed with its steps and the clock beside it.
-    Row(
-        Modifier.fillMaxWidth().testTag("quickWind"),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        // Smaller on narrow phones: room for "11.8 mph" between the steps.
-        WindDial(fromDeg, onDirection, Modifier.size(if (narrow) 60.dp else 76.dp))
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            // As wide as a number needs: the steps stay near the thumb.
-            WindSpeedField(
-                stringResource(Res.string.wind_speed), speed, onSpeed, unit, onUnit,
-                tag = "windSpeed", fieldMaxWidth = 150.dp, stepWidth = if (narrow) 44.dp else 50.dp,
-            )
-            // Smaller rather than cut on narrow phones ("11 o'clock · 330°").
-            val bodyMedium = MaterialTheme.typography.bodyMedium
-            BasicText(
-                stringResource(Res.string.wind_direction_clock, clockHour(fromDeg)) + " · ${fromDeg.roundToInt()}°",
-                style = bodyMedium.copy(color = LocalContentColor.current),
-                maxLines = 1,
-                autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = bodyMedium.fontSize),
-                modifier = Modifier.testTag("windDirectionText"),
-            )
-            if (zoneNote.isNotEmpty()) {
-                Text(zoneNote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-            }
-        }
-    }
-}
-
 /** Clock hour of a direction (0° = 12 o'clock = from the target). */
 fun clockHour(deg: Double): Int {
     val h = (((deg % 360) + 360) % 360 / 30).roundToInt() % 12
     return if (h == 0) 12 else h
-}
-
-/** Wind direction (where it blows from), set by touching or dragging the dial; 15° steps. */
-@Composable
-fun WindDial(fromDeg: Double, onChange: (Double) -> Unit, modifier: Modifier = Modifier) {
-    val ring = MaterialTheme.colorScheme.outline
-    val knob = MaterialTheme.colorScheme.primary
-    fun angleAt(p: Offset, w: Float, h: Float): Double {
-        val a = atan2((p.x - w / 2).toDouble(), (h / 2 - p.y).toDouble()) * 180 / PI
-        return (((a + 360) % 360) / 15).roundToInt() * 15.0 % 360
-    }
-    Box(modifier.testTag("windDial")) {
-        Canvas(
-            Modifier.fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures { onChange(angleAt(it, size.width.toFloat(), size.height.toFloat())) }
-                }
-                .pointerInput(Unit) {
-                    detectDragGestures { change, _ ->
-                        onChange(angleAt(change.position, size.width.toFloat(), size.height.toFloat()))
-                    }
-                },
-        ) {
-            val r = size.minDimension / 2 - 8.dp.toPx()
-            drawCircle(ring, radius = r, style = Stroke(2.dp.toPx()))
-            val a = fromDeg * PI / 180
-            val p = Offset(center.x + (r * sin(a)).toFloat(), center.y - (r * cos(a)).toFloat())
-            drawLine(knob, p, center, strokeWidth = 2.dp.toPx())
-            drawCircle(knob, radius = 7.dp.toPx(), center = p)
-        }
-    }
 }
