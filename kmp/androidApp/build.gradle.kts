@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         // Same id as the Qt version: installs as its update and keeps the data.
-        applicationId = "org.vetalguru.balcalc"
+        applicationId = "org.vetalguru.holdmark"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 5 // the Qt version was 1; grow with every release

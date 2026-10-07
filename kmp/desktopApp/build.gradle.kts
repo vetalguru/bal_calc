@@ -72,7 +72,7 @@ compose.desktop {
         nativeDistributions {
             appResourcesRootDir.set(appResources)
             targetFormats(TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "BalCalc"
+            packageName = "Holdmark"
             packageVersion = rootProject.extra["appVersion"] as String
             description = "Ballistic calculator"
             vendor = "vetalguru"
@@ -83,7 +83,7 @@ compose.desktop {
             windows {
                 iconFile.set(repoRoot.resolve("kmp/icons/balcalc.ico"))
                 menu = true
-                menuGroup = "BalCalc"
+                menuGroup = "Holdmark"
                 shortcut = true
                 dirChooser = true
                 // Fixed: a newer MSI replaces the installed version.
@@ -91,7 +91,7 @@ compose.desktop {
             }
             linux {
                 iconFile.set(repoRoot.resolve("kmp/icons/balcalc.png"))
-                packageName = "balcalc"
+                packageName = "holdmark"
                 menuGroup = "Science;Engineering"
                 appCategory = "science"
                 shortcut = true
@@ -119,6 +119,6 @@ tasks.register<Zip>("packageZip") {
     dependsOn("createDistributable")
     val os = if (System.getProperty("os.name").startsWith("Windows")) "windows" else "linux"
     from(layout.buildDirectory.dir("compose/binaries/main/app"))
-    archiveFileName.set("BalCalc-${rootProject.extra["appVersion"]}-$os-x64.zip")
+    archiveFileName.set("Holdmark-${rootProject.extra["appVersion"]}-$os-x64.zip")
     destinationDirectory.set(layout.buildDirectory.dir("compose/binaries/main/zip"))
 }

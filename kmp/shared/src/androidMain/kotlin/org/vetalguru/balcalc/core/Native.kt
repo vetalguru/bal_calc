@@ -21,7 +21,7 @@ fun androidEngine(): Engine {
 }
 
 /** Where the Qt version kept it too (QStandardPaths::AppDataLocation). */
-fun androidDatabasePath(context: Context): String = File(context.filesDir, "balcalc.db").path
+fun androidDatabasePath(context: Context): String = File(context.filesDir, "holdmark.db").path
 
 /** data/seed packed as assets under seed/. */
 fun androidSeed(context: Context): List<SeedFile> {

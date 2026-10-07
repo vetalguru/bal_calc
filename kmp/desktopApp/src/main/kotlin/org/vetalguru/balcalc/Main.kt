@@ -23,7 +23,7 @@ fun main() {
     application {
         Window(
             onCloseRequest = ::exitApplication,
-            title = "BalCalc",
+            title = "Holdmark",
             icon = icon,
             state = rememberWindowState(width = 1100.dp, height = 760.dp),
         ) {

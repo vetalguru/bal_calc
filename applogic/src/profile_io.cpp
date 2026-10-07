@@ -26,7 +26,7 @@ constexpr const char* kLegacyProfileFormat = "balcalc-profile";
 constexpr int kVersion = 1;
 
 Error BadFile(const std::string& what) {
-    return Error(ErrorCode::kFormat, 0, "Not a valid BalCalc file: " + what);
+    return Error(ErrorCode::kFormat, 0, "Not a valid Holdmark file: " + what);
 }
 
 template <typename T>

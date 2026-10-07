@@ -184,7 +184,7 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform, Files
     private val systemClipboard get() = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     override suspend fun copyText(text: String) =
-        systemClipboard.setPrimaryClip(ClipData.newPlainText("BalCalc", text))
+        systemClipboard.setPrimaryClip(ClipData.newPlainText("Holdmark", text))
 
     override suspend fun pasteText(): String? =
         systemClipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(activity)?.toString()

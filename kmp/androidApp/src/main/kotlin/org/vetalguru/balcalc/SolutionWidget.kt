@@ -22,7 +22,7 @@ class SolutionWidget : AppWidgetProvider() {
         for (id in ids) {
             val views = RemoteViews(context.packageName, R.layout.widget_solution)
             val elevation = saved.getString("elevation", null)
-            views.setTextViewText(R.id.widget_title, saved.getString("title", "BalCalc"))
+            views.setTextViewText(R.id.widget_title, saved.getString("title", "Holdmark"))
             views.setTextViewText(R.id.widget_range, saved.getString("range", ""))
             views.setTextViewText(R.id.widget_elevation, elevation ?: context.getString(R.string.widget_empty))
             views.setTextViewText(R.id.widget_windage, saved.getString("windage", ""))
