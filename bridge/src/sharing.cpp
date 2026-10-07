@@ -15,10 +15,10 @@ std::string Api::Impl::ExportFileName(const std::string& kind, Id id) const {
                     c = '_';
                 }
             }
-            return name + ".balcalc.json";
+            return name + ".holdmark.json";
         }
     }
-    return kind + ".balcalc.json";
+    return kind + ".holdmark.json";
 }
 
 void Api::Impl::AddSharingHandlers(HandlerMap& h) {

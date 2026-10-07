@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-    Builds a signed release APK (and optionally the AAB) for BalCalc.
+    Builds a signed release APK (and optionally the AAB) for Holdmark.
 
 .DESCRIPTION
     Signing settings live outside the repository, in
-    %APPDATA%\BalCalc\android-signing.json: the keystore path, the key alias
+    %APPDATA%\Holdmark\android-signing.json: the keystore path, the key alias
     and the keystore password encrypted with Windows DPAPI (readable only by
     the current Windows user on this PC).
 
@@ -26,8 +26,14 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
-$configDir = Join-Path $env:APPDATA 'BalCalc'
+$configDir = Join-Path $env:APPDATA 'Holdmark'
 $configFile = Join-Path $configDir 'android-signing.json'
+# Before the rename the settings were under BalCalc: take them over once.
+$oldConfig = Join-Path (Join-Path $env:APPDATA 'BalCalc') 'android-signing.json'
+if (-not (Test-Path $configFile) -and (Test-Path $oldConfig)) {
+    New-Item -ItemType Directory -Force $configDir | Out-Null
+    Copy-Item $oldConfig $configFile
+}
 
 # A terminal opened before the SDK was installed lacks these: take them from
 # the user/machine environment.
@@ -68,8 +74,8 @@ function Invoke-Setup {
         $pass = Read-Host 'New keystore password (6+ characters)' -AsSecureString
         $again = Read-Host 'Repeat the password' -AsSecureString
         if ((Get-PlainText $pass) -ne (Get-PlainText $again)) { throw 'Passwords differ' }
-        $name = Read-Host 'Your name or organisation for the certificate [BalCalc]'
-        if (-not $name) { $name = 'BalCalc' }
+        $name = Read-Host 'Your name or organisation for the certificate [Holdmark]'
+        if (-not $name) { $name = 'Holdmark' }
         $env:BALCALC_KS_PASS = Get-PlainText $pass
         try {
             & $keytool -genkeypair -keystore $path -storetype PKCS12 -alias $alias `

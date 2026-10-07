@@ -545,7 +545,7 @@ TEST_F(Bridge, ShareRifleAndCartridge) {
     const json st = Sample();
     const int rifle = st.at("currentRifleId");
     const json e = Ok("exportJson", {{"kind", "rifle"}, {"id", rifle}});
-    EXPECT_EQ(e.at("fileName"), "Rifle.balcalc.json");
+    EXPECT_EQ(e.at("fileName"), "Rifle.holdmark.json");
     EXPECT_NE(e.at("json").get<std::string>().find("balcalc-rifle"), std::string::npos);
     const json after = Ok("importShared", {{"text", e.at("json")}});
     EXPECT_EQ(after.at("rifles").size(), 2U);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Ported from app/i18n/balcalc_uk.ts; see values/strings.xml. -->
 <resources>
-    <string name="app_name">BalCalc</string>
+    <string name="app_name">Holdmark</string>
     <string name="nav_solution">Рішення</string>
     <string name="nav_solution_short">Рішення</string>
     <string name="nav_table">Таблиця дистанцій</string>
@@ -433,7 +433,7 @@
     <string name="qr_scan">Сканувати камерою</string>
     <string name="qr_picture">З картинки</string>
     <string name="qr_progress">Прочитано частин: %1$s з %2$s — скануйте наступну.</string>
-    <string name="qr_not_found">QR-код BalCalc не знайдено.</string>
+    <string name="qr_not_found">QR-код Holdmark не знайдено.</string>
     <string name="photo">Фото</string>
     <string name="photo_choose">Вибрати картинку</string>
     <string name="photo_take">Сфотографувати</string>
@@ -494,7 +494,7 @@
     <string name="sensor_compass">З компаса</string>
     <string name="sensor_reading">Вимірюю…</string>
     <string name="sensor_no_pressure">Барометр не дав показів.</string>
-    <string name="sensor_no_location">Немає місця: перевірте, що геолокацію ввімкнено й дозволено для BalCalc.</string>
+    <string name="sensor_no_location">Немає місця: перевірте, що геолокацію ввімкнено й дозволено для Holdmark.</string>
     <string name="sensor_pressure_set">Барометр: %1$s гПа</string>
     <string name="sensor_location_set">Місце (±%1$s м): висота %2$s м, широта %3$s°</string>
     <string name="sensor_location_no_alt">Місце (±%1$s м): широта %2$s°; висоти телефон не дав</string>

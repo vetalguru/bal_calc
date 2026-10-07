@@ -1,4 +1,4 @@
-# BalCalc
+# Holdmark
 
 [![CI](https://github.com/vetalguru/bal_calc/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/vetalguru/bal_calc/actions/workflows/ci.yml)
 
