@@ -3,7 +3,7 @@ package org.vetalguru.balcalc
 import org.vetalguru.balcalc.core.NamedText
 
 /** For tests: no dialogs, an in-memory clipboard and canned files. */
-class FakePlatform(var files: List<NamedText> = emptyList()) : Platform {
+class FakePlatform(var files: List<NamedText> = emptyList(), override val sensors: PhoneSensors? = null) : Platform {
     var clipboard: String? = null
     val saved = mutableListOf<NamedText>()
     override suspend fun saveText(suggestedName: String, text: String): Boolean {
