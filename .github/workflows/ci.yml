@@ -1,5 +1,8 @@
 name: CI
 
+# One job per check and one per artifact: each shows on its own in a PR, a
+# failure names exactly what broke, and they all run side by side.
+
 on:
   push:
     branches: [master]
@@ -11,8 +14,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
-    name: C++ core on Ubuntu 26.04 (GCC)
+  # --- C++ core -------------------------------------------------------------
+
+  cpp-linux:
+    name: "C++: build and tests (Ubuntu 26.04, GCC)"
     runs-on: ubuntu-24.04
     container: ubuntu:26.04
     steps:
@@ -37,8 +42,8 @@ jobs:
       - name: Test
         run: ctest --test-dir build/debug --output-on-failure
 
-  windows:
-    name: C++ core on Windows (MSVC 2022)
+  cpp-windows:
+    name: "C++: build and tests (Windows, MSVC 2022)"
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -48,78 +53,168 @@ jobs:
       - name: Configure
         run: cmake --preset windows-msvc
 
-      - name: Build and test
-        run: |
-          cmake --build build/windows-msvc --config Debug
-          ctest --test-dir build/windows-msvc -C Debug --output-on-failure
+      - name: Build
+        run: cmake --build build/windows-msvc --config Debug
 
-  kotlin:
-    name: Kotlin app on Linux (Android APK, desktop UI test, DEB)
+      - name: Test
+        run: ctest --test-dir build/windows-msvc -C Debug --output-on-failure
+
+  # --- Kotlin app: checks ---------------------------------------------------
+
+  desktop-tests-linux:
+    name: "Kotlin: desktop UI tests (Linux)"
     runs-on: ubuntu-24.04
-    env:
-      NDK_VERSION: 26.1.10909125
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Install Ninja
-        run: sudo apt-get update && sudo apt-get install -y ninja-build fakeroot
-
-      - name: Install NDK, CMake and SDK platform
-        run: |
-          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
-            "ndk;$NDK_VERSION" "cmake;3.31.6" "platforms;android-37.0"
-
-      - uses: gradle/actions/setup-gradle@v4
-
-      - name: Desktop UI test (C++ core through JNI) and Android APK
+      - name: Desktop UI tests (the C++ core through JNI)
         working-directory: kmp
-        run: ./gradlew :shared:desktopTest :androidApp:assembleDebug :desktopApp:packageDeb :desktopApp:packageZip
+        run: ./gradlew :shared:desktopTest
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: balcalc-kotlin
+          name: desktop-tests-linux
           path: |
-            kmp/androidApp/build/outputs/apk/debug/*.apk
-            kmp/desktopApp/build/compose/binaries/main/deb/*.deb
-            kmp/desktopApp/build/compose/binaries/main/zip/*.zip
             kmp/shared/build/screenshots/*.png
             kmp/shared/build/reports/tests/
 
-  kotlin-windows:
-    name: Kotlin app on Windows (desktop UI test, MSI)
+  desktop-tests-windows:
+    name: "Kotlin: desktop UI tests (Windows)"
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - uses: gradle/actions/setup-gradle@v4
-
-      # WiX 3 (for the MSI) comes with the runner image.
-      - name: Desktop UI test (C++ core through JNI), MSI and ZIP
+      - name: Desktop UI tests (the C++ core through JNI)
         working-directory: kmp
-        run: ./gradlew.bat :shared:desktopTest :desktopApp:packageMsi :desktopApp:packageZip
+        run: ./gradlew.bat :shared:desktopTest
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: balcalc-kotlin-windows
+          name: desktop-tests-windows
           path: |
-            kmp/desktopApp/build/compose/binaries/main/msi/*.msi
-            kmp/desktopApp/build/compose/binaries/main/zip/*.zip
             kmp/shared/build/screenshots/*.png
             kmp/shared/build/reports/tests/
+
+  android-lint:
+    name: "Kotlin: Android lint"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+        with:
+          android: "true"
+
+      - name: Android lint (fails on errors)
+        working-directory: kmp
+        run: ./gradlew :androidApp:lintDebug
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-lint-report
+          path: kmp/androidApp/build/reports/lint-results-debug.*
+
+  # --- Kotlin app: artifacts ------------------------------------------------
+
+  android-apk:
+    name: "Artifact: Android APK (debug)"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+        with:
+          android: "true"
+
+      - name: Build the APK
+        working-directory: kmp
+        run: ./gradlew :androidApp:assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: kmp/androidApp/build/outputs/apk/debug/*.apk
+
+  linux-deb:
+    name: "Artifact: Linux DEB package"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+
+      - name: Build the DEB
+        working-directory: kmp
+        run: ./gradlew :desktopApp:packageDeb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb
+          path: kmp/desktopApp/build/compose/binaries/main/deb/*.deb
+
+  linux-zip:
+    name: "Artifact: Linux portable ZIP"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+
+      - name: Build the ZIP
+        working-directory: kmp
+        run: ./gradlew :desktopApp:packageZip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-zip
+          path: kmp/desktopApp/build/compose/binaries/main/zip/*.zip
+
+  windows-msi:
+    name: "Artifact: Windows MSI installer"
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+
+      # WiX 3 (for the MSI) comes with the runner image.
+      - name: Build the MSI
+        working-directory: kmp
+        run: ./gradlew.bat :desktopApp:packageMsi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-msi
+          path: kmp/desktopApp/build/compose/binaries/main/msi/*.msi
+
+  windows-zip:
+    name: "Artifact: Windows portable ZIP"
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+
+      - name: Build the ZIP
+        working-directory: kmp
+        run: ./gradlew.bat :desktopApp:packageZip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: kmp/desktopApp/build/compose/binaries/main/zip/*.zip

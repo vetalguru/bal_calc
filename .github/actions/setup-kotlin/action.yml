@@ -1,0 +1,35 @@
+name: Set up the Kotlin build
+description: >
+  Java 17 and Gradle for the Kotlin app; Ninja on Linux (the C++ core for the
+  desktop app); the Android NDK, CMake and SDK platform when `android` is true.
+
+inputs:
+  android:
+    description: Install the Android NDK, CMake and SDK platform.
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - name: Install Ninja (and fakeroot for the DEB)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y ninja-build fakeroot
+
+    - name: Install NDK, CMake and SDK platform
+      if: inputs.android == 'true'
+      shell: bash
+      env:
+        NDK_VERSION: 26.1.10909125
+      run: |
+        # A composite step runs bash with pipefail: `yes` ends on a closed pipe.
+        (yes || true) | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
+        "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+          "ndk;$NDK_VERSION" "cmake;3.31.6" "platforms;android-37.0"
+
+    - uses: gradle/actions/setup-gradle@v4

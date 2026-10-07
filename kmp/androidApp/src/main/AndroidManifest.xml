@@ -38,10 +38,14 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/solution_widget_info" />
         </receiver>
-        <!-- The scanner turns with the phone instead of forcing landscape. -->
+        <!-- The scanner turns with the phone instead of forcing landscape.
+             MissingClass: the activity comes with the shared module's
+             zxing-android-embedded, packed into the APK but not on this
+             module's compile classpath, where lint looks for it. -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="fullSensor"
+            tools:ignore="MissingClass"
             tools:replace="screenOrientation" />
     </application>
 </manifest>
