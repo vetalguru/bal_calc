@@ -47,7 +47,7 @@
 //   setSettings {angleUnit?, holdMode?, language?, tableFromM?, tableToM?, tableStepM?, prefs? (merged into the interface preferences)}
 //                                     → state
 //   solution                          → {ok, error, rangeM, elevation, windage, ...}
-//   rangeTable                        → {ok, error, hasScope, computeMs, rows}
+//   rangeTable {windSpeeds?}          → {ok, error, hasScope, computeMs, rows, windSpeeds}; rows carry windages for each speed
 //   trajectoryCurve {maxRangeM, points} → as rangeTable
 //   rifleForm {id} / saveRifle {form} / deleteRifle {id}
 //   cartridgeForm {id} / saveCartridge {form} / deleteCartridge {id}
@@ -1205,7 +1205,7 @@ struct Api::Impl {
         return out;
     }
 
-    json Table(double from_m, double to_m, double step_m) {
+    json Table(double from_m, double to_m, double step_m, const json& wind_speeds = json::array()) {
         const auto start = std::chrono::steady_clock::now();
         if (profile_id == 0) {
             return {{"ok", false}, {"error", "Choose a rifle and a cartridge."}, {"rows", json::array()}};
@@ -1216,6 +1216,35 @@ struct Api::Impl {
         }
         json out = ToJson(al::BuildRangeTable(p.value(), Session(), Unit(), from_m, to_m, step_m),
                           p.value().scope.has_value());
+        // Wind columns: the windage for other wind speeds, from the same
+        // direction (one zone), each computed in full.
+        json speeds = json::array();
+        if (wind_speeds.is_array()) {
+            for (const json& v : wind_speeds) {
+                if (v.is_number() && speeds.size() < 6) {
+                    speeds.push_back(std::clamp(v.get<double>(), 0.0, 40.0));
+                }
+            }
+        }
+        out["windSpeeds"] = speeds;
+        if (!speeds.empty() && out.value("ok", false)) {
+            const al::SessionConditions base = Session();
+            const double from = base.winds.empty() ? 90.0 : base.winds.front().from_deg;
+            json& rows = out["rows"];
+            for (json& row : rows) {
+                row["windages"] = json::array();
+                row["windageClicksAt"] = json::array();
+            }
+            for (const json& v : speeds) {
+                al::SessionConditions s = base;
+                s.winds = {al::WindInput{v.get<double>(), from, 0.0}};
+                const al::RangeTable t = al::BuildRangeTable(p.value(), s, Unit(), from_m, to_m, step_m);
+                for (std::size_t i = 0; i < rows.size() && i < t.rows.size(); ++i) {
+                    rows[i]["windages"].push_back(t.rows[i].windage);
+                    rows[i]["windageClicksAt"].push_back(t.rows[i].windage_clicks);
+                }
+            }
+        }
         out["computeMs"] = std::chrono::duration<double, std::milli>(
                                std::chrono::steady_clock::now() - start)
                                .count();
@@ -1405,8 +1434,8 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
          }},
         {"solution", [](I& s, const json&) -> json { return s.Solution(); }},
         {"rangeTable",
-         [](I& s, const json&) -> json {
-             return s.Table(s.table_from_m, s.table_to_m, s.table_step_m);
+         [](I& s, const json& a) -> json {
+             return s.Table(s.table_from_m, s.table_to_m, s.table_step_m, a.value("windSpeeds", json::array()));
          }},
         {"compareCurves", [](I& s, const json& a) -> json { return s.CompareCurves(a); }},
         {"pairOptions", [](I& s, const json&) -> json { return s.PairOptions(); }},

@@ -477,4 +477,13 @@
     <string name="ranges_at_marks">Дальность у каждой риски</string>
     <string name="dialed_clicks">Выставлено на барабане вверх</string>
     <string name="clicks_unit">кликов</string>
+    <string name="table_columns">Колонки</string>
+    <string name="table_export">Экспорт</string>
+    <string name="export_csv">Таблица (CSV, для электронных таблиц)</string>
+    <string name="export_png">Картинка (PNG, чтобы распечатать или сохранить)</string>
+    <string name="export_title">Таблица поправок %1$s · %2$s °C · ветер %3$s м/с</string>
+    <string name="columns_automatic">Подобранные под экран</string>
+    <string name="wind_columns">Дополнительные колонки ветра, м/с</string>
+    <string name="wind_columns_hint">Напр. 2, 4, 6: снос для каждой скорости с заданного направления (до 6)</string>
+    <string name="col_wind_at">Ветер %1$s</string>
 </resources>

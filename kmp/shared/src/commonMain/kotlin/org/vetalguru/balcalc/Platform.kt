@@ -21,6 +21,9 @@ interface Platform {
     /** Whether [scanQr] has a camera to use. */
     val canScanQr: Boolean get() = false
 
+    /** Asks where to save a binary file ([mimeType], e.g. "image/png"); false when cancelled. */
+    suspend fun saveBytes(suggestedName: String, mimeType: String, bytes: ByteArray): Boolean = false
+
     /** Whether [takePhoto] has a camera to use. */
     val canTakePhoto: Boolean get() = false
 

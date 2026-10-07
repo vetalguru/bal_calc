@@ -507,4 +507,13 @@
     <string name="ranges_at_marks">Range at each mark</string>
     <string name="dialed_clicks">Dialled up on the turret</string>
     <string name="clicks_unit">clicks</string>
+    <string name="table_columns">Columns</string>
+    <string name="table_export">Export</string>
+    <string name="export_csv">Table (CSV, for a spreadsheet)</string>
+    <string name="export_png">Picture (PNG, to print or keep)</string>
+    <string name="export_title">Range card %1$s · %2$s °C · wind %3$s m/s</string>
+    <string name="columns_automatic">Chosen for the screen</string>
+    <string name="wind_columns">Extra wind columns, m/s</string>
+    <string name="wind_columns_hint">E.g. 2, 4, 6: the windage for each, from the set direction (up to 6)</string>
+    <string name="col_wind_at">Wind %1$s</string>
 </resources>
