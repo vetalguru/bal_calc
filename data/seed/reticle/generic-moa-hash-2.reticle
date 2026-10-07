@@ -1,0 +1,98 @@
+<reticle name="MOA hash 2" size-x="112moa" size-y="112moa" zero-x="56moa" zero-y="56moa">
+  <elements>
+    <reticle-line start-x="-40moa" start-y="0moa" end-x="40moa" end-y="0moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="0moa" start-y="-40moa" end-x="0moa" end-y="40moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="40moa" start-y="0moa" end-x="56moa" end-y="0moa" line-width="0.96moa" line-color="black" />
+    <reticle-line start-x="-40moa" start-y="0moa" end-x="-56moa" end-y="0moa" line-width="0.96moa" line-color="black" />
+    <reticle-line start-x="0moa" start-y="40moa" end-x="0moa" end-y="56moa" line-width="0.96moa" line-color="black" />
+    <reticle-line start-x="0moa" start-y="-40moa" end-x="0moa" end-y="-56moa" line-width="0.96moa" line-color="black" />
+    <reticle-line start-x="2moa" start-y="-0.4moa" end-x="2moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="2moa" end-x="0.4moa" end-y="2moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-2moa" start-y="-0.4moa" end-x="-2moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-2moa" end-x="0.4moa" end-y="-2moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="4moa" start-y="-0.4moa" end-x="4moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="4moa" end-x="0.4moa" end-y="4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-4moa" start-y="-0.4moa" end-x="-4moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-4moa" end-x="0.4moa" end-y="-4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="6moa" start-y="-0.4moa" end-x="6moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="6moa" end-x="0.4moa" end-y="6moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-6moa" start-y="-0.4moa" end-x="-6moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-6moa" end-x="0.4moa" end-y="-6moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="8moa" start-y="-0.4moa" end-x="8moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="8moa" end-x="0.4moa" end-y="8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-8moa" start-y="-0.4moa" end-x="-8moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-8moa" end-x="0.4moa" end-y="-8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="10moa" start-y="-0.8moa" end-x="10moa" end-y="0.8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.8moa" start-y="10moa" end-x="0.8moa" end-y="10moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-10moa" start-y="-0.8moa" end-x="-10moa" end-y="0.8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.8moa" start-y="-10moa" end-x="0.8moa" end-y="-10moa" line-width="0.12moa" line-color="black" />
+    <reticle-text position-x="10moa" position-y="-2moa" text-height="1.2moa" text="10" color="black" />
+    <reticle-text position-x="1.6moa" position-y="-10moa" text-height="1.2moa" text="10" color="black" />
+    <reticle-line start-x="12moa" start-y="-0.4moa" end-x="12moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="12moa" end-x="0.4moa" end-y="12moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-12moa" start-y="-0.4moa" end-x="-12moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-12moa" end-x="0.4moa" end-y="-12moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="14moa" start-y="-0.4moa" end-x="14moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="14moa" end-x="0.4moa" end-y="14moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-14moa" start-y="-0.4moa" end-x="-14moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-14moa" end-x="0.4moa" end-y="-14moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="16moa" start-y="-0.4moa" end-x="16moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="16moa" end-x="0.4moa" end-y="16moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-16moa" start-y="-0.4moa" end-x="-16moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-16moa" end-x="0.4moa" end-y="-16moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="18moa" start-y="-0.4moa" end-x="18moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="18moa" end-x="0.4moa" end-y="18moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-18moa" start-y="-0.4moa" end-x="-18moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-18moa" end-x="0.4moa" end-y="-18moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="20moa" start-y="-0.8moa" end-x="20moa" end-y="0.8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.8moa" start-y="20moa" end-x="0.8moa" end-y="20moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-20moa" start-y="-0.8moa" end-x="-20moa" end-y="0.8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.8moa" start-y="-20moa" end-x="0.8moa" end-y="-20moa" line-width="0.12moa" line-color="black" />
+    <reticle-text position-x="20moa" position-y="-2moa" text-height="1.2moa" text="20" color="black" />
+    <reticle-text position-x="1.6moa" position-y="-20moa" text-height="1.2moa" text="20" color="black" />
+    <reticle-line start-x="22moa" start-y="-0.4moa" end-x="22moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="22moa" end-x="0.4moa" end-y="22moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-22moa" start-y="-0.4moa" end-x="-22moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-22moa" end-x="0.4moa" end-y="-22moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="24moa" start-y="-0.4moa" end-x="24moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="24moa" end-x="0.4moa" end-y="24moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-24moa" start-y="-0.4moa" end-x="-24moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-24moa" end-x="0.4moa" end-y="-24moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="26moa" start-y="-0.4moa" end-x="26moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="26moa" end-x="0.4moa" end-y="26moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-26moa" start-y="-0.4moa" end-x="-26moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-26moa" end-x="0.4moa" end-y="-26moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="28moa" start-y="-0.4moa" end-x="28moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="28moa" end-x="0.4moa" end-y="28moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-28moa" start-y="-0.4moa" end-x="-28moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-28moa" end-x="0.4moa" end-y="-28moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="30moa" start-y="-0.8moa" end-x="30moa" end-y="0.8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.8moa" start-y="30moa" end-x="0.8moa" end-y="30moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-30moa" start-y="-0.8moa" end-x="-30moa" end-y="0.8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.8moa" start-y="-30moa" end-x="0.8moa" end-y="-30moa" line-width="0.12moa" line-color="black" />
+    <reticle-text position-x="30moa" position-y="-2moa" text-height="1.2moa" text="30" color="black" />
+    <reticle-text position-x="1.6moa" position-y="-30moa" text-height="1.2moa" text="30" color="black" />
+    <reticle-line start-x="32moa" start-y="-0.4moa" end-x="32moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="32moa" end-x="0.4moa" end-y="32moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-32moa" start-y="-0.4moa" end-x="-32moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-32moa" end-x="0.4moa" end-y="-32moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="34moa" start-y="-0.4moa" end-x="34moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="34moa" end-x="0.4moa" end-y="34moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-34moa" start-y="-0.4moa" end-x="-34moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-34moa" end-x="0.4moa" end-y="-34moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="36moa" start-y="-0.4moa" end-x="36moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="36moa" end-x="0.4moa" end-y="36moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-36moa" start-y="-0.4moa" end-x="-36moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-36moa" end-x="0.4moa" end-y="-36moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="38moa" start-y="-0.4moa" end-x="38moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="38moa" end-x="0.4moa" end-y="38moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-38moa" start-y="-0.4moa" end-x="-38moa" end-y="0.4moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.4moa" start-y="-38moa" end-x="0.4moa" end-y="-38moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="40moa" start-y="-0.8moa" end-x="40moa" end-y="0.8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.8moa" start-y="40moa" end-x="0.8moa" end-y="40moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-40moa" start-y="-0.8moa" end-x="-40moa" end-y="0.8moa" line-width="0.12moa" line-color="black" />
+    <reticle-line start-x="-0.8moa" start-y="-40moa" end-x="0.8moa" end-y="-40moa" line-width="0.12moa" line-color="black" />
+    <reticle-text position-x="40moa" position-y="-2moa" text-height="1.2moa" text="40" color="black" />
+    <reticle-text position-x="1.6moa" position-y="-40moa" text-height="1.2moa" text="40" color="black" />
+  </elements>
+</reticle>

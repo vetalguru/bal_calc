@@ -1,0 +1,10 @@
+<reticle name="Duplex (no marks)" size-x="120moa" size-y="120moa" zero-x="60moa" zero-y="60moa">
+  <elements>
+    <reticle-line start-x="-15moa" start-y="0moa" end-x="15moa" end-y="0moa" line-width="0.15moa" line-color="black" />
+    <reticle-line start-x="0moa" start-y="-15moa" end-x="0moa" end-y="15moa" line-width="0.15moa" line-color="black" />
+    <reticle-line start-x="15moa" start-y="0moa" end-x="60moa" end-y="0moa" line-width="1.2moa" line-color="black" />
+    <reticle-line start-x="-15moa" start-y="0moa" end-x="-60moa" end-y="0moa" line-width="1.2moa" line-color="black" />
+    <reticle-line start-x="0moa" start-y="15moa" end-x="0moa" end-y="60moa" line-width="1.2moa" line-color="black" />
+    <reticle-line start-x="0moa" start-y="-15moa" end-x="0moa" end-y="-60moa" line-width="1.2moa" line-color="black" />
+  </elements>
+</reticle>
