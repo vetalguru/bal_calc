@@ -3,6 +3,7 @@ package org.vetalguru.balcalc.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -60,12 +61,14 @@ internal fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armor
             PhotoRow(photo, route::change)
         }
         Section(stringResource(Res.string.bullet)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    if (fromLibrary) stringResource(Res.string.from_library_named, f.bulletName) else stringResource(Res.string.own_bullet),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f),
-                )
+            // The bullet's name on its own line: beside the buttons a long one
+            // was squeezed to a letter column on phones.
+            Text(
+                if (fromLibrary) stringResource(Res.string.from_library_named, f.bulletName) else stringResource(Res.string.own_bullet),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("bulletSource"),
+            )
+            FlowRow {
                 TextButton(onClick = {
                     nav.push(Route.Bullets { id -> model.act { f = model.armory.cartridgeFormWithBullet(f, id) } })
                 }, modifier = Modifier.testTag("chooseBullet")) {

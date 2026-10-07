@@ -1007,6 +1007,8 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("bullet:Test bullet 175 HPBT") }
         onNodeWithTag("bullet:Test bullet 175 HPBT").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("bulletName") && shown("bulletName") == "Test bullet 175 HPBT" }
+        onNodeWithTag("bulletSource").performScrollTo()
+        shot("cartridge-library-bullet")
         onNodeWithTag("save").performClick()
         onNodeWithTag("navSolution").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") && elevation() != before }
