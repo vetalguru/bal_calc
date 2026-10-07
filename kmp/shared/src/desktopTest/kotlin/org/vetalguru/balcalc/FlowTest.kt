@@ -383,6 +383,25 @@ class FlowTest {
     }
 
     @Test
+    fun stabilityInTheEditors() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        onNodeWithTag("navArmory").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("rifle:Sample .308 Win") }
+        onAllNodesWithText("Edit").onFirst().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("stabilityLine") }
+        val good = shown("stabilityLine")
+        assertTrue(good.contains("stable"), good)
+        // A slow twist: marginal, then unstable.
+        type("twist", "14")
+        waitUntil(timeoutMillis = 10_000) { shown("stabilityLine").contains("marginal") }
+        type("twist", "20")
+        waitUntil(timeoutMillis = 10_000) { shown("stabilityLine").contains("unstable") }
+        onNodeWithTag("stabilityLine").performScrollTo()
+        shot("stability-unstable")
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)

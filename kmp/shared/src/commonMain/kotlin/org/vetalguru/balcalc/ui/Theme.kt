@@ -24,6 +24,10 @@ data class AppColors(
     val transonic: Color,
     val drift: Color,
     val series: List<Color>,
+    /** Stability: Sg 1.5 and over, 1 to 1.5, under 1. */
+    val good: Color,
+    val caution: Color,
+    val bad: Color,
 )
 
 private val Orange = Color(0xFFFF9800)
@@ -34,12 +38,14 @@ private val DayColors = AppColors(
     reticleField = Color(0xFFF4F1E8), reticleInk = Color(0xFF111111), reticleEdge = Color(0xFF555555),
     target = Color(0xFFE53935), transonic = Color(0xFFEF6C00), drift = Color(0xFF00897B),
     series = listOf(Color(0xFFEF6C00), Color(0xFF1E88E5), Color(0xFF8E24AA)),
+    good = Color(0xFF2E7D32), caution = Color(0xFFF9A825), bad = Color(0xFFC62828),
 )
 
 private val DarkColors = DayColors.copy(
     reticleField = Color(0xFF1C1B19), reticleInk = Color(0xFFE8E4D8), reticleEdge = Color(0xFF8A8780),
     target = Color(0xFFFF5A52), transonic = Color(0xFFFFA040), drift = Color(0xFF4DB6AC),
     series = listOf(Color(0xFFFFA040), Color(0xFF64B5F6), Color(0xFFCE93D8)),
+    good = Color(0xFF81C784), caution = Color(0xFFFFD54F), bad = Color(0xFFEF5350),
 )
 
 // Night: red on black only, dim, so the eyes keep their dark adaptation.
@@ -49,6 +55,8 @@ private val NightColors = AppColors(
     reticleField = Color.Black, reticleInk = NightRed, reticleEdge = NightDim,
     target = Color(0xFFFF3B30), transonic = NightRed, drift = NightDim,
     series = listOf(NightRed, Color(0xFFB71C1C), Color(0xFF7F1010)),
+    // Brightness instead of hue at night: dim is fine, bright is a problem.
+    good = NightDim, caution = NightRed, bad = Color(0xFFFF3B30),
 )
 
 private val NightScheme = darkColorScheme(

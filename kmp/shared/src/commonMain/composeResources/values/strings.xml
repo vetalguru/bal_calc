@@ -489,4 +489,9 @@
     <string name="style_signs">Signs: + −</string>
     <string name="round_to_clicks">Round to whole clicks</string>
     <string name="show_second_unit">Also the other unit and cm at the target</string>
+    <string name="sg_with">Stability Sg %1$s with %2$s: %3$s</string>
+    <string name="sg_stable">stable</string>
+    <string name="sg_marginal">marginal, accuracy may suffer</string>
+    <string name="sg_unstable">unstable, the bullet may tumble</string>
+    <string name="sg_missing">Stability with %1$s: enter the twist and the bullet length.</string>
 </resources>

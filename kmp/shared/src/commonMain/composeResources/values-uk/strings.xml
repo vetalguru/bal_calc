@@ -459,4 +459,9 @@
     <string name="style_signs">Знаками: + −</string>
     <string name="round_to_clicks">Округлювати до цілих кліків</string>
     <string name="show_second_unit">Також інша одиниця і см на цілі</string>
+    <string name="sg_with">Стабільність Sg %1$s з %2$s: %3$s</string>
+    <string name="sg_stable">стабільна</string>
+    <string name="sg_marginal">на межі, купчастість може постраждати</string>
+    <string name="sg_unstable">нестабільна, куля може перекидатися</string>
+    <string name="sg_missing">Стабільність з %1$s: введіть крок нарізів і довжину кулі.</string>
 </resources>

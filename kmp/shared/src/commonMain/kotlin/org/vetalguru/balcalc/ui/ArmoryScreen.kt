@@ -423,6 +423,18 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
     var reticles by remember { mutableStateOf(emptyList<ReticleItem>()) }
     LaunchedEffect(Unit) { reticles = model.reticles() }
     val reticleList = reticles // read outside the editor's BoxWithConstraints (see TruingScreen)
+    // Stability with the current cartridge, as the twist is edited.
+    val currentCartridge = model.state.currentCartridgeId
+    var partner by remember { mutableStateOf<CartridgeForm?>(null) }
+    LaunchedEffect(currentCartridge) {
+        partner = if (currentCartridge > 0) runCatching { model.cartridgeForm(currentCartridge) }.getOrNull() else null
+    }
+    var sg by remember { mutableStateOf<Double?>(null) }
+    LaunchedEffect(f.twistIn, partner) {
+        sg = partner?.let { p -> runCatching { model.stability(f.twistIn, p.massGr, p.diameterIn, p.lengthIn, p.muzzleVelocity) }.getOrNull() }
+    }
+    val stability = sg
+    val partnerName = partner?.name.orEmpty()
     val scope = rememberCoroutineScope()
     val cm = stringResource(Res.string.unit_cm)
     val inch = stringResource(Res.string.unit_in)
@@ -448,6 +460,7 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
                 { mod -> NumberField(stringResource(Res.string.twist), f.twistIn, { f = f.copy(twistIn = it) }, mod, inch, 2, 0.0, 60.0, tag = "twist") },
             )
             SwitchRow(stringResource(Res.string.left_twist), f.twistLeft, { f = f.copy(twistLeft = it) })
+            StabilityLine(stability, partnerName)
         }
         Section(stringResource(Res.string.scope)) {
             LibraryButton("scopeFromLibrary") {
@@ -513,6 +526,18 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val fromLibrary = f.libraryBulletId > 0
+    // Stability in the current rifle, as the bullet and velocity are edited.
+    val currentRifle = model.state.currentRifleId
+    var partner by remember { mutableStateOf<RifleForm?>(null) }
+    LaunchedEffect(currentRifle) {
+        partner = if (currentRifle > 0) runCatching { model.rifleForm(currentRifle) }.getOrNull() else null
+    }
+    var sg by remember { mutableStateOf<Double?>(null) }
+    LaunchedEffect(f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity, partner) {
+        sg = partner?.let { r -> runCatching { model.stability(r.twistIn, f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity) }.getOrNull() }
+    }
+    val stability = sg
+    val partnerName = partner?.name.orEmpty()
     val inch = stringResource(Res.string.unit_in)
     EditorPage(
         title = stringResource(if (f.cartridgeId > 0) Res.string.edit_cartridge else Res.string.new_cartridge),
@@ -556,6 +581,7 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
                     { mod -> NumberField(stringResource(Res.string.length_spin), f.lengthIn, { if (!fromLibrary) f = f.copy(lengthIn = it) }, mod, inch, 3, 0.0, 4.0) },
                 )
             }
+            StabilityLine(stability, partnerName)
         }
         Section(stringResource(Res.string.velocity)) {
             Fields(

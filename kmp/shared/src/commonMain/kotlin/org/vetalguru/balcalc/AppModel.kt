@@ -179,6 +179,16 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
         api.get("libraryBullets", buildJsonObject { put("filter", filter) })
     suspend fun libraryCartridges(filter: String): List<CartridgeItem> =
         api.get("libraryCartridges", buildJsonObject { put("filter", filter) })
+    /** Miller Sg at standard air; 0 when an input is missing. */
+    suspend fun stability(twistIn: Double, massGr: Double, diameterIn: Double, lengthIn: Double, velocityMps: Double): Double =
+        api.call("stability", buildJsonObject {
+            put("twistIn", twistIn)
+            put("massGr", massGr)
+            put("diameterIn", diameterIn)
+            put("lengthIn", lengthIn)
+            put("velocityMps", velocityMps)
+        }).jsonObject.getValue("sg").jsonPrimitive.double
+
     suspend fun libraryScopes(filter: String): List<LibraryScope> =
         api.get("libraryScopes", buildJsonObject { put("filter", filter) })
     suspend fun libraryRifles(filter: String): List<LibraryRifle> =
