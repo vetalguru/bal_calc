@@ -27,7 +27,8 @@ runs:
       env:
         NDK_VERSION: 26.1.10909125
       run: |
-        yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
+        # A composite step runs bash with pipefail: `yes` ends on a closed pipe.
+        (yes || true) | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
         "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
           "ndk;$NDK_VERSION" "cmake;3.31.6" "platforms;android-37.0"
 
