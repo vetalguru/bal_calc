@@ -676,7 +676,8 @@ class FlowTest {
         // The range card gets a lead column.
         onNodeWithTag("navTable").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("rangeTable") }
-        assertTrue(hasText("Lead", substring = true))
+        // The table loads after the screen: wait for its lead column.
+        waitUntil("lead column in the range card", 10_000) { hasText("Lead", substring = true) }
         shot("table-lead")
         db.delete()
     }
