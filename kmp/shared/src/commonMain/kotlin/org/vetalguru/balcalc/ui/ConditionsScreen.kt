@@ -272,7 +272,7 @@ fun ConditionsScreen(model: AppModel) {
                             stringResource(Res.string.cant), c.cantDeg,
                             { v -> model.updateConditions { it.copy(cantDeg = v) } },
                             m, deg, from = -45.0, to = 45.0, tag = "cantAngle", fieldMaxWidth = FIELD_MAX,
-                            hint = stringResource(Res.string.cant_hint),
+                            hint = stringResource(Res.string.cant_hint), hintPicture = { CantPicture() },
                         )
                     },
                 )

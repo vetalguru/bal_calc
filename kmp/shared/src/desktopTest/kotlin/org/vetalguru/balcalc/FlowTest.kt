@@ -1139,6 +1139,12 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "1" }
         onNodeWithTag("cantAngleMinus").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { shown("cantAngle") == "-1" }
+        // The cant's ⓘ shows what cant is, drawn.
+        onNodeWithTag("cantAngleInfo").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 5_000) { exists("cantPicture") }
+        shot("conditions-cant-hint")
+        onNodeWithTag("navSolution").performClick() // a tap elsewhere closes it
+        onNodeWithTag("navConditions").performClick()
         // The direction's meaning behind its ⓘ.
         onNodeWithTag("windFromInfo").performScrollTo().performClick()
         waitUntil(timeoutMillis = 5_000) { hasText("Where the wind blows from", substring = true) }

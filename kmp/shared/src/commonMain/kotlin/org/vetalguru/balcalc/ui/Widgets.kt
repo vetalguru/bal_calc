@@ -77,6 +77,8 @@ fun NumberField(
     unitMenu: UnitMenu? = null,
     /** What the numbers mean, behind an ⓘ in the field (tap it), instead of a long label. */
     hint: String? = null,
+    /** A drawing shown with [hint] (what cant looks like, ...). */
+    hintPicture: (@Composable () -> Unit)? = null,
 ) {
     var text by remember { mutableStateOf(formatNumber(value, decimals)) }
     var focused by remember { mutableStateOf(false) }
@@ -108,7 +110,7 @@ fun NumberField(
                     else -> UnitPicker(unit, unitMenu, tag)
                 }
                 if (hint != null) {
-                    Hint(hint, Modifier.padding(start = 4.dp).testTag("${tag}Info")) {
+                    Hint(hint, Modifier.padding(start = 4.dp).testTag("${tag}Info"), hintPicture) {
                         Text("ⓘ", color = MaterialTheme.colorScheme.primary)
                     }
                 }
@@ -158,12 +160,25 @@ private fun UnitPicker(unit: String, menu: UnitMenu, tag: String?) {
 /** [content] that shows [hint] in a small bubble when tapped (or hovered with a mouse). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Hint(hint: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    val state = rememberTooltipState(isPersistent = false)
+fun Hint(
+    hint: String,
+    modifier: Modifier = Modifier,
+    picture: (@Composable () -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
+    // Stays until a tap elsewhere: a sentence (or a picture) takes longer than a glance.
+    val state = rememberTooltipState(isPersistent = true)
     val scope = rememberCoroutineScope()
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-        tooltip = { PlainTooltip { Text(hint) } },
+        tooltip = {
+            PlainTooltip {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    picture?.invoke()
+                    Text(hint)
+                }
+            }
+        },
         state = state,
         modifier = modifier,
     ) {
@@ -188,6 +203,7 @@ fun StepperField(
     fieldMaxWidth: Dp = Dp.Unspecified,
     stepWidth: Dp = 50.dp,
     hint: String? = null,
+    hintPicture: (@Composable () -> Unit)? = null,
     /** Steps go round (a direction: 345 + 15 = 0) instead of stopping at [to]. */
     wrap: Boolean = false,
     decimals: Int = 1,
@@ -207,7 +223,7 @@ fun StepperField(
             } else {
                 Modifier.weight(1f, fill = false).widthIn(max = fieldMaxWidth)
             }
-            NumberField(label, value, onEdited, field, unit, decimals, from, to, tag, unitMenu, hint)
+            NumberField(label, value, onEdited, field, unit, decimals, from, to, tag, unitMenu, hint, hintPicture)
             Box(Modifier.padding(top = 16.dp).testTag("${tag}Plus")) { Step("+${formatNumber(step, 0)}", stepWidth) { by(step) } }
         }
     }
