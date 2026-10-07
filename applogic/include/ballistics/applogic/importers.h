@@ -74,6 +74,8 @@ struct SeedReport {
 // records that already exist (same name and source) are skipped.
 Result<SeedReport> SeedLibrary(storage::Database& db, const std::vector<SeedFile>& files,
                                int seed_version);
+// The seed version the database already has; 0 when it was never seeded.
+Result<int> SeededVersion(storage::Database& db);
 
 } // namespace ballistics::applogic
 

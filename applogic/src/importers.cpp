@@ -587,14 +587,25 @@ Result<Id> ImportFile(Database& db, const std::string& file_name, const std::str
     return Bad("Unknown file type: " + file_name);
 }
 
-Result<SeedReport> SeedLibrary(Database& db, const std::vector<SeedFile>& files, int seed_version) {
-    constexpr const char* kKey = "seed.version";
-    SeedReport report;
-    auto done = storage::GetSetting(db, kKey);
+namespace {
+constexpr const char* kSeedVersionKey = "seed.version";
+} // namespace
+
+Result<int> SeededVersion(Database& db) {
+    auto done = storage::GetSetting(db, kSeedVersionKey);
     if (!done) {
         return done.error();
     }
-    if (done.value() && std::atoi(done.value()->c_str()) >= seed_version) {
+    return done.value() ? std::atoi(done.value()->c_str()) : 0;
+}
+
+Result<SeedReport> SeedLibrary(Database& db, const std::vector<SeedFile>& files, int seed_version) {
+    SeedReport report;
+    auto done = SeededVersion(db);
+    if (!done) {
+        return done.error();
+    }
+    if (done.value() >= seed_version) {
         return report;
     }
     // One transaction for the whole seed: far fewer disk syncs on phones.
@@ -649,7 +660,7 @@ Result<SeedReport> SeedLibrary(Database& db, const std::vector<SeedFile>& files,
             report.problems.push_back(f.name + ": " + id.error().message);
         }
     }
-    if (auto s = storage::SetSetting(db, kKey, std::to_string(seed_version)); !s) {
+    if (auto s = storage::SetSetting(db, kSeedVersionKey, std::to_string(seed_version)); !s) {
         return s.error();
     }
     if (auto s = txn.Commit(); !s) {

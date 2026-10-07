@@ -10,6 +10,7 @@
 //
 //   open {path}                       → {databasePath}
 //   seed {version, files:[{name, content}]} → {imported, skipped, problems}
+//   seedVersion                       → {version} (0: never seeded)
 //   info                              → {engineVersion, sqliteVersion, databasePath}
 //   state                             → {rifles, cartridges, currentRifleId,
 //                                        currentCartridgeId, currentProfileId,

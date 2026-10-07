@@ -63,7 +63,7 @@ protected:
 // assembled from the topic files: none may be lost when code moves).
 TEST_F(Bridge, EveryMethodIsThere) {
     const char* methods[] = {
-        "open", "seed", "info", "state", "select", "targets", "saveTargets", "selectTarget",
+        "open", "seed", "seedVersion", "info", "state", "select", "targets", "saveTargets", "selectTarget",
         "situations", "saveSituation", "applySituation", "deleteSituation", "setConditions",
         "setSettings", "solution", "rangeTable", "compareCurves", "pairOptions", "trajectoryCurve",
         "rifleForm", "saveRifle", "deleteRifle", "cartridgeForm", "saveCartridge", "deleteCartridge",
@@ -74,7 +74,7 @@ TEST_F(Bridge, EveryMethodIsThere) {
         "libraryBullets", "bulletForm", "saveBullet", "deleteBullet", "exportJson", "importShared",
         "importFiles", "stationPressure",
     };
-    EXPECT_EQ(std::size(methods), 58U);
+    EXPECT_EQ(std::size(methods), 59U);
     for (const char* m : methods) {
         const json r = json::parse(api_.Call(m, "{}"));
         if (!r.at("ok").get<bool>()) {
@@ -599,10 +599,28 @@ TEST_F(Bridge, NewerSeedAddsOnlyWhatIsNew) {
             old_files.push_back(f);
         }
     }
+    EXPECT_EQ(Ok("seedVersion").at("version"), 0);
     EXPECT_EQ(Ok("seed", {{"version", 1}, {"files", old_files}}).at("imported"), 69 + 1 + 4);
+    EXPECT_EQ(Ok("seedVersion").at("version"), 1);
     EXPECT_EQ(Ok("seed", {{"version", 2}, {"files", files}}).at("imported"), 10 + 253);
+    EXPECT_EQ(Ok("seedVersion").at("version"), 2);
     EXPECT_EQ(Ok("seed", {{"version", 2}, {"files", files}}).at("imported"), 0);
     EXPECT_EQ(Ok("reticles").size(), 14U);
+}
+
+// A later start sends only the catalogs (the app skips the library files
+// once the version is seeded): the catalogs are there again.
+TEST_F(Bridge, LaterStartNeedsOnlyTheCatalogs) {
+    json catalogs = json::array();
+    for (const char* name : {"published_scopes.json", "published_rifles.json"}) {
+        std::ifstream in(std::filesystem::path(std::string(BALLISTICS_SEED_DIR)) / name, std::ios::binary);
+        std::ostringstream text;
+        text << in.rdbuf();
+        catalogs.push_back({{"name", name}, {"content", text.str()}});
+    }
+    EXPECT_EQ(Ok("seed", {{"version", 2}, {"files", catalogs}}).at("imported"), 0);
+    EXPECT_FALSE(Ok("libraryScopes").empty());
+    EXPECT_FALSE(Ok("libraryRifles").empty());
 }
 
 TEST_F(Bridge, StarterLibraryIsSeededOnce) {

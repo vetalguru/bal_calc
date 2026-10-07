@@ -29,7 +29,7 @@ fun androidSeed(context: Context): List<SeedFile> {
     fun walk(dir: String): List<SeedFile> = assets.list(dir).orEmpty().flatMap { name ->
         val path = "$dir/$name"
         if (isSeedFile(name)) {
-            listOf(SeedFile(name, assets.open(path).use { it.readBytes().decodeToString() }))
+            listOf(SeedFile(name) { assets.open(path).use { it.readBytes().decodeToString() } })
         } else {
             walk(path)
         }
