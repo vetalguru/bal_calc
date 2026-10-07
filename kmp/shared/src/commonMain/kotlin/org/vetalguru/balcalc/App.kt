@@ -31,14 +31,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.core.Api
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
 import org.vetalguru.balcalc.ui.ArmoryNav
-import org.vetalguru.balcalc.ui.BalCalcTheme
 import org.vetalguru.balcalc.ui.ArmoryScreen
+import org.vetalguru.balcalc.ui.BalCalcTheme
 import org.vetalguru.balcalc.ui.ConditionsScreen
 import org.vetalguru.balcalc.ui.SolutionScreen
 import org.vetalguru.balcalc.ui.TableScreen
@@ -69,6 +70,7 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
     AppLanguage(model.state.language.ifEmpty { null }) {
     BalCalcTheme(model.state.prefs.theme, systemDark = dark) {
         KeepScreenOn(model.state.prefs.keepScreenOn)
+        WidgetFeed(model, platform)
         // Back: an inner page first (handled by it), then to the solution, then out.
         BackHandler(enabled = page != 0) { page = 0 }
         val snackbar = remember { SnackbarHostState() }
@@ -136,4 +138,30 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
     }
 }
 
+}
+
+/** Keeps a home-screen widget (where the platform has one) showing the current solution. */
+@Composable
+private fun WidgetFeed(model: AppModel, platform: Platform) {
+    val st = model.state
+    val sol = model.solution
+    val unit = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
+    val other = stringResource(if (st.moa) Res.string.unit_mrad else Res.string.unit_moa)
+    val metres = stringResource(Res.string.unit_m)
+    val cm = stringResource(Res.string.unit_cm)
+    val words = listOf(Res.string.up, Res.string.down, Res.string.right, Res.string.left).map { stringResource(it) }
+    val lines = if (!sol.ok || !model.ready) null else {
+        val click = { v: Double -> v.takeIf { sol.hasScope } }
+        val e = formatCorrection(sol.elevation, click(sol.clickElevation), st.moa, sol.rangeM, st.prefs.roundToClicks, words[0], words[1], other, cm)
+        val w = formatCorrection(sol.windage, click(sol.clickWindage), st.moa, sol.rangeM, st.prefs.roundToClicks, words[2], words[3], other, cm)
+        val eClicks = e.clicks?.let { " · " + stringResource(Res.string.clicks, it) }.orEmpty()
+        val wClicks = w.clicks?.let { " · " + stringResource(Res.string.clicks, it) }.orEmpty()
+        SolutionLines(
+            st.currentPair?.let { "${it.rifleName} · ${it.cartridgeName}" }.orEmpty(),
+            "${sol.rangeM.roundToInt()} $metres",
+            "${e.direction} ${e.value} $unit".trim() + eClicks,
+            "${w.direction} ${w.value} $unit".trim() + wClicks,
+        )
+    }
+    LaunchedEffect(lines) { platform.publishSolution(lines) }
 }

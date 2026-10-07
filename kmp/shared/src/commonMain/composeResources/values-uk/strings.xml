@@ -486,6 +486,8 @@
     <string name="wind_columns">Додаткові колонки вітру, м/с</string>
     <string name="wind_columns_hint">Напр. 2, 4, 6: знесення для кожної швидкості з заданого напрямку (до 6)</string>
     <string name="col_wind_at">Вітер %1$s</string>
+    <string name="minimal_view">Мінімальний вигляд</string>
+    <string name="full_view">Повний вигляд</string>
     <string name="sensor_barometer">З барометра</string>
     <string name="sensor_location">Моє місце</string>
     <string name="sensor_angles">Виміряти телефоном</string>

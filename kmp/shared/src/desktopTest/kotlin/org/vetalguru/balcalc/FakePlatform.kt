@@ -15,6 +15,8 @@ class FakePlatform(var files: List<NamedText> = emptyList(), override val sensor
     override suspend fun pasteText() = clipboard
     var image: ByteArray? = null
     override suspend fun openImage() = image
+    var published: SolutionLines? = null
+    override fun publishSolution(summary: SolutionLines?) { published = summary }
     val savedBytes = mutableListOf<Pair<String, ByteArray>>()
     override suspend fun saveBytes(suggestedName: String, mimeType: String, bytes: ByteArray): Boolean {
         savedBytes += suggestedName to bytes
