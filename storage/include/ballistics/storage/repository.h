@@ -1,13 +1,13 @@
 #ifndef BALLISTICS_STORAGE_REPOSITORY_H
 #define BALLISTICS_STORAGE_REPOSITORY_H
 
+#include <ballistics/storage/database.h>
+#include <ballistics/storage/records.h>
+
 #include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
-
-#include <ballistics/storage/database.h>
-#include <ballistics/storage/records.h>
 
 namespace ballistics::storage {
 
@@ -21,7 +21,7 @@ namespace ballistics::storage {
 // caller's, if one is open).
 template <typename T>
 class Repository final {
-public:
+   public:
     explicit Repository(Database& db) : db_(db) {}
 
     // Inserts (id == 0) or updates the record; returns and sets its id.
@@ -38,7 +38,7 @@ public:
     // other records still reference it.
     Status Remove(Id id);
 
-private:
+   private:
     Database& db_;
 };
 
@@ -48,12 +48,14 @@ Status SetSetting(Database& db, const std::string& key, const std::string& value
 
 // The picture of a rifle or cartridge (kind "rifle" | "cartridge"): image
 // file bytes. Deleting the owner deletes it.
-Result<std::optional<std::vector<std::uint8_t>>> GetPhoto(Database& db, const std::string& kind, Id owner);
+Result<std::optional<std::vector<std::uint8_t>>> GetPhoto(Database& db, const std::string& kind,
+                                                          Id owner);
 // An empty image removes the picture.
-Status SetPhoto(Database& db, const std::string& kind, Id owner, const std::vector<std::uint8_t>& image);
+Status SetPhoto(Database& db, const std::string& kind, Id owner,
+                const std::vector<std::uint8_t>& image);
 // The owners of the pictures of this kind.
 Result<std::vector<Id>> PhotoOwners(Database& db, const std::string& kind);
 
-} // namespace ballistics::storage
+}  // namespace ballistics::storage
 
-#endif // BALLISTICS_STORAGE_REPOSITORY_H
+#endif  // BALLISTICS_STORAGE_REPOSITORY_H

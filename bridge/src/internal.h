@@ -3,15 +3,6 @@
 #ifndef BALLISTICS_BRIDGE_INTERNAL_H
 #define BALLISTICS_BRIDGE_INTERNAL_H
 
-#include <cstddef>
-#include <cstdint>
-#include <stdexcept>
-#include <string>
-#include <utility>
-#include <vector>
-
-#include <nlohmann/json.hpp>
-
 #include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/library.h>
 #include <ballistics/applogic/session.h>
@@ -19,21 +10,29 @@
 #include <ballistics/storage/database.h>
 #include <ballistics/units.h>
 
+#include <cstddef>
+#include <cstdint>
+#include <nlohmann/json.hpp>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
 namespace ballistics::bridge::detail {
 
 namespace al = ballistics::applogic;
 namespace bs = ballistics::storage;
 namespace u = ballistics::units;
-using nlohmann::json;
 using al::Id;
+using nlohmann::json;
 
-inline constexpr const char* kCurrentProfileKey = "ui.current_profile"; // before v3: the selection
+inline constexpr const char* kCurrentProfileKey = "ui.current_profile";  // before v3: the selection
 inline constexpr const char* kCurrentRifleKey = "ui.current_rifle";
 inline constexpr const char* kCurrentCartridgeKey = "ui.current_cartridge";
 inline constexpr const char* kAngleUnitKey = "ui.angle_unit";
 inline constexpr const char* kLanguageKey = "ui.language";
 inline constexpr const char* kUiPrefsKey = "ui.prefs";
-inline constexpr std::size_t kMaxExtraWindZones = 2; // three wind zones in all
+inline constexpr std::size_t kMaxExtraWindZones = 2;  // three wind zones in all
 inline constexpr const char* kTargetSpeedUnitKey = "ui.target_speed_unit";
 inline constexpr const char* kHoldModeKey = "ui.hold_mode";
 inline constexpr const char* kSituationsKey = "ui.situations";
@@ -104,6 +103,6 @@ std::string Dump(const json& j);
 Id FirstId(const json& list);
 bool Contains(const json& list, Id id);
 
-} // namespace ballistics::bridge::detail
+}  // namespace ballistics::bridge::detail
 
-#endif // BALLISTICS_BRIDGE_INTERNAL_H
+#endif  // BALLISTICS_BRIDGE_INTERNAL_H

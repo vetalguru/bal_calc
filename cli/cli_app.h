@@ -21,6 +21,6 @@ struct WindSpec {
 };
 bool ParseWind(const std::string& text, WindSpec& wind);
 
-} // namespace balcli
+}  // namespace balcli
 
-#endif // BALCALC_CLI_APP_H
+#endif  // BALCALC_CLI_APP_H

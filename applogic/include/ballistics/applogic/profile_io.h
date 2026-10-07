@@ -1,10 +1,10 @@
 #ifndef BALLISTICS_APPLOGIC_PROFILE_IO_H
 #define BALLISTICS_APPLOGIC_PROFILE_IO_H
 
-#include <string>
-
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/records.h>
+
+#include <string>
 
 // Rifles and cartridges as self-contained JSON documents for backup and
 // sharing:
@@ -36,7 +36,7 @@ Result<std::string> ExportCartridgeJson(storage::Database& db, Id cartridge_id);
 struct Imported {
     Id rifle_id = 0;
     Id cartridge_id = 0;
-    Id profile_id = 0; // pair, from a "balcalc-profile" file
+    Id profile_id = 0;  // pair, from a "balcalc-profile" file
 };
 
 // Imports a rifle, a cartridge or a legacy profile as new records. The
@@ -44,6 +44,6 @@ struct Imported {
 // name gets a " (2)", " (3)", ... suffix.
 Result<Imported> ImportShareJson(storage::Database& db, const std::string& json);
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic
 
-#endif // BALLISTICS_APPLOGIC_PROFILE_IO_H
+#endif  // BALLISTICS_APPLOGIC_PROFILE_IO_H

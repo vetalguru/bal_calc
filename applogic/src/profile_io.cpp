@@ -1,15 +1,13 @@
+#include <ballistics/applogic/library.h>
 #include <ballistics/applogic/profile_io.h>
+#include <ballistics/storage/repository.h>
+#include <sqlite_manager/transaction.h>
 
 #include <cmath>
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <set>
 #include <utility>
-
-#include <nlohmann/json.hpp>
-#include <sqlite_manager/transaction.h>
-
-#include <ballistics/applogic/library.h>
-#include <ballistics/storage/repository.h>
 
 namespace ballistics::applogic {
 
@@ -71,7 +69,7 @@ bool Same(double a, double b) { return std::fabs(a - b) <= 1e-9 * std::max(1.0, 
 // An existing library bullet with the same identity and drag, if any.
 std::optional<Id> FindSameBullet(Database& db, const BulletRecord& b) {
     if (b.drag_kind == kDragKindCurve) {
-        return std::nullopt; // curves are compared by id only; import a copy
+        return std::nullopt;  // curves are compared by id only; import a copy
     }
     auto all = Repository<BulletRecord>(db).List(b.name);
     if (!all) {
@@ -86,7 +84,8 @@ std::optional<Id> FindSameBullet(Database& db, const BulletRecord& b) {
         }
         bool bands_equal = true;
         for (std::size_t i = 0; i < x.bc_bands.size(); ++i) {
-            bands_equal = bands_equal && Same(x.bc_bands[i].velocity_mps, b.bc_bands[i].velocity_mps) &&
+            bands_equal = bands_equal &&
+                          Same(x.bc_bands[i].velocity_mps, b.bc_bands[i].velocity_mps) &&
                           Same(x.bc_bands[i].bc_lb_in2, b.bc_bands[i].bc_lb_in2);
         }
         if (bands_equal) {
@@ -160,20 +159,13 @@ Result<json> BulletJson(Database& db, Id bullet_id) {
     for (const BcPoint& band : br.bc_bands) {
         bands.push_back({band.velocity_mps, band.bc_lb_in2});
     }
-    json out = {{"name", br.name},
-                {"manufacturer", br.manufacturer},
-                {"caliber", br.caliber},
-                {"diameter_m", br.diameter_m},
-                {"mass_kg", br.mass_kg},
-                {"length_m", br.length_m},
-                {"drag_kind", br.drag_kind},
-                {"drag_table", br.drag_table},
-                {"bc", Opt(br.bc)},
-                {"form_factor", br.form_factor},
-                {"source", br.source},
-                {"notes", br.notes},
-                {"bc_bands", bands},
-                {"curve", nullptr}};
+    json out = {{"name", br.name},           {"manufacturer", br.manufacturer},
+                {"caliber", br.caliber},     {"diameter_m", br.diameter_m},
+                {"mass_kg", br.mass_kg},     {"length_m", br.length_m},
+                {"drag_kind", br.drag_kind}, {"drag_table", br.drag_table},
+                {"bc", Opt(br.bc)},          {"form_factor", br.form_factor},
+                {"source", br.source},       {"notes", br.notes},
+                {"bc_bands", bands},         {"curve", nullptr}};
     if (br.curve_id) {
         auto curve = Require<DragCurveRecord>(db, *br.curve_id, "drag curve");
         if (!curve) {
@@ -183,9 +175,8 @@ Result<json> BulletJson(Database& db, Id bullet_id) {
         for (const DragPoint& pt : curve.value().points) {
             points.push_back({pt.mach, pt.cd});
         }
-        out["curve"] = {{"name", curve.value().name},
-                        {"source", curve.value().source},
-                        {"points", points}};
+        out["curve"] = {
+            {"name", curve.value().name}, {"source", curve.value().source}, {"points", points}};
     }
     return out;
 }
@@ -242,7 +233,7 @@ Result<Id> ReadCartridge(Database& db, const json& jc, Id bullet_id,
     c.barrel_length_m = jc.value("barrel_length_m", 0.0);
     c.source = jc.value("source", "");
     if (c.source.rfind("import:", 0) == 0) {
-        c.source = kSourceUser; // shared with the user: theirs, not the library's
+        c.source = kSourceUser;  // shared with the user: theirs, not the library's
     }
     c.notes = jc.value("notes", "");
     for (const json& vp : jc.value("velocity_points", json::array())) {
@@ -328,7 +319,8 @@ Status ImportInto(Database& db, const json& doc, const std::string& format, Impo
     if (!bullet) {
         return bullet.error();
     }
-    std::string caliber = format == kLegacyProfileFormat ? doc.at("rifle").value("caliber", "") : "";
+    std::string caliber =
+        format == kLegacyProfileFormat ? doc.at("rifle").value("caliber", "") : "";
     if (caliber.empty()) {
         caliber = doc.at("bullet").value("caliber", "");
     }
@@ -367,7 +359,7 @@ Status ImportInto(Database& db, const json& doc, const std::string& format, Impo
     return sqlite_manager::Ok();
 }
 
-} // namespace
+}  // namespace
 
 Result<std::string> ExportRifleJson(Database& db, Id rifle_id) {
     auto r = Require<RifleRecord>(db, rifle_id, "rifle");
@@ -458,4 +450,4 @@ Result<Imported> ImportShareJson(Database& db, const std::string& text) {
     return out;
 }
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic

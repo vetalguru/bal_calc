@@ -6,15 +6,13 @@
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <set>
-
 #include <nlohmann/json.hpp>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -63,7 +61,7 @@ TEST(Import, EveryBundledAmmoFileParses) {
         ASSERT_TRUE(a.ok()) << f << ": " << a.error().message;
         EXPECT_GT(a.value().bullet.mass_kg, 0.0) << f;
         EXPECT_GT(a.value().bullet.diameter_m, 0.0) << f;
-        EXPECT_LT(a.value().bullet.diameter_m, 0.03) << f; // shotgun slugs are the biggest
+        EXPECT_LT(a.value().bullet.diameter_m, 0.03) << f;  // shotgun slugs are the biggest
         EXPECT_GT(a.value().cartridge.muzzle_velocity_mps, 50.0) << f;
     }
 }
@@ -98,12 +96,13 @@ TEST(Import, AmmoValuesAndUnits) {
     EXPECT_NEAR(ak.value().bullet.diameter_m, 0.00762, 1e-12);
 
     EXPECT_FALSE(ParseAmmo("<nope/>").ok());
-    EXPECT_FALSE(ParseAmmo(R"(<ammo-info-ex name="x" bc="0.3" bullet-weight="10furlongs" />)").ok());
+    EXPECT_FALSE(
+        ParseAmmo(R"(<ammo-info-ex name="x" bc="0.3" bullet-weight="10furlongs" />)").ok());
 }
 
 TEST(Import, EveryBundledDrgFileParses) {
     const auto files = FilesIn(kSeed / "drg", ".drg");
-    EXPECT_EQ(files.size(), 1U); // McCoy's .308 Sierra 168 gr (Lapua's are not bundled)
+    EXPECT_EQ(files.size(), 1U);  // McCoy's .308 Sierra 168 gr (Lapua's are not bundled)
     for (const auto& f : files) {
         const auto d = ParseDrg(ReadFile(f));
         ASSERT_TRUE(d.ok()) << f << ": " << d.error().message;
@@ -117,8 +116,9 @@ TEST(Import, EveryBundledDrgFileParses) {
 }
 
 TEST(Import, DrgHeaderVariants) {
-    const auto lapua = ParseDrg("CFM, .224 Lapua E539 3.6g ( 55gr ), .00360, .0057, .0170, Radar Data\r\n"
-                                "0.360\t0.000\r\n0.350\t0.200\r\n0.420\t1.000\r\n");
+    const auto lapua = ParseDrg(
+        "CFM, .224 Lapua E539 3.6g ( 55gr ), .00360, .0057, .0170, Radar Data\r\n"
+        "0.360\t0.000\r\n0.350\t0.200\r\n0.420\t1.000\r\n");
     ASSERT_TRUE(lapua.ok()) << lapua.error().message;
     EXPECT_EQ(lapua.value().kind, "CFM");
     EXPECT_EQ(lapua.value().name, ".224 Lapua E539 3.6g ( 55gr )");
@@ -130,13 +130,15 @@ TEST(Import, DrgHeaderVariants) {
     EXPECT_DOUBLE_EQ(lapua.value().points[2].cd, 0.42);
 
     // The source typo "x. y" instead of "x, y" is tolerated.
-    const auto typo = ParseDrg("CFM, .30 Lapua N558 Naturalis 11.0g ( 170gr ), .01100, .007830. .03370, Radar Data\n"
-                               "0.3 0.0\n0.4 1.0\n");
+    const auto typo = ParseDrg(
+        "CFM, .30 Lapua N558 Naturalis 11.0g ( 170gr ), .01100, .007830. .03370, Radar Data\n"
+        "0.3 0.0\n0.4 1.0\n");
     ASSERT_TRUE(typo.ok()) << typo.error().message;
     EXPECT_DOUBLE_EQ(typo.value().diameter_m, 0.00783);
     EXPECT_DOUBLE_EQ(typo.value().length_m, 0.0337);
 
-    EXPECT_FALSE(ParseDrg("Nennstiel EB, Sphere, 0.001, 0.001, 0.0, Encoded Data\n1 2\n3 4\n").ok());
+    EXPECT_FALSE(
+        ParseDrg("Nennstiel EB, Sphere, 0.001, 0.001, 0.0, Encoded Data\n1 2\n3 4\n").ok());
     EXPECT_FALSE(ParseDrg("CFM, only one point, 0.01, 0.0078, 0.03, Radar Data\n0.3 0.5\n").ok());
 }
 
@@ -160,7 +162,7 @@ TEST(Import, EveryBundledReticleParses) {
 }
 
 class ImportDb : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override { ASSERT_TRUE(db_.Open(":memory:").ok()); }
     storage::Database db_;
 };
@@ -175,11 +177,11 @@ TEST_F(ImportDb, SeedImportsEverythingOnce) {
     EXPECT_EQ(first.value().imported, 69 + 1 + 14 + 253);
 
     EXPECT_EQ(SeededVersion(db_).value(), 1);
-    const auto again = SeedLibrary(db_, files, 1); // same version: nothing to do
+    const auto again = SeedLibrary(db_, files, 1);  // same version: nothing to do
     EXPECT_EQ(again.value().imported, 0);
     EXPECT_EQ(again.value().skipped, 0);
 
-    const auto newer = SeedLibrary(db_, files, 2); // new version: existing ones skipped
+    const auto newer = SeedLibrary(db_, files, 2);  // new version: existing ones skipped
     EXPECT_EQ(newer.value().imported, 0);
     EXPECT_EQ(newer.value().skipped, 69 + 1 + 14 + 253);
 
@@ -225,7 +227,8 @@ TEST_F(ImportDb, PublishedBandsAreImported) {
 
 TEST_F(ImportDb, ImportFileDispatchesByExtension) {
     EXPECT_TRUE(ImportFile(db_, "x.AMMO", ReadFile(kSeed / "ammo" / "7.5x55 GP11.ammo")).ok());
-    EXPECT_TRUE(ImportFile(db_, "mildot.reticle", ReadFile(kSeed / "reticle" / "mildot.reticle")).ok());
+    EXPECT_TRUE(
+        ImportFile(db_, "mildot.reticle", ReadFile(kSeed / "reticle" / "mildot.reticle")).ok());
     EXPECT_FALSE(ImportFile(db_, "notes.txt", "hello").ok());
 }
 
@@ -236,7 +239,7 @@ TEST_F(ImportDb, HornadyBandsAreG7) {
     EXPECT_EQ(eld[0].bc_bands, 3);
     const auto form = LoadBulletForm(db_, eld[0].id).value();
     EXPECT_EQ(form.drag_table, "G7");
-    EXPECT_NEAR(form.bands[0].bc, 0.326, 1e-9); // Mach 2.25
+    EXPECT_NEAR(form.bands[0].bc, 0.326, 1e-9);  // Mach 2.25
     EXPECT_NEAR(form.bands[0].velocity_mps, units::FpsToMps(2512.0), 1e-9);
 }
 
@@ -260,7 +263,8 @@ TEST_F(ImportDb, PublishedBulletsAreSane) {
         const double sd = w / 7000.0 / (d * d);
         EXPECT_GT(sd, 0.1);
         EXPECT_LT(sd, 0.45);
-        const double g1 = b.contains("g1") ? b.at("g1").get<double>() : b.at("g1_bands").at(0).at(1).get<double>();
+        const double g1 = b.contains("g1") ? b.at("g1").get<double>()
+                                           : b.at("g1_bands").at(0).at(1).get<double>();
         EXPECT_GT(g1, 0.05);
         EXPECT_LT(g1, 1.2);
         if (b.contains("g7")) {
@@ -296,5 +300,5 @@ TEST_F(ImportDb, PublishedBulletsAreSane) {
     EXPECT_EQ(solved, 253);
 }
 
-} // namespace
-} // namespace ballistics::applogic
+}  // namespace
+}  // namespace ballistics::applogic

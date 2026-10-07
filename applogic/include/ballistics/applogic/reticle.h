@@ -1,21 +1,21 @@
 #ifndef BALLISTICS_APPLOGIC_RETICLE_H
 #define BALLISTICS_APPLOGIC_RETICLE_H
 
-#include <string>
-
 #include <ballistics/storage/records.h>
+
+#include <string>
 
 // Where to put the target in the reticle for a firing solution.
 namespace ballistics::applogic {
 
 // How the correction is applied.
 enum class HoldMode {
-    kDialElevation, // dial elevation on the turret, hold windage (default)
-    kHoldAll,       // hold both on the reticle, turrets stay at zero
-    kDialAll,       // dial both
+    kDialElevation,  // dial elevation on the turret, hold windage (default)
+    kHoldAll,        // hold both on the reticle, turrets stay at zero
+    kDialAll,        // dial both
 };
 
-HoldMode HoldModeFromString(const std::string& s); // "dial_elevation" | "hold" | "dial"
+HoldMode HoldModeFromString(const std::string& s);  // "dial_elevation" | "hold" | "dial"
 const char* ToString(HoldMode mode);
 
 // How many times larger a reticle mark looks than its nominal value: 1 for
@@ -34,7 +34,7 @@ struct ReticleHold {
     // target goes below the centre, hence the negative signs.
     double target_x = 0.0;
     double target_y = 0.0;
-    double scale = 1.0; // SubtensionScale used
+    double scale = 1.0;  // SubtensionScale used
 };
 
 // Splits a correction (up/right positive, rad) into turret clicks and a
@@ -44,6 +44,6 @@ ReticleHold ComputeReticleHold(double elevation_rad, double windage_rad,
                                const storage::ScopeRecord& scope, double magnification,
                                HoldMode mode);
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic
 
-#endif // BALLISTICS_APPLOGIC_RETICLE_H
+#endif  // BALLISTICS_APPLOGIC_RETICLE_H

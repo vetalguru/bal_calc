@@ -2,7 +2,6 @@
 #include <ballistics/drag.h>
 #include <ballistics/solver.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -70,9 +69,9 @@ TEST(PhysicsDrag, CurveIsMonotoneBetweenPoints) {
 }
 
 TEST(PhysicsDrag, StandardTablesAreAvailable) {
-    for (auto id : {DragTableId::kG1, DragTableId::kG2, DragTableId::kG5, DragTableId::kG6,
-                    DragTableId::kG7, DragTableId::kG8, DragTableId::kGI, DragTableId::kGS,
-                    DragTableId::kRA4}) {
+    for (auto id :
+         {DragTableId::kG1, DragTableId::kG2, DragTableId::kG5, DragTableId::kG6, DragTableId::kG7,
+          DragTableId::kG8, DragTableId::kGI, DragTableId::kGS, DragTableId::kRA4}) {
         EXPECT_GT(StandardDragTable(id).size(), 20U) << DragTableName(id);
     }
 }
@@ -89,7 +88,7 @@ Shot Sample308() {
 
 TEST(PhysicsSolver, VacuumMatchesClosedForm) {
     Shot shot = Sample308();
-    shot.atmosphere.pressure_pa = 1e-9; // no air
+    shot.atmosphere.pressure_pa = 1e-9;  // no air
     shot.sight_height_m = 0.0;
     shot.elevation_rad = units::DegToRad(2.0);
     const Trajectory traj = Fly(shot, 1000.0);
@@ -163,12 +162,11 @@ TEST(PhysicsSolver, FastEnoughForPhones) {
     const auto start = std::chrono::steady_clock::now();
     const auto table = Fly(shot, 2510.0).Table(10.0, 2500.0);
     const double ms =
-        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start)
-            .count();
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
     EXPECT_EQ(table.size(), 251U);
     // Desktop budget; phones are ~5x slower and the plan allows 50 ms there.
     EXPECT_LT(ms, 10.0);
 }
 
-} // namespace
-} // namespace ballistics
+}  // namespace
+}  // namespace ballistics

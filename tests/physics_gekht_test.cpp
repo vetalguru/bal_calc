@@ -6,7 +6,6 @@
 #include <ballistics/effects.h>
 #include <ballistics/solver.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -47,13 +46,13 @@ double Angle(const std::string& text) { return units::DegToRad(Parse(text).value
 struct Row {
     double range_m = 0.0;
     double drop_m = 0.0;
-    double windage_m = 0.0; // right positive (the file has left positive)
+    double windage_m = 0.0;  // right positive (the file has left positive)
     double velocity_mps = 0.0;
 };
 
 struct Case {
-    Shot shot;           // as fired (wind, Earth rotation)
-    double zero_m = 0.0; // zeroed in the same air, without them
+    Shot shot;            // as fired (wind, Earth rotation)
+    double zero_m = 0.0;  // zeroed in the same air, without them
     std::vector<Row> rows;
 };
 
@@ -71,12 +70,12 @@ Case Load(const std::string& name) {
     EXPECT_TRUE(in) << name;
     Case c;
     Shot& s = c.shot;
-    s.spin_drift = false; // set by the "rifle" line when the file has a twist
+    s.spin_drift = false;  // set by the "rifle" line when the file has a twist
     s.aerodynamic_jump = false;
     std::optional<double> twist_m;
     for (std::string line; std::getline(in, line);) {
         if (line.rfind("\xEF\xBB\xBF", 0) == 0) {
-            line.erase(0, 3); // BOM
+            line.erase(0, 3);  // BOM
         }
         if (!line.empty() && line.back() == '\r') {
             line.pop_back();
@@ -143,7 +142,7 @@ Case Load(const std::string& name) {
 
 struct Tolerance {
     const char* name;
-    double velocity = 0.0015; // relative
+    double velocity = 0.0015;  // relative
     double drop_moa = 0.10;
     double windage_moa = 0.05;
     // Ballistic Explorer gets Coriolis drift from the flat-fire formula
@@ -178,7 +177,7 @@ TEST_P(Gekht, MatchesTheTable) {
     ASSERT_TRUE(zero.converged);
 
     Shot shot = c.shot;
-    shot.elevation_rad = zero.elevation_rad; // zeroed for elevation only, as they do
+    shot.elevation_rad = zero.elevation_rad;  // zeroed for elevation only, as they do
     const Trajectory traj = Fly(shot, c.rows.back().range_m + 1.0);
     // The same shot without Earth rotation, for the Eotvos part of the drop.
     const Case off = tol.flat_fire_coriolis ? Load("be_coriolis_off") : Case{};
@@ -211,11 +210,12 @@ TEST_P(Gekht, MatchesTheTable) {
         }
         const auto p = traj.AtSlantRange(r.range_m);
         ASSERT_TRUE(p) << r.range_m;
-        const double moa = units::MoaToRad(1.0) * r.range_m; // 1 MOA at this range, m
+        const double moa = units::MoaToRad(1.0) * r.range_m;  // 1 MOA at this range, m
         const double yd = std::round(r.range_m / units::YardToM(1.0));
         EXPECT_NEAR(p->speed_mps, r.velocity_mps, r.velocity_mps * tol.velocity) << yd << " yd";
         if (!tol.flat_fire_coriolis) {
-            EXPECT_NEAR(p->drop_m, r.drop_m, tol.drop_moa * moa + units::InchToM(0.05)) << yd << " yd";
+            EXPECT_NEAR(p->drop_m, r.drop_m, tol.drop_moa * moa + units::InchToM(0.05))
+                << yd << " yd";
         } else {
             // Eotvos lift (east) or sink (west): flat fire again, see above.
             const double theirs = r.drop_m - off.rows.at(i).drop_m;
@@ -227,7 +227,8 @@ TEST_P(Gekht, MatchesTheTable) {
                 EXPECT_LE(ours / theirs, 1.0) << yd << " yd";
             }
             EXPECT_NEAR(no_rotation.AtSlantRange(r.range_m)->drop_m, off.rows.at(i).drop_m,
-                        tol.drop_moa * moa + units::InchToM(0.05)) << yd << " yd";
+                        tol.drop_moa * moa + units::InchToM(0.05))
+                << yd << " yd";
         }
         if (!tol.flat_fire_coriolis) {
             EXPECT_NEAR(p->windage_m, r.windage_m, tol.windage_moa * moa + units::InchToM(0.05))
@@ -249,8 +250,7 @@ INSTANTIATE_TEST_SUITE_P(
                       Tolerance{"g1_nowind_up_supersonic"},
                       Tolerance{"g1_twist", 0.0015, 0.10, 0.015}, Tolerance{"g7_nowind"},
                       Tolerance{"g1_wind", 0.0015, 0.10, 0.10},
-                      Tolerance{"g1_wind_hot", 0.0015, 0.10, 0.10},
-                      Tolerance{"g1_wind_cold"},
+                      Tolerance{"g1_wind_hot", 0.0015, 0.10, 0.10}, Tolerance{"g1_wind_cold"},
                       Tolerance{"be_coriolis_off", 0.005, 0.4},
                       Tolerance{"be_coriolis_north", 0.005, 0.4, 0.05, true},
                       Tolerance{"be_coriolis_south", 0.005, 0.4, 0.05, true},
@@ -259,5 +259,5 @@ INSTANTIATE_TEST_SUITE_P(
                       Tolerance{"be_coriolis_pole", 0.005, 0.4, 0.05, true}),
     [](const ::testing::TestParamInfo<Tolerance>& info) { return std::string(info.param.name); });
 
-} // namespace
-} // namespace ballistics
+}  // namespace
+}  // namespace ballistics

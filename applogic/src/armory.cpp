@@ -1,15 +1,13 @@
 #include <ballistics/applogic/armory.h>
+#include <ballistics/applogic/library.h>
+#include <ballistics/storage/repository.h>
+#include <ballistics/units.h>
+#include <sqlite_manager/transaction.h>
 
 #include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <utility>
-
-#include <sqlite_manager/transaction.h>
-
-#include <ballistics/applogic/library.h>
-#include <ballistics/storage/repository.h>
-#include <ballistics/units.h>
 
 namespace ballistics::applogic {
 
@@ -104,7 +102,7 @@ Status RemovePairs(Database& db, Id rifle_id, Id cartridge_id) {
 void RemoveOwnBullet(Database& db, Id bullet_id) {
     auto b = Repository<BulletRecord>(db).Get(bullet_id);
     if (b && b.value() && b.value()->source == kSourceUser) {
-        Repository<BulletRecord>(db).Remove(bullet_id).ok(); // refused while still used
+        Repository<BulletRecord>(db).Remove(bullet_id).ok();  // refused while still used
     }
 }
 
@@ -129,7 +127,7 @@ void FillBullet(CartridgeForm& f, const BulletRecord& b) {
     f.length_in = units::MToInch(b.length_m);
 }
 
-} // namespace
+}  // namespace
 
 double ClickToRad(const std::string& u, double v) {
     if (!(v > 0.0)) {
@@ -310,7 +308,7 @@ Status DeleteRifle(Database& db, Id rifle_id) {
         return s;
     }
     if (r.value().scope_id) {
-        Repository<ScopeRecord>(db).Remove(*r.value().scope_id).ok(); // kept if shared
+        Repository<ScopeRecord>(db).Remove(*r.value().scope_id).ok();  // kept if shared
     }
     return txn.value().Commit();
 }
@@ -369,8 +367,9 @@ Result<std::vector<CartridgeSummary>> ListLibraryCartridges(Database& db,
     const std::string needle = Lower(filter);
     std::vector<CartridgeSummary> out;
     for (const CartridgeRecord& c : all.value()) {
-        if (IsLibraryCartridge(c) && (needle.empty() || Lower(c.name).find(needle) != std::string::npos ||
-                                      Lower(c.caliber).find(needle) != std::string::npos)) {
+        if (IsLibraryCartridge(c) &&
+            (needle.empty() || Lower(c.name).find(needle) != std::string::npos ||
+             Lower(c.caliber).find(needle) != std::string::npos)) {
             out.push_back(Summary(db, c));
         }
     }
@@ -448,10 +447,10 @@ Result<Id> SaveCartridgeForm(Database& db, const CartridgeForm& f) {
         b = std::move(br).value();
     }
     if (f.cartridge_id == 0) {
-        c.id = 0; // a copy: new row
+        c.id = 0;  // a copy: new row
         c.source = kSourceUser;
         if (b.source == kSourceUser) {
-            b.id = 0; // and its own bullet copied too
+            b.id = 0;  // and its own bullet copied too
         }
     }
 
@@ -610,4 +609,4 @@ Result<Id> CreateSampleProfile(Database& db, const std::string& rifle_name,
     return EnsureProfile(db, rifle_id.value(), cartridge_id.value());
 }
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic

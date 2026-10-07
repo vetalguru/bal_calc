@@ -1,9 +1,9 @@
 #ifndef BALLISTICS_STANDARD_DRAG_TABLES_H
 #define BALLISTICS_STANDARD_DRAG_TABLES_H
 
-#include <cstddef>
-
 #include <ballistics/drag.h>
+
+#include <cstddef>
 
 namespace ballistics::detail {
 
@@ -15,6 +15,6 @@ struct Span {
 
 Span<DragPoint> StandardTable(DragTableId id);
 
-} // namespace ballistics::detail
+}  // namespace ballistics::detail
 
-#endif // BALLISTICS_STANDARD_DRAG_TABLES_H
+#endif  // BALLISTICS_STANDARD_DRAG_TABLES_H

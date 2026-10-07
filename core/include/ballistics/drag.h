@@ -13,15 +13,15 @@ struct DragPoint {
 
 // Standard reference projectiles.
 enum class DragTableId {
-    kG1,  // flat base (most published BCs)
-    kG2,  // Aberdeen J projectile
-    kG5,  // short boat-tail
-    kG6,  // flat base, secant ogive
-    kG7,  // long boat-tail (modern long-range bullets)
-    kG8,  // flat base, 10 cal secant ogive
-    kGI,  // Ingalls
-    kGS,  // sphere
-    kRA4, // .22 LR
+    kG1,   // flat base (most published BCs)
+    kG2,   // Aberdeen J projectile
+    kG5,   // short boat-tail
+    kG6,   // flat base, secant ogive
+    kG7,   // long boat-tail (modern long-range bullets)
+    kG8,   // flat base, 10 cal secant ogive
+    kGI,   // Ingalls
+    kGS,   // sphere
+    kRA4,  // .22 LR
 };
 
 const char* DragTableName(DragTableId id);
@@ -31,7 +31,7 @@ std::vector<DragPoint> StandardDragTable(DragTableId id);
 // no overshoot between table points. Mach outside the table is clamped
 // to the end points.
 class DragCurve final {
-public:
+   public:
     DragCurve() = default;
     // `points` must have >= 2 entries with strictly increasing Mach.
     explicit DragCurve(std::vector<DragPoint> points);
@@ -40,7 +40,7 @@ public:
     bool empty() const { return x_.empty(); }
     const std::vector<DragPoint>& points() const { return points_; }
 
-private:
+   private:
     std::vector<DragPoint> points_;
     std::vector<double> x_, a_, b_, c_, d_;
 };
@@ -67,7 +67,7 @@ struct BcPoint {
 //   a = rho * K(M) * v^2,   K = (pi / 8) * Cd_ref(M) / BC,
 // with BC in kg/m^2 (sectional density / form factor).
 class DragModel final {
-public:
+   public:
     // Published BC (lb/in^2) against a standard table.
     static DragModel FromBc(DragTableId table, double bc_lb_in2);
 
@@ -96,12 +96,12 @@ public:
     double bc_kg_m2() const { return bc_kg_m2_; }
     const DragCurve& curve() const { return curve_; }
 
-private:
+   private:
     DragCurve curve_;
     double bc_kg_m2_ = 0.0;
-    std::vector<DsfPoint> dsf_; // sorted by Mach
+    std::vector<DsfPoint> dsf_;  // sorted by Mach
 };
 
-} // namespace ballistics
+}  // namespace ballistics
 
-#endif // BALLISTICS_DRAG_H
+#endif  // BALLISTICS_DRAG_H

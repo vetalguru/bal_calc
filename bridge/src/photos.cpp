@@ -29,9 +29,10 @@ void Api::Impl::AddPhotosHandlers(HandlerMap& h) {
          [](I& s, const json& a) -> json {
              const std::string kind = PhotoKind(a);
              const Id id = IdOf(a);
-             const bool exists = kind == "rifle"
-                                     ? Must(bs::Repository<bs::RifleRecord>(s.db).Get(id)).has_value()
-                                     : Must(bs::Repository<bs::CartridgeRecord>(s.db).Get(id)).has_value();
+             const bool exists =
+                 kind == "rifle"
+                     ? Must(bs::Repository<bs::RifleRecord>(s.db).Get(id)).has_value()
+                     : Must(bs::Repository<bs::CartridgeRecord>(s.db).Get(id)).has_value();
              if (!exists) {
                  throw Failure("Save the record first.");
              }
@@ -45,4 +46,4 @@ void Api::Impl::AddPhotosHandlers(HandlerMap& h) {
     });
 }
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge

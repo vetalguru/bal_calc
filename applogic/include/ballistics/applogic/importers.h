@@ -1,11 +1,11 @@
 #ifndef BALLISTICS_APPLOGIC_IMPORTERS_H
 #define BALLISTICS_APPLOGIC_IMPORTERS_H
 
-#include <string>
-#include <vector>
-
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/records.h>
+
+#include <string>
+#include <vector>
 
 // Readers for third-party data files and the bundled starter library:
 //
@@ -27,18 +27,18 @@ inline constexpr const char* kSourceReticleFile = "import:reticle";
 inline constexpr const char* kSourcePublished = "published";
 
 struct AmmoFile {
-    storage::BulletRecord bullet;       // id 0
-    storage::CartridgeRecord cartridge; // bullet_id 0
+    storage::BulletRecord bullet;        // id 0
+    storage::CartridgeRecord cartridge;  // bullet_id 0
 };
 Result<AmmoFile> ParseAmmo(const std::string& xml);
 
 struct DrgFile {
-    std::string kind; // "CFM", "BRL", ...
+    std::string kind;  // "CFM", "BRL", ...
     std::string name;
     double mass_kg = 0.0;
     double diameter_m = 0.0;
     double length_m = 0.0;
-    std::vector<DragPoint> points; // Mach ascending, duplicates removed
+    std::vector<DragPoint> points;  // Mach ascending, duplicates removed
 };
 // Fails for "Encoded Data" files (obfuscated, not readable).
 Result<DrgFile> ParseDrg(const std::string& text);
@@ -62,12 +62,12 @@ Result<Id> ImportFile(storage::Database& db, const std::string& file_name,
 
 // Bundled starter data.
 struct SeedFile {
-    std::string name;    // file name, decides the format
+    std::string name;  // file name, decides the format
     std::string content;
 };
 struct SeedReport {
     int imported = 0;
-    int skipped = 0; // already present or unreadable (e.g. encoded .drg)
+    int skipped = 0;  // already present or unreadable (e.g. encoded .drg)
     std::vector<std::string> problems;
 };
 // Imports `files` once per `seed_version` (remembered in the settings);
@@ -77,6 +77,6 @@ Result<SeedReport> SeedLibrary(storage::Database& db, const std::vector<SeedFile
 // The seed version the database already has; 0 when it was never seeded.
 Result<int> SeededVersion(storage::Database& db);
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic
 
-#endif // BALLISTICS_APPLOGIC_IMPORTERS_H
+#endif  // BALLISTICS_APPLOGIC_IMPORTERS_H

@@ -46,6 +46,6 @@ constexpr Vec3 Cross(const Vec3& a, const Vec3& b) {
     return {a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
 }
 
-} // namespace ballistics
+}  // namespace ballistics
 
-#endif // BALLISTICS_VEC3_H
+#endif  // BALLISTICS_VEC3_H

@@ -7,7 +7,7 @@ namespace {
 // WEZ settings in the app's keys and units.
 struct WezKey {
     const char* key;
-    double al::WezSettings::*value;
+    double al::WezSettings::* value;
 };
 const WezKey kWezKeys[] = {
     {"rangeM", &al::WezSettings::range_m},
@@ -26,8 +26,7 @@ const WezKey kWezKeys[] = {
     {"targetWidthCm", &al::WezSettings::target_width_cm},
     {"targetHeightCm", &al::WezSettings::target_height_cm},
 };
-} // namespace
-
+}  // namespace
 
 // ---- Forms <-> JSON ---------------------------------------------------------
 
@@ -221,4 +220,4 @@ json ToJson(const al::RangeTable& t, bool has_scope) {
     return {{"ok", t.ok}, {"error", t.error}, {"hasScope", has_scope}, {"rows", rows}};
 }
 
-} // namespace ballistics::bridge::detail
+}  // namespace ballistics::bridge::detail

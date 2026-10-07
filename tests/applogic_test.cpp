@@ -5,7 +5,6 @@
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -57,7 +56,7 @@ std::size_t Count(storage::Database& db) {
 }
 
 class AppLogic : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override { ASSERT_TRUE(db_.Open(":memory:").ok()); }
     storage::Database db_;
 };
@@ -116,7 +115,7 @@ TEST_F(AppLogic, RifleRoundTrip) {
     g.zero_range_m = 200.0;
     ASSERT_TRUE(SaveRifleForm(db_, g).ok());
     EXPECT_EQ(Count<storage::RifleRecord>(db_), 1U);
-    EXPECT_EQ(Count<storage::ScopeRecord>(db_), 1U); // the same scope updated
+    EXPECT_EQ(Count<storage::ScopeRecord>(db_), 1U);  // the same scope updated
     const RifleForm h = LoadRifleForm(db_, id.value()).value();
     EXPECT_TRUE(h.twist_left);
     EXPECT_DOUBLE_EQ(h.zero_range_m, 200.0);
@@ -129,7 +128,7 @@ TEST_F(AppLogic, CartridgeRoundTrip) {
     EXPECT_EQ(f.name, "Handload SMK 175");
     EXPECT_EQ(f.caliber, ".308 Win");
     EXPECT_EQ(f.bullet_name, "SMK 175");
-    EXPECT_EQ(f.library_bullet_id, 0); // its own bullet
+    EXPECT_EQ(f.library_bullet_id, 0);  // its own bullet
     EXPECT_NEAR(f.mass_gr, 175.0, 1e-9);
     EXPECT_NEAR(f.powder_sensitivity_pct_per_c, 0.1, 1e-12);
 
@@ -162,7 +161,7 @@ TEST_F(AppLogic, OneCartridgeServesSeveralRifles) {
     const Id a = EnsureProfile(db_, tikka, cartridge).value();
     const Id b = EnsureProfile(db_, remington, cartridge).value();
     EXPECT_NE(a, b);
-    EXPECT_EQ(EnsureProfile(db_, tikka, cartridge).value(), a); // found, not duplicated
+    EXPECT_EQ(EnsureProfile(db_, tikka, cartridge).value(), a);  // found, not duplicated
     EXPECT_EQ(Count<storage::ProfileRecord>(db_), 2U);
     EXPECT_FALSE(EnsureProfile(db_, tikka, 999).ok());
 
@@ -171,7 +170,7 @@ TEST_F(AppLogic, OneCartridgeServesSeveralRifles) {
     s.temperature_c = 10.0;
     s.pressure_hpa = 990.0;
     s.target_range_m = 300.0;
-    s.powder_c = 15.0; // the rifles' zero_powder_c
+    s.powder_c = 15.0;  // the rifles' zero_powder_c
     const auto at_a = Summarize(storage::LoadProfile(db_, a).value(), s, AngleUnit::kMrad);
     const auto at_b = Summarize(storage::LoadProfile(db_, b).value(), s, AngleUnit::kMrad);
     EXPECT_GT(at_a.elevation, 1.0);
@@ -199,7 +198,7 @@ TEST_F(AppLogic, DeletingARifleOrCartridgeRemovesItsPairs) {
     EXPECT_EQ(Count<storage::ProfileRecord>(db_), 0U);
     EXPECT_EQ(Count<storage::RifleRecord>(db_), 0U);
     EXPECT_EQ(Count<storage::ScopeRecord>(db_), 0U);
-    EXPECT_EQ(Count<storage::CartridgeRecord>(db_), 1U); // the cartridge stays
+    EXPECT_EQ(Count<storage::CartridgeRecord>(db_), 1U);  // the cartridge stays
     EXPECT_FALSE(DeleteRifle(db_, p.rifle_id).ok());
 
     const Id rifle = SaveRifleForm(db_, SampleRifle()).value();
@@ -207,7 +206,7 @@ TEST_F(AppLogic, DeletingARifleOrCartridgeRemovesItsPairs) {
     ASSERT_TRUE(DeleteCartridge(db_, p.cartridge_id).ok());
     EXPECT_EQ(Count<storage::ProfileRecord>(db_), 0U);
     EXPECT_EQ(Count<storage::CartridgeRecord>(db_), 0U);
-    EXPECT_EQ(Count<storage::BulletRecord>(db_), 0U); // its own bullet went too
+    EXPECT_EQ(Count<storage::BulletRecord>(db_), 0U);  // its own bullet went too
     EXPECT_EQ(Count<storage::RifleRecord>(db_), 1U);
 }
 
@@ -219,7 +218,7 @@ TEST_F(AppLogic, CartridgesOfTheRiflesCaliberComeFirst) {
     ASSERT_TRUE(SaveCartridgeForm(db_, SampleCartridge()).ok());
     const auto all = ListCartridges(db_).value();
     ASSERT_EQ(all.size(), 2U);
-    EXPECT_EQ(all[0].name, "A .300 WM load"); // by name
+    EXPECT_EQ(all[0].name, "A .300 WM load");  // by name
     const auto for_308 = ListCartridges(db_, "308 Winchester").value();
     EXPECT_EQ(for_308[0].name, "Handload SMK 175");
     EXPECT_EQ(for_308[0].bullet_name, "SMK 175");
@@ -245,7 +244,7 @@ TEST_F(AppLogic, LibraryCartridgesAreCopied) {
     lib.source = "import:ammo";
     ASSERT_TRUE(storage::Repository<storage::CartridgeRecord>(db_).Save(lib).ok());
 
-    EXPECT_TRUE(ListCartridges(db_).value().empty()); // not the user's
+    EXPECT_TRUE(ListCartridges(db_).value().empty());  // not the user's
     const auto library = ListLibraryCartridges(db_, "factory").value();
     ASSERT_EQ(library.size(), 1U);
     EXPECT_TRUE(ListLibraryCartridges(db_, "nosler").value().empty());
@@ -257,10 +256,10 @@ TEST_F(AppLogic, LibraryCartridgesAreCopied) {
     const Id mine = SaveCartridgeForm(db_, f).value();
     EXPECT_NE(mine, lib.id);
     const auto copy = storage::Repository<storage::CartridgeRecord>(db_).Get(mine).value().value();
-    EXPECT_EQ(copy.bullet_id, b.id);          // the library bullet, shared
-    EXPECT_DOUBLE_EQ(copy.barrel_length_m, 0.61); // kept from the original
+    EXPECT_EQ(copy.bullet_id, b.id);               // the library bullet, shared
+    EXPECT_DOUBLE_EQ(copy.barrel_length_m, 0.61);  // kept from the original
     EXPECT_EQ(ListCartridges(db_).value().size(), 1U);
-    EXPECT_EQ(ListLibraryCartridges(db_).value().size(), 1U); // original untouched
+    EXPECT_EQ(ListLibraryCartridges(db_).value().size(), 1U);  // original untouched
 }
 
 TEST_F(AppLogic, SampleProfile) {
@@ -270,7 +269,6 @@ TEST_F(AppLogic, SampleProfile) {
     EXPECT_EQ(p.cartridge.name, "Sample cartridge");
     ASSERT_TRUE(p.scope.has_value());
 }
-
 
 TEST_F(AppLogic, SessionRoundTrip) {
     SessionConditions s;
@@ -321,17 +319,18 @@ TEST_F(AppLogic, SummaryAtTarget) {
     ASSERT_TRUE(mrad.ok) << mrad.error;
     EXPECT_GT(mrad.elevation, 5.0);
     EXPECT_LT(mrad.elevation, 15.0);
-    EXPECT_GT(mrad.windage, 0.5); // wind from the right: hold right
+    EXPECT_GT(mrad.windage, 0.5);  // wind from the right: hold right
     EXPECT_GT(mrad.stability, 1.0);
     // 1/4 MOA clicks.
-    EXPECT_NEAR(mrad.elevation_clicks, std::round(units::RadToMoa(mrad.elevation * 1e-3) * 4.0), 1.0);
+    EXPECT_NEAR(mrad.elevation_clicks, std::round(units::RadToMoa(mrad.elevation * 1e-3) * 4.0),
+                1.0);
     const SolutionSummary moa = Summarize(p, s, AngleUnit::kMoa);
     EXPECT_NEAR(moa.elevation, units::RadToMoa(mrad.elevation * 1e-3), 1e-9);
 
     s.target_range_m = 1200.0;
     const SolutionSummary far = Summarize(p, s, AngleUnit::kMrad);
     ASSERT_TRUE(far.ok);
-    EXPECT_GT(far.transonic_range_m, 600.0); // Mach 1.2 reached on the way
+    EXPECT_GT(far.transonic_range_m, 600.0);  // Mach 1.2 reached on the way
     EXPECT_LT(far.transonic_range_m, 1200.0);
 
     s.target_range_m = 0.0;
@@ -342,15 +341,15 @@ TEST_F(AppLogic, RangeTableMatchesSummary) {
     const Id id = SamplePair(db_);
     const storage::LoadedProfile p = storage::LoadProfile(db_, id).value();
     SessionConditions s;
-    s.temperature_c = 10.0; // the profile's zero conditions
+    s.temperature_c = 10.0;  // the profile's zero conditions
     s.pressure_hpa = 990.0;
-    s.powder_c = 15.0; // zero_powder_c of the form
+    s.powder_c = 15.0;  // zero_powder_c of the form
     s.winds = {{3.0, 90.0, 0.0}};
     const RangeTable t = BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 100.0);
     ASSERT_TRUE(t.ok) << t.error;
     ASSERT_EQ(t.rows.size(), 11U);
     EXPECT_DOUBLE_EQ(t.rows[0].range_m, 0.0);
-    EXPECT_DOUBLE_EQ(t.rows[0].elevation, 0.0); // no hold at the muzzle
+    EXPECT_DOUBLE_EQ(t.rows[0].elevation, 0.0);  // no hold at the muzzle
     for (std::size_t i = 2; i < t.rows.size(); ++i) {
         EXPECT_GT(t.rows[i].elevation, t.rows[i - 1].elevation);
         EXPECT_LT(t.rows[i].velocity_mps, t.rows[i - 1].velocity_mps);
@@ -362,7 +361,7 @@ TEST_F(AppLogic, RangeTableMatchesSummary) {
     calm.winds.clear();
     EXPECT_NEAR(BuildRangeTable(p, calm, AngleUnit::kMrad, 100.0, 100.0, 1.0).rows.at(0).drop_cm,
                 0.0, 0.01);
-    EXPECT_LT(t.rows[1].drop_cm, -0.5); // wind from the right: jump low
+    EXPECT_LT(t.rows[1].drop_cm, -0.5);  // wind from the right: jump low
 
     // Same numbers as the single-target summary.
     s.target_range_m = 700.0;
@@ -377,7 +376,7 @@ TEST_F(AppLogic, RangeTableRejectsBadSpec) {
     const storage::LoadedProfile p = storage::LoadProfile(db_, id).value();
     EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 0.0, 1000.0, 0.0).ok);
     EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 500.0, 100.0, 50.0).ok);
-    EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 0.0, 3000.0, 1.0).ok); // > 2000 rows
+    EXPECT_FALSE(BuildRangeTable(p, {}, AngleUnit::kMrad, 0.0, 3000.0, 1.0).ok);  // > 2000 rows
 }
 
 bool Has(const SolutionSummary& s, const char* code, double* value = nullptr) {
@@ -415,7 +414,8 @@ TEST_F(AppLogic, SummaryApexPointBlankAndDensityAltitude) {
     EXPECT_GT(r.point_blank_far_m, 180.0);
     EXPECT_LT(r.point_blank_far_m, 300.0);
     // 10 C, 990 hPa, 50 %: the session air.
-    EXPECT_NEAR(r.density_altitude_m, DensityAltitude({0.0, 99000.0, units::CToK(10.0), 0.5}), 1e-6);
+    EXPECT_NEAR(r.density_altitude_m, DensityAltitude({0.0, 99000.0, units::CToK(10.0), 0.5}),
+                1e-6);
     EXPECT_NEAR(r.pressure_hpa, 990.0, 1e-9);
     EXPECT_TRUE(r.warnings.empty());
 
@@ -444,7 +444,7 @@ TEST_F(AppLogic, WarningsFollowTheirThresholds) {
     hot.temperature_c = 30.0;
     EXPECT_TRUE(Has(Summarize(p, hot, AngleUnit::kMrad), kWarnZeroTemperature, &v));
     EXPECT_NEAR(v, 20.0, 1e-9);
-    hot.temperature_c = 24.0; // 14 C off: still fine
+    hot.temperature_c = 24.0;  // 14 C off: still fine
     EXPECT_FALSE(Has(Summarize(p, hot, AngleUnit::kMrad), kWarnZeroTemperature));
 
     SessionConditions high = AtZero(300.0);
@@ -455,9 +455,10 @@ TEST_F(AppLogic, WarningsFollowTheirThresholds) {
     SessionConditions old = AtZero(300.0);
     old.weather_at_unix = 1.0e9;
     EXPECT_FALSE(Has(Summarize(p, old, AngleUnit::kMrad, 1.0e9 + 3600.0), kWarnStaleWeather));
-    EXPECT_TRUE(Has(Summarize(p, old, AngleUnit::kMrad, 1.0e9 + 25 * 3600.0), kWarnStaleWeather, &v));
+    EXPECT_TRUE(
+        Has(Summarize(p, old, AngleUnit::kMrad, 1.0e9 + 25 * 3600.0), kWarnStaleWeather, &v));
     EXPECT_NEAR(v, 25.0, 1e-9);
-    EXPECT_FALSE(Has(Summarize(p, old, AngleUnit::kMrad), kWarnStaleWeather)); // no clock
+    EXPECT_FALSE(Has(Summarize(p, old, AngleUnit::kMrad), kWarnStaleWeather));  // no clock
 
     const SolutionSummary far = Summarize(p, AtZero(1300.0), AngleUnit::kMrad);
     ASSERT_TRUE(far.ok);
@@ -557,7 +558,7 @@ TEST_F(AppLogic, MovingTargetLead) {
     const SolutionSummary still = Summarize(p, s, AngleUnit::kMrad);
     EXPECT_FALSE(still.has_lead);
 
-    s.target_speed_mps = 4.0; // a walking... running man, to the right
+    s.target_speed_mps = 4.0;  // a walking... running man, to the right
     s.target_heading_deg = 90.0;
     const SolutionSummary r = Summarize(p, s, AngleUnit::kMrad);
     ASSERT_TRUE(r.ok && r.has_lead);
@@ -566,12 +567,12 @@ TEST_F(AppLogic, MovingTargetLead) {
     EXPECT_NEAR(r.lead_total_windage, r.windage + r.lead, 1e-9);
     EXPECT_NEAR(r.lead_range_m, 500.0, 1e-9);
     EXPECT_NEAR(r.lead_elevation, r.elevation, 1e-9);
-    EXPECT_NEAR(r.lead_clicks, std::round(units::RadToMoa(r.lead * 1e-3) * 4.0), 1e-9); // 1/4 MOA
+    EXPECT_NEAR(r.lead_clicks, std::round(units::RadToMoa(r.lead * 1e-3) * 4.0), 1e-9);  // 1/4 MOA
 
-    s.target_heading_deg = 270.0; // to the left
+    s.target_heading_deg = 270.0;  // to the left
     EXPECT_NEAR(Summarize(p, s, AngleUnit::kMrad).lead, -r.lead, 1e-9);
 
-    s.target_heading_deg = 0.0; // straight away: no lead, a longer shot
+    s.target_heading_deg = 0.0;  // straight away: no lead, a longer shot
     const SolutionSummary away = Summarize(p, s, AngleUnit::kMrad);
     EXPECT_NEAR(away.lead, 0.0, 1e-9);
     EXPECT_GT(away.lead_range_m, 502.0);
@@ -583,7 +584,7 @@ TEST_F(AppLogic, MovingTargetLead) {
     ASSERT_TRUE(t.ok);
     EXPECT_DOUBLE_EQ(t.rows.front().lead, 0.0);
     EXPECT_NEAR(t.rows[5].lead, r.lead, 1e-9);
-    EXPECT_GT(t.rows[10].lead, t.rows[5].lead); // flight time grows faster than range
+    EXPECT_GT(t.rows[10].lead, t.rows[5].lead);  // flight time grows faster than range
 
     ASSERT_TRUE(SaveSession(db_, s).ok());
     EXPECT_DOUBLE_EQ(LoadSession(db_).value().target_speed_mps, 4.0);
@@ -612,14 +613,15 @@ TEST_F(AppLogic, RangeRowsCarryTheParts) {
     EXPECT_GT(far.coriolis_lift_cm, 2.0);
     EXPECT_NEAR(far.windage_cm - plain.rows.back().windage_cm, far.coriolis_drift_cm, 1e-6);
     EXPECT_NEAR(far.lead_cm, 300.0 * far.time_s, 1e-6);
-    s.azimuth_deg = 270.0; // west: it sinks
-    EXPECT_LT(BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 200.0).rows.back().coriolis_lift_cm,
-              -2.0);
+    s.azimuth_deg = 270.0;  // west: it sinks
+    EXPECT_LT(
+        BuildRangeTable(p, s, AngleUnit::kMrad, 0.0, 1000.0, 200.0).rows.back().coriolis_lift_cm,
+        -2.0);
 }
 
 TEST_F(AppLogic, HitProbabilityFallsWithRange) {
     const storage::LoadedProfile p = storage::LoadProfile(db_, SamplePair(db_)).value();
-    EXPECT_DOUBLE_EQ(LoadWezSettings(db_).value().group_moa, 1.0); // defaults
+    EXPECT_DOUBLE_EQ(LoadWezSettings(db_).value().group_moa, 1.0);  // defaults
     WezSettings w;
     w.target_kind = "figure";
     w.target_width_cm = 45;
@@ -632,13 +634,13 @@ TEST_F(AppLogic, HitProbabilityFallsWithRange) {
     const WezResult r = ComputeWez(p, s, w, 1200.0, 100.0);
     ASSERT_TRUE(r.ok) << r.error;
     ASSERT_EQ(r.rows.size(), 12u);
-    EXPECT_GT(r.rows.front().probability, 0.99); // 100 m: a sure hit
+    EXPECT_GT(r.rows.front().probability, 0.99);  // 100 m: a sure hit
     for (std::size_t i = 1; i < r.rows.size(); ++i) {
         EXPECT_LE(r.rows[i].probability, r.rows[i - 1].probability + 1e-9) << i;
         EXPECT_GT(r.rows[i].sigma_right_cm, r.rows[i - 1].sigma_right_cm);
     }
     EXPECT_LT(r.rows.back().probability, 0.6);
-    EXPECT_NEAR(r.at_target.probability, r.rows[5].probability, 1e-12); // 600 m
+    EXPECT_NEAR(r.at_target.probability, r.rows[5].probability, 1e-12);  // 600 m
     ASSERT_FALSE(r.parts.empty());
     EXPECT_LE(r.shots_50, r.shots_80);
     EXPECT_LE(r.shots_80, r.shots_95);
@@ -652,5 +654,5 @@ TEST_F(AppLogic, HitProbabilityFallsWithRange) {
     EXPECT_FALSE(ComputeWez(p, s, w, 1200.0, 0.0).ok);
 }
 
-} // namespace
-} // namespace ballistics::applogic
+}  // namespace
+}  // namespace ballistics::applogic

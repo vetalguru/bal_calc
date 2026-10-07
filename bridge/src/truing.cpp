@@ -90,9 +90,9 @@ void Api::Impl::AddTruingHandlers(HandlerMap& h) {
              if (Bool(a, "hasWindage")) {
                  wind = Num(a, "windage") * s.UnitRad();
              }
-             const Id id = Must(al::LogShot(s.db, s.profile_id, s.Session(), Num(a, "rangeM"),
-                                            Num(a, "elevation") * s.UnitRad(), wind,
-                                            Str(a, "notes")));
+             const Id id =
+                 Must(al::LogShot(s.db, s.profile_id, s.Session(), Num(a, "rangeM"),
+                                  Num(a, "elevation") * s.UnitRad(), wind, Str(a, "notes")));
              return {{"id", id}};
          }},
         {"deleteShot",
@@ -125,8 +125,9 @@ void Api::Impl::AddTruingHandlers(HandlerMap& h) {
                  if (s.profile_id == 0) {
                      throw Failure("Choose a rifle and a cartridge.");
                  }
-                 r = al::BcFromHit(Must(bs::LoadProfile(s.db, s.profile_id)), table, Num(a, "rangeM"),
-                                   Num(a, "elevation") * s.UnitRad(), s.Session());
+                 r = al::BcFromHit(Must(bs::LoadProfile(s.db, s.profile_id)), table,
+                                   Num(a, "rangeM"), Num(a, "elevation") * s.UnitRad(),
+                                   s.Session());
              } else {
                  r = al::BcFromChronograph(table, Num(a, "vNearMps"), Num(a, "vFarMps"),
                                            Num(a, "distanceM"), s.Session());
@@ -160,4 +161,4 @@ void Api::Impl::AddTruingHandlers(HandlerMap& h) {
     });
 }
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge

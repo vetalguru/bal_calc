@@ -2,7 +2,6 @@
 #include <ballistics/drag.h>
 #include <ballistics/solver.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -124,7 +123,7 @@ TEST(PhysicsDsf, FactorInterpolatesAndHoldsTheEnds) {
 
 TEST(PhysicsDsf, ScalesTheDragAtEachMach) {
     const DragModel m = DragModel::FromBc(DragTableId::kG7, 0.243);
-    const DragModel scaled = m.WithMachScale({{1.4, 1.0}, {0.9, 1.2}}); // unsorted on purpose
+    const DragModel scaled = m.WithMachScale({{1.4, 1.0}, {0.9, 1.2}});  // unsorted on purpose
     ASSERT_EQ(scaled.mach_scale().size(), 2u);
     EXPECT_DOUBLE_EQ(scaled.mach_scale().front().mach, 0.9);
     EXPECT_DOUBLE_EQ(scaled.Coefficient(2.0), m.Coefficient(2.0));
@@ -136,5 +135,5 @@ TEST(PhysicsDsf, ScalesTheDragAtEachMach) {
     EXPECT_THROW(m.WithMachScale({{1.0, 0.0}}), std::invalid_argument);
 }
 
-} // namespace
-} // namespace ballistics
+}  // namespace
+}  // namespace ballistics

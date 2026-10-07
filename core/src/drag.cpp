@@ -1,11 +1,10 @@
 #include <ballistics/drag.h>
+#include <ballistics/units.h>
 
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
 #include <utility>
-
-#include <ballistics/units.h>
 
 #include "standard_drag_tables.h"
 
@@ -26,19 +25,28 @@ double EndSlope(double h0, double h1, double d0, double d1) {
     return m;
 }
 
-} // namespace
+}  // namespace
 
 const char* DragTableName(DragTableId id) {
     switch (id) {
-        case DragTableId::kG1: return "G1";
-        case DragTableId::kG2: return "G2";
-        case DragTableId::kG5: return "G5";
-        case DragTableId::kG6: return "G6";
-        case DragTableId::kG7: return "G7";
-        case DragTableId::kG8: return "G8";
-        case DragTableId::kGI: return "GI";
-        case DragTableId::kGS: return "GS";
-        case DragTableId::kRA4: return "RA4";
+        case DragTableId::kG1:
+            return "G1";
+        case DragTableId::kG2:
+            return "G2";
+        case DragTableId::kG5:
+            return "G5";
+        case DragTableId::kG6:
+            return "G6";
+        case DragTableId::kG7:
+            return "G7";
+        case DragTableId::kG8:
+            return "G8";
+        case DragTableId::kGI:
+            return "GI";
+        case DragTableId::kGS:
+            return "GS";
+        case DragTableId::kRA4:
+            return "RA4";
     }
     return "?";
 }
@@ -217,4 +225,4 @@ double DragModel::Coefficient(double mach) const {
     return dsf_.empty() ? k : k * DsfFactor(dsf_, mach);
 }
 
-} // namespace ballistics
+}  // namespace ballistics

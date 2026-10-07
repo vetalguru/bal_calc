@@ -40,8 +40,9 @@ json Api::Impl::Targets() {
         zoom = magnification > 0.0 ? magnification : p->scope->max_magnification;
         const al::SolutionSummary now = al::Summarize(*p, Session(), Unit());
         if (now.ok) {
-            const al::ReticleHold h = al::ComputeReticleHold(now.elevation * UnitRad(), now.windage * UnitRad(),
-                                                             *p->scope, zoom, al::HoldModeFromString(hold_mode));
+            const al::ReticleHold h =
+                al::ComputeReticleHold(now.elevation * UnitRad(), now.windage * UnitRad(),
+                                       *p->scope, zoom, al::HoldModeFromString(hold_mode));
             dial_e = h.dial_elevation_rad;
             dial_w = h.dial_windage_rad;
         }
@@ -67,7 +68,8 @@ json Api::Impl::Targets() {
                 double x = -u::RadToMrad(w);
                 double y = -u::RadToMrad(e);
                 if (p->scope) {
-                    const al::ReticleHold h = al::ComputeReticleHold(e, w, *p->scope, zoom, al::HoldMode::kHoldAll);
+                    const al::ReticleHold h =
+                        al::ComputeReticleHold(e, w, *p->scope, zoom, al::HoldMode::kHoldAll);
                     x = h.target_x;
                     y = h.target_y;
                 }
@@ -212,17 +214,23 @@ void Api::Impl::AddTargetsHandlers(HandlerMap& h) {
     using I = Api::Impl;
     h.insert({
         {"targets", [](I& s, const json&) -> json { return s.Targets(); }},
-        {"saveTargets", [](I& s, const json& a) -> json { return s.SaveTargets(a.value("targets", json::array())); }},
+        {"saveTargets",
+         [](I& s, const json& a) -> json {
+             return s.SaveTargets(a.value("targets", json::array()));
+         }},
         {"selectTarget",
          [](I& s, const json& a) -> json {
              const double i = Num(a, "index", -1.0);
              return s.SelectTarget(i < 0.0 ? kMaxTargets : static_cast<std::size_t>(i));
          }},
         {"situations", [](I& s, const json&) -> json { return s.Situations(); }},
-        {"saveSituation", [](I& s, const json& a) -> json { return s.SaveSituation(Trim(Str(a, "name"))); }},
-        {"applySituation", [](I& s, const json& a) -> json { return s.ApplySituation(Str(a, "name")); }},
-        {"deleteSituation", [](I& s, const json& a) -> json { return s.DeleteSituation(Str(a, "name")); }},
+        {"saveSituation",
+         [](I& s, const json& a) -> json { return s.SaveSituation(Trim(Str(a, "name"))); }},
+        {"applySituation",
+         [](I& s, const json& a) -> json { return s.ApplySituation(Str(a, "name")); }},
+        {"deleteSituation",
+         [](I& s, const json& a) -> json { return s.DeleteSituation(Str(a, "name")); }},
     });
 }
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge

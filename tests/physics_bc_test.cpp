@@ -2,7 +2,6 @@
 #include <ballistics/bc.h>
 #include <ballistics/solver.h>
 #include <ballistics/units.h>
-
 #include <gtest/gtest.h>
 
 namespace ballistics {
@@ -45,9 +44,9 @@ TEST(PhysicsBc, FromTwoChronographs) {
 
 TEST(PhysicsBc, ImpossibleReadingsGiveNothing) {
     const Atmosphere air = StandardAtmosphere(0.0);
-    EXPECT_FALSE(BcFromVelocities(DragTableId::kG7, 800, 810, 100, air)); // faster further out
-    EXPECT_FALSE(BcFromVelocities(DragTableId::kG7, 800, 799.99, 100, air)); // a BC above 2
-    EXPECT_FALSE(BcFromVelocities(DragTableId::kG7, 800, 200, 10, air));     // a BC below 0.02
+    EXPECT_FALSE(BcFromVelocities(DragTableId::kG7, 800, 810, 100, air));     // faster further out
+    EXPECT_FALSE(BcFromVelocities(DragTableId::kG7, 800, 799.99, 100, air));  // a BC above 2
+    EXPECT_FALSE(BcFromVelocities(DragTableId::kG7, 800, 200, 10, air));      // a BC below 0.02
     EXPECT_FALSE(BcFromVelocities(DragTableId::kG7, 800, 700, 0, air));
 }
 
@@ -67,5 +66,5 @@ TEST(PhysicsBc, FitIsABisectionOnARisingQuantity) {
     EXPECT_FALSE(FitBc([](double x) -> std::optional<double> { return x; }, 5.0));
 }
 
-} // namespace
-} // namespace ballistics
+}  // namespace
+}  // namespace ballistics

@@ -54,8 +54,10 @@ json Api::Impl::Solution() {
                {"windageClicks", r.windage_clicks},
                {"hasScope", p.value().scope.has_value()},
                // One click in the angle unit (0 without a scope): for rounding to clicks.
-               {"clickElevation", p.value().scope ? al::FromRad(p.value().scope->click_vertical_rad, Unit()) : 0.0},
-               {"clickWindage", p.value().scope ? al::FromRad(p.value().scope->click_horizontal_rad, Unit()) : 0.0},
+               {"clickElevation",
+                p.value().scope ? al::FromRad(p.value().scope->click_vertical_rad, Unit()) : 0.0},
+               {"clickWindage",
+                p.value().scope ? al::FromRad(p.value().scope->click_horizontal_rad, Unit()) : 0.0},
                {"dropCm", r.drop_cm},
                {"windageCm", r.windage_cm},
                {"velocity", r.velocity_mps},
@@ -96,9 +98,8 @@ json Api::Impl::Solution() {
         out["warnings"] = warnings;
         AddReticle(p.value(), r, out);
     }
-    out["computeMs"] = std::chrono::duration<double, std::milli>(
-                           std::chrono::steady_clock::now() - start)
-                           .count();
+    out["computeMs"] =
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
     return out;
 }
 
@@ -152,7 +153,8 @@ json Api::Impl::PairOptions() {
 json Api::Impl::Table(double from_m, double to_m, double step_m, const json& wind_speeds) {
     const auto start = std::chrono::steady_clock::now();
     if (profile_id == 0) {
-        return {{"ok", false}, {"error", "Choose a rifle and a cartridge."}, {"rows", json::array()}};
+        return {
+            {"ok", false}, {"error", "Choose a rifle and a cartridge."}, {"rows", json::array()}};
     }
     auto p = bs::LoadProfile(db, profile_id);
     if (!p) {
@@ -182,16 +184,16 @@ json Api::Impl::Table(double from_m, double to_m, double step_m, const json& win
         for (const json& v : speeds) {
             al::SessionConditions s = base;
             s.winds = {al::WindInput{v.get<double>(), from, 0.0}};
-            const al::RangeTable t = al::BuildRangeTable(p.value(), s, Unit(), from_m, to_m, step_m);
+            const al::RangeTable t =
+                al::BuildRangeTable(p.value(), s, Unit(), from_m, to_m, step_m);
             for (std::size_t i = 0; i < rows.size() && i < t.rows.size(); ++i) {
                 rows[i]["windages"].push_back(t.rows[i].windage);
                 rows[i]["windageClicksAt"].push_back(t.rows[i].windage_clicks);
             }
         }
     }
-    out["computeMs"] = std::chrono::duration<double, std::milli>(
-                           std::chrono::steady_clock::now() - start)
-                           .count();
+    out["computeMs"] =
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
     return out;
 }
 
@@ -201,7 +203,8 @@ void Api::Impl::AddSolutionHandlers(HandlerMap& h) {
         {"solution", [](I& s, const json&) -> json { return s.Solution(); }},
         {"rangeTable",
          [](I& s, const json& a) -> json {
-             return s.Table(s.table_from_m, s.table_to_m, s.table_step_m, a.value("windSpeeds", json::array()));
+             return s.Table(s.table_from_m, s.table_to_m, s.table_step_m,
+                            a.value("windSpeeds", json::array()));
          }},
         {"compareCurves", [](I& s, const json& a) -> json { return s.CompareCurves(a); }},
         {"pairOptions", [](I& s, const json&) -> json { return s.PairOptions(); }},
@@ -224,16 +227,18 @@ void Api::Impl::AddSolutionHandlers(HandlerMap& h) {
                  out["error"] = "Choose a rifle and a cartridge.";
                  return out;
              }
-             const al::WezResult r = al::ComputeWez(Must(bs::LoadProfile(s.db, s.profile_id)),
-                                                    s.Session(), w, Num(a, "toM", 1000.0),
-                                                    Num(a, "stepM", 50.0));
+             const al::WezResult r =
+                 al::ComputeWez(Must(bs::LoadProfile(s.db, s.profile_id)), s.Session(), w,
+                                Num(a, "toM", 1000.0), Num(a, "stepM", 50.0));
              json rows = json::array();
              for (const al::WezRow& row : r.rows) {
                  rows.push_back(ToJson(row));
              }
              json parts = json::array();
              for (const Spread::Part& p : r.parts) {
-                 parts.push_back({{"source", p.source}, {"upCm", p.up_m * 100.0}, {"rightCm", p.right_m * 100.0}});
+                 parts.push_back({{"source", p.source},
+                                  {"upCm", p.up_m * 100.0},
+                                  {"rightCm", p.right_m * 100.0}});
              }
              out.update({{"ok", r.ok},
                          {"error", r.error},
@@ -248,4 +253,4 @@ void Api::Impl::AddSolutionHandlers(HandlerMap& h) {
     });
 }
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge

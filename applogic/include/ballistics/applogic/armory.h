@@ -1,11 +1,11 @@
 #ifndef BALLISTICS_APPLOGIC_ARMORY_H
 #define BALLISTICS_APPLOGIC_ARMORY_H
 
-#include <string>
-#include <vector>
-
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/records.h>
+
+#include <string>
+#include <vector>
 
 // The armory screens: rifles (with their scope and zero) and cartridges
 // (with their bullet) as two independent lists, edited in the units shooters
@@ -18,10 +18,10 @@ using storage::Result;
 using storage::Status;
 
 // Scope adjustment units.
-inline constexpr const char* kClickMrad = "mrad";     // value in MRAD, e.g. 0.1
-inline constexpr const char* kClickMoa = "moa";       // true MOA, e.g. 0.25
-inline constexpr const char* kClickSmoa = "smoa";     // inch per 100 yd (shooter's MOA)
-inline constexpr const char* kClickCm100m = "cm100m"; // cm per 100 m
+inline constexpr const char* kClickMrad = "mrad";      // value in MRAD, e.g. 0.1
+inline constexpr const char* kClickMoa = "moa";        // true MOA, e.g. 0.25
+inline constexpr const char* kClickSmoa = "smoa";      // inch per 100 yd (shooter's MOA)
+inline constexpr const char* kClickCm100m = "cm100m";  // cm per 100 m
 
 // Angle of one click, rad; 0 for unknown units or non-positive values.
 double ClickToRad(const std::string& units, double value);
@@ -34,19 +34,19 @@ bool SameCaliber(const std::string& a, const std::string& b);
 // ---- Rifles ---------------------------------------------------------------
 
 struct RifleForm {
-    Id rifle_id = 0; // 0 = new rifle
+    Id rifle_id = 0;  // 0 = new rifle
 
     std::string name;
     std::string caliber;
     double sight_height_cm = 5.0;
-    double twist_in = 10.0; // 0 = unknown (no spin effects)
+    double twist_in = 10.0;  // 0 = unknown (no spin effects)
     bool twist_left = false;
 
     // Scope
     std::string click_units = kClickMrad;
     double click_value = 0.1;
-    Id reticle_id = 0;               // 0 = none
-    std::string focal_plane = "ffp"; // "ffp" | "sfp"
+    Id reticle_id = 0;                // 0 = none
+    std::string focal_plane = "ffp";  // "ffp" | "sfp"
     double sfp_reference_magnification = 0.0;
     double min_magnification = 0.0;
     double max_magnification = 0.0;
@@ -54,7 +54,7 @@ struct RifleForm {
     // Zero
     double zero_range_m = 100.0;
     double zero_temperature_c = 15.0;
-    double zero_pressure_hpa = 1013.25; // station pressure
+    double zero_pressure_hpa = 1013.25;  // station pressure
     double zero_altitude_m = 0.0;
     double zero_humidity_pct = 50.0;
     double zero_powder_c = 15.0;
@@ -79,7 +79,7 @@ Status DeleteRifle(storage::Database& db, Id rifle_id);
 // ---- Cartridges -----------------------------------------------------------
 
 struct CartridgeForm {
-    Id cartridge_id = 0; // 0 = new cartridge
+    Id cartridge_id = 0;  // 0 = new cartridge
     // A new cartridge copied from this (library) cartridge keeps what the
     // form does not show: measured velocities, barrel length, notes.
     Id copy_of = 0;
@@ -100,7 +100,7 @@ struct CartridgeForm {
 
     double muzzle_velocity_mps = 0.0;
     double powder_reference_c = 15.0;
-    double powder_sensitivity_pct_per_c = 0.0; // % of V0 per C
+    double powder_sensitivity_pct_per_c = 0.0;  // % of V0 per C
 };
 
 struct CartridgeSummary {
@@ -142,6 +142,6 @@ Status SetZeroOffset(storage::Database& db, Id profile_id, double up_cm, double 
 Result<Id> CreateSampleProfile(storage::Database& db, const std::string& rifle_name,
                                const std::string& cartridge_name);
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic
 
-#endif // BALLISTICS_APPLOGIC_ARMORY_H
+#endif  // BALLISTICS_APPLOGIC_ARMORY_H

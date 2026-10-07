@@ -1,9 +1,8 @@
 // The JSON facade the Kotlin app talks to: every method, through Call()
 // only, as the app sees it.
-#include <ballistics/bridge/api.h>
 #include <ballistics/applogic/session.h>
+#include <ballistics/bridge/api.h>
 #include <ballistics/storage/database.h>
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -11,12 +10,11 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <nlohmann/json.hpp>
 #include <set>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <nlohmann/json.hpp>
 
 namespace ballistics::bridge {
 namespace {
@@ -28,7 +26,8 @@ std::string TestBase64(const std::vector<std::uint8_t>& d) {
     static const char* a = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     std::string out;
     for (std::size_t i = 0; i < d.size(); i += 3) {
-        const unsigned n = (d[i] << 16) | (i + 1 < d.size() ? d[i + 1] << 8 : 0) | (i + 2 < d.size() ? d[i + 2] : 0);
+        const unsigned n = (d[i] << 16) | (i + 1 < d.size() ? d[i + 1] << 8 : 0) |
+                           (i + 2 < d.size() ? d[i + 2] : 0);
         out += a[(n >> 18) & 63];
         out += a[(n >> 12) & 63];
         out += i + 1 < d.size() ? a[(n >> 6) & 63] : '=';
@@ -38,7 +37,7 @@ std::string TestBase64(const std::vector<std::uint8_t>& d) {
 }
 
 class Bridge : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override { Ok("open", {{"path", ":memory:"}}); }
 
     // The result of a call that must succeed.
@@ -54,9 +53,7 @@ protected:
         return r.value("error", "");
     }
 
-    json Sample() {
-        return Ok("addSample", {{"rifleName", "Rifle"}, {"cartridgeName", "Load"}});
-    }
+    json Sample() { return Ok("addSample", {{"rifleName", "Rifle"}, {"cartridgeName", "Load"}}); }
 
     Api api_;
 };
@@ -65,22 +62,73 @@ protected:
 // assembled from the topic files: none may be lost when code moves).
 TEST_F(Bridge, EveryMethodIsThere) {
     const char* methods[] = {
-        "open", "seed", "seedVersion", "info", "state", "select", "targets", "saveTargets", "selectTarget",
-        "situations", "saveSituation", "applySituation", "deleteSituation", "setConditions",
-        "setSettings", "solution", "rangeTable", "compareCurves", "pairOptions", "trajectoryCurve",
-        "rifleForm", "saveRifle", "deleteRifle", "cartridgeForm", "saveCartridge", "deleteCartridge",
-        "stability", "photos", "photo", "setPhoto", "cartridgeFormWithBullet", "libraryScopes",
-        "libraryRifles", "libraryCartridges", "cartridgeFormFromLibrary", "setZeroOffset", "addSample",
-        "shots", "logShot", "deleteShot", "setShotUsed", "computeTruing", "applyTruing", "resetTruing",
-        "wez", "bcCalculator", "computeDsf", "applyDsf", "setDsf", "resetDsf", "reticles",
-        "libraryBullets", "bulletForm", "saveBullet", "deleteBullet", "exportJson", "importShared",
-        "importFiles", "stationPressure",
+        "open",
+        "seed",
+        "seedVersion",
+        "info",
+        "state",
+        "select",
+        "targets",
+        "saveTargets",
+        "selectTarget",
+        "situations",
+        "saveSituation",
+        "applySituation",
+        "deleteSituation",
+        "setConditions",
+        "setSettings",
+        "solution",
+        "rangeTable",
+        "compareCurves",
+        "pairOptions",
+        "trajectoryCurve",
+        "rifleForm",
+        "saveRifle",
+        "deleteRifle",
+        "cartridgeForm",
+        "saveCartridge",
+        "deleteCartridge",
+        "stability",
+        "photos",
+        "photo",
+        "setPhoto",
+        "cartridgeFormWithBullet",
+        "libraryScopes",
+        "libraryRifles",
+        "libraryCartridges",
+        "cartridgeFormFromLibrary",
+        "setZeroOffset",
+        "addSample",
+        "shots",
+        "logShot",
+        "deleteShot",
+        "setShotUsed",
+        "computeTruing",
+        "applyTruing",
+        "resetTruing",
+        "wez",
+        "bcCalculator",
+        "computeDsf",
+        "applyDsf",
+        "setDsf",
+        "resetDsf",
+        "reticles",
+        "libraryBullets",
+        "bulletForm",
+        "saveBullet",
+        "deleteBullet",
+        "exportJson",
+        "importShared",
+        "importFiles",
+        "stationPressure",
     };
     EXPECT_EQ(std::size(methods), 59U);
     for (const char* m : methods) {
         const json r = json::parse(api_.Call(m, "{}"));
         if (!r.at("ok").get<bool>()) {
-            EXPECT_EQ(r.at("error").get<std::string>().rfind("Unknown method", 0), std::string::npos) << m;
+            EXPECT_EQ(r.at("error").get<std::string>().rfind("Unknown method", 0),
+                      std::string::npos)
+                << m;
         }
     }
     EXPECT_EQ(Fails("noSuchMethod"), "Unknown method: noSuchMethod");
@@ -114,7 +162,8 @@ TEST_F(Bridge, SampleGivesTheKnownSolution) {
     EXPECT_TRUE(sol.at("hasScope").get<bool>());
     EXPECT_FALSE(sol.at("hasReticle").get<bool>());
     EXPECT_EQ(sol.at("holdMode"), "dial_elevation");
-    EXPECT_NEAR(sol.at("clickElevation").get<double>(), 0.1, 1e-9); // the sample scope: 0.1 mrad clicks
+    EXPECT_NEAR(sol.at("clickElevation").get<double>(), 0.1,
+                1e-9);  // the sample scope: 0.1 mrad clicks
     EXPECT_NEAR(sol.at("clickWindage").get<double>(), 0.1, 1e-9);
 }
 
@@ -123,13 +172,13 @@ TEST_F(Bridge, ConditionsAndSettingsChangeTheSolution) {
     const double base = Ok("solution").at("elevation").get<double>();
     const json c = Ok("setConditions", {{"targetRangeM", 800}, {"temperatureC", -10}});
     EXPECT_EQ(c.at("targetRangeM"), 800.0);
-    EXPECT_EQ(c.at("pressureHpa"), 1013.25); // untouched keys kept
+    EXPECT_EQ(c.at("pressureHpa"), 1013.25);  // untouched keys kept
     const double far = Ok("solution").at("elevation").get<double>();
     EXPECT_GT(far, base * 3);
 
     Ok("setSettings", {{"angleUnit", "moa"}});
     EXPECT_NEAR(Ok("solution").at("elevation").get<double>(), far * 3.4377, 0.01);
-    Ok("setSettings", {{"angleUnit", "furlongs"}}); // ignored
+    Ok("setSettings", {{"angleUnit", "furlongs"}});  // ignored
     EXPECT_EQ(Ok("state").at("angleUnit"), "moa");
 
     Ok("setSettings", {{"holdMode", "hold"}});
@@ -145,7 +194,7 @@ TEST_F(Bridge, ConditionsAndSettingsChangeTheSolution) {
 TEST_F(Bridge, WindZonesAndGust) {
     Sample();
     Ok("setConditions", {{"targetRangeM", 800}, {"windSpeed", 0}, {"windFromDeg", 270}});
-    const double still = Ok("solution").at("windage").get<double>(); // spin drift only
+    const double still = Ok("solution").at("windage").get<double>();  // spin drift only
     EXPECT_FALSE(Ok("solution").at("hasGust").get<bool>());
 
     // Calm here, wind from the right further out, more of it at the end.
@@ -153,9 +202,9 @@ TEST_F(Bridge, WindZonesAndGust) {
                                     {{"speedMps", 6}, {"fromDeg", 90}, {"untilM", 0}},
                                     {{"speedMps", 9}, {"fromDeg", 90}, {"untilM", 0}}});
     const json c = Ok("setConditions", {{"windUntilM", 300}, {"windZones", zones}});
-    ASSERT_EQ(c.at("windZones").size(), 2u); // three zones in all
+    ASSERT_EQ(c.at("windZones").size(), 2u);  // three zones in all
     EXPECT_EQ(c.at("windUntilM"), 300.0);
-    EXPECT_EQ(c.at("windFromDeg"), 270.0); // a calm zone keeps its direction
+    EXPECT_EQ(c.at("windFromDeg"), 270.0);  // a calm zone keeps its direction
     const double zoned = Ok("solution").at("windage").get<double>();
     EXPECT_GT(zoned, still + 0.1);
 
@@ -173,17 +222,18 @@ TEST_F(Bridge, MovingTarget) {
     Sample();
     EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "kmh");
     EXPECT_FALSE(Ok("solution").at("hasLead").get<bool>());
-    Ok("setConditions", {{"targetSpeedMps", 5}, {"targetHeadingDeg", 270}, {"targetSpeedUnit", "mps"}});
+    Ok("setConditions",
+       {{"targetSpeedMps", 5}, {"targetHeadingDeg", 270}, {"targetSpeedUnit", "mps"}});
     const json sol = Ok("solution");
     ASSERT_TRUE(sol.at("hasLead").get<bool>());
-    EXPECT_LT(sol.at("lead").get<double>(), -1.0); // to the left, ~5 mrad at 300 m
+    EXPECT_LT(sol.at("lead").get<double>(), -1.0);  // to the left, ~5 mrad at 300 m
     EXPECT_NEAR(sol.at("leadCm").get<double>(), -500.0 * sol.at("time").get<double>(), 1e-6);
     const json table = Ok("rangeTable");
     EXPECT_LT(table.at("rows").back().at("lead").get<double>(), sol.at("lead").get<double>());
     EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mps");
     Ok("setConditions", {{"targetSpeedUnit", "mph"}});
     EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mph");
-    Ok("setConditions", {{"targetSpeedUnit", "knots"}}); // not a unit the app has: kept as it was
+    Ok("setConditions", {{"targetSpeedUnit", "knots"}});  // not a unit the app has: kept as it was
     EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mph");
 }
 
@@ -197,16 +247,18 @@ TEST_F(Bridge, CompareCurves) {
     form["name"] = "Hot load";
     form["muzzleVelocity"] = 850.0;
     const auto hot = Ok("saveCartridge", {{"form", form}}).at("id").get<int>();
-    const auto chosen = Ok("state").at("currentCartridgeId").get<int>(); // saving selects it
+    const auto chosen = Ok("state").at("currentCartridgeId").get<int>();  // saving selects it
 
     const json options = Ok("pairOptions");
     ASSERT_EQ(options.size(), 1u);
     EXPECT_EQ(options[0].at("cartridges").size(), 2u);
 
-    const json curves = Ok("compareCurves", {{"maxRangeM", 1000}, {"points", 10},
-        {"pairs", json::array({{{"rifleId", rifle}, {"cartridgeId", first}},
-                               {{"rifleId", rifle}, {"cartridgeId", hot}},
-                               {{"rifleId", 999}, {"cartridgeId", hot}}})}});
+    const json curves =
+        Ok("compareCurves", {{"maxRangeM", 1000},
+                             {"points", 10},
+                             {"pairs", json::array({{{"rifleId", rifle}, {"cartridgeId", first}},
+                                                    {{"rifleId", rifle}, {"cartridgeId", hot}},
+                                                    {{"rifleId", 999}, {"cartridgeId", hot}}})}});
     ASSERT_EQ(curves.size(), 3u);
     ASSERT_TRUE(curves[0].at("ok").get<bool>());
     ASSERT_TRUE(curves[1].at("ok").get<bool>());
@@ -215,7 +267,7 @@ TEST_F(Bridge, CompareCurves) {
     const json& slow = curves[0].at("rows").back();
     const json& fast = curves[1].at("rows").back();
     EXPECT_GT(fast.at("velocity").get<double>(), slow.at("velocity").get<double>() + 10.0);
-    EXPECT_GT(fast.at("dropCm").get<double>(), slow.at("dropCm").get<double>()); // less drop
+    EXPECT_GT(fast.at("dropCm").get<double>(), slow.at("dropCm").get<double>());  // less drop
     EXPECT_FALSE(curves[2].at("ok").get<bool>());
     EXPECT_FALSE(curves[2].at("error").get<std::string>().empty());
     // The current choice is untouched.
@@ -225,12 +277,13 @@ TEST_F(Bridge, CompareCurves) {
 TEST_F(Bridge, DsfTable) {
     Sample();
     EXPECT_TRUE(Ok("solution").at("dsf").empty());
-    EXPECT_FALSE(Ok("computeDsf").at("ok").get<bool>()); // no shots yet
+    EXPECT_FALSE(Ok("computeDsf").at("ok").get<bool>());  // no shots yet
     EXPECT_EQ(Fails("applyDsf"), "Nothing to apply.");
 
     Ok("setConditions", {{"targetRangeM", 1300}});
     const double before = Ok("solution").at("elevation").get<double>();
-    Ok("setDsf", {{"points", json::array({{{"mach", 1.4}, {"factor", 1.0}}, {{"mach", 0.9}, {"factor", 1.15}}})}});
+    Ok("setDsf", {{"points", json::array({{{"mach", 1.4}, {"factor", 1.0}},
+                                          {{"mach", 0.9}, {"factor", 1.15}}})}});
     const json sol = Ok("solution");
     ASSERT_EQ(sol.at("dsf").size(), 2u);
     EXPECT_DOUBLE_EQ(sol.at("dsf")[0].at("mach").get<double>(), 0.9);
@@ -244,7 +297,7 @@ TEST_F(Bridge, DsfTable) {
     for (int range : {900, 1100, 1300}) {
         Ok("setConditions", {{"targetRangeM", range}});
         const double predicted = Ok("solution").at("elevation").get<double>();
-        const double more = range == 900 ? 1.0 : 1.03; // transonic: 3 % more drop
+        const double more = range == 900 ? 1.0 : 1.03;  // transonic: 3 % more drop
         Ok("logShot", {{"rangeM", range}, {"elevation", predicted * more}});
     }
     const json fit = Ok("computeDsf");
@@ -258,10 +311,13 @@ TEST_F(Bridge, BcCalculator) {
     EXPECT_EQ(Fails("bcCalculator", {{"mode", "hit"}, {"rangeM", 500}, {"elevation", 3}}),
               "Choose a rifle and a cartridge.");
     Sample();
-    json r = Ok("bcCalculator", {{"mode", "chronograph"}, {"table", "G7"}, {"vNearMps", 790},
-                                 {"vFarMps", 760}, {"distanceM", 100}});
+    json r = Ok("bcCalculator", {{"mode", "chronograph"},
+                                 {"table", "G7"},
+                                 {"vNearMps", 790},
+                                 {"vFarMps", 760},
+                                 {"distanceM", 100}});
     ASSERT_TRUE(r.at("ok").get<bool>()) << r.dump();
-    EXPECT_GT(r.at("bc").get<double>(), 0.4); // 30 m/s over 100 m: a long, sleek bullet
+    EXPECT_GT(r.at("bc").get<double>(), 0.4);  // 30 m/s over 100 m: a long, sleek bullet
     EXPECT_LT(r.at("bc").get<double>(), 0.6);
 
     // The sample's own correction at 800 m gives back its BC (G7 0.243).
@@ -269,24 +325,27 @@ TEST_F(Bridge, BcCalculator) {
     const double hit = Ok("solution").at("elevation").get<double>();
     r = Ok("bcCalculator", {{"mode", "hit"}, {"table", "G7"}, {"rangeM", 800}, {"elevation", hit}});
     ASSERT_TRUE(r.at("ok").get<bool>()) << r.dump();
-    EXPECT_NEAR(r.at("bc").get<double>(), 0.243, 0.002); // the shown correction is rounded
+    EXPECT_NEAR(r.at("bc").get<double>(), 0.243, 0.002);  // the shown correction is rounded
 
-    r = Ok("bcCalculator", {{"table", "G7"}, {"vNearMps", 700}, {"vFarMps", 760}, {"distanceM", 100}});
+    r = Ok("bcCalculator",
+           {{"table", "G7"}, {"vNearMps", 700}, {"vFarMps", 760}, {"distanceM", 100}});
     EXPECT_FALSE(r.at("ok").get<bool>());
     EXPECT_FALSE(r.at("error").get<std::string>().empty());
 }
 
 TEST_F(Bridge, HitProbability) {
     json r = Ok("wez");
-    EXPECT_FALSE(r.at("ok").get<bool>()); // no rifle yet, settings still there
+    EXPECT_FALSE(r.at("ok").get<bool>());  // no rifle yet, settings still there
     EXPECT_EQ(r.at("settings").at("targetKind"), "rectangle");
     Sample();
-    r = Ok("wez", {{"toM", 1000}, {"stepM", 100}, {"settings", {{"targetKind", "ellipse"}, {"groupMoa", 0.5}}}});
+    r = Ok("wez", {{"toM", 1000},
+                   {"stepM", 100},
+                   {"settings", {{"targetKind", "ellipse"}, {"groupMoa", 0.5}}}});
     ASSERT_TRUE(r.at("ok").get<bool>()) << r.dump();
     EXPECT_EQ(r.at("rows").size(), 10u);
     EXPECT_EQ(r.at("settings").at("targetKind"), "ellipse");
     EXPECT_EQ(r.at("settings").at("groupMoa"), 0.5);
-    EXPECT_GT(r.at("atTarget").at("probability").get<double>(), 0.5); // 300 m, a 50 cm ellipse
+    EXPECT_GT(r.at("atTarget").at("probability").get<double>(), 0.5);  // 300 m, a 50 cm ellipse
     EXPECT_GE(r.at("shots95").get<int>(), r.at("shots50").get<int>());
     EXPECT_FALSE(r.at("parts").empty());
     // Kept.
@@ -379,11 +438,14 @@ TEST_F(Bridge, PhotosGoWithTheirRecords) {
     ASSERT_EQ(all.size(), 1U);
     EXPECT_EQ(all.at(std::to_string(cartridge)), "AAEC");
 
-    EXPECT_EQ(Fails("setPhoto", {{"kind", "rifle"}, {"id", 999}, {"image", "AAEC"}}), "Save the record first.");
-    EXPECT_EQ(Fails("setPhoto", {{"kind", "bullet"}, {"id", 1}, {"image", "AAEC"}}), "Unknown kind of record.");
-    EXPECT_EQ(Fails("setPhoto", {{"kind", "rifle"}, {"id", rifle}, {"image", "*"}}), "The picture is damaged.");
+    EXPECT_EQ(Fails("setPhoto", {{"kind", "rifle"}, {"id", 999}, {"image", "AAEC"}}),
+              "Save the record first.");
+    EXPECT_EQ(Fails("setPhoto", {{"kind", "bullet"}, {"id", 1}, {"image", "AAEC"}}),
+              "Unknown kind of record.");
+    EXPECT_EQ(Fails("setPhoto", {{"kind", "rifle"}, {"id", rifle}, {"image", "*"}}),
+              "The picture is damaged.");
 
-    Ok("setPhoto", {{"kind", "rifle"}, {"id", rifle}, {"image", ""}}); // removes
+    Ok("setPhoto", {{"kind", "rifle"}, {"id", rifle}, {"image", ""}});  // removes
     EXPECT_TRUE(Ok("photos", {{"kind", "rifle"}}).empty());
     Ok("deleteCartridge", {{"id", cartridge}});
     EXPECT_TRUE(Ok("photos", {{"kind", "cartridge"}}).empty());
@@ -393,13 +455,22 @@ TEST_F(Bridge, StabilityForTheEditors) {
     // .308 175 gr (1.24 in) from a 1:10 barrel at 790 m/s (2592 fps), by hand:
     // twist 32.47 cal, length 4.026 cal; 30 * 175 / (32.47^2 * 0.308^3 *
     // 4.026 * (1 + 4.026^2)) = 2.46, times (2592 / 2800)^(1/3) = 0.975: 2.40.
-    const json r = Ok("stability", {{"twistIn", 10}, {"massGr", 175}, {"diameterIn", 0.308},
-                                    {"lengthIn", 1.24}, {"velocityMps", 790}});
+    const json r = Ok("stability", {{"twistIn", 10},
+                                    {"massGr", 175},
+                                    {"diameterIn", 0.308},
+                                    {"lengthIn", 1.24},
+                                    {"velocityMps", 790}});
     EXPECT_NEAR(r.at("sg").get<double>(), 2.40, 0.01);
     // A 1:14 barrel: Sg scales with 1/twist^2, 2.40 * (10/14)^2 = 1.22, marginal.
-    EXPECT_NEAR(Ok("stability", {{"twistIn", 14}, {"massGr", 175}, {"diameterIn", 0.308},
-                                 {"lengthIn", 1.24}, {"velocityMps", 790}}).at("sg").get<double>(), 1.22, 0.01);
-    EXPECT_EQ(Ok("stability", {{"twistIn", 10}, {"massGr", 175}}).at("sg"), 0.0); // missing inputs
+    EXPECT_NEAR(Ok("stability", {{"twistIn", 14},
+                                 {"massGr", 175},
+                                 {"diameterIn", 0.308},
+                                 {"lengthIn", 1.24},
+                                 {"velocityMps", 790}})
+                    .at("sg")
+                    .get<double>(),
+                1.22, 0.01);
+    EXPECT_EQ(Ok("stability", {{"twistIn", 10}, {"massGr", 175}}).at("sg"), 0.0);  // missing inputs
 }
 
 TEST_F(Bridge, TargetsWithTheirHolds) {
@@ -408,7 +479,11 @@ TEST_F(Bridge, TargetsWithTheirHolds) {
     EXPECT_TRUE(Ok("targets").empty());
     const json list = {
         {{"name", "Gong 300"}, {"rangeM", 300}},
-        {{"name", " Steel 600 "}, {"rangeM", 600}, {"lookAngleDeg", 5}, {"windSpeed", 4}, {"windFromDeg", 90}},
+        {{"name", " Steel 600 "},
+         {"rangeM", 600},
+         {"lookAngleDeg", 5},
+         {"windSpeed", 4},
+         {"windFromDeg", 90}},
     };
     json t = Ok("saveTargets", {{"targets", list}});
     ASSERT_EQ(t.size(), 2U);
@@ -434,7 +509,8 @@ TEST_F(Bridge, TargetsWithTheirHolds) {
     EXPECT_NEAR(Ok("targets")[1].at("holdY").get<double>(), 0.0, 0.05);
 
     EXPECT_EQ(Fails("selectTarget", {{"index", 5}}), "No such target.");
-    EXPECT_EQ(Fails("saveTargets", {{"targets", {{{"name", ""}, {"rangeM", 300}}}}}), "Enter a name for each target.");
+    EXPECT_EQ(Fails("saveTargets", {{"targets", {{{"name", ""}, {"rangeM", 300}}}}}),
+              "Enter a name for each target.");
     EXPECT_EQ(Fails("saveTargets", {{"targets", {{{"name", "x"}, {"rangeM", 5}}}}}),
               "A target range must be between 10 and 3000 m.");
     json many = json::array();
@@ -451,16 +527,18 @@ TEST_F(Bridge, RangeTableAndCurve) {
     ASSERT_TRUE(t.at("ok").get<bool>());
     ASSERT_EQ(t.at("rows").size(), 11U);
     EXPECT_NEAR(t.at("rows")[3].at("elevation").get<double>(),
-                Ok("solution").at("elevation").get<double>(), 1e-9); // 300 m
-    EXPECT_EQ(Ok("trajectoryCurve", {{"maxRangeM", 1000}, {"points", 250}}).at("rows").size(), 251U);
+                Ok("solution").at("elevation").get<double>(), 1e-9);  // 300 m
+    EXPECT_EQ(Ok("trajectoryCurve", {{"maxRangeM", 1000}, {"points", 250}}).at("rows").size(),
+              251U);
 
     // Wind columns: each speed computed in full, from the set direction.
     Ok("setConditions", {{"windSpeed", 4}, {"windFromDeg", 90}});
     const json w = Ok("rangeTable", {{"windSpeeds", {2, 4, 8}}});
     EXPECT_EQ(w.at("windSpeeds").size(), 3U);
-    const json& row = w.at("rows")[5]; // 500 m
+    const json& row = w.at("rows")[5];  // 500 m
     ASSERT_EQ(row.at("windages").size(), 3U);
-    EXPECT_NEAR(row.at("windages")[1].get<double>(), row.at("windage").get<double>(), 1e-9); // 4 m/s: as set
+    EXPECT_NEAR(row.at("windages")[1].get<double>(), row.at("windage").get<double>(),
+                1e-9);  // 4 m/s: as set
     // Spin drift plus a part growing with the wind: 4 more m/s give twice
     // what 2 more give (point mass: the crosswind part is close to linear).
     const double w2 = row.at("windages")[0], w4 = row.at("windages")[1], w8 = row.at("windages")[2];
@@ -476,7 +554,7 @@ TEST_F(Bridge, RifleAndCartridgeFormsAndSelection) {
     r["caliber"] = ".308 Win";
     const auto rifle = Ok("saveRifle", {{"form", r}}).at("id").get<int>();
     EXPECT_EQ(Ok("state").at("currentRifleId"), rifle);
-    EXPECT_EQ(Ok("state").at("currentProfileId"), 0); // no cartridge yet
+    EXPECT_EQ(Ok("state").at("currentProfileId"), 0);  // no cartridge yet
 
     json c = Ok("cartridgeForm", {{"id", 0}});
     c["name"] = "Load";
@@ -549,7 +627,7 @@ TEST_F(Bridge, ShareRifleAndCartridge) {
     EXPECT_NE(e.at("json").get<std::string>().find("balcalc-rifle"), std::string::npos);
     const json after = Ok("importShared", {{"text", e.at("json")}});
     EXPECT_EQ(after.at("rifles").size(), 2U);
-    EXPECT_NE(after.at("currentRifleId"), rifle); // the imported one is current
+    EXPECT_NE(after.at("currentRifleId"), rifle);  // the imported one is current
     const json c = Ok("exportJson", {{"kind", "cartridge"}, {"id", st.at("currentCartridgeId")}});
     EXPECT_EQ(Ok("importShared", {{"text", c.at("json")}}).at("cartridges").size(), 2U);
     EXPECT_FALSE(Fails("importShared", {{"text", "nonsense"}}).empty());
@@ -561,15 +639,16 @@ TEST_F(Bridge, BulletLibraryAndImports) {
     b["name"] = "Test 175";
     b["massGr"] = 175;
     b["diameterIn"] = 0.308;
-    b["bands"] = json::array({{{"velocity", 869}, {"bc", 0.505}}, {{"velocity", 701}, {"bc", 0.496}}});
+    b["bands"] =
+        json::array({{{"velocity", 869}, {"bc", 0.505}}, {{"velocity", 701}, {"bc", 0.496}}});
     const auto id = Ok("saveBullet", {{"form", b}}).at("id").get<int>();
     const json list = Ok("libraryBullets", {{"filter", "test"}});
     ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0].at("bcBands"), 2);
     EXPECT_EQ(Ok("bulletForm", {{"id", id}}).at("bands").size(), 2U);
 
-    const json c = Ok("cartridgeFormWithBullet", {{"form", Ok("cartridgeForm", {{"id", 0}})},
-                                                  {"bulletId", id}});
+    const json c = Ok("cartridgeFormWithBullet",
+                      {{"form", Ok("cartridgeForm", {{"id", 0}})}, {"bulletId", id}});
     EXPECT_EQ(c.at("libraryBulletId"), id);
     EXPECT_NEAR(c.at("massGr").get<double>(), 175.0, 1e-9);
     Ok("deleteBullet", {{"id", id}});
@@ -619,7 +698,8 @@ TEST_F(Bridge, NewerSeedAddsOnlyWhatIsNew) {
 TEST_F(Bridge, LaterStartNeedsOnlyTheCatalogs) {
     json catalogs = json::array();
     for (const char* name : {"published_scopes.json", "published_rifles.json"}) {
-        std::ifstream in(std::filesystem::path(std::string(BALLISTICS_SEED_DIR)) / name, std::ios::binary);
+        std::ifstream in(std::filesystem::path(std::string(BALLISTICS_SEED_DIR)) / name,
+                         std::ios::binary);
         std::ostringstream text;
         text << in.rdbuf();
         catalogs.push_back({{"name", name}, {"content", text.str()}});
@@ -635,10 +715,10 @@ TEST_F(Bridge, StarterLibraryIsSeededOnce) {
          std::filesystem::recursive_directory_iterator(std::string(BALLISTICS_SEED_DIR))) {
         const std::string name = entry.path().filename().string();
         if (entry.path().parent_path().filename() == "sources") {
-            continue; // collection inputs, not shipped
+            continue;  // collection inputs, not shipped
         }
-        if (!entry.is_regular_file() || name == "README.md" || name.find(".py") != std::string::npos ||
-            name.rfind("LICENSE", 0) == 0) {
+        if (!entry.is_regular_file() || name == "README.md" ||
+            name.find(".py") != std::string::npos || name.rfind("LICENSE", 0) == 0) {
             continue;
         }
         std::ifstream in(entry.path(), std::ios::binary);
@@ -647,13 +727,13 @@ TEST_F(Bridge, StarterLibraryIsSeededOnce) {
         files.push_back({{"name", name}, {"content", text.str()}});
     }
     const json r = Ok("seed", {{"version", 1}, {"files", files}});
-    EXPECT_EQ(r.at("imported"), 337) << r.dump(); // 69 ammo + 1 drg + 14 reticles + 253 bullets
+    EXPECT_EQ(r.at("imported"), 337) << r.dump();  // 69 ammo + 1 drg + 14 reticles + 253 bullets
     EXPECT_EQ(Ok("libraryBullets").size(), 323U);
     EXPECT_EQ(Ok("libraryCartridges").size(), 69U);
     EXPECT_EQ(Ok("reticles").size(), 14U);
     EXPECT_EQ(Ok("libraryScopes").size(), 50U);
     EXPECT_EQ(Ok("libraryRifles").size(), 126U);
-    EXPECT_TRUE(Ok("state").at("cartridges").empty()); // factory loads stay in the library
+    EXPECT_TRUE(Ok("state").at("cartridges").empty());  // factory loads stay in the library
     EXPECT_EQ(Ok("seed", {{"version", 1}, {"files", files}}).at("imported"), 0);
 
     const json lib = Ok("libraryCartridges", {{"filter", "GP11"}});
@@ -674,13 +754,14 @@ TEST_F(Bridge, PublishedScopesAndRiflesAreSane) {
         text << in.rdbuf();
         files.push_back({{"name", name}, {"content", text.str()}});
     }
-    EXPECT_EQ(Ok("seed", {{"version", 1}, {"files", files}}).at("imported"), 0); // not records
+    EXPECT_EQ(Ok("seed", {{"version", 1}, {"files", files}}).at("imported"), 0);  // not records
 
     const json scopes = Ok("libraryScopes");
     ASSERT_GE(scopes.size(), 50U);
     std::set<std::string> names;
     for (const json& s : scopes) {
-        const std::string name = s.at("maker").get<std::string>() + " " + s.at("model").get<std::string>();
+        const std::string name =
+            s.at("maker").get<std::string>() + " " + s.at("model").get<std::string>();
         SCOPED_TRACE(name);
         EXPECT_TRUE(names.insert(name).second) << "duplicate";
         EXPECT_EQ(s.at("source").get<std::string>().rfind("https://", 0), 0U);
@@ -711,8 +792,9 @@ TEST_F(Bridge, PublishedScopesAndRiflesAreSane) {
     ASSERT_GE(rifles.size(), 100U);
     std::set<std::string> keys;
     for (const json& r : rifles) {
-        const std::string key = r.at("maker").get<std::string>() + " " + r.at("model").get<std::string>() +
-                                " " + r.at("caliber").get<std::string>() + " " + r.at("twistIn").dump();
+        const std::string key = r.at("maker").get<std::string>() + " " +
+                                r.at("model").get<std::string>() + " " +
+                                r.at("caliber").get<std::string>() + " " + r.at("twistIn").dump();
         SCOPED_TRACE(key);
         EXPECT_TRUE(keys.insert(key).second) << "duplicate";
         EXPECT_EQ(r.at("source").get<std::string>().rfind("https://", 0), 0U);
@@ -743,13 +825,15 @@ TEST(BridgeFile, SessionSelectionAndSettingsPersist) {
     int rifle = 0;
     {
         Api api;
-        ASSERT_NE(api.Call("open", json{{"path", path}}.dump()).find("\"ok\":true"), std::string::npos);
+        ASSERT_NE(api.Call("open", json{{"path", path}}.dump()).find("\"ok\":true"),
+                  std::string::npos);
         const json st = json::parse(api.Call("addSample", "{}")).at("result");
         rifle = st.at("currentRifleId");
-        api.Call("setConditions", R"({"targetRangeM": 650, "powderFollowsAir": false, "powderC": 5})");
+        api.Call("setConditions",
+                 R"({"targetRangeM": 650, "powderFollowsAir": false, "powderC": 5})");
         api.Call("setSettings", R"({"angleUnit": "moa", "holdMode": "dial", "language": "uk"})");
         api.Call("setSettings", R"({"prefs": {"theme": "night", "keepScreenOn": true, "old": 1}})");
-        api.Call("setSettings", R"({"prefs": {"old": null}})"); // merged; null removes
+        api.Call("setSettings", R"({"prefs": {"old": null}})");  // merged; null removes
     }
     {
         Api api;
@@ -807,10 +891,10 @@ TEST(BridgeFile, WindStartsFromNoon) {
         const json c = json::parse(api.Call("state", "")).at("result").at("conditions");
         EXPECT_EQ(c.at("windFromDeg"), 0.0) << start;
         EXPECT_EQ(c.at("windSpeed"), 5.0) << start;
-        api.Call("setConditions", R"({"windFromDeg": 90})"); // not kept to the next start
+        api.Call("setConditions", R"({"windFromDeg": 90})");  // not kept to the next start
     }
     std::filesystem::remove(path);
 }
 
-} // namespace
-} // namespace ballistics::bridge
+}  // namespace
+}  // namespace ballistics::bridge

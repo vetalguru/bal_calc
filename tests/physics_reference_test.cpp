@@ -2,9 +2,6 @@
 // (py-ballisticcalc SciPy DOP853, rtol 1e-12; see reference/generate_reference.py).
 #include <ballistics/solver.h>
 #include <ballistics/units.h>
-
-#include "reference/reference_setup.h"
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -12,6 +9,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include "reference/reference_setup.h"
 
 namespace ballistics {
 namespace {
@@ -103,5 +102,5 @@ TEST(PhysicsReference, ZeroMatchesReference) {
     }
 }
 
-} // namespace
-} // namespace ballistics
+}  // namespace
+}  // namespace ballistics

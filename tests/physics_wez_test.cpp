@@ -2,7 +2,6 @@
 // spread against real flights with random errors.
 #include <ballistics/units.h>
 #include <ballistics/wez.h>
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -45,8 +44,9 @@ TEST(PhysicsWez, CorrelatedSpreadAgainstSampling) {
     s.sigma_up_m = 0.2;
     s.sigma_right_m = 0.15;
     s.correlation = 0.6;
-    for (Target t : {Target{Target::Kind::kRectangle, 0.3, 0.3}, Target{Target::Kind::kFigure, 0.5, 0.8},
-                     Target{Target::Kind::kEllipse, 0.4, 0.2}}) {
+    for (Target t :
+         {Target{Target::Kind::kRectangle, 0.3, 0.3}, Target{Target::Kind::kFigure, 0.5, 0.8},
+          Target{Target::Kind::kEllipse, 0.4, 0.2}}) {
         std::mt19937 rng(7);
         std::normal_distribution<double> n(0.0, 1.0);
         int hits = 0;
@@ -61,8 +61,10 @@ TEST(PhysicsWez, CorrelatedSpreadAgainstSampling) {
             } else if (t.kind == Target::Kind::kEllipse) {
                 inside = std::pow(2 * up / t.height_m, 2) + std::pow(2 * right / t.width_m, 2) <= 1;
             } else {
-                inside = (up >= -0.35 * t.height_m && up <= 0.35 * t.height_m && std::abs(right) <= t.width_m / 2) ||
-                         (up > 0.35 * t.height_m && up <= 0.65 * t.height_m && std::abs(right) <= 0.2 * t.width_m);
+                inside = (up >= -0.35 * t.height_m && up <= 0.35 * t.height_m &&
+                          std::abs(right) <= t.width_m / 2) ||
+                         (up > 0.35 * t.height_m && up <= 0.65 * t.height_m &&
+                          std::abs(right) <= 0.2 * t.width_m);
             }
             hits += inside;
         }
@@ -72,7 +74,7 @@ TEST(PhysicsWez, CorrelatedSpreadAgainstSampling) {
 }
 
 TEST(PhysicsWez, ShotsToHit) {
-    EXPECT_EQ(ShotsToHit(0.5, 0.95), 5); // 1 - 0.5^5 = 0.97
+    EXPECT_EQ(ShotsToHit(0.5, 0.95), 5);  // 1 - 0.5^5 = 0.97
     EXPECT_EQ(ShotsToHit(0.5, 0.5), 1);
     EXPECT_EQ(ShotsToHit(0.1, 0.9), 22);
     EXPECT_EQ(ShotsToHit(1.0, 0.99), 1);
@@ -155,7 +157,7 @@ TEST(PhysicsWez, PartsNameTheirSources) {
     e.muzzle_velocity_mps = 3.0;
     const Spread s = WezModel(shot, e, 700.0).At(600.0);
     ASSERT_EQ(s.parts.size(), 2u);
-    EXPECT_EQ(s.parts[0].source, "windSpeed"); // 2 m/s of wind beats 3 m/s of velocity
+    EXPECT_EQ(s.parts[0].source, "windSpeed");  // 2 m/s of wind beats 3 m/s of velocity
     EXPECT_GT(std::abs(s.parts[0].right_m), 5 * std::abs(s.parts[0].up_m));
     EXPECT_EQ(s.parts[1].source, "muzzleVelocity");
     EXPECT_GT(std::abs(s.parts[1].up_m), 5 * std::abs(s.parts[1].right_m));
@@ -165,5 +167,5 @@ TEST(PhysicsWez, PartsNameTheirSources) {
     EXPECT_NEAR(HitProbability(none, {}), 1.0, 1e-9);
 }
 
-} // namespace
-} // namespace ballistics
+}  // namespace
+}  // namespace ballistics

@@ -10,7 +10,9 @@ std::optional<std::string> Api::Impl::Setting(const char* key) {
     return v && v.value() ? v.value() : std::nullopt;
 }
 
-void Api::Impl::Put(const char* key, const std::string& value) { bs::SetSetting(db, key, value).ok(); }
+void Api::Impl::Put(const char* key, const std::string& value) {
+    bs::SetSetting(db, key, value).ok();
+}
 
 void Api::Impl::LoadSettings() {
     angle_unit = Setting(kAngleUnitKey).value_or(angle_unit);
@@ -23,9 +25,9 @@ void Api::Impl::LoadSettings() {
             ui_prefs = prefs;
         }
     }
-    for (const auto& [key, value] : {std::pair{kTableFromKey, &table_from_m},
-                                     std::pair{kTableToKey, &table_to_m},
-                                     std::pair{kTableStepKey, &table_step_m}}) {
+    for (const auto& [key, value] :
+         {std::pair{kTableFromKey, &table_from_m}, std::pair{kTableToKey, &table_to_m},
+          std::pair{kTableStepKey, &table_step_m}}) {
         if (auto v = Setting(key)) {
             try {
                 *value = std::stod(*v);
@@ -55,7 +57,7 @@ al::SessionConditions Api::Impl::Session() const {
     for (std::size_t i = 0; i < wind_zones.size(); ++i) {
         al::WindInput w = wind_zones[i];
         if (i + 1 == wind_zones.size()) {
-            w.until_m = 0.0; // the last zone goes to the end
+            w.until_m = 0.0;  // the last zone goes to the end
         }
         s.winds.push_back(w);
     }
@@ -111,14 +113,22 @@ void Api::Impl::ApplySession(const al::SessionConditions& s) {
 }
 
 json Api::Impl::Conditions() const {
-    return {{"temperatureC", temperature_c},   {"pressureHpa", pressure_hpa},
-            {"altitudeM", altitude_m},         {"humidityPct", humidity_pct},
-            {"powderFollowsAir", powder_follows_air}, {"powderC", powder_c},
-            {"windSpeed", wind_speed},         {"windFromDeg", wind_from_deg},
-            {"lookAngleDeg", look_angle_deg},  {"cantDeg", cant_deg},
-            {"coriolis", coriolis},            {"latitudeDeg", latitude_deg},
-            {"useAzimuth", use_azimuth},       {"azimuthDeg", azimuth_deg},
-            {"targetRangeM", target_range_m},  {"magnification", magnification},
+    return {{"temperatureC", temperature_c},
+            {"pressureHpa", pressure_hpa},
+            {"altitudeM", altitude_m},
+            {"humidityPct", humidity_pct},
+            {"powderFollowsAir", powder_follows_air},
+            {"powderC", powder_c},
+            {"windSpeed", wind_speed},
+            {"windFromDeg", wind_from_deg},
+            {"lookAngleDeg", look_angle_deg},
+            {"cantDeg", cant_deg},
+            {"coriolis", coriolis},
+            {"latitudeDeg", latitude_deg},
+            {"useAzimuth", use_azimuth},
+            {"azimuthDeg", azimuth_deg},
+            {"targetRangeM", target_range_m},
+            {"magnification", magnification},
             {"useDensityAltitude", use_density_altitude},
             {"densityAltitudeM", density_altitude_m},
             {"targetHeightCm", target_height_cm},
@@ -133,7 +143,8 @@ json Api::Impl::Conditions() const {
 json Api::Impl::ZonesJson() const {
     json zones = json::array();
     for (const al::WindInput& w : wind_zones) {
-        zones.push_back({{"speedMps", w.speed_mps}, {"fromDeg", w.from_deg}, {"untilM", w.until_m}});
+        zones.push_back(
+            {{"speedMps", w.speed_mps}, {"fromDeg", w.from_deg}, {"untilM", w.until_m}});
     }
     return zones;
 }
@@ -166,7 +177,8 @@ void Api::Impl::SetConditions(const json& a) {
     num("windGustMps", wind_gust_mps);
     num("targetSpeedMps", target_speed_mps);
     num("targetHeadingDeg", target_heading_deg);
-    if (const std::string u = Str(a, "targetSpeedUnit"); (u == "kmh" || u == "mps" || u == "mph") && u != target_speed_unit) {
+    if (const std::string u = Str(a, "targetSpeedUnit");
+        (u == "kmh" || u == "mps" || u == "mph") && u != target_speed_unit) {
         target_speed_unit = u;
         Put(kTargetSpeedUnitKey, u);
     }
@@ -273,7 +285,7 @@ void Api::Impl::AddSessionHandlers(HandlerMap& h) {
                  s.Put(kLanguageKey, s.language);
              }
              if (a.contains("prefs") && a.at("prefs").is_object()) {
-                 s.ui_prefs.merge_patch(a.at("prefs")); // a null value removes a key
+                 s.ui_prefs.merge_patch(a.at("prefs"));  // a null value removes a key
                  s.Put(kUiPrefsKey, s.ui_prefs.dump());
              }
              for (const auto& [name, key, field] :
@@ -295,4 +307,4 @@ void Api::Impl::AddSessionHandlers(HandlerMap& h) {
     });
 }
 
-} // namespace ballistics::bridge
+}  // namespace ballistics::bridge

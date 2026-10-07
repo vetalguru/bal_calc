@@ -1,10 +1,9 @@
 // JNI entry points of org.vetalguru.balcalc.core.Native (Android and
 // desktop): a handle to a bridge::Api and its one call.
+#include <ballistics/bridge/api.h>
 #include <jni.h>
 
 #include <string>
-
-#include <ballistics/bridge/api.h>
 
 namespace {
 
@@ -81,10 +80,11 @@ jstring FromUtf8(JNIEnv* env, const std::string& s) {
             out += static_cast<char16_t>(c);
         }
     }
-    return env->NewString(reinterpret_cast<const jchar*>(out.data()), static_cast<jsize>(out.size()));
+    return env->NewString(reinterpret_cast<const jchar*>(out.data()),
+                          static_cast<jsize>(out.size()));
 }
 
-} // namespace
+}  // namespace
 
 extern "C" {
 
@@ -98,10 +98,9 @@ JNIEXPORT void JNICALL Java_org_vetalguru_balcalc_core_Native_destroy(JNIEnv*, j
 }
 
 JNIEXPORT jstring JNICALL Java_org_vetalguru_balcalc_core_Native_call(JNIEnv* env, jclass,
-                                                                      jlong handle,
-                                                                      jstring method,
+                                                                      jlong handle, jstring method,
                                                                       jstring args) {
     return FromUtf8(env, FromHandle(handle)->Call(ToUtf8(env, method), ToUtf8(env, args)));
 }
 
-} // extern "C"
+}  // extern "C"

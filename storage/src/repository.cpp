@@ -1,4 +1,6 @@
 #include <ballistics/storage/repository.h>
+#include <sqlite_manager/statement.h>
+#include <sqlite_manager/transaction.h>
 
 #include <cstdint>
 #include <functional>
@@ -7,9 +9,6 @@
 #include <utility>
 #include <variant>
 #include <vector>
-
-#include <sqlite_manager/statement.h>
-#include <sqlite_manager/transaction.h>
 
 namespace ballistics::storage {
 
@@ -59,12 +58,12 @@ struct Column {
     const char* name;
     std::function<Value(const T&)> get;
     std::function<void(T&, const Value&)> set;
-    bool insert = true; // false: filled by the database (defaults)
+    bool insert = true;  // false: filled by the database (defaults)
 };
 
 // Column bound to a data member; the member type picks the conversion.
 template <typename T, typename M>
-Column<T> Col(const char* name, M T::*member) {
+Column<T> Col(const char* name, M T::* member) {
     Column<T> c{name, nullptr, nullptr};
     c.get = [member](const T& r) -> Value {
         const M& m = r.*member;
@@ -109,14 +108,14 @@ Column<T> Col(const char* name, M T::*member) {
 
 // Column bound to a member of a nested struct (e.g. atmosphere fields).
 template <typename T, typename S>
-Column<T> Nested(const char* name, S T::*outer, double S::*inner) {
+Column<T> Nested(const char* name, S T::* outer, double S::* inner) {
     return {name, [outer, inner](const T& r) -> Value { return (r.*outer).*inner; },
             [outer, inner](T& r, const Value& v) { (r.*outer).*inner = AsDouble(v); }};
 }
 
 // Text column the database fills with its default when left empty.
 template <typename T>
-Column<T> DbDefaultText(const char* name, std::string T::*member) {
+Column<T> DbDefaultText(const char* name, std::string T::* member) {
     Column<T> c = Col(name, member);
     c.insert = false;
     return c;
@@ -147,11 +146,15 @@ Status Bind(Statement& st, const std::string& param, const Value& v) {
 
 Value Read(const Statement& st, int col) {
     switch (st.ColumnType(col)) {
-        case ValueType::kInteger: return st.ColumnInt64(col);
-        case ValueType::kFloat: return st.ColumnDouble(col);
-        case ValueType::kText: return st.ColumnText(col);
+        case ValueType::kInteger:
+            return st.ColumnInt64(col);
+        case ValueType::kFloat:
+            return st.ColumnDouble(col);
+        case ValueType::kText:
+            return st.ColumnText(col);
         case ValueType::kBlob:
-        case ValueType::kNull: break;
+        case ValueType::kNull:
+            break;
     }
     return {};
 }
@@ -231,8 +234,9 @@ const Table<DragCurveRecord>& TableOf() {
                 return s;
             }
             for (const DragPoint& p : r.points) {
-                if (Status s = Exec(db, "INSERT INTO drag_point (curve_id, mach, cd) VALUES (?, ?, ?)",
-                                    {r.id, p.mach, p.cd});
+                if (Status s =
+                        Exec(db, "INSERT INTO drag_point (curve_id, mach, cd) VALUES (?, ?, ?)",
+                             {r.id, p.mach, p.cd});
                     !s) {
                     return s;
                 }
@@ -242,7 +246,9 @@ const Table<DragCurveRecord>& TableOf() {
         [](Database& db, R& r) -> Status {
             auto rows = Rows<DragPoint>(
                 db, "SELECT mach, cd FROM drag_point WHERE curve_id = ? ORDER BY mach", r.id,
-                [](const Statement& st) { return DragPoint{st.ColumnDouble(0), st.ColumnDouble(1)}; });
+                [](const Statement& st) {
+                    return DragPoint{st.ColumnDouble(0), st.ColumnDouble(1)};
+                });
             if (!rows) {
                 return rows.error();
             }
@@ -279,11 +285,13 @@ const Table<BulletRecord>& TableOf() {
             return Ok();
         },
         [](Database& db, R& r) -> Status {
-            auto rows = Rows<BcPoint>(
-                db,
-                "SELECT velocity_mps, bc FROM bullet_bc_band WHERE bullet_id = ? "
-                "ORDER BY velocity_mps DESC",
-                r.id, [](const Statement& st) { return BcPoint{st.ColumnDouble(0), st.ColumnDouble(1)}; });
+            auto rows =
+                Rows<BcPoint>(db,
+                              "SELECT velocity_mps, bc FROM bullet_bc_band WHERE bullet_id = ? "
+                              "ORDER BY velocity_mps DESC",
+                              r.id, [](const Statement& st) {
+                                  return BcPoint{st.ColumnDouble(0), st.ColumnDouble(1)};
+                              });
             if (!rows) {
                 return rows.error();
             }
@@ -328,7 +336,8 @@ const Table<CartridgeRecord>& TableOf() {
                 db,
                 "SELECT powder_temp_k, velocity_mps FROM cartridge_velocity_point "
                 "WHERE cartridge_id = ? ORDER BY powder_temp_k",
-                r.id, [](const Statement& st) { return Point{st.ColumnDouble(0), st.ColumnDouble(1)}; });
+                r.id,
+                [](const Statement& st) { return Point{st.ColumnDouble(0), st.ColumnDouble(1)}; });
             if (!rows) {
                 return rows.error();
             }
@@ -341,53 +350,52 @@ const Table<CartridgeRecord>& TableOf() {
 template <>
 const Table<RifleRecord>& TableOf() {
     using R = RifleRecord;
-    static const Table<R> t{"rifle",
-                            "name, id",
-                            {Col("name", &R::name), Col("caliber", &R::caliber),
-                             Col("barrel_length_m", &R::barrel_length_m),
-                             Col("twist_m", &R::twist_m), Col("sight_height_m", &R::sight_height_m),
-                             Col("notes", &R::notes), Col("scope_id", &R::scope_id),
-                             Col("zero_range_m", &R::zero_range_m),
-                             Nested("zero_altitude_m", &R::zero_atmosphere, &Atmosphere::altitude_m),
-                             Nested("zero_pressure_pa", &R::zero_atmosphere, &Atmosphere::pressure_pa),
-                             Nested("zero_temperature_k", &R::zero_atmosphere,
-                                    &Atmosphere::temperature_k),
-                             Nested("zero_humidity", &R::zero_atmosphere, &Atmosphere::humidity),
-                             Col("zero_powder_temp_k", &R::zero_powder_temp_k)},
-                            nullptr,
-                            nullptr};
+    static const Table<R> t{
+        "rifle",
+        "name, id",
+        {Col("name", &R::name), Col("caliber", &R::caliber),
+         Col("barrel_length_m", &R::barrel_length_m), Col("twist_m", &R::twist_m),
+         Col("sight_height_m", &R::sight_height_m), Col("notes", &R::notes),
+         Col("scope_id", &R::scope_id), Col("zero_range_m", &R::zero_range_m),
+         Nested("zero_altitude_m", &R::zero_atmosphere, &Atmosphere::altitude_m),
+         Nested("zero_pressure_pa", &R::zero_atmosphere, &Atmosphere::pressure_pa),
+         Nested("zero_temperature_k", &R::zero_atmosphere, &Atmosphere::temperature_k),
+         Nested("zero_humidity", &R::zero_atmosphere, &Atmosphere::humidity),
+         Col("zero_powder_temp_k", &R::zero_powder_temp_k)},
+        nullptr,
+        nullptr};
     return t;
 }
 
 template <>
 const Table<ReticleRecord>& TableOf() {
     using R = ReticleRecord;
-    static const Table<R> t{"reticle",
-                            "name, id",
-                            {Col("name", &R::name), Col("units", &R::units),
-                             Col("focal_plane", &R::focal_plane),
-                             Col("reference_magnification", &R::reference_magnification),
-                             Col("definition", &R::definition), Col("source", &R::source)},
-                            nullptr,
-                            nullptr};
+    static const Table<R> t{
+        "reticle",
+        "name, id",
+        {Col("name", &R::name), Col("units", &R::units), Col("focal_plane", &R::focal_plane),
+         Col("reference_magnification", &R::reference_magnification),
+         Col("definition", &R::definition), Col("source", &R::source)},
+        nullptr,
+        nullptr};
     return t;
 }
 
 template <>
 const Table<ScopeRecord>& TableOf() {
     using R = ScopeRecord;
-    static const Table<R> t{"scope",
-                            "name, id",
-                            {Col("name", &R::name), Col("click_units", &R::click_units),
-                             Col("click_vertical_rad", &R::click_vertical_rad),
-                             Col("click_horizontal_rad", &R::click_horizontal_rad),
-                             Col("reticle_id", &R::reticle_id),
-                             Col("min_magnification", &R::min_magnification),
-                             Col("max_magnification", &R::max_magnification),
-                             Col("notes", &R::notes), Col("focal_plane", &R::focal_plane),
-                             Col("sfp_reference_magnification", &R::sfp_reference_magnification)},
-                            nullptr,
-                            nullptr};
+    static const Table<R> t{
+        "scope",
+        "name, id",
+        {Col("name", &R::name), Col("click_units", &R::click_units),
+         Col("click_vertical_rad", &R::click_vertical_rad),
+         Col("click_horizontal_rad", &R::click_horizontal_rad), Col("reticle_id", &R::reticle_id),
+         Col("min_magnification", &R::min_magnification),
+         Col("max_magnification", &R::max_magnification), Col("notes", &R::notes),
+         Col("focal_plane", &R::focal_plane),
+         Col("sfp_reference_magnification", &R::sfp_reference_magnification)},
+        nullptr,
+        nullptr};
     return t;
 }
 
@@ -407,9 +415,9 @@ const Table<ProfileRecord>& TableOf() {
                 return s;
             }
             for (const DsfPoint& p : r.dsf) {
-                if (Status s = Exec(db,
-                                    "INSERT INTO profile_dsf (profile_id, mach, factor) VALUES (?, ?, ?)",
-                                    {r.id, p.mach, p.factor});
+                if (Status s = Exec(
+                        db, "INSERT INTO profile_dsf (profile_id, mach, factor) VALUES (?, ?, ?)",
+                        {r.id, p.mach, p.factor});
                     !s) {
                     return s;
                 }
@@ -419,7 +427,9 @@ const Table<ProfileRecord>& TableOf() {
         [](Database& db, R& r) -> Status {
             auto rows = Rows<DsfPoint>(
                 db, "SELECT mach, factor FROM profile_dsf WHERE profile_id = ? ORDER BY mach", r.id,
-                [](const Statement& st) { return DsfPoint{st.ColumnDouble(0), st.ColumnDouble(1)}; });
+                [](const Statement& st) {
+                    return DsfPoint{st.ColumnDouble(0), st.ColumnDouble(1)};
+                });
             if (!rows) {
                 return rows.error();
             }
@@ -435,8 +445,7 @@ const Table<ConditionsRecord>& TableOf() {
     static const Table<R> t{
         "conditions",
         "name, id",
-        {Col("name", &R::name),
-         Nested("altitude_m", &R::atmosphere, &Atmosphere::altitude_m),
+        {Col("name", &R::name), Nested("altitude_m", &R::atmosphere, &Atmosphere::altitude_m),
          Nested("pressure_pa", &R::atmosphere, &Atmosphere::pressure_pa),
          Nested("temperature_k", &R::atmosphere, &Atmosphere::temperature_k),
          Nested("humidity", &R::atmosphere, &Atmosphere::humidity),
@@ -449,11 +458,11 @@ const Table<ConditionsRecord>& TableOf() {
             }
             std::int64_t seq = 0;
             for (const WindZone& w : r.winds) {
-                if (Status s = Exec(db,
-                                    "INSERT INTO wind_zone (conditions_id, seq, until_range_m, "
-                                    "speed_mps, from_rad, vertical_mps) VALUES (?, ?, ?, ?, ?, ?)",
-                                    {r.id, seq++, w.until_range_m, w.speed_mps, w.from_rad,
-                                     w.vertical_mps});
+                if (Status s = Exec(
+                        db,
+                        "INSERT INTO wind_zone (conditions_id, seq, until_range_m, "
+                        "speed_mps, from_rad, vertical_mps) VALUES (?, ?, ?, ?, ?, ?)",
+                        {r.id, seq++, w.until_range_m, w.speed_mps, w.from_rad, w.vertical_mps});
                     !s) {
                     return s;
                 }
@@ -522,7 +531,7 @@ bool HasNameColumn(const Table<T>& t) {
     return false;
 }
 
-} // namespace
+}  // namespace
 
 template <typename T>
 Result<Id> Repository<T>::Save(T& record) {
@@ -724,8 +733,10 @@ Status SetSetting(Database& db, const std::string& key, const std::string& value
                 {key, value});
 }
 
-Result<std::optional<std::vector<std::uint8_t>>> GetPhoto(Database& db, const std::string& kind, Id owner) {
-    auto st = Statement::Prepare(db.connection(), "SELECT image FROM photo WHERE kind = ? AND owner_id = ?");
+Result<std::optional<std::vector<std::uint8_t>>> GetPhoto(Database& db, const std::string& kind,
+                                                          Id owner) {
+    auto st = Statement::Prepare(db.connection(),
+                                 "SELECT image FROM photo WHERE kind = ? AND owner_id = ?");
     if (!st) {
         return st.error();
     }
@@ -745,13 +756,15 @@ Result<std::optional<std::vector<std::uint8_t>>> GetPhoto(Database& db, const st
     return std::optional<std::vector<std::uint8_t>>(st.value().ColumnBlob(0));
 }
 
-Status SetPhoto(Database& db, const std::string& kind, Id owner, const std::vector<std::uint8_t>& image) {
+Status SetPhoto(Database& db, const std::string& kind, Id owner,
+                const std::vector<std::uint8_t>& image) {
     if (image.empty()) {
         return Exec(db, "DELETE FROM photo WHERE kind = ? AND owner_id = ?", {kind, owner});
     }
-    auto st = Statement::Prepare(db.connection(),
-                                 "INSERT INTO photo (kind, owner_id, image) VALUES (?, ?, ?) "
-                                 "ON CONFLICT(kind, owner_id) DO UPDATE SET image = excluded.image");
+    auto st =
+        Statement::Prepare(db.connection(),
+                           "INSERT INTO photo (kind, owner_id, image) VALUES (?, ?, ?) "
+                           "ON CONFLICT(kind, owner_id) DO UPDATE SET image = excluded.image");
     if (!st) {
         return st.error();
     }
@@ -772,7 +785,8 @@ Status SetPhoto(Database& db, const std::string& kind, Id owner, const std::vect
 }
 
 Result<std::vector<Id>> PhotoOwners(Database& db, const std::string& kind) {
-    auto st = Statement::Prepare(db.connection(), "SELECT owner_id FROM photo WHERE kind = ? ORDER BY owner_id");
+    auto st = Statement::Prepare(db.connection(),
+                                 "SELECT owner_id FROM photo WHERE kind = ? ORDER BY owner_id");
     if (!st) {
         return st.error();
     }
@@ -792,4 +806,4 @@ Result<std::vector<Id>> PhotoOwners(Database& db, const std::string& kind) {
     }
 }
 
-} // namespace ballistics::storage
+}  // namespace ballistics::storage

@@ -1,9 +1,8 @@
 #include <ballistics/effects.h>
+#include <ballistics/units.h>
 
 #include <algorithm>
 #include <cmath>
-
-#include <ballistics/units.h>
 
 namespace ballistics {
 
@@ -11,7 +10,7 @@ double LocalGravity(double latitude_rad, double altitude_m) {
     constexpr double kEquatorGravity = 9.7803253359;
     constexpr double kK = 0.00193185265241;
     constexpr double kE2 = 0.00669437999013;
-    constexpr double kFreeAirGradient = 3.086e-6; // 1/s^2
+    constexpr double kFreeAirGradient = 3.086e-6;  // 1/s^2
     const double s2 = std::sin(latitude_rad) * std::sin(latitude_rad);
     const double g0 = kEquatorGravity * (1.0 + kK * s2) / std::sqrt(1.0 - kE2 * s2);
     return g0 - kFreeAirGradient * altitude_m;
@@ -27,8 +26,9 @@ double MillerStability(double mass_kg, double diameter_m, double length_m, doubl
     const double d_in = units::MToInch(diameter_m);
     const double twist_cal = std::fabs(twist_m) / diameter_m;
     const double len_cal = length_m / diameter_m;
-    const double sg = 30.0 * grains /
-                      (twist_cal * twist_cal * d_in * d_in * d_in * len_cal * (1.0 + len_cal * len_cal));
+    const double sg =
+        30.0 * grains /
+        (twist_cal * twist_cal * d_in * d_in * d_in * len_cal * (1.0 + len_cal * len_cal));
     const double fv = std::cbrt(units::MpsToFps(velocity_mps) / 2800.0);
     const double temp_f = units::KToF(temperature_k);
     const double pressure_inhg = pressure_pa / units::kPaPerInHg;
@@ -73,8 +73,8 @@ double MuzzleVelocityAt(const PowderSensitivity& powder, double powder_temperatu
         return v0 + (v1 - v0) * (powder_temperature_k - t0) / (t1 - t0);
     }
     return powder.reference_velocity_mps *
-           (1.0 + powder.fraction_per_kelvin *
-                      (powder_temperature_k - powder.reference_temperature_k));
+           (1.0 +
+            powder.fraction_per_kelvin * (powder_temperature_k - powder.reference_temperature_k));
 }
 
-} // namespace ballistics
+}  // namespace ballistics

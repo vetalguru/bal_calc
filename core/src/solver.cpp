@@ -1,9 +1,8 @@
+#include <ballistics/effects.h>
 #include <ballistics/solver.h>
 
 #include <algorithm>
 #include <cmath>
-
-#include <ballistics/effects.h>
 
 namespace ballistics {
 
@@ -19,7 +18,8 @@ State operator*(double k, const State& s) { return {k * s.p, k * s.v}; }
 
 // Air velocity of a wind zone in the shooter's frame.
 Vec3 WindVector(const WindZone& w) {
-    return {-w.speed_mps * std::cos(w.from_rad), w.vertical_mps, -w.speed_mps * std::sin(w.from_rad)};
+    return {-w.speed_mps * std::cos(w.from_rad), w.vertical_mps,
+            -w.speed_mps * std::sin(w.from_rad)};
 }
 
 // Earth's rotation vector in the shooter's frame (x towards the LOS
@@ -42,7 +42,7 @@ Vec3 EarthRotation(const Shot& shot) {
 // Right-hand side of the point-mass equations of motion: gravity, drag
 // against the moving air, Coriolis.
 class Dynamics {
-public:
+   public:
     Dynamics(const Shot& shot, const AtmosphereModel& air) : shot_(shot), air_(air) {
         for (const WindZone& w : shot.winds) {
             zones_.push_back({w.until_range_m, WindVector(w)});
@@ -72,7 +72,7 @@ public:
 
     State Derivative(const State& s) const { return {s.v, Acceleration(s)}; }
 
-private:
+   private:
     struct Zone {
         double until;
         Vec3 air;
@@ -90,8 +90,8 @@ constexpr double kA31 = 3.0 / 40, kA32 = 9.0 / 40;
 constexpr double kA41 = 44.0 / 45, kA42 = -56.0 / 15, kA43 = 32.0 / 9;
 constexpr double kA51 = 19372.0 / 6561, kA52 = -25360.0 / 2187, kA53 = 64448.0 / 6561,
                  kA54 = -212.0 / 729;
-constexpr double kA61 = 9017.0 / 3168, kA62 = -355.0 / 33, kA63 = 46732.0 / 5247,
-                 kA64 = 49.0 / 176, kA65 = -5103.0 / 18656;
+constexpr double kA61 = 9017.0 / 3168, kA62 = -355.0 / 33, kA63 = 46732.0 / 5247, kA64 = 49.0 / 176,
+                 kA65 = -5103.0 / 18656;
 constexpr double kB1 = 35.0 / 384, kB3 = 500.0 / 1113, kB4 = 125.0 / 192, kB5 = -2187.0 / 6784,
                  kB6 = 11.0 / 84;
 // Error weights: 5th-order minus embedded 4th-order solution.
@@ -127,7 +127,7 @@ struct Quintic {
     }
 };
 
-} // namespace
+}  // namespace
 
 double Trajectory::SlantRange(const Vec3& p) const { return Dot(p - sight_, los_); }
 
@@ -202,7 +202,7 @@ std::optional<TrajectoryPoint> Trajectory::AtSlantRange(double slant_range_m) co
         return std::nullopt;
     }
     if (SlantRange(nodes_[i].p) > slant_range_m) {
-        return std::nullopt; // before the start of the flight
+        return std::nullopt;  // before the start of the flight
     }
 
     // Safeguarded Newton on the interpolant: s(t) is monotone in a segment.
@@ -230,7 +230,8 @@ std::optional<TrajectoryPoint> Trajectory::AtSlantRange(double slant_range_m) co
     return Interpolate(i, t);
 }
 
-std::vector<TrajectoryPoint> Trajectory::Table(double step_m, double max_m, bool include_zero) const {
+std::vector<TrajectoryPoint> Trajectory::Table(double step_m, double max_m,
+                                               bool include_zero) const {
     std::vector<TrajectoryPoint> out;
     if (!(step_m > 0.0)) {
         return out;
@@ -269,10 +270,9 @@ Trajectory Fly(const Shot& shot, double max_slant_range_m, const SolverOptions& 
 
     // Spin: stability at the muzzle, crosswind jump from the first zone.
     traj.twist_m_ = shot.twist_m;
-    traj.stability_ =
-        MillerStability(shot.mass_kg, shot.bullet_diameter_m, shot.bullet_length_m, shot.twist_m,
-                        shot.muzzle_velocity_mps, shot.atmosphere.temperature_k,
-                        shot.atmosphere.pressure_pa);
+    traj.stability_ = MillerStability(shot.mass_kg, shot.bullet_diameter_m, shot.bullet_length_m,
+                                      shot.twist_m, shot.muzzle_velocity_mps,
+                                      shot.atmosphere.temperature_k, shot.atmosphere.pressure_pa);
     traj.spin_drift_ = shot.spin_drift && traj.stability_ > 0.0;
     if (shot.aerodynamic_jump && traj.stability_ > 0.0 && !shot.winds.empty()) {
         const WindZone* first = &shot.winds.front();
@@ -281,9 +281,9 @@ Trajectory Fly(const Shot& shot, double max_slant_range_m, const SolverOptions& 
                 first = &w;
             }
         }
-        traj.jump_rad_ = AerodynamicJump(traj.stability_, shot.bullet_length_m,
-                                         shot.bullet_diameter_m, shot.twist_m,
-                                         first->speed_mps * std::sin(first->from_rad));
+        traj.jump_rad_ =
+            AerodynamicJump(traj.stability_, shot.bullet_length_m, shot.bullet_diameter_m,
+                            shot.twist_m, first->speed_mps * std::sin(first->from_rad));
     }
 
     const double elevation = shot.elevation_rad + traj.jump_rad_;
@@ -332,7 +332,7 @@ Trajectory Fly(const Shot& shot, double max_slant_range_m, const SolverOptions& 
         if (ratio <= 1.0 || h <= kMinStep) {
             t += h;
             y = y1;
-            k1 = k7; // first-same-as-last
+            k1 = k7;  // first-same-as-last
             traj.nodes_.push_back({t, y.p, y.v, k1.v});
         }
         const double factor = ratio == 0.0 ? 5.0 : 0.9 * std::pow(ratio, -0.2);
@@ -403,4 +403,4 @@ ZeroResult FindZero(Shot shot, double zero_range_m, double offset_up_m,
     return result;
 }
 
-} // namespace ballistics
+}  // namespace ballistics

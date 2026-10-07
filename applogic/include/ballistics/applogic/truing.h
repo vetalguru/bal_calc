@@ -1,13 +1,13 @@
 #ifndef BALLISTICS_APPLOGIC_TRUING_H
 #define BALLISTICS_APPLOGIC_TRUING_H
 
-#include <optional>
-#include <string>
-#include <vector>
-
 #include <ballistics/applogic/session.h>
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/records.h>
+
+#include <optional>
+#include <string>
+#include <vector>
 
 // Shot log and truing: fit the profile's muzzle-velocity and drag scales
 // to the corrections that actually hit.
@@ -31,8 +31,8 @@ struct TruingPoint {
     Id shot_id = 0;
     double range_m = 0.0;
     double observed_rad = 0.0;
-    double predicted_before_rad = 0.0; // with the profile's current scales
-    double predicted_after_rad = 0.0;  // with the fitted scales
+    double predicted_before_rad = 0.0;  // with the profile's current scales
+    double predicted_after_rad = 0.0;   // with the fitted scales
 };
 
 struct TruingResult {
@@ -40,10 +40,10 @@ struct TruingResult {
     std::string error;
     double velocity_scale = 1.0;
     double drag_scale = 1.0;
-    bool drag_fitted = false; // false: only velocity could be told apart
+    bool drag_fitted = false;  // false: only velocity could be told apart
     double rms_before_rad = 0.0;
     double rms_after_rad = 0.0;
-    double muzzle_velocity_before_mps = 0.0; // at the cartridge's reference powder temperature
+    double muzzle_velocity_before_mps = 0.0;  // at the cartridge's reference powder temperature
     double muzzle_velocity_after_mps = 0.0;
     std::vector<TruingPoint> points;
 };
@@ -69,16 +69,16 @@ inline constexpr double kDsfMinFactor = 0.5;
 inline constexpr double kDsfMaxFactor = 2.0;
 // A transonic shot still missing by more than this after the fit is one the
 // DSF cannot explain (DsfShot::limited).
-inline constexpr double kDsfMissTolerance = 0.05e-3; // rad
+inline constexpr double kDsfMissTolerance = 0.05e-3;  // rad
 
 struct DsfShot {
     Id shot_id = 0;
     double range_m = 0.0;
-    double mach = 0.0;                 // at the target, before the fit
+    double mach = 0.0;  // at the target, before the fit
     double observed_rad = 0.0;
-    double predicted_before_rad = 0.0; // with the profile's current DSF
-    double predicted_after_rad = 0.0;  // with the fitted one
-    bool used = false;                 // gave a DSF point
+    double predicted_before_rad = 0.0;  // with the profile's current DSF
+    double predicted_after_rad = 0.0;   // with the fitted one
+    bool used = false;                  // gave a DSF point
     // Still misses by more than kDsfMissTolerance after the fit: the DSF
     // alone cannot explain this hit (true the velocity and drag first).
     bool limited = false;
@@ -87,8 +87,8 @@ struct DsfShot {
 struct DsfResult {
     bool ok = false;
     std::string error;
-    std::vector<DsfPoint> points; // sorted by Mach
-    std::vector<DsfShot> shots;   // every shot marked for truing
+    std::vector<DsfPoint> points;  // sorted by Mach
+    std::vector<DsfShot> shots;    // every shot marked for truing
     double rms_before_rad = 0.0;
     double rms_after_rad = 0.0;
 };
@@ -103,7 +103,7 @@ Status SetDsf(storage::Database& db, Id profile_id, std::vector<DsfPoint> points
 struct BcResult {
     bool ok = false;
     std::string error;
-    double bc = 0.0; // lb/in^2
+    double bc = 0.0;  // lb/in^2
 };
 
 // From two chronograph readings `distance_m` apart, in the session's air.
@@ -113,9 +113,9 @@ BcResult BcFromChronograph(const std::string& table, double v_near_mps, double v
 // From the elevation that hit at `range_m` with this rifle and cartridge in
 // the session's conditions: the bullet's drag becomes one BC against
 // `table`, everything else (zero, powder, truing) stays as the app solves.
-BcResult BcFromHit(const storage::LoadedProfile& profile, const std::string& table,
-                   double range_m, double elevation_rad, const SessionConditions& s);
+BcResult BcFromHit(const storage::LoadedProfile& profile, const std::string& table, double range_m,
+                   double elevation_rad, const SessionConditions& s);
 
-} // namespace ballistics::applogic
+}  // namespace ballistics::applogic
 
-#endif // BALLISTICS_APPLOGIC_TRUING_H
+#endif  // BALLISTICS_APPLOGIC_TRUING_H
