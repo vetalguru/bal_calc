@@ -1106,4 +1106,25 @@ class FlowTest {
 
     @Test
     fun desktop() = run(1100, 760, "desktop")
+
+    /** Wind speed by thumb on the conditions page: + and − next to the field, typing still works. */
+    @Test
+    fun windSpeedSteps() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        onNodeWithTag("navConditions").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("conditionsWindSpeedPlus") }
+        onNodeWithTag("conditionsWindSpeedPlus").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "1" }
+        onNodeWithTag("conditionsWindSpeedPlus").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "2" }
+        onNodeWithTag("conditionsWindSpeedMinus").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "1" }
+        type("conditionsWindSpeed", "7.5")
+        onNodeWithTag("conditionsWindSpeedMinus").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "6.5" }
+        shot("conditions-wind-steps")
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("windSpeed") && shown("windSpeed") == "6.5" }
+        db.delete()
+    }
 }
