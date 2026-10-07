@@ -70,7 +70,7 @@ fun ConditionsScreen(model: AppModel) {
                                 model.updateConditions { it.copy(altitudeM = v) }
                                 if (qnhMode) stationFrom(qnh, v)
                             },
-                            m, stringResource(Res.string.unit_m), decimals = 0, from = -500.0, to = 6000.0,
+                            m, stringResource(Res.string.unit_m), decimals = 0, from = -500.0, to = 6000.0, tag = "altitude",
                         )
                     },
                     { m ->
@@ -92,7 +92,7 @@ fun ConditionsScreen(model: AppModel) {
                                     model.updateConditions { it.copy(pressureHpa = v) }
                                 }
                             },
-                            m, stringResource(Res.string.unit_hpa), from = 300.0, to = 1200.0,
+                            m, stringResource(Res.string.unit_hpa), from = 300.0, to = 1200.0, tag = "pressure",
                         )
                     },
                     { m ->
@@ -116,6 +116,7 @@ fun ConditionsScreen(model: AppModel) {
                     modifier = Modifier.testTag("useDensityAltitude"),
                 )
                 if (!c.useDensityAltitude) SwitchRow(stringResource(Res.string.enter_qnh), qnhMode, { qnhMode = it })
+                AirSensorButtons(model) { qnhMode = false }
                 val sol = model.solution
                 if (sol.ok && (qnhMode || c.useDensityAltitude)) {
                     Text(
@@ -267,17 +268,18 @@ fun ConditionsScreen(model: AppModel) {
                         NumberField(
                             stringResource(Res.string.shot_angle), c.lookAngleDeg,
                             { v -> model.updateConditions { it.copy(lookAngleDeg = v) } },
-                            m, deg, from = -60.0, to = 60.0,
+                            m, deg, from = -60.0, to = 60.0, tag = "lookAngle",
                         )
                     },
                     { m ->
                         NumberField(
                             stringResource(Res.string.cant), c.cantDeg,
                             { v -> model.updateConditions { it.copy(cantDeg = v) } },
-                            m, deg, from = -45.0, to = 45.0,
+                            m, deg, from = -45.0, to = 45.0, tag = "cantAngle",
                         )
                     },
                 )
+                TiltButton(model)
             }
 
             Section(stringResource(Res.string.target_section)) {
@@ -298,17 +300,18 @@ fun ConditionsScreen(model: AppModel) {
                     NumberField(
                         stringResource(Res.string.latitude), c.latitudeDeg,
                         { v -> model.updateConditions { it.copy(latitudeDeg = v) } },
-                        unit = deg, from = -90.0, to = 90.0,
+                        unit = deg, from = -90.0, to = 90.0, tag = "latitude",
                     )
                     SwitchRow(
                         stringResource(Res.string.known_direction), c.useAzimuth,
                         { on -> model.updateConditions { it.copy(useAzimuth = on) } },
                     )
+                    CompassButton(model)
                     if (c.useAzimuth) {
                         NumberField(
                             stringResource(Res.string.azimuth), c.azimuthDeg,
                             { v -> model.updateConditions { it.copy(azimuthDeg = v % 360) } },
-                            unit = deg, decimals = 0, from = 0.0, to = 360.0,
+                            unit = deg, decimals = 0, from = 0.0, to = 360.0, tag = "azimuth",
                         )
                     }
                 }

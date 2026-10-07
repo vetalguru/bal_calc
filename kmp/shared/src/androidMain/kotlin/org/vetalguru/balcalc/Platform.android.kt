@@ -32,6 +32,8 @@ actual fun BackHandler(enabled: Boolean, onBack: () -> Unit) =
  * onCreate: launchers must be registered before the activity starts.
  */
 class AndroidPlatform(private val activity: ComponentActivity) : Platform {
+    override val sensors: PhoneSensors = AndroidSensors(activity)
+
     private var onCreated: ((Uri?) -> Unit)? = null
     private var onOpened: ((List<Uri>) -> Unit)? = null
 
