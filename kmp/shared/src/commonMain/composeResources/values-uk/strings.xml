@@ -39,7 +39,8 @@
     <string name="trued">Уточнено: швидкість ×%1$s, опір ×%2$s</string>
     <string name="not_trued">Ще не уточнено: записуйте влучання, щоб уточнити цю зброю і набій.</string>
     <string name="wind_speed">Швидкість вітру</string>
-    <string name="wind_from">Вітер звідки</string>
+    <string name="wind_from">Напрямок вітру</string>
+    <string name="wind_direction_clock">Напрямок вітру: %1$s год.</string>
     <string name="wind_clock">на %1$s год.</string>
     <string name="wind_clock_hint">12 = від цілі, 3 = справа</string>
     <string name="velocity">Швидкість</string>
@@ -64,7 +65,7 @@
     <string name="powder_temperature">Температура пороху</string>
     <string name="wind">Вітер</string>
     <string name="speed">Швидкість</string>
-    <string name="wind_from_degrees">Дме звідки (0 = від цілі, 90 = справа)</string>
+    <string name="wind_from_degrees">Напрямок вітру (0 = від цілі, 90 = справа)</string>
     <string name="angles">Кути</string>
     <string name="shot_angle">Кут місця цілі (вгору +, вниз −)</string>
     <string name="cant">Завал зброї (за годинниковою +)</string>

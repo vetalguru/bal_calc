@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -176,11 +179,14 @@ internal fun QuickWind(
                 )
                 Step("+1") { onSpeed(speed + 1) }
             }
-            Text(
-                stringResource(Res.string.wind_from) + " " +
-                    stringResource(Res.string.wind_clock, clockHour(fromDeg)) + " · ${fromDeg.roundToInt()}°",
-                style = MaterialTheme.typography.bodyMedium,
+            // Smaller rather than cut on narrow phones ("11 o'clock · 330°").
+            val bodyMedium = MaterialTheme.typography.bodyMedium
+            BasicText(
+                stringResource(Res.string.wind_direction_clock, clockHour(fromDeg)) + " · ${fromDeg.roundToInt()}°",
+                style = bodyMedium.copy(color = LocalContentColor.current),
                 maxLines = 1,
+                autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = bodyMedium.fontSize),
+                modifier = Modifier.testTag("windDirectionText"),
             )
             if (zoneNote.isNotEmpty()) {
                 Text(zoneNote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
