@@ -101,6 +101,10 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
     if (logging) LogShotDialog(model, st.conditions.targetRangeM, sol.elevation) { logging = false }
     var situations by remember { mutableStateOf(false) }
     if (situations) SituationsDialog(model) { situations = false }
+    if (st.prefs.minimal && sol.ok) {
+        MinimalSolution(model, sol)
+        return
+    }
 
     // "Viewer on top, controller below": what to read above, what the thumb
     // changes below. Side by side on wide screens.
@@ -237,6 +241,10 @@ private fun Viewer(
                                     Text(stringResource(Res.string.log_hit))
                                 }
                             }
+                            TextButton(
+                                onClick = { model.setPrefs { it.copy(minimal = true) } },
+                                modifier = Modifier.padding(horizontal = 8.dp).testTag("minimalOn"),
+                            ) { Text(stringResource(Res.string.minimal_view)) }
                         }
                     }
                     1 -> if (sol.ok) ReticleCard(model, sol, wide, marks)
@@ -808,6 +816,57 @@ private fun ReticleFullscreen(
                 FilledTonalButton(onClick = { zoom = (zoom * 1.5f).coerceAtMost(8f) }, modifier = Modifier.testTag("reticleZoomIn")) { Text("+") }
                 Button(onClick = onClose, modifier = Modifier.testTag("reticleClose")) { Text(stringResource(Res.string.close)) }
             }
+        }
+    }
+}
+
+/**
+ * The minimal view: the corrections as big as the screen allows and the
+ * range with its steps; nothing else to read past.
+ */
+@Composable
+private fun MinimalSolution(model: AppModel, sol: Solution) {
+    val st = model.state
+    val c = st.conditions
+    val unit = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
+    val other = stringResource(if (st.moa) Res.string.unit_mrad else Res.string.unit_moa)
+    val cm = stringResource(Res.string.unit_cm)
+    val (up, down, right, left) = when (st.prefs.correctionStyle) {
+        "arrows" -> listOf("↑", "↓", "→", "←")
+        "signs" -> listOf("+", "−", "+", "−")
+        else -> listOf(
+            stringResource(Res.string.up), stringResource(Res.string.down),
+            stringResource(Res.string.right), stringResource(Res.string.left),
+        )
+    }
+    val click = { v: Double -> v.takeIf { sol.hasScope } }
+    val e = formatCorrection(sol.elevation, click(sol.clickElevation), st.moa, sol.rangeM, st.prefs.roundToClicks, up, down, other, cm)
+    val w = formatCorrection(sol.windage, click(sol.clickWindage), st.moa, sol.rangeM, st.prefs.roundToClicks, right, left, other, cm)
+    Column(
+        Modifier.fillMaxSize().padding(16.dp).testTag("minimal"),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        for ((title, corr, tag) in listOf(
+            Triple(stringResource(Res.string.elevation), e, "elevation"),
+            Triple(stringResource(Res.string.windage), w, "windage"),
+        )) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("$title  ${corr.direction}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Text(corr.value, fontSize = 96.sp, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.testTag(tag))
+                Text(
+                    if (corr.clicks != null) "$unit · ${stringResource(Res.string.clicks, corr.clicks)}" else unit,
+                    fontSize = 22.sp,
+                )
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Step("−10") { model.setTargetRange(c.targetRangeM - 10) }
+            RangeField(c.targetRangeM, model::setTargetRange, Modifier.width(160.dp))
+            Step("+10") { model.setTargetRange(c.targetRangeM + 10) }
+        }
+        OutlinedButton(onClick = { model.setPrefs { it.copy(minimal = false) } }, modifier = Modifier.testTag("minimalOff")) {
+            Text(stringResource(Res.string.full_view))
         }
     }
 }

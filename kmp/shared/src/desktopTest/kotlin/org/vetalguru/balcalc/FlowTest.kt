@@ -491,6 +491,33 @@ class FlowTest {
     }
 
     @Test
+    fun minimalViewAndWidgetLines() = runDesktopComposeUiTest(412, 915) {
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
+        val platform = FakePlatform()
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        waitUntil(timeoutMillis = 30_000) { exists("sample") }
+        onNodeWithTag("sample").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+        // What a home-screen widget would show.
+        waitUntil(timeoutMillis = 10_000) { platform.published != null }
+        val lines = platform.published!!
+        assertEquals("300 m", lines.range)
+        assertTrue(lines.elevation.startsWith("UP 1.61 MRAD") && lines.elevation.contains("16 clicks"), lines.elevation)
+        assertTrue(lines.title.contains("Sample"), lines.title)
+
+        onNodeWithTag("minimalOn").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("minimal") }
+        assertEquals("1.61", shown("elevation"))
+        assertTrue(!exists("quickWind")) // nothing but the corrections and the range
+        shot("minimal")
+        onAllNodesWithText("+10").onFirst().performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("elevation") != "1.61" && platform.published?.range == "310 m" }
+        onNodeWithTag("minimalOff").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("quickWind") }
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)

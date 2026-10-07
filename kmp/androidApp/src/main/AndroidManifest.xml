@@ -18,6 +18,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- The home-screen widget: the current solution. -->
+        <receiver
+            android:name=".SolutionWidget"
+            android:exported="false"
+            android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/solution_widget_info" />
+        </receiver>
         <!-- The scanner turns with the phone instead of forcing landscape. -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"

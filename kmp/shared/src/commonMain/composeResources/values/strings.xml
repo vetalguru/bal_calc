@@ -516,4 +516,6 @@
     <string name="wind_columns">Extra wind columns, m/s</string>
     <string name="wind_columns_hint">E.g. 2, 4, 6: the windage for each, from the set direction (up to 6)</string>
     <string name="col_wind_at">Wind %1$s</string>
+    <string name="minimal_view">Minimal view</string>
+    <string name="full_view">Full view</string>
 </resources>

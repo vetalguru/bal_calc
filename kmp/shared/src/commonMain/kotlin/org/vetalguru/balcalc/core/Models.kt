@@ -317,6 +317,8 @@ data class UiPrefs(
     val tableColumns: List<String> = emptyList(),
     /** Extra wind speeds (m/s) with a windage column each in the range card. */
     val tableWinds: List<Double> = emptyList(),
+    /** The solution screen as only the big corrections and the range (one glance, one thumb). */
+    val minimal: Boolean = false,
 )
 
 /** A named target of the target card, with its corrections and its hold on the reticle. */

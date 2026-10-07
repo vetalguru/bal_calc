@@ -21,6 +21,9 @@ interface Platform {
     /** Whether [scanQr] has a camera to use. */
     val canScanQr: Boolean get() = false
 
+    /** The current solution in four short lines, for a home-screen widget (null: none). */
+    fun publishSolution(summary: SolutionLines?) = Unit
+
     /** Asks where to save a binary file ([mimeType], e.g. "image/png"); false when cancelled. */
     suspend fun saveBytes(suggestedName: String, mimeType: String, bytes: ByteArray): Boolean = false
 
@@ -46,3 +49,6 @@ val LocalPlatform = androidx.compose.runtime.staticCompositionLocalOf<Platform> 
 /** Keeps the screen from dimming and locking while [enabled] (phones; nothing on desktops). */
 @Composable
 expect fun KeepScreenOn(enabled: Boolean)
+
+/** A solution as a widget shows it: who, how far, and the two corrections. */
+data class SolutionLines(val title: String, val range: String, val elevation: String, val windage: String)

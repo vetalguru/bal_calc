@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_name">Рішення BalCalc</string>
+    <string name="widget_description">Поточне рішення: дальність, вертикальна і горизонтальна поправки.</string>
+    <string name="widget_empty">Відкрийте BalCalc, щоб отримати рішення</string>
+</resources>

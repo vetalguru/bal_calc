@@ -1,9 +1,12 @@
 package org.vetalguru.balcalc
 
 import android.Manifest
+import android.appwidget.AppWidgetManager
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
@@ -148,6 +151,33 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
         activity.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
             ?.use { if (it.moveToFirst()) it.getString(0) else null }
             ?: uri.lastPathSegment.orEmpty()
+
+    // The home-screen widget reads the last solution from here (SolutionWidget).
+    override fun publishSolution(summary: SolutionLines?) {
+        activity.getSharedPreferences(WIDGET_PREFS, Context.MODE_PRIVATE).edit().apply {
+            if (summary == null) {
+                clear()
+            } else {
+                putString("title", summary.title)
+                putString("range", summary.range)
+                putString("elevation", summary.elevation)
+                putString("windage", summary.windage)
+            }
+        }.apply()
+        val widget = ComponentName(activity.packageName, "org.vetalguru.balcalc.SolutionWidget")
+        val ids = AppWidgetManager.getInstance(activity).getAppWidgetIds(widget)
+        if (ids.isNotEmpty()) {
+            activity.sendBroadcast(
+                Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).setComponent(widget)
+                    .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids),
+            )
+        }
+    }
+
+    companion object {
+        /** Where the widget's lines are kept. */
+        const val WIDGET_PREFS = "balcalc_widget"
+    }
 
     private val clipboard get() = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 

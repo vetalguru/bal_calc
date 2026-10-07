@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_name">BalCalc solution</string>
+    <string name="widget_description">The current firing solution: range, elevation and windage.</string>
+    <string name="widget_empty">Open BalCalc to get a solution</string>
+</resources>
