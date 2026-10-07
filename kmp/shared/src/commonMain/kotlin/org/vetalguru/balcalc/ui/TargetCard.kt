@@ -75,7 +75,7 @@ fun TargetCard(model: AppModel, targets: List<TargetItem>, unit: String) {
                         Text(t.name, fontWeight = FontWeight.Bold, maxLines = 1)
                         Text(
                             "${t.rangeM.roundToInt()} ${stringResource(Res.string.unit_m)} · ${t.lookAngleDeg.roundToInt()}° · " +
-                                "${t.windSpeed.fixed(1)} ${stringResource(Res.string.unit_mps)} " +
+                                windSpeedText(t.windSpeed, WindUnit.of(model.state.prefs.windUnit)) + " " +
                                 stringResource(Res.string.wind_clock, clockHour(t.windFromDeg)),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -132,8 +132,9 @@ private fun TargetsDialog(model: AppModel, initial: List<TargetItem>, onClose: (
                             stringResource(Res.string.unit_m), 0, 10.0, 3000.0, tag = "targetRange$i") },
                         { m -> NumberField(stringResource(Res.string.look_angle_short), t.lookAngleDeg, { rows[i] = rows[i].copy(lookAngleDeg = it) }, m,
                             "°", 0, -60.0, 60.0) },
-                        { m -> NumberField(stringResource(Res.string.wind_speed), t.windSpeed, { rows[i] = rows[i].copy(windSpeed = it) }, m,
-                            stringResource(Res.string.unit_mps), 1, 0.0, 40.0) },
+                        { m -> WindSpeedField(stringResource(Res.string.wind_speed), t.windSpeed, { rows[i] = rows[i].copy(windSpeed = it) },
+                            WindUnit.of(model.state.prefs.windUnit), { u -> model.setPrefs { it.copy(windUnit = u.key) } }, m,
+                            tag = "targetWind$i", steps = false) },
                         { m ->
                             ChoiceField(
                                 stringResource(Res.string.wind_from),

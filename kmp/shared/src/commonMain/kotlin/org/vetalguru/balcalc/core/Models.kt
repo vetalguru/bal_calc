@@ -319,6 +319,8 @@ data class UiPrefs(
     val tableWinds: List<Double> = emptyList(),
     /** The solution screen as only the big corrections and the range (one glance, one thumb). */
     val minimal: Boolean = false,
+    /** Wind speeds shown and typed in "mps", "kmh" or "mph" (the core keeps m/s). */
+    val windUnit: String = "mps",
 )
 
 /** A named target of the target card, with its corrections and its hold on the reticle. */

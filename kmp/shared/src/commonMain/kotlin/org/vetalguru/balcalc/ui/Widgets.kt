@@ -2,6 +2,10 @@ package org.vetalguru.balcalc.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.ui.unit.Dp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.TooltipAnchorPosition
@@ -69,6 +73,7 @@ fun NumberField(
     from: Double = -1e9,
     to: Double = 1e9,
     tag: String? = null,
+    unitMenu: UnitMenu? = null,
 ) {
     var text by remember { mutableStateOf(formatNumber(value, decimals)) }
     var focused by remember { mutableStateOf(false) }
@@ -90,7 +95,11 @@ fun NumberField(
         value = text,
         onValueChange = { t -> if (t.all { it.isDigit() || it == '.' || it == ',' || it == '-' }) text = t },
         label = { Text(label, maxLines = 1) },
-        suffix = if (unit.isNotEmpty()) ({ Text(unit) }) else null,
+        suffix = when {
+            unit.isEmpty() -> null
+            unitMenu == null -> ({ Text(unit) })
+            else -> ({ UnitPicker(unit, unitMenu, tag) })
+        },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
@@ -101,6 +110,35 @@ fun NumberField(
             }
             .let { m -> if (tag != null) m.testTag(tag) else m },
     )
+}
+
+/** Units a field can switch between: (key, label) pairs; [onPick] gets the key. */
+class UnitMenu(val options: List<Pair<String, String>>, val onPick: (String) -> Unit)
+
+/** A field's unit that opens the list of the others when tapped. */
+@Composable
+private fun UnitPicker(unit: String, menu: UnitMenu, tag: String?) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        Text(
+            "$unit▾",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable { open = true }.testTag("${tag}Unit"),
+        )
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            menu.options.forEach { (key, label) ->
+                DropdownMenuItem(
+                    text = { Text(label) },
+                    onClick = {
+                        open = false
+                        menu.onPick(key)
+                    },
+                    modifier = Modifier.testTag("${tag}Unit-$key"),
+                )
+            }
+        }
+    }
 }
 
 /** [content] that shows [hint] in a small bubble when tapped (or hovered with a mouse). */
@@ -131,15 +169,24 @@ fun StepperField(
     from: Double = -1e9,
     to: Double = 1e9,
     tag: String? = null,
+    unitMenu: UnitMenu? = null,
+    /** Narrower than the space there is (the steps stay beside it); unspecified: all of it. */
+    fieldMaxWidth: Dp = Dp.Unspecified,
+    stepWidth: Dp = 50.dp,
 ) {
     fun by(d: Double) {
         val v = (value + d).coerceIn(from, to)
         if (v != value) onEdited(v)
     }
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Box(Modifier.testTag("${tag}Minus")) { Step("−${formatNumber(step, 0)}") { by(-step) } }
-        NumberField(label, value, onEdited, Modifier.weight(1f), unit, from = from, to = to, tag = tag)
-        Box(Modifier.testTag("${tag}Plus")) { Step("+${formatNumber(step, 0)}") { by(step) } }
+        Box(Modifier.testTag("${tag}Minus")) { Step("−${formatNumber(step, 0)}", stepWidth) { by(-step) } }
+        val field = if (fieldMaxWidth == Dp.Unspecified) {
+            Modifier.weight(1f)
+        } else {
+            Modifier.weight(1f, fill = false).widthIn(max = fieldMaxWidth)
+        }
+        NumberField(label, value, onEdited, field, unit, from = from, to = to, tag = tag, unitMenu = unitMenu)
+        Box(Modifier.testTag("${tag}Plus")) { Step("+${formatNumber(step, 0)}", stepWidth) { by(step) } }
     }
 }
 

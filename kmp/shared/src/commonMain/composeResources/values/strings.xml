@@ -322,6 +322,7 @@
     <string name="moving_target">Moving target</string>
     <string name="target_speed">Target speed</string>
     <string name="unit_kmh">km/h</string>
+    <string name="unit_mph">mph</string>
     <string name="moves_left">← To the left</string>
     <string name="moves_right">To the right →</string>
     <string name="target_angle">Angle to the line of fire (90 = straight across)</string>
@@ -514,7 +515,7 @@
     <string name="export_png">Picture (PNG, to print or keep)</string>
     <string name="export_title">Range card %1$s · %2$s °C · wind %3$s m/s</string>
     <string name="columns_automatic">Chosen for the screen</string>
-    <string name="wind_columns">Extra wind columns, m/s</string>
+    <string name="wind_columns">Extra wind columns, %1$s</string>
     <string name="wind_columns_hint">E.g. 2, 4, 6: the windage for each, from the set direction (up to 6)</string>
     <string name="col_wind_at">Wind %1$s</string>
     <string name="minimal_view">Minimal view</string>

@@ -139,11 +139,11 @@ private fun tableColumns(table: RangeTable, prefs: UiPrefs, moa: Boolean, widthD
     val titles = columnTitles(moa)
     val keys = prefs.tableColumns.ifEmpty { automaticColumns(table, widthDp) }
     val windTitle = stringResource(Res.string.col_wind_at, "%s")
-    val mps = stringResource(Res.string.unit_mps)
+    val windUnit = WindUnit.of(prefs.windUnit)
     return allColumns.filter { it.first in keys }.map { (key, fmt, value) ->
         TableCol(key, titles.getValue(key), fmt.first, fmt.second, value)
     } + table.windSpeeds.mapIndexed { i, v ->
-        TableCol("wind@$v", windTitle.replace("%s", "${v.fixed(0)} $mps"), 2, true) { it.windages.getOrElse(i) { 0.0 } }
+        TableCol("wind@$v", windTitle.replace("%s", windSpeedText(v, windUnit)), 2, true) { it.windages.getOrElse(i) { 0.0 } }
     }
 }
 
@@ -295,7 +295,8 @@ private fun ColumnsDialog(model: AppModel, onClose: () -> Unit) {
     val titles = columnTitles(model.state.moa)
     var automatic by remember { mutableStateOf(prefs.tableColumns.isEmpty()) }
     val chosen = remember { mutableStateListOf<String>().apply { addAll(prefs.tableColumns.ifEmpty { listOf("range", "elev", "elevClicks", "wind", "windClicks") }) } }
-    var winds by remember { mutableStateOf(prefs.tableWinds.joinToString(", ") { it.fixed(0) }) }
+    val windUnit = WindUnit.of(prefs.windUnit)
+    var winds by remember { mutableStateOf(prefs.tableWinds.joinToString(", ") { formatNumber(it * windUnit.perMps, 1) }) }
     AlertDialog(
         onDismissRequest = onClose,
         title = { Text(stringResource(Res.string.table_columns)) },
@@ -311,7 +312,7 @@ private fun ColumnsDialog(model: AppModel, onClose: () -> Unit) {
                 }
                 OutlinedTextField(
                     winds, { winds = it },
-                    label = { Text(stringResource(Res.string.wind_columns)) },
+                    label = { Text(stringResource(Res.string.wind_columns, stringResource(windUnit.label))) },
                     supportingText = { Text(stringResource(Res.string.wind_columns_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().testTag("windColumns"),
@@ -320,8 +321,9 @@ private fun ColumnsDialog(model: AppModel, onClose: () -> Unit) {
         },
         confirmButton = {
             Button(onClick = {
+                // Typed in the wind unit, kept in m/s.
                 val speeds = winds.split(',', ';', ' ').mapNotNull { it.trim().replace(',', '.').toDoubleOrNull() }
-                    .filter { it in 0.0..40.0 }.distinct().take(6)
+                    .map { it / windUnit.perMps }.filter { it in 0.0..MAX_WIND_MPS }.distinct().take(6)
                 model.setPrefs { p ->
                     p.copy(tableColumns = if (automatic) emptyList() else allColumns.map { it.first }.filter { it in chosen }, tableWinds = speeds)
                 }

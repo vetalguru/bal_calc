@@ -292,6 +292,7 @@
     <string name="moving_target">Рухома ціль</string>
     <string name="target_speed">Швидкість цілі</string>
     <string name="unit_kmh">км/год</string>
+    <string name="unit_mph">mph</string>
     <string name="moves_left">← Ліворуч</string>
     <string name="moves_right">Праворуч →</string>
     <string name="target_angle">Кут до лінії вогню (90 = поперек)</string>
@@ -484,7 +485,7 @@
     <string name="export_png">Картинка (PNG, щоб надрукувати чи зберегти)</string>
     <string name="export_title">Таблиця поправок %1$s · %2$s °C · вітер %3$s м/с</string>
     <string name="columns_automatic">Підібрані під екран</string>
-    <string name="wind_columns">Додаткові колонки вітру, м/с</string>
+    <string name="wind_columns">Додаткові колонки вітру, %1$s</string>
     <string name="wind_columns_hint">Напр. 2, 4, 6: знесення для кожної швидкості з заданого напрямку (до 6)</string>
     <string name="col_wind_at">Вітер %1$s</string>
     <string name="minimal_view">Мінімальний вигляд</string>

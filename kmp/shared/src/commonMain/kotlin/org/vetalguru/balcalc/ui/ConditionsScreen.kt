@@ -147,15 +147,17 @@ fun ConditionsScreen(model: AppModel) {
             }
 
             Section(stringResource(Res.string.wind)) {
+                val windUnit = WindUnit.of(model.state.prefs.windUnit)
+                val setWindUnit = { u: WindUnit -> model.setPrefs { it.copy(windUnit = u.key) } }
                 val zoned = c.windZones.isNotEmpty()
                 if (zoned) Text(stringResource(Res.string.zone_title, 1), fontWeight = FontWeight.Bold)
                 Fields(
                     wide,
                     { m ->
-                        StepperField(
+                        WindSpeedField(
                             stringResource(Res.string.speed), c.windSpeed,
                             { v -> model.updateConditions { it.copy(windSpeed = v) } },
-                            m, stringResource(Res.string.unit_mps), from = 0.0, to = 40.0, tag = "conditionsWindSpeed",
+                            windUnit, setWindUnit, m, tag = "conditionsWindSpeed",
                         )
                     },
                     { m ->
@@ -174,10 +176,10 @@ fun ConditionsScreen(model: AppModel) {
                         tag = "zoneUntil0",
                     )
                 }
-                StepperField(
+                WindSpeedField(
                     stringResource(Res.string.wind_gust), c.windGustMps,
                     { v -> model.updateConditions { it.copy(windGustMps = v) } },
-                    unit = stringResource(Res.string.unit_mps), from = 0.0, to = 40.0, tag = "windGust",
+                    windUnit, setWindUnit, tag = "windGust",
                 )
                 SwitchRow(
                     stringResource(Res.string.wind_zones_on), zoned,
@@ -221,10 +223,10 @@ fun ConditionsScreen(model: AppModel) {
                     Fields(
                         wide,
                         { m ->
-                            StepperField(
+                            WindSpeedField(
                                 stringResource(Res.string.speed), z.speedMps,
                                 { v -> change { it.copy(speedMps = v) } },
-                                m, stringResource(Res.string.unit_mps), from = 0.0, to = 40.0, tag = "zoneSpeed${i + 1}",
+                                windUnit, setWindUnit, m, tag = "zoneSpeed${i + 1}",
                             )
                         },
                         { m ->
