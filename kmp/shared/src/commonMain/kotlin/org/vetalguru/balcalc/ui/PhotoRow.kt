@@ -49,7 +49,8 @@ fun Thumbnail(image: ImageBitmap, size: Dp, modifier: Modifier = Modifier) = Ima
  */
 @Composable
 fun PhotoRow(photo: ByteArray?, onPhoto: (ByteArray?) -> Unit) {
-    val platform = LocalPlatform.current
+    val files = LocalPlatform.current.files
+    val camera = LocalPlatform.current.camera
     val scope = rememberCoroutineScope()
     val image = remember(photo) { pictureOf(photo) }
     var bad by remember { mutableStateOf(false) }
@@ -64,11 +65,11 @@ fun PhotoRow(photo: ByteArray?, onPhoto: (ByteArray?) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
         if (image != null) Thumbnail(image, 96.dp, Modifier.testTag("photo"))
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            OutlinedButton(onClick = { scope.launch { take(platform.openImage()) } }, modifier = Modifier.testTag("photoChoose")) {
+            OutlinedButton(onClick = { scope.launch { take(files.openImage()) } }, modifier = Modifier.testTag("photoChoose")) {
                 Text(stringResource(Res.string.photo_choose))
             }
-            if (platform.canTakePhoto) {
-                OutlinedButton(onClick = { scope.launch { take(platform.takePhoto()) } }) {
+            if (camera != null) {
+                OutlinedButton(onClick = { scope.launch { take(camera.takePhoto()) } }) {
                     Text(stringResource(Res.string.photo_take))
                 }
             }

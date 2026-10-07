@@ -15,7 +15,10 @@ import org.vetalguru.balcalc.core.NamedText
 actual fun BackHandler(enabled: Boolean, onBack: () -> Unit) = Unit
 
 /** Native file dialogs and the system clipboard. */
-class DesktopPlatform(private val owner: () -> Frame?) : Platform {
+class DesktopPlatform(private val owner: () -> Frame?) : Platform, Files, Clipboard {
+    override val files: Files get() = this
+    override val clipboard: Clipboard get() = this
+
     override suspend fun saveText(suggestedName: String, text: String): Boolean {
         val file = withContext(Dispatchers.Main) {
             FileDialog(owner(), null, FileDialog.SAVE).run {

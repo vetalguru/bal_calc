@@ -176,9 +176,9 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     fun share(kind: String, id: Long, toFile: Boolean) = model.act {
         val e = model.exportJson(kind, id)
         if (toFile) {
-            if (platform.saveText(e.fileName, e.json)) model.message = saved
+            if (platform.files.saveText(e.fileName, e.json)) model.message = saved
         } else {
-            platform.copyText(e.json)
+            platform.clipboard.copyText(e.json)
             model.message = copied
         }
     }
@@ -209,7 +209,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                         DropdownMenuItem({ Text(stringResource(Res.string.from_file)) }, onClick = {
                             importMenu = false
                             model.act {
-                                platform.openTexts(listOf("json"), multiple = false).firstOrNull()?.let {
+                                platform.files.openTexts(listOf("json"), multiple = false).firstOrNull()?.let {
                                     model.importShared(it.content)
                                     model.message = imported
                                 }
@@ -218,7 +218,7 @@ private fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                         DropdownMenuItem({ Text(stringResource(Res.string.from_clipboard)) }, onClick = {
                             importMenu = false
                             model.act {
-                                model.importShared(platform.pasteText().orEmpty())
+                                model.importShared(platform.clipboard.pasteText().orEmpty())
                                 model.message = imported
                             }
                         }, modifier = Modifier.testTag("importClipboard"))
@@ -784,7 +784,7 @@ fun BulletList(model: AppModel, picker: Boolean, onBack: () -> Unit, onEdit: (Lo
         actions = {
             TextButton(onClick = {
                 model.act {
-                    val files = platform.openTexts(listOf("ammo", "drg", "reticle", "json"), multiple = true)
+                    val files = platform.files.openTexts(listOf("ammo", "drg", "reticle", "json"), multiple = true)
                     if (files.isNotEmpty()) {
                         val r = model.importFiles(files)
                         report = (listOf(importedFiles.replace("%s", r.imported.toString())) +

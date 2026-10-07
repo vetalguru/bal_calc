@@ -163,5 +163,5 @@ private fun WidgetFeed(model: AppModel, platform: Platform) {
             "${w.direction} ${w.value} $unit".trim() + wClicks,
         )
     }
-    LaunchedEffect(lines) { platform.publishSolution(lines) }
+    LaunchedEffect(lines) { platform.widget?.publish(lines) }
 }
