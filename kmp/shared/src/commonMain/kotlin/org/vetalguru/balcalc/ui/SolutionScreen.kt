@@ -1,6 +1,10 @@
 package org.vetalguru.balcalc.ui
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +28,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Tab
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -31,7 +40,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,6 +47,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +69,8 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
 import org.vetalguru.balcalc.coreText
@@ -75,105 +86,247 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
     val st = model.state
     val sol = model.solution
     val unit = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
-    val sampleRifle = stringResource(Res.string.sample_rifle_name)
-    val sampleCartridge = stringResource(Res.string.sample_cartridge_name)
     var logging by remember { mutableStateOf(false) }
     if (logging) LogShotDialog(model, st.conditions.targetRangeM, sol.elevation) { logging = false }
     var situations by remember { mutableStateOf(false) }
     if (situations) SituationsDialog(model) { situations = false }
 
+    // "Viewer on top, controller below": what to read above, what the thumb
+    // changes below. Side by side on wide screens.
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 600.dp
+        // Small phones (under 380 dp): the controller drops its big steps.
+        val narrow = maxWidth < 380.dp
         Column(Modifier.fillMaxSize()) {
-            // Rifle and cartridge pickers.
-            Row(
-                Modifier.fillMaxWidth().padding(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Picker(
-                    items = st.rifles.map { it.id to it.name },
-                    selected = st.currentRifleId,
-                    empty = stringResource(Res.string.no_rifles),
-                    onSelect = model::selectRifle,
-                    modifier = Modifier.weight(1f).testTag("rifleBox"),
-                )
-                Picker(
-                    items = st.cartridges.map { it.id to it.name },
-                    selected = st.currentCartridgeId,
-                    empty = stringResource(Res.string.no_cartridges),
-                    onSelect = model::selectCartridge,
-                    modifier = Modifier.weight(1f).testTag("cartridgeBox"),
-                )
-            }
-            if (st.rifles.isNotEmpty()) {
-                TextButton(
-                    onClick = { situations = true },
-                    modifier = Modifier.align(Alignment.End).padding(end = 8.dp).testTag("situations"),
-                ) { Text(stringResource(Res.string.situations)) }
-            }
-
-            Column(
-                Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                DistanceCard(st.conditions.targetRangeM, model::setTargetRange)
-
-                if (!sol.ok && model.ready) {
-                    Text(
-                        coreText(sol.error),
-                        color = MaterialTheme.colorScheme.error,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
+            Pickers(model)
+            if (wide) {
+                Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Viewer(model, sol, unit, wide, narrow, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1.3f))
+                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) { Controller(model, narrow = false) }
                 }
-                if (model.ready && (st.rifles.isEmpty() || st.cartridges.isEmpty())) {
-                    EmptyActions(
-                        wide = wide,
-                        addLabel = stringResource(
-                            if (st.rifles.isEmpty()) Res.string.add_rifle else Res.string.add_cartridge,
-                        ),
-                        onAdd = onEditArmory,
-                        onSample = { model.addSample(sampleRifle, sampleCartridge) },
-                    )
-                }
-
-                if (sol.ok) {
-                    Corrections(sol, unit, st.conditions.windGustMps, wide)
-                    Warnings(sol.warnings)
-                    Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            if (sol.velocityScale != 1.0 || sol.dragScale != 1.0) {
-                                stringResource(Res.string.trued, sol.velocityScale.fixed(4), sol.dragScale.fixed(3))
-                            } else {
-                                stringResource(Res.string.not_trued)
-                            },
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f),
-                        )
-                        OutlinedButton(onClick = { logging = true }, modifier = Modifier.testTag("logHitSolution")) {
-                            Text(stringResource(Res.string.log_hit))
-                        }
-                    }
-                    ReticleCard(model, sol, wide)
-                }
-
-                QuickWind(
-                    speed = st.conditions.windSpeed,
-                    fromDeg = st.conditions.windFromDeg,
-                    onSpeed = { v -> model.updateConditions { it.copy(windSpeed = v) } },
-                    onDirection = { d -> model.updateConditions { it.copy(windFromDeg = d) } },
-                    zoneNote = if (st.conditions.windZones.isEmpty()) "" else stringResource(
-                        Res.string.quick_zone_note,
-                        st.conditions.windZones.size + 1,
-                        st.conditions.windUntilM.roundToInt(),
-                    ),
-                )
-
-                MovingTargetCard(model, sol, unit)
-
-                if (sol.ok) Details(sol, st.conditions.targetHeightCm, wide)
+            } else {
+                Viewer(model, sol, unit, wide, narrow, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1f))
+                Controller(model, narrow)
             }
         }
+    }
+}
+
+/** Rifle and cartridge pickers. */
+@Composable
+private fun Pickers(model: AppModel) {
+    val st = model.state
+    Row(
+        Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Picker(
+            items = st.rifles.map { it.id to it.name },
+            selected = st.currentRifleId,
+            empty = stringResource(Res.string.no_rifles),
+            onSelect = model::selectRifle,
+            modifier = Modifier.weight(1f).testTag("rifleBox"),
+        )
+        Picker(
+            items = st.cartridges.map { it.id to it.name },
+            selected = st.currentCartridgeId,
+            empty = stringResource(Res.string.no_cartridges),
+            onSelect = model::selectCartridge,
+            modifier = Modifier.weight(1f).testTag("cartridgeBox"),
+        )
+    }
+}
+
+private class ViewPage(val title: StringResource, val tag: String)
+
+private val viewPages = listOf(
+    ViewPage(Res.string.view_corrections, "viewCorrections"),
+    ViewPage(Res.string.view_reticle, "viewReticle"),
+    ViewPage(Res.string.view_more, "viewMore"),
+)
+
+/** The upper part: corrections, the reticle, the rest; swiped or chosen by the tabs. */
+@Composable
+private fun Viewer(
+    model: AppModel,
+    sol: Solution,
+    unit: String,
+    wide: Boolean,
+    narrow: Boolean,
+    onEditArmory: () -> Unit,
+    onLogHit: () -> Unit,
+    onSituations: () -> Unit,
+    modifier: Modifier,
+) {
+    val st = model.state
+    val pager = rememberPagerState { viewPages.size }
+    val scope = rememberCoroutineScope()
+    val sampleRifle = stringResource(Res.string.sample_rifle_name)
+    val sampleCartridge = stringResource(Res.string.sample_cartridge_name)
+    Column(modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SecondaryTabRow(selectedTabIndex = pager.currentPage, modifier = Modifier.weight(1f)) {
+                viewPages.forEachIndexed { i, p ->
+                    Tab(
+                        selected = pager.currentPage == i,
+                        onClick = { scope.launch { pager.animateScrollToPage(i) } },
+                        text = { Text(stringResource(p.title), maxLines = 1) },
+                        modifier = Modifier.testTag(p.tag),
+                    )
+                }
+            }
+            if (st.rifles.isNotEmpty() && !narrow) {
+                TextButton(onClick = onSituations, modifier = Modifier.testTag("situations")) {
+                    Text(stringResource(Res.string.situations), maxLines = 1)
+                }
+            }
+        }
+        // Every page stays composed: switching is instant and keeps its scroll.
+        HorizontalPager(pager, Modifier.fillMaxWidth().weight(1f), beyondViewportPageCount = viewPages.size - 1) { page ->
+            Column(
+                Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                when (page) {
+                    0 -> {
+                        if (!sol.ok && model.ready) {
+                            Text(
+                                coreText(sol.error),
+                                color = MaterialTheme.colorScheme.error,
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            )
+                        }
+                        if (model.ready && (st.rifles.isEmpty() || st.cartridges.isEmpty())) {
+                            EmptyActions(
+                                wide = wide,
+                                addLabel = stringResource(
+                                    if (st.rifles.isEmpty()) Res.string.add_rifle else Res.string.add_cartridge,
+                                ),
+                                onAdd = onEditArmory,
+                                onSample = { model.addSample(sampleRifle, sampleCartridge) },
+                            )
+                        }
+                        if (sol.ok) {
+                            Corrections(sol, unit, st.conditions.windGustMps)
+                            DetailsLine(sol) { scope.launch { pager.animateScrollToPage(2) } }
+                            Warnings(sol.warnings)
+                            Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    if (sol.velocityScale != 1.0 || sol.dragScale != 1.0) {
+                                        stringResource(Res.string.trued, sol.velocityScale.fixed(4), sol.dragScale.fixed(3))
+                                    } else {
+                                        stringResource(Res.string.not_trued)
+                                    },
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                OutlinedButton(onClick = onLogHit, modifier = Modifier.testTag("logHitSolution")) {
+                                    Text(stringResource(Res.string.log_hit))
+                                }
+                            }
+                        }
+                    }
+                    1 -> if (sol.ok) ReticleCard(model, sol, wide)
+                    else -> {
+                        if (st.rifles.isNotEmpty() && narrow) {
+                            OutlinedButton(onClick = onSituations, modifier = Modifier.padding(horizontal = 12.dp).testTag("situations")) {
+                                Text(stringResource(Res.string.situations))
+                            }
+                        }
+                        MovingTargetCard(model, sol, unit)
+                        if (sol.ok) Details(sol, st.conditions.targetHeightCm, wide)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** The lower part: range, wind and angle, each changed with the thumb. */
+@Composable
+private fun Controller(model: AppModel, narrow: Boolean) {
+    val c = model.state.conditions
+    val angle = { d: Double -> model.updateConditions { it.copy(lookAngleDeg = (it.lookAngleDeg + d).coerceIn(-60.0, 60.0)) } }
+    Card(
+        Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                if (!narrow) Step("−100") { model.setTargetRange(c.targetRangeM - 100) }
+                Step("−10") { model.setTargetRange(c.targetRangeM - 10) }
+                RangeField(c.targetRangeM, model::setTargetRange, Modifier.weight(1f), showUnit = !narrow)
+                Step("+10") { model.setTargetRange(c.targetRangeM + 10) }
+                if (!narrow) Step("+100") { model.setTargetRange(c.targetRangeM + 100) }
+            }
+            HorizontalDivider()
+            QuickWind(
+                speed = c.windSpeed,
+                fromDeg = c.windFromDeg,
+                onSpeed = { v -> model.updateConditions { it.copy(windSpeed = v.coerceIn(0.0, 40.0)) } },
+                onDirection = { d -> model.updateConditions { it.copy(windFromDeg = d) } },
+                zoneNote = if (c.windZones.isEmpty()) "" else stringResource(
+                    Res.string.quick_zone_note,
+                    c.windZones.size + 1,
+                    c.windUntilM.roundToInt(),
+                ),
+            )
+            HorizontalDivider()
+            // Look angle: uphill positive.
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    stringResource(Res.string.look_angle_short),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 4.dp).weight(1f),
+                )
+                if (!narrow) Step("−5") { angle(-5.0) }
+                Step("−1") { angle(-1.0) }
+                Text(
+                    "${c.lookAngleDeg.roundToInt()}°",
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(56.dp).testTag("lookAngle"),
+                )
+                Step("+1") { angle(1.0) }
+                if (!narrow) Step("+5") { angle(5.0) }
+            }
+        }
+    }
+}
+
+/** A small ± button of the controller. */
+@Composable
+private fun Step(label: String, onClick: () -> Unit) {
+    FilledTonalButton(
+        onClick = onClick,
+        contentPadding = PaddingValues(horizontal = 2.dp),
+        modifier = Modifier.width(50.dp).height(40.dp),
+    ) { Text(label, fontSize = 13.sp, maxLines = 1) }
+}
+
+/** Velocity, time of flight, energy, Mach and stability in one line; the rest on "More". */
+@Composable
+private fun DetailsLine(sol: Solution, onMore: () -> Unit) {
+    val parts = listOf(
+        "${sol.velocity.fixed(0)} ${stringResource(Res.string.unit_mps)}",
+        "${sol.time.fixed(2)} ${stringResource(Res.string.unit_s)}",
+        "${sol.energy.fixed(0)} ${stringResource(Res.string.unit_j)}",
+        "M ${sol.mach.fixed(2)}",
+    ) + if (sol.stability > 0) listOf("Sg ${sol.stability.fixed(2)}") else emptyList()
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onMore).padding(horizontal = 16.dp).testTag("detailsLine"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            parts.joinToString("  ·  "),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            modifier = Modifier.weight(1f),
+        )
+        Text("›", fontSize = 22.sp, color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -209,34 +362,9 @@ fun Picker(
     }
 }
 
-@Composable
-private fun DistanceCard(rangeM: Double, onRange: (Double) -> Unit) {
-    Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(Res.string.distance), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                RangeField(rangeM, onRange, Modifier.weight(1f))
-                Text(stringResource(Res.string.unit_m), fontSize = 20.sp)
-            }
-            Row(Modifier.fillMaxWidth()) {
-                for (step in listOf(-100, -10, 10, 100)) {
-                    TextButton(onClick = { onRange(rangeM + step) }, modifier = Modifier.weight(1f)) {
-                        Text((if (step > 0) "+" else "−") + abs(step))
-                    }
-                }
-            }
-            Slider(
-                value = rangeM.toFloat().coerceIn(50f, 2500f),
-                onValueChange = { onRange((it / 5f).roundToInt() * 5.0) },
-                valueRange = 50f..2500f,
-            )
-        }
-    }
-}
-
 /** The big distance input: whole metres, committed on Done or focus loss. */
 @Composable
-private fun RangeField(rangeM: Double, onRange: (Double) -> Unit, modifier: Modifier) {
+private fun RangeField(rangeM: Double, onRange: (Double) -> Unit, modifier: Modifier, showUnit: Boolean = true) {
     var text by remember { mutableStateOf(rangeM.roundToInt().toString()) }
     var focused by remember { mutableStateOf(false) }
     LaunchedEffect(rangeM, focused) { if (!focused) text = rangeM.roundToInt().toString() }
@@ -245,7 +373,8 @@ private fun RangeField(rangeM: Double, onRange: (Double) -> Unit, modifier: Modi
         value = text,
         onValueChange = { t -> if (t.length <= 4 && t.all(Char::isDigit)) text = t },
         singleLine = true,
-        textStyle = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
+        textStyle = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
+        suffix = if (showUnit) ({ Text(stringResource(Res.string.unit_m)) }) else null,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
         modifier = modifier.testTag("range").onFocusChanged {
@@ -273,7 +402,7 @@ private fun EmptyActions(wide: Boolean, addLabel: String, onAdd: () -> Unit, onS
 }
 
 @Composable
-private fun Corrections(sol: Solution, unit: String, gustMps: Double, wide: Boolean) {
+private fun Corrections(sol: Solution, unit: String, gustMps: Double) {
     val elevation: @Composable (Modifier) -> Unit = { m ->
         CorrectionTile(
             title = stringResource(Res.string.elevation),
@@ -311,17 +440,11 @@ private fun Corrections(sol: Solution, unit: String, gustMps: Double, wide: Bool
             },
         )
     }
-    if (wide) {
-        // Tagged with the range it was solved for, so tests can wait for it.
-        Row(Modifier.padding(horizontal = 12.dp).testTag("solvedFor:${sol.rangeM.roundToInt()}"), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            elevation(Modifier.weight(1f))
-            windage(Modifier.weight(1f))
-        }
-    } else {
-        Column(Modifier.padding(horizontal = 12.dp).testTag("solvedFor:${sol.rangeM.roundToInt()}"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            elevation(Modifier.fillMaxWidth())
-            windage(Modifier.fillMaxWidth())
-        }
+    // Side by side: read together. Tagged with the range it was solved for,
+    // so tests can wait for it.
+    Row(Modifier.padding(horizontal = 12.dp).testTag("solvedFor:${sol.rangeM.roundToInt()}"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        elevation(Modifier.weight(1f))
+        windage(Modifier.weight(1f))
     }
 }
 
@@ -337,17 +460,15 @@ private fun CorrectionTile(
     extra: String = "",
 ) {
     Card(modifier, elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)) {
-        Column(Modifier.padding(16.dp)) {
+        Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(title, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                 Spacer(Modifier.weight(1f))
                 Text(direction, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             }
-            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(value, fontSize = 56.sp, fontWeight = FontWeight.Bold, modifier = Modifier.testTag(tag))
-                Text(unit, fontSize = 18.sp, modifier = Modifier.padding(bottom = 12.dp))
-            }
-            if (clicks.isNotEmpty()) Text(clicks, fontSize = 18.sp)
+            Text(value, fontSize = 48.sp, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.testTag(tag))
+            // The unit with the clicks: the number keeps the whole width.
+            Text(if (clicks.isNotEmpty()) "$unit · $clicks" else unit, fontSize = 16.sp, maxLines = 1)
             if (extra.isNotEmpty()) {
                 Text(extra, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.testTag("${tag}Gust"))
             }
@@ -438,46 +559,36 @@ private fun QuickWind(
     onDirection: (Double) -> Unit,
     zoneNote: String = "",
 ) {
-    Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("quickWind")) {
-        // The dial on the left, everything else in the rest of the width. The
-        // dial is a third of the card (84..112 dp), so a 320 dp phone, a
-        // 412 dp one and a tablet all keep the text on its lines.
-        BoxWithConstraints(Modifier.padding(16.dp)) {
-            val dial = (maxWidth * 0.32f).coerceIn(84.dp, 112.dp)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                WindDial(fromDeg, onDirection, Modifier.size(dial))
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    NumberField(
-                        label = stringResource(Res.string.wind_speed),
-                        value = speed,
-                        onEdited = onSpeed,
-                        unit = stringResource(Res.string.unit_mps),
-                        from = 0.0,
-                        to = 40.0,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
-                        tag = "windSpeed",
-                    )
-                    Text(
-                        stringResource(Res.string.wind_from),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        stringResource(Res.string.wind_clock, clockHour(fromDeg)) + " · ${fromDeg.roundToInt()}°",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        stringResource(Res.string.wind_clock_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (zoneNote.isNotEmpty()) {
-                        Text(zoneNote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-                    }
-                }
+    // The dial on the left; the speed with its steps and the clock beside it.
+    Row(
+        Modifier.fillMaxWidth().testTag("quickWind"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        WindDial(fromDeg, onDirection, Modifier.size(76.dp))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                Step("−1") { onSpeed(speed - 1) }
+                NumberField(
+                    label = stringResource(Res.string.wind_speed),
+                    value = speed,
+                    onEdited = onSpeed,
+                    unit = stringResource(Res.string.unit_mps),
+                    from = 0.0,
+                    to = 40.0,
+                    modifier = Modifier.weight(1f),
+                    tag = "windSpeed",
+                )
+                Step("+1") { onSpeed(speed + 1) }
+            }
+            Text(
+                stringResource(Res.string.wind_from) + " " +
+                    stringResource(Res.string.wind_clock, clockHour(fromDeg)) + " · ${fromDeg.roundToInt()}°",
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+            )
+            if (zoneNote.isNotEmpty()) {
+                Text(zoneNote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
             }
         }
     }

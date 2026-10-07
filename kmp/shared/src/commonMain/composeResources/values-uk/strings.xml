@@ -448,4 +448,8 @@
     <string name="theme_dark">Темна</string>
     <string name="theme_night">Нічна (червона)</string>
     <string name="keep_screen_on">Не вимикати екран</string>
+    <string name="view_corrections">Поправки</string>
+    <string name="view_reticle">Сітка</string>
+    <string name="view_more">Ще</string>
+    <string name="look_angle_short">Кут</string>
 </resources>

@@ -91,7 +91,7 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }
         onNodeWithTag("elevation").assertTextEquals("1.61")
         shot("$name-solution")
-        onNodeWithTag("quickWind").performScrollTo()
+        assertTrue(exists("quickWind")) // the controller: always on screen
         shotOf("quickWind", "$name-wind")
 
         // Colder air: more elevation.
@@ -485,7 +485,7 @@ class FlowTest {
         assertTrue(!exists("addZone")) // three zones in all
         onNodeWithTag("navSolution").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("windage") && shown("windage") != calm }
-        onNodeWithTag("quickWind").performScrollTo()
+        assertTrue(exists("quickWind")) // the controller: always on screen
         assertTrue(hasText("Zone 1 of 3", substring = true))
         db.delete()
     }
@@ -495,6 +495,7 @@ class FlowTest {
         val db = startWithSample()
         setRange(500)
         assertTrue(!exists("lead"))
+        onNodeWithTag("viewMore").performClick()
 
         // 15 km/h to the right (the default direction): lead to the right.
         onNodeWithTag("targetSpeed").performScrollTo()
