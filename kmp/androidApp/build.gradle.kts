@@ -13,7 +13,7 @@ android {
     ndkVersion = libs.versions.android.ndk.get()
 
     defaultConfig {
-        // Same id as the Qt version: installs as its update and keeps the data.
+        // Holdmark's own id since the rename (BalCalc was org.vetalguru.balcalc).
         applicationId = "org.vetalguru.holdmark"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
@@ -70,6 +70,10 @@ android {
 }
 
 kotlin { jvmToolchain(17) }
+
+// Outputs named like every package: Holdmark-<version>-<platform>-<arch>-<build type>,
+// e.g. Holdmark-0.5.0-android-arm64-release.apk (AGP adds the build type).
+base.archivesName.set("Holdmark-${rootProject.extra["appVersion"]}-android-arm64")
 
 // data/seed as assets/seed (data files only).
 val seedAssets = tasks.register<Sync>("seedAssets") {

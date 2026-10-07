@@ -100,6 +100,28 @@ compose.desktop {
     }
 }
 
+// Installers named like every package: Holdmark-<version>-<platform>-<arch>-release
+// (Compose names them after packageName and packageVersion only).
+val appVersion = rootProject.extra["appVersion"] as String
+for ((task, ext, platform) in listOf(
+    Triple("packageMsi", "msi", "windows-x64"),
+    Triple("packageDeb", "deb", "linux-amd64"),
+)) {
+    tasks.matching { it.name == task }.configureEach {
+        val dir = layout.buildDirectory.dir("compose/binaries/main/$ext")
+        // A plain string: a top-level val would take the script object into the configuration cache.
+        val fileName = "Holdmark-$appVersion-$platform-release.$ext"
+        doLast {
+            val out = dir.get().asFile
+            val named = File(out, fileName)
+            out.listFiles { f -> f.extension == ext && f != named }?.forEach { built ->
+                named.delete()
+                check(built.renameTo(named)) { "Cannot rename $built to $named" }
+            }
+        }
+    }
+}
+
 tasks.matching { it.name in setOf("prepareAppResources", "run", "createDistributable") }
     .configureEach { dependsOn(stageResources) }
 
