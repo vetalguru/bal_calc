@@ -85,20 +85,27 @@ internal fun Controller(model: AppModel, narrow: Boolean) {
             HorizontalDivider()
             // Look angle: uphill positive.
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    stringResource(Res.string.look_angle_short),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    modifier = Modifier.padding(start = 4.dp).weight(1f),
-                )
+                // The weight on a plain box: the tooltip's anchor does not pass it on.
+                Box(Modifier.padding(start = 4.dp).weight(1f)) {
+                    Hint(stringResource(Res.string.shot_angle), Modifier.testTag("lookAngleHint")) {
+                        Text(
+                            stringResource(Res.string.look_angle_short),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                        )
+                    }
+                }
                 if (!narrow) Step("−5") { angle(-5.0) }
                 Step("−1") { angle(-1.0) }
+                // An arrow tells up from down without a sign to decode.
+                val deg = c.lookAngleDeg.roundToInt()
                 Text(
-                    "${c.lookAngleDeg.roundToInt()}°",
+                    (if (deg > 0) "↑" else if (deg < 0) "↓" else "") + "${kotlin.math.abs(deg)}°",
                     style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.width(56.dp).testTag("lookAngle"),
+                    maxLines = 1,
+                    modifier = Modifier.width(64.dp).testTag("lookAngle"),
                 )
                 Step("+1") { angle(1.0) }
                 if (!narrow) Step("+5") { angle(5.0) }

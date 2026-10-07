@@ -1081,6 +1081,9 @@ class FlowTest {
             chooseLanguage("Русский")
             waitUntil(timeoutMillis = 10_000) { hasText("Решение") }
             shot("ru-settings")
+            onNodeWithTag("navSolution").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+            shot("ru-solution")
         } finally {
             // The language is process-wide: back to the system's for the other tests.
             chooseLanguage("English")
@@ -1125,6 +1128,22 @@ class FlowTest {
         shot("conditions-wind-steps")
         onNodeWithTag("navSolution").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("windSpeed") && shown("windSpeed") == "6.5" }
+        db.delete()
+    }
+
+    /** The look angle on the controller: up or down by an arrow, a tap on its name explains it. */
+    @Test
+    fun lookAngleArrowAndHint() = runDesktopComposeUiTest(320, 640) {
+        val db = startWithSample()
+        assertEquals("0°", shown("lookAngle"))
+        onAllNodesWithText("+1").onLast().performClick() // the angle's, below the wind's
+        waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "↑1°" }
+        onAllNodesWithText("−1").onLast().performClick()
+        onAllNodesWithText("−1").onLast().performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "↓1°" }
+        onNodeWithTag("lookAngleHint").performClick()
+        waitUntil(timeoutMillis = 5_000) { hasText("Shot angle (uphill +, downhill −)") }
+        shot("look-angle-hint")
         db.delete()
     }
 }

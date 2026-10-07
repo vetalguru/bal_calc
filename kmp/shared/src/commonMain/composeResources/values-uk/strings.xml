@@ -451,7 +451,7 @@
     <string name="view_corrections">Поправки</string>
     <string name="view_reticle">Сітка</string>
     <string name="view_more">Ще</string>
-    <string name="look_angle_short">Кут</string>
+    <string name="look_angle_short">Кут місця цілі</string>
     <string name="corrections_format">Поправки</string>
     <string name="correction_style">Напрям</string>
     <string name="style_words">Словами: ВГОРУ, ВЛІВО</string>
