@@ -36,6 +36,8 @@ void Api::Impl::LoadSettings() {
     if (auto session = al::LoadSession(db)) {
         ApplySession(session.value());
     }
+    // Every start begins with the wind from 12 o'clock (the speed stays).
+    wind_from_deg = 0.0;
 }
 
 al::SessionConditions Api::Impl::Session() const {

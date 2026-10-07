@@ -1,6 +1,8 @@
 // The JSON facade the Kotlin app talks to: every method, through Call()
 // only, as the app sees it.
 #include <ballistics/bridge/api.h>
+#include <ballistics/applogic/session.h>
+#include <ballistics/storage/database.h>
 
 #include <gtest/gtest.h>
 
@@ -781,6 +783,29 @@ TEST(BridgeErrors, CallsFailCleanly) {
                     .at("result")
                     .get<double>(),
                 954.6, 0.5);
+}
+
+// Every start begins with the wind from 12 o'clock, whatever was saved;
+// the speed stays.
+TEST(BridgeFile, WindStartsFromNoon) {
+    const auto path = (std::filesystem::temp_directory_path() / "balcalc_wind.db").string();
+    std::filesystem::remove(path);
+    {
+        ballistics::storage::Database db;
+        ASSERT_TRUE(db.Open(path).ok());
+        ballistics::applogic::SessionConditions s;
+        s.winds = {{5.0, 90.0, 0.0}};
+        ASSERT_TRUE(ballistics::applogic::SaveSession(db, s).ok());
+    }
+    for (int start = 0; start < 2; ++start) {
+        Api api;
+        api.Call("open", json{{"path", path}}.dump());
+        const json c = json::parse(api.Call("state", "")).at("result").at("conditions");
+        EXPECT_EQ(c.at("windFromDeg"), 0.0) << start;
+        EXPECT_EQ(c.at("windSpeed"), 5.0) << start;
+        api.Call("setConditions", R"({"windFromDeg": 90})"); // not kept to the next start
+    }
+    std::filesystem::remove(path);
 }
 
 } // namespace
