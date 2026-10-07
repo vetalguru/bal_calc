@@ -167,12 +167,14 @@ protected:
 
 TEST_F(ImportDb, SeedImportsEverythingOnce) {
     const auto files = AllSeedFiles();
+    EXPECT_EQ(SeededVersion(db_).value(), 0);
     const auto first = SeedLibrary(db_, files, 1);
     ASSERT_TRUE(first.ok()) << first.error().message;
     EXPECT_TRUE(first.value().problems.empty()) << first.value().problems.front();
     // 69 ammo + 1 drg + 14 reticles (4 BallisticCalculator + 10 generic) + 253 published bullets.
     EXPECT_EQ(first.value().imported, 69 + 1 + 14 + 253);
 
+    EXPECT_EQ(SeededVersion(db_).value(), 1);
     const auto again = SeedLibrary(db_, files, 1); // same version: nothing to do
     EXPECT_EQ(again.value().imported, 0);
     EXPECT_EQ(again.value().skipped, 0);

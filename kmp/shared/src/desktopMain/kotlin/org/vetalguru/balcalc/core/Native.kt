@@ -50,5 +50,5 @@ fun desktopDatabasePath(): String {
 fun desktopSeed(): List<SeedFile> =
     File(resourcesDir(), "seed").walkTopDown()
         .filter { it.isFile && isSeedFile(it.name) }
-        .map { SeedFile(it.name, it.readText()) }
+        .map { f -> SeedFile(f.name) { f.readText() } }
         .toList()

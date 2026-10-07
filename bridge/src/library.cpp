@@ -41,6 +41,11 @@ void Api::Impl::AddLibraryHandlers(HandlerMap& h) {
              s.Refresh();
              return {{"imported", r.imported}, {"skipped", r.skipped}, {"problems", r.problems}};
          }},
+        {"seedVersion",
+         [](I& s, const json&) -> json {
+             s.RequireOpen();
+             return {{"version", Must(al::SeededVersion(s.db))}};
+         }},
         {"libraryScopes", [](I& s, const json& a) -> json { return Matching(s.scope_catalog, Str(a, "filter")); }},
         {"libraryRifles", [](I& s, const json& a) -> json { return Matching(s.rifle_catalog, Str(a, "filter")); }},
         {"libraryCartridges",

@@ -10,6 +10,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.int
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -24,8 +25,10 @@ fun interface Engine {
 /** A failed call; [message] is the core's English sentence (a translation key). */
 class ApiException(message: String) : Exception(message)
 
-/** A file of the starter library (data/seed), passed to the core once. */
-class SeedFile(val name: String, val content: String)
+/** A file of the starter library (data/seed); read only when it is sent to the core. */
+class SeedFile(val name: String, read: () -> String) {
+    val content: String by lazy(read)
+}
 
 /**
  * The app's single way into the C++ core. Calls run one at a time off the
@@ -53,10 +56,14 @@ class Api(private val engine: Engine) {
         if (started) return
         started = true
         call("open", buildJsonObject { put("path", databasePath) })
+        // The library files matter once per seed version; the catalogs on
+        // every start (the core keeps them in memory). Unsent files are not read.
+        val seeded = call("seedVersion").jsonObject.getValue("version").jsonPrimitive.int
+        val files = seed().filter { seeded < SEED_VERSION || isCatalogFile(it.name) }
         seedResult = call("seed", buildJsonObject {
             put("version", SEED_VERSION)
             putJsonArray("files") {
-                for (f in seed()) {
+                for (f in files) {
                     addJsonObject {
                         put("name", f.name)
                         put("content", f.content)
@@ -85,6 +92,9 @@ class Api(private val engine: Engine) {
         }
     }
 }
+
+/** The read-only scope and rifle catalogs of the starter library (not stored in the database). */
+fun isCatalogFile(name: String): Boolean = name == "published_scopes.json" || name == "published_rifles.json"
 
 /** Starter-library files to send: the data formats, not docs or scripts. */
 fun isSeedFile(name: String): Boolean =
