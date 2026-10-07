@@ -9,7 +9,7 @@ import android.widget.RemoteViews
 
 /**
  * The home-screen widget: the last solution the app computed (range,
- * elevation, windage), as AndroidPlatform.publishSolution left it; a tap
+ * elevation, windage), as AndroidPlatform.publish left it; a tap
  * opens the app.
  */
 class SolutionWidget : AppWidgetProvider() {

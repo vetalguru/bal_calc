@@ -68,7 +68,7 @@ private val HoleColor = Color(0xFFE53935)
  */
 @Composable
 fun GroupScreen(model: AppModel, onBack: () -> Unit) {
-    val platform = LocalPlatform.current
+    val files = LocalPlatform.current.files
     val scope = rememberCoroutineScope()
     val st = model.state
     var photo by remember { mutableStateOf<ImageBitmap?>(null) }
@@ -97,7 +97,7 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
         ) {
             Button(onClick = {
                 scope.launch {
-                    val bytes = platform.openImage() ?: return@launch
+                    val bytes = files.openImage() ?: return@launch
                     photo = runCatching { bytes.decodeToImageBitmap() }.getOrNull()
                     scale.clear(); holes.clear(); aim = null; mode = Marking.Scale; saved = false
                 }

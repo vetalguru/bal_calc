@@ -171,7 +171,7 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("more:Load") }
         onNodeWithTag("more:Load").performClick()
         onNodeWithTag("copy").performClick()
-        waitUntil(timeoutMillis = 10_000) { platform.clipboard?.contains("balcalc-cartridge") == true }
+        waitUntil(timeoutMillis = 10_000) { platform.clipboardText?.contains("balcalc-cartridge") == true }
         onNodeWithTag("cartridgesTab").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("cartridge:Load") }
         onAllNodesWithText("Import").onFirst().performClick()
@@ -280,8 +280,8 @@ class FlowTest {
         // The same file as the code carries, read back from pictures of its parts.
         onNodeWithTag("more:$name").performClick()
         onNodeWithTag("copy").performClick()
-        waitUntil(timeoutMillis = 10_000) { platform.clipboard != null }
-        val parts = QrShare.parts(platform.clipboard!!)
+        waitUntil(timeoutMillis = 10_000) { platform.clipboardText != null }
+        val parts = QrShare.parts(platform.clipboardText!!)
         onAllNodesWithText("Import").onFirst().performClick()
         onNodeWithTag("importQr").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("qrPicture") }

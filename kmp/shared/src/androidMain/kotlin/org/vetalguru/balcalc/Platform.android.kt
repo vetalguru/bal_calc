@@ -34,7 +34,12 @@ actual fun BackHandler(enabled: Boolean, onBack: () -> Unit) =
  * other providers, no storage permission). Create it in the activity's
  * onCreate: launchers must be registered before the activity starts.
  */
-class AndroidPlatform(private val activity: ComponentActivity) : Platform {
+class AndroidPlatform(private val activity: ComponentActivity) : Platform, Files, Clipboard, Camera, HomeWidget {
+    override val files: Files get() = this
+    override val clipboard: Clipboard get() = this
+    override val widget: HomeWidget get() = this
+    override val camera: Camera?
+        get() = if (activity.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) this else null
     override val sensors: PhoneSensors = AndroidSensors(activity)
 
     private var onCreated: ((Uri?) -> Unit)? = null
@@ -100,9 +105,6 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
     private val scan: ActivityResultLauncher<ScanOptions> =
         activity.registerForActivityResult(ScanContract()) { onScanned?.invoke(it.contents) }
 
-    override val canScanQr: Boolean
-        get() = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
-
     // The scanner asks for the camera itself, when it opens.
     override suspend fun scanQr(): String? = suspendCancellableCoroutine { c ->
         onScanned = { c.resume(it) }
@@ -121,8 +123,6 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
     private var onPicture: ((Bitmap?) -> Unit)? = null
     private val takePicture: ActivityResultLauncher<Void?> =
         activity.registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { onPicture?.invoke(it) }
-
-    override val canTakePhoto: Boolean get() = canScanQr
 
     // The app declares the camera (for the QR scanner), so the system camera
     // app may be started only once the permission is granted.
@@ -155,7 +155,7 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
             ?: uri.lastPathSegment.orEmpty()
 
     // The home-screen widget reads the last solution from here (SolutionWidget).
-    override fun publishSolution(summary: SolutionLines?) {
+    override fun publish(summary: SolutionLines?) {
         activity.getSharedPreferences(WIDGET_PREFS, Context.MODE_PRIVATE).edit().apply {
             if (summary == null) {
                 clear()
@@ -181,13 +181,13 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
         const val WIDGET_PREFS = "balcalc_widget"
     }
 
-    private val clipboard get() = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    private val systemClipboard get() = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     override suspend fun copyText(text: String) =
-        clipboard.setPrimaryClip(ClipData.newPlainText("BalCalc", text))
+        systemClipboard.setPrimaryClip(ClipData.newPlainText("BalCalc", text))
 
     override suspend fun pasteText(): String? =
-        clipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(activity)?.toString()
+        systemClipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(activity)?.toString()
 }
 
 @Composable

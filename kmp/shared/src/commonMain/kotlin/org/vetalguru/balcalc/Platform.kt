@@ -3,41 +3,53 @@ package org.vetalguru.balcalc
 import androidx.compose.runtime.Composable
 import org.vetalguru.balcalc.core.NamedText
 
-/** What the screens need from the operating system. */
+/**
+ * What the screens need from the operating system, as separate
+ * capabilities: each screen takes only the one it uses. A capability a
+ * platform lacks is null (no camera on a desktop, no widget in tests).
+ */
 interface Platform {
+    val files: Files
+    val clipboard: Clipboard
+    val camera: Camera? get() = null
+    val sensors: PhoneSensors? get() = null
+    val widget: HomeWidget? get() = null
+}
+
+/** Files the user picks: our shared files, exports and pictures. */
+interface Files {
     /** Asks where to save [text]; false when the user cancelled. */
     suspend fun saveText(suggestedName: String, text: String): Boolean
+
+    /** Asks where to save a binary file ([mimeType], e.g. "image/png"); false when cancelled. */
+    suspend fun saveBytes(suggestedName: String, mimeType: String, bytes: ByteArray): Boolean
 
     /** Asks for files to read; empty when cancelled. [extensions] without dots. */
     suspend fun openTexts(extensions: List<String>, multiple: Boolean): List<NamedText>
 
+    /** Asks for a picture (a target photo, a rifle); its bytes, or null when cancelled. */
+    suspend fun openImage(): ByteArray?
+}
+
+interface Clipboard {
     suspend fun copyText(text: String)
 
     suspend fun pasteText(): String?
+}
 
-    /** Asks for a picture (a target photo); its bytes, or null when cancelled. */
-    suspend fun openImage(): ByteArray? = null
+/** The camera (asking for it first, each time it is needed). */
+interface Camera {
+    /** One QR code read by the camera; null when cancelled. */
+    suspend fun scanQr(): String?
 
-    /** Whether [scanQr] has a camera to use. */
-    val canScanQr: Boolean get() = false
+    /** A picture from the camera; null when cancelled. */
+    suspend fun takePhoto(): ByteArray?
+}
 
-    /** The current solution in four short lines, for a home-screen widget (null: none). */
-    fun publishSolution(summary: SolutionLines?) = Unit
-
-    /** Asks where to save a binary file ([mimeType], e.g. "image/png"); false when cancelled. */
-    suspend fun saveBytes(suggestedName: String, mimeType: String, bytes: ByteArray): Boolean = false
-
-    /** Whether [takePhoto] has a camera to use. */
-    val canTakePhoto: Boolean get() = false
-
-    /** A picture from the camera (asking for it first); null when cancelled. */
-    suspend fun takePhoto(): ByteArray? = null
-
-    /** One QR code read by the camera (asking for it first); null when cancelled. */
-    suspend fun scanQr(): String? = null
-
-    /** The phone's sensors; null where there are none (desktops). */
-    val sensors: PhoneSensors? get() = null
+/** A home-screen widget showing the current solution. */
+fun interface HomeWidget {
+    /** The solution in four short lines (null: none). */
+    fun publish(summary: SolutionLines?)
 }
 
 /** The system Back action (Android key or gesture); nothing on desktops. */

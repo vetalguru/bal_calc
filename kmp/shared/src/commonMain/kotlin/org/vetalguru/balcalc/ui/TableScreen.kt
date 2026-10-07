@@ -198,7 +198,7 @@ fun TableScreen(model: AppModel, onRangeChosen: () -> Unit) {
 private fun RangeCard(model: AppModel, table: RangeTable, onColumns: () -> Unit, onRow: (Double) -> Unit) {
     val st = model.state
     val targetM = st.conditions.targetRangeM
-    val platform = LocalPlatform.current
+    val files = LocalPlatform.current.files
     val scope = rememberCoroutineScope()
     val saved = stringResource(Res.string.saved)
     val title = stringResource(
@@ -217,9 +217,9 @@ private fun RangeCard(model: AppModel, table: RangeTable, onColumns: () -> Unit,
             val rows = table.rows.map { r -> cols.map { cell(it, r) } }
             val ok = if (png) {
                 val target = table.rows.indexOfFirst { abs(it.rangeM - targetM) < 0.5 }
-                platform.saveBytes("range-card.png", "image/png", tablePng(title, header, rows, target))
+                files.saveBytes("range-card.png", "image/png", tablePng(title, header, rows, target))
             } else {
-                platform.saveBytes("range-card.csv", "text/csv", tableCsv(title, header, rows).encodeToByteArray())
+                files.saveBytes("range-card.csv", "text/csv", tableCsv(title, header, rows).encodeToByteArray())
             }
             if (ok) model.message = saved
         }

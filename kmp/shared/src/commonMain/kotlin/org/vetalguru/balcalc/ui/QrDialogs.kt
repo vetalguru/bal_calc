@@ -77,7 +77,8 @@ fun QrShowDialog(title: String, parts: List<String>, onClose: () -> Unit) {
  */
 @Composable
 fun QrImportDialog(model: AppModel, onImported: () -> Unit, onClose: () -> Unit) {
-    val platform = LocalPlatform.current
+    val files = LocalPlatform.current.files
+    val camera = LocalPlatform.current.camera
     val scope = rememberCoroutineScope()
     val collector = remember { QrShare.Collector() }
     var have by remember { mutableIntStateOf(0) }
@@ -113,14 +114,14 @@ fun QrImportDialog(model: AppModel, onImported: () -> Unit, onClose: () -> Unit)
                 if (collector.total > 1) {
                     Text(stringResource(Res.string.qr_progress, have, collector.total), modifier = Modifier.testTag("qrProgress"))
                 }
-                if (platform.canScanQr) {
-                    Button(onClick = { scope.launch { take(platform.scanQr()) } }, modifier = Modifier.testTag("qrScan")) {
+                if (camera != null) {
+                    Button(onClick = { scope.launch { take(camera.scanQr()) } }, modifier = Modifier.testTag("qrScan")) {
                         Text(stringResource(Res.string.qr_scan))
                     }
                 }
                 OutlinedButton(onClick = {
                     scope.launch {
-                        val image = platform.openImage() ?: return@launch
+                        val image = files.openImage() ?: return@launch
                         take(decodeQrImage(image) ?: "")
                     }
                 }, modifier = Modifier.testTag("qrPicture")) { Text(stringResource(Res.string.qr_picture)) }
