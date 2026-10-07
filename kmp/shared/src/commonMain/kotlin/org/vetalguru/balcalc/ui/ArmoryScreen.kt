@@ -99,7 +99,10 @@ internal open class WithPhoto {
     suspend fun load(model: AppModel, kind: String, id: Long) {
         if (photoLoaded) return
         photoLoaded = true
-        if (id > 0) photo = model.photo(kind, id)
+        if (id <= 0) return
+        val stored = model.photo(kind, id)
+        // A picture chosen while this loaded wins: the stored one is older.
+        if (!photoChanged) photo = stored
     }
 }
 
