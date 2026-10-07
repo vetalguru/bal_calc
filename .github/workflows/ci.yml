@@ -186,24 +186,6 @@ jobs:
           name: linux-deb
           path: kmp/desktopApp/build/compose/binaries/main/deb/*.deb
 
-  linux-zip:
-    name: "Artifact: Linux portable ZIP"
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: ./.github/actions/setup-kotlin
-
-      - name: Build the ZIP
-        working-directory: kmp
-        run: ./gradlew :desktopApp:packageZip
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: linux-zip
-          path: kmp/desktopApp/build/compose/binaries/main/zip/*.zip
-
   windows-msi:
     name: "Artifact: Windows MSI installer"
     runs-on: windows-2022
@@ -222,21 +204,3 @@ jobs:
         with:
           name: windows-msi
           path: kmp/desktopApp/build/compose/binaries/main/msi/*.msi
-
-  windows-zip:
-    name: "Artifact: Windows portable ZIP"
-    runs-on: windows-2022
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: ./.github/actions/setup-kotlin
-
-      - name: Build the ZIP
-        working-directory: kmp
-        run: ./gradlew.bat :desktopApp:packageZip
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows-zip
-          path: kmp/desktopApp/build/compose/binaries/main/zip/*.zip
