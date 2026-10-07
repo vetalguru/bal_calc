@@ -509,9 +509,9 @@
     <string name="compass_magnetic">От магнитного севера: для истинного сначала возьмите «Моё место».</string>
     <string name="compass_true">От истинного севера.</string>
     <string name="compass_calibrate">Компас плохо откалиброван: поводите телефоном восьмёркой.</string>
-    <string name="wind_gust_hint">0 — без порывов</string>
-    <string name="shot_angle_hint">Вверх +, вниз −</string>
-    <string name="cant_hint">По часовой стрелке +</string>
-    <string name="wind_direction_hint">0° — от цели, 90° — справа, 270° — слева</string>
+    <string name="wind_gust_hint">Скорость ветра в порывах: для неё покажется вторая поправка. 0 — порывов нет</string>
+    <string name="shot_angle_hint">Угол на цель относительно горизонта: вверх +, вниз −</string>
+    <string name="cant_hint">Наклон оружия вбок: по часовой стрелке +</string>
+    <string name="wind_direction_hint">Откуда дует ветер: 0° — от цели (в лицо), 90° — справа, 180° — в спину, 270° — слева</string>
     <string name="wind_clock_short">%1$s ч.</string>
 </resources>

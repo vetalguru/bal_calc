@@ -15,6 +15,7 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -74,8 +75,10 @@ fun NumberField(
     to: Double = 1e9,
     tag: String? = null,
     unitMenu: UnitMenu? = null,
-    /** A small explanation under the field (what the numbers mean), instead of a long label. */
+    /** What the numbers mean, behind an ⓘ in the field (tap it), instead of a long label. */
     hint: String? = null,
+    /** A drawing shown with [hint] (what cant looks like, ...). */
+    hintPicture: (@Composable () -> Unit)? = null,
 ) {
     var text by remember { mutableStateOf(formatNumber(value, decimals)) }
     var focused by remember { mutableStateOf(false) }
@@ -97,12 +100,22 @@ fun NumberField(
         value = text,
         onValueChange = { t -> if (t.all { it.isDigit() || it == '.' || it == ',' || it == '-' }) text = t },
         label = { Text(label, maxLines = 1) },
-        suffix = when {
-            unit.isEmpty() -> null
-            unitMenu == null -> ({ Text(unit) })
-            else -> ({ UnitPicker(unit, unitMenu, tag) })
-        },
-        supportingText = hint?.let { h -> { Text(h) } },
+        // The unit (a picker when it can change), then the ⓘ: in the suffix, not the
+        // 48 dp icon slot, so a narrow field keeps room for the number.
+        suffix = if (unit.isEmpty() && hint == null) null else ({
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                when {
+                    unit.isEmpty() -> {}
+                    unitMenu == null -> Text(unit)
+                    else -> UnitPicker(unit, unitMenu, tag)
+                }
+                if (hint != null) {
+                    Hint(hint, Modifier.padding(start = 4.dp).testTag("${tag}Info"), hintPicture) {
+                        Text("ⓘ", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+        }),
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
@@ -147,12 +160,25 @@ private fun UnitPicker(unit: String, menu: UnitMenu, tag: String?) {
 /** [content] that shows [hint] in a small bubble when tapped (or hovered with a mouse). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Hint(hint: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    val state = rememberTooltipState(isPersistent = false)
+fun Hint(
+    hint: String,
+    modifier: Modifier = Modifier,
+    picture: (@Composable () -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
+    // Stays until a tap elsewhere: a sentence (or a picture) takes longer than a glance.
+    val state = rememberTooltipState(isPersistent = true)
     val scope = rememberCoroutineScope()
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-        tooltip = { PlainTooltip { Text(hint) } },
+        tooltip = {
+            PlainTooltip {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    picture?.invoke()
+                    Text(hint)
+                }
+            }
+        },
         state = state,
         modifier = modifier,
     ) {
@@ -177,6 +203,7 @@ fun StepperField(
     fieldMaxWidth: Dp = Dp.Unspecified,
     stepWidth: Dp = 50.dp,
     hint: String? = null,
+    hintPicture: (@Composable () -> Unit)? = null,
     /** Steps go round (a direction: 345 + 15 = 0) instead of stopping at [to]. */
     wrap: Boolean = false,
     decimals: Int = 1,
@@ -185,16 +212,20 @@ fun StepperField(
         val v = if (wrap) ((value + d) % to + to) % to else (value + d).coerceIn(from, to)
         if (v != value) onEdited(v)
     }
-    // Top-aligned with the steps level with the box (a hint under the field adds height).
-    Row(modifier, verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Box(Modifier.padding(top = 16.dp).testTag("${tag}Minus")) { Step("−${formatNumber(step, 0)}", stepWidth) { by(-step) } }
-        val field = if (fieldMaxWidth == Dp.Unspecified) {
-            Modifier.weight(1f)
-        } else {
-            Modifier.weight(1f, fill = false).widthIn(max = fieldMaxWidth)
+    // Top-aligned: the steps level with the box, below the label's notch.
+    // Narrow (a small phone): smaller steps leave the number room.
+    BoxWithConstraints(modifier) {
+        val stepWidth = if (maxWidth < 300.dp) minOf(stepWidth, 44.dp) else stepWidth
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Box(Modifier.padding(top = 16.dp).testTag("${tag}Minus")) { Step("−${formatNumber(step, 0)}", stepWidth) { by(-step) } }
+            val field = if (fieldMaxWidth == Dp.Unspecified) {
+                Modifier.weight(1f)
+            } else {
+                Modifier.weight(1f, fill = false).widthIn(max = fieldMaxWidth)
+            }
+            NumberField(label, value, onEdited, field, unit, decimals, from, to, tag, unitMenu, hint, hintPicture)
+            Box(Modifier.padding(top = 16.dp).testTag("${tag}Plus")) { Step("+${formatNumber(step, 0)}", stepWidth) { by(step) } }
         }
-        NumberField(label, value, onEdited, field, unit, decimals, from, to, tag, unitMenu, hint)
-        Box(Modifier.padding(top = 16.dp).testTag("${tag}Plus")) { Step("+${formatNumber(step, 0)}", stepWidth) { by(step) } }
     }
 }
 
