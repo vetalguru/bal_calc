@@ -797,6 +797,45 @@ class FlowTest {
     }
 
     @Test
+    fun phoneSensors() = runDesktopComposeUiTest(412, 915) {
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
+        val sensors = FakeSensors()
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform(sensors = sensors)) }
+        waitUntil(timeoutMillis = 30_000) { exists("sample") }
+        onNodeWithTag("sample").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+        onNodeWithTag("navConditions").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("fromBarometer") }
+
+        // Barometer and location fill the air.
+        onNodeWithTag("fromBarometer").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("pressure") == "987.6" }
+        onNodeWithTag("myLocation").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("altitude") == "296" }
+        assertTrue(shown("sensorNote").contains("296"), shown("sensorNote"))
+        shot("sensors-air")
+
+        // The rifle's angles from the phone lying on it.
+        onNodeWithTag("measureAngles").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("tiltNow") }
+        shot("sensors-tilt")
+        onNodeWithTag("useAngles").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "4.3" && shown("cantAngle") == "-1.3" }
+
+        // Coriolis on: latitude from the fix, the azimuth from the compass
+        // against true north (the location was taken).
+        onNodeWithText("Account for Earth rotation", substring = true).performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("fromCompass") }
+        assertEquals("49.8", shown("latitude"))
+        onNodeWithTag("fromCompass").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("headingNow") }
+        assertEquals("124°", shown("headingNow")) // 117.4 magnetic + 6.3 declination
+        onNodeWithTag("useHeading").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("azimuth") && shown("azimuth") == "124" }
+        db.delete()
+    }
+
+    @Test
     fun libraryBulletAndSettings() = runDesktopComposeUiTest(400, 820) {
         val db = startWithSample()
         val before = elevation()
