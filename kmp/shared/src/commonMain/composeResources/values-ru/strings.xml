@@ -515,4 +515,7 @@
     <string name="wind_direction_hint">Откуда дует ветер: 0° — от цели (в лицо), 90° — справа, 180° — в спину, 270° — слева</string>
     <string name="wind_clock_short">%1$s ч.</string>
     <string name="target_angle_hint">Угол α между линией огня и тем, куда идёт цель: 0° — от вас, 90° — поперёк, 180° — на вас. Сторону задают кнопки «Влево» и «Вправо»</string>
+    <string name="chart_computing">Считаю…</string>
+    <string name="chart_no_data">Нет данных для графика: выберите винтовку и патрон</string>
+    <string name="chart_target">дальность до цели</string>
 </resources>
