@@ -442,6 +442,34 @@ class FlowTest {
     }
 
     @Test
+    fun reticleRangesAndFullScreen() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(300) // 1.61 mrad: 16 clicks dialled
+        onNodeWithTag("viewReticle").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("rangesAtMarks") }
+        onNodeWithTag("rangesAtMarks").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 20_000) { exists("markRanges") && shown("markRanges").contains("→") }
+        // Dialled for 300 m, the first mark is further out; the next ones further still.
+        val ranges = Regex("""→ (\d+)""").findAll(shown("markRanges")).map { it.groupValues[1].toInt() }.toList()
+        assertTrue(ranges.size >= 3 && ranges[0] > 300 && ranges.zipWithNext().all { (a, b) -> b > a }, "$ranges")
+        // Nothing dialled: the 1 mil mark comes nearer.
+        type("dialedClicks", "0")
+        waitUntil(timeoutMillis = 10_000) {
+            Regex("""→ (\d+)""").find(shown("markRanges"))?.groupValues?.get(1)?.toInt()?.let { it < ranges[0] } == true
+        }
+        shot("reticle-ranges")
+
+        onNodeWithTag("reticleFullscreen").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("reticleScreen") }
+        onNodeWithTag("reticleZoomIn").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("reticleZoom") == "×1.5" }
+        shot("reticle-fullscreen")
+        onNodeWithTag("reticleClose").performClick()
+        waitUntil(timeoutMillis = 10_000) { !exists("reticleScreen") }
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)

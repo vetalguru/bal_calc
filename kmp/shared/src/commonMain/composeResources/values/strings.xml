@@ -503,6 +503,10 @@
     <string name="core_37">Enter a name for each target.</string>
     <string name="core_38">A target range must be between 10 and 3000 m.</string>
     <string name="core_39">At most 20 targets.</string>
+    <string name="reticle_fullscreen">Full screen</string>
+    <string name="ranges_at_marks">Range at each mark</string>
+    <string name="dialed_clicks">Dialled up on the turret</string>
+    <string name="clicks_unit">clicks</string>
     <string name="sensor_barometer">From the barometer</string>
     <string name="sensor_location">My location</string>
     <string name="sensor_angles">Measure with the phone</string>

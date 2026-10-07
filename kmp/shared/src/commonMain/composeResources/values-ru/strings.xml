@@ -473,6 +473,10 @@
     <string name="core_37">Введите название каждой цели.</string>
     <string name="core_38">Дальность цели должна быть от 10 до 3000 м.</string>
     <string name="core_39">Не больше 20 целей.</string>
+    <string name="reticle_fullscreen">На весь экран</string>
+    <string name="ranges_at_marks">Дальность у каждой риски</string>
+    <string name="dialed_clicks">Выставлено на барабане вверх</string>
+    <string name="clicks_unit">кликов</string>
     <string name="sensor_barometer">С барометра</string>
     <string name="sensor_location">Моё место</string>
     <string name="sensor_angles">Измерить телефоном</string>
