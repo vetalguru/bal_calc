@@ -479,6 +479,35 @@ TEST_F(Bridge, BulletLibraryAndImports) {
     EXPECT_TRUE(Ok("reticles").empty());
 }
 
+// An app updated with a bigger starter library (a higher seed version) gets
+// the new records once, keeping what it has.
+TEST_F(Bridge, NewerSeedAddsOnlyWhatIsNew) {
+    json old_files = json::array();
+    json files = json::array();
+    for (const auto& entry :
+         std::filesystem::recursive_directory_iterator(std::string(BALLISTICS_SEED_DIR))) {
+        const std::string name = entry.path().filename().string();
+        if (!entry.is_regular_file() || entry.path().parent_path().filename() == "sources" ||
+            (entry.path().extension() != ".ammo" && entry.path().extension() != ".drg" &&
+             entry.path().extension() != ".reticle" && entry.path().extension() != ".json")) {
+            continue;
+        }
+        std::ifstream in(entry.path(), std::ios::binary);
+        std::ostringstream text;
+        text << in.rdbuf();
+        const json f = {{"name", name}, {"content", text.str()}};
+        files.push_back(f);
+        // What version 1 shipped: no published bullets, no generic reticles.
+        if (name != "published_bullets.json" && name.rfind("generic-", 0) != 0) {
+            old_files.push_back(f);
+        }
+    }
+    EXPECT_EQ(Ok("seed", {{"version", 1}, {"files", old_files}}).at("imported"), 69 + 1 + 4);
+    EXPECT_EQ(Ok("seed", {{"version", 2}, {"files", files}}).at("imported"), 10 + 253);
+    EXPECT_EQ(Ok("seed", {{"version", 2}, {"files", files}}).at("imported"), 0);
+    EXPECT_EQ(Ok("reticles").size(), 14U);
+}
+
 TEST_F(Bridge, StarterLibraryIsSeededOnce) {
     json files = json::array();
     for (const auto& entry :
@@ -497,10 +526,10 @@ TEST_F(Bridge, StarterLibraryIsSeededOnce) {
         files.push_back({{"name", name}, {"content", text.str()}});
     }
     const json r = Ok("seed", {{"version", 1}, {"files", files}});
-    EXPECT_EQ(r.at("imported"), 327) << r.dump(); // 69 ammo + 1 drg + 4 reticles + 253 bullets
+    EXPECT_EQ(r.at("imported"), 337) << r.dump(); // 69 ammo + 1 drg + 14 reticles + 253 bullets
     EXPECT_EQ(Ok("libraryBullets").size(), 323U);
     EXPECT_EQ(Ok("libraryCartridges").size(), 69U);
-    EXPECT_EQ(Ok("reticles").size(), 4U);
+    EXPECT_EQ(Ok("reticles").size(), 14U);
     EXPECT_EQ(Ok("libraryScopes").size(), 50U);
     EXPECT_EQ(Ok("libraryRifles").size(), 126U);
     EXPECT_TRUE(Ok("state").at("cartridges").empty()); // factory loads stay in the library

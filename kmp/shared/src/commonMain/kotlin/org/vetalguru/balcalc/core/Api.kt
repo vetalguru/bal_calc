@@ -67,8 +67,12 @@ class Api(private val engine: Engine) {
     }
 
     companion object {
-        /** Same as the Qt app: a database it seeded is not seeded again. */
-        const val SEED_VERSION = 1
+        /**
+         * Bump when the starter library grows: a database seeded with an older
+         * version gets the new records (the ones it has are skipped).
+         * 2: published bullets and the generic reticles.
+         */
+        const val SEED_VERSION = 2
 
         val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 

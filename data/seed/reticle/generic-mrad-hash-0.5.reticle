@@ -1,0 +1,100 @@
+<reticle name="MRAD hash 0.5" size-x="28mil" size-y="28mil" zero-x="14mil" zero-y="14mil">
+  <elements>
+    <reticle-line start-x="-10mil" start-y="0mil" end-x="10mil" end-y="0mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="0mil" start-y="-10mil" end-x="0mil" end-y="10mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="10mil" start-y="0mil" end-x="14mil" end-y="0mil" line-width="0.24mil" line-color="black" />
+    <reticle-line start-x="-10mil" start-y="0mil" end-x="-14mil" end-y="0mil" line-width="0.24mil" line-color="black" />
+    <reticle-line start-x="0mil" start-y="10mil" end-x="0mil" end-y="14mil" line-width="0.24mil" line-color="black" />
+    <reticle-line start-x="0mil" start-y="-10mil" end-x="0mil" end-y="-14mil" line-width="0.24mil" line-color="black" />
+    <reticle-line start-x="0.5mil" start-y="-0.1mil" end-x="0.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="0.5mil" end-x="0.1mil" end-y="0.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.5mil" start-y="-0.1mil" end-x="-0.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-0.5mil" end-x="0.1mil" end-y="-0.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="1mil" start-y="-0.2mil" end-x="1mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="1mil" end-x="0.2mil" end-y="1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-1mil" start-y="-0.2mil" end-x="-1mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-1mil" end-x="0.2mil" end-y="-1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="1.5mil" start-y="-0.1mil" end-x="1.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="1.5mil" end-x="0.1mil" end-y="1.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-1.5mil" start-y="-0.1mil" end-x="-1.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-1.5mil" end-x="0.1mil" end-y="-1.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="2mil" start-y="-0.2mil" end-x="2mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="2mil" end-x="0.2mil" end-y="2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-2mil" start-y="-0.2mil" end-x="-2mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-2mil" end-x="0.2mil" end-y="-2mil" line-width="0.03mil" line-color="black" />
+    <reticle-text position-x="2mil" position-y="-0.5mil" text-height="0.3mil" text="2" color="black" />
+    <reticle-text position-x="0.4mil" position-y="-2mil" text-height="0.3mil" text="2" color="black" />
+    <reticle-line start-x="2.5mil" start-y="-0.1mil" end-x="2.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="2.5mil" end-x="0.1mil" end-y="2.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-2.5mil" start-y="-0.1mil" end-x="-2.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-2.5mil" end-x="0.1mil" end-y="-2.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="3mil" start-y="-0.2mil" end-x="3mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="3mil" end-x="0.2mil" end-y="3mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-3mil" start-y="-0.2mil" end-x="-3mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-3mil" end-x="0.2mil" end-y="-3mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="3.5mil" start-y="-0.1mil" end-x="3.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="3.5mil" end-x="0.1mil" end-y="3.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-3.5mil" start-y="-0.1mil" end-x="-3.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-3.5mil" end-x="0.1mil" end-y="-3.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="4mil" start-y="-0.2mil" end-x="4mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="4mil" end-x="0.2mil" end-y="4mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-4mil" start-y="-0.2mil" end-x="-4mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-4mil" end-x="0.2mil" end-y="-4mil" line-width="0.03mil" line-color="black" />
+    <reticle-text position-x="4mil" position-y="-0.5mil" text-height="0.3mil" text="4" color="black" />
+    <reticle-text position-x="0.4mil" position-y="-4mil" text-height="0.3mil" text="4" color="black" />
+    <reticle-line start-x="4.5mil" start-y="-0.1mil" end-x="4.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="4.5mil" end-x="0.1mil" end-y="4.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-4.5mil" start-y="-0.1mil" end-x="-4.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-4.5mil" end-x="0.1mil" end-y="-4.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="5mil" start-y="-0.2mil" end-x="5mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="5mil" end-x="0.2mil" end-y="5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-5mil" start-y="-0.2mil" end-x="-5mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-5mil" end-x="0.2mil" end-y="-5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="5.5mil" start-y="-0.1mil" end-x="5.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="5.5mil" end-x="0.1mil" end-y="5.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-5.5mil" start-y="-0.1mil" end-x="-5.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-5.5mil" end-x="0.1mil" end-y="-5.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="6mil" start-y="-0.2mil" end-x="6mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="6mil" end-x="0.2mil" end-y="6mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-6mil" start-y="-0.2mil" end-x="-6mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-6mil" end-x="0.2mil" end-y="-6mil" line-width="0.03mil" line-color="black" />
+    <reticle-text position-x="6mil" position-y="-0.5mil" text-height="0.3mil" text="6" color="black" />
+    <reticle-text position-x="0.4mil" position-y="-6mil" text-height="0.3mil" text="6" color="black" />
+    <reticle-line start-x="6.5mil" start-y="-0.1mil" end-x="6.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="6.5mil" end-x="0.1mil" end-y="6.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-6.5mil" start-y="-0.1mil" end-x="-6.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-6.5mil" end-x="0.1mil" end-y="-6.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="7mil" start-y="-0.2mil" end-x="7mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="7mil" end-x="0.2mil" end-y="7mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-7mil" start-y="-0.2mil" end-x="-7mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-7mil" end-x="0.2mil" end-y="-7mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="7.5mil" start-y="-0.1mil" end-x="7.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="7.5mil" end-x="0.1mil" end-y="7.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-7.5mil" start-y="-0.1mil" end-x="-7.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-7.5mil" end-x="0.1mil" end-y="-7.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="8mil" start-y="-0.2mil" end-x="8mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="8mil" end-x="0.2mil" end-y="8mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-8mil" start-y="-0.2mil" end-x="-8mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-8mil" end-x="0.2mil" end-y="-8mil" line-width="0.03mil" line-color="black" />
+    <reticle-text position-x="8mil" position-y="-0.5mil" text-height="0.3mil" text="8" color="black" />
+    <reticle-text position-x="0.4mil" position-y="-8mil" text-height="0.3mil" text="8" color="black" />
+    <reticle-line start-x="8.5mil" start-y="-0.1mil" end-x="8.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="8.5mil" end-x="0.1mil" end-y="8.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-8.5mil" start-y="-0.1mil" end-x="-8.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-8.5mil" end-x="0.1mil" end-y="-8.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="9mil" start-y="-0.2mil" end-x="9mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="9mil" end-x="0.2mil" end-y="9mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-9mil" start-y="-0.2mil" end-x="-9mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-9mil" end-x="0.2mil" end-y="-9mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="9.5mil" start-y="-0.1mil" end-x="9.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="9.5mil" end-x="0.1mil" end-y="9.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-9.5mil" start-y="-0.1mil" end-x="-9.5mil" end-y="0.1mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.1mil" start-y="-9.5mil" end-x="0.1mil" end-y="-9.5mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="10mil" start-y="-0.2mil" end-x="10mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="10mil" end-x="0.2mil" end-y="10mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-10mil" start-y="-0.2mil" end-x="-10mil" end-y="0.2mil" line-width="0.03mil" line-color="black" />
+    <reticle-line start-x="-0.2mil" start-y="-10mil" end-x="0.2mil" end-y="-10mil" line-width="0.03mil" line-color="black" />
+    <reticle-text position-x="10mil" position-y="-0.5mil" text-height="0.3mil" text="10" color="black" />
+    <reticle-text position-x="0.4mil" position-y="-10mil" text-height="0.3mil" text="10" color="black" />
+  </elements>
+</reticle>

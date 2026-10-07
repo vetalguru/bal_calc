@@ -142,7 +142,7 @@ TEST(Import, DrgHeaderVariants) {
 
 TEST(Import, EveryBundledReticleParses) {
     const auto files = FilesIn(kSeed / "reticle", ".reticle");
-    EXPECT_EQ(files.size(), 4U);
+    EXPECT_EQ(files.size(), 14U);
     for (const auto& f : files) {
         const auto r = ParseReticle(ReadFile(f));
         ASSERT_TRUE(r.ok()) << f << ": " << r.error().message;
@@ -170,8 +170,8 @@ TEST_F(ImportDb, SeedImportsEverythingOnce) {
     const auto first = SeedLibrary(db_, files, 1);
     ASSERT_TRUE(first.ok()) << first.error().message;
     EXPECT_TRUE(first.value().problems.empty()) << first.value().problems.front();
-    // 69 ammo + 1 drg + 4 reticles + 253 published bullets.
-    EXPECT_EQ(first.value().imported, 69 + 1 + 4 + 253);
+    // 69 ammo + 1 drg + 14 reticles (4 BallisticCalculator + 10 generic) + 253 published bullets.
+    EXPECT_EQ(first.value().imported, 69 + 1 + 14 + 253);
 
     const auto again = SeedLibrary(db_, files, 1); // same version: nothing to do
     EXPECT_EQ(again.value().imported, 0);
@@ -179,10 +179,10 @@ TEST_F(ImportDb, SeedImportsEverythingOnce) {
 
     const auto newer = SeedLibrary(db_, files, 2); // new version: existing ones skipped
     EXPECT_EQ(newer.value().imported, 0);
-    EXPECT_EQ(newer.value().skipped, 69 + 1 + 4 + 253);
+    EXPECT_EQ(newer.value().skipped, 69 + 1 + 14 + 253);
 
     EXPECT_EQ(ListLibraryBullets(db_).value().size(), 69U + 1U + 253U);
-    EXPECT_EQ(storage::Repository<storage::ReticleRecord>(db_).List().value().size(), 4U);
+    EXPECT_EQ(storage::Repository<storage::ReticleRecord>(db_).List().value().size(), 14U);
     EXPECT_EQ(ListLibraryBullets(db_, "lapua").value().size() >= 50U, true);
 }
 
