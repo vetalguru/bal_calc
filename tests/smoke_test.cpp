@@ -3,5 +3,5 @@
 #include <gtest/gtest.h>
 
 TEST(Smoke, VersionExists) {
-    EXPECT_STREQ(ballistics::version(), "0.3.0");
+    EXPECT_STREQ(ballistics::version(), "0.4.0");
 }
