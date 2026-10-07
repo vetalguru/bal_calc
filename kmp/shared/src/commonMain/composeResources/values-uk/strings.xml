@@ -293,7 +293,7 @@
     <string name="unit_mph">mph</string>
     <string name="moves_left">← Ліворуч</string>
     <string name="moves_right">Праворуч →</string>
-    <string name="target_angle">Кут до лінії вогню (90 = поперек)</string>
+    <string name="target_angle">Кут руху</string>
     <string name="lead_value">Упередження: %1$s</string>
     <string name="lead_moves">За час польоту ціль зміститься на %1$s м.</string>
     <string name="lead_total">По горизонталі з упередженням: %1$s</string>
@@ -514,6 +514,7 @@
     <string name="cant_hint">Нахил зброї вбік: за годинниковою стрілкою +</string>
     <string name="wind_direction_hint">Звідки дме вітер: 0° — від цілі (в обличчя), 90° — справа, 180° — у спину, 270° — зліва</string>
     <string name="wind_clock_short">%1$s год.</string>
+    <string name="target_angle_hint">Кут α між лінією вогню і тим, куди йде ціль: 0° — від вас, 90° — поперек, 180° — на вас. Бік задають кнопки «Ліворуч» і «Праворуч»</string>
     <string name="chart_computing">Рахую…</string>
     <string name="chart_no_data">Немає даних для графіка: виберіть гвинтівку й набій</string>
     <string name="chart_target">дальність до цілі</string>

@@ -181,6 +181,10 @@ TEST_F(Bridge, MovingTarget) {
     const json table = Ok("rangeTable");
     EXPECT_LT(table.at("rows").back().at("lead").get<double>(), sol.at("lead").get<double>());
     EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mps");
+    Ok("setConditions", {{"targetSpeedUnit", "mph"}});
+    EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mph");
+    Ok("setConditions", {{"targetSpeedUnit", "knots"}}); // not a unit the app has: kept as it was
+    EXPECT_EQ(Ok("state").at("conditions").at("targetSpeedUnit"), "mph");
 }
 
 TEST_F(Bridge, CompareCurves) {
