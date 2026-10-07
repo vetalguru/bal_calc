@@ -357,6 +357,19 @@ TEST_F(Bridge, PhotosGoWithTheirRecords) {
     EXPECT_TRUE(Ok("photos", {{"kind", "cartridge"}}).empty());
 }
 
+TEST_F(Bridge, StabilityForTheEditors) {
+    // .308 175 gr (1.24 in) from a 1:10 barrel at 790 m/s (2592 fps), by hand:
+    // twist 32.47 cal, length 4.026 cal; 30 * 175 / (32.47^2 * 0.308^3 *
+    // 4.026 * (1 + 4.026^2)) = 2.46, times (2592 / 2800)^(1/3) = 0.975: 2.40.
+    const json r = Ok("stability", {{"twistIn", 10}, {"massGr", 175}, {"diameterIn", 0.308},
+                                    {"lengthIn", 1.24}, {"velocityMps", 790}});
+    EXPECT_NEAR(r.at("sg").get<double>(), 2.40, 0.01);
+    // A 1:14 barrel: Sg scales with 1/twist^2, 2.40 * (10/14)^2 = 1.22, marginal.
+    EXPECT_NEAR(Ok("stability", {{"twistIn", 14}, {"massGr", 175}, {"diameterIn", 0.308},
+                                 {"lengthIn", 1.24}, {"velocityMps", 790}}).at("sg").get<double>(), 1.22, 0.01);
+    EXPECT_EQ(Ok("stability", {{"twistIn", 10}, {"massGr", 175}}).at("sg"), 0.0); // missing inputs
+}
+
 TEST_F(Bridge, RangeTableAndCurve) {
     Sample();
     Ok("setSettings", {{"tableFromM", 0}, {"tableToM", 1000}, {"tableStepM", 100}});

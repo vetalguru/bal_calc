@@ -26,6 +26,7 @@
 #include <ballistics/applogic/truing.h>
 #include <ballistics/applogic/wez.h>
 #include <ballistics/atmosphere.h>
+#include <ballistics/effects.h>
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
@@ -66,6 +67,7 @@
 //   importShared {text}               → state
 //   importFiles {files:[{name, content}]} → {imported, problems:[{file, message}]}
 //   stationPressure {qnhHpa, altitudeM} → hPa
+//   stability {twistIn, massGr, diameterIn, lengthIn, velocityMps} → {sg} (standard air)
 //   photos {kind} → {id: base64} / photo {kind, id} → base64 / setPhoto {kind, id, image} (empty removes)
 //   situations / saveSituation {name} / applySituation {name} → state / deleteSituation {name}
 //   compareCurves {maxRangeM, points, pairs:[{rifleId, cartridgeId}]} → [table + label]
@@ -1321,6 +1323,16 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
              Must(al::DeleteCartridge(s.db, IdOf(a)));
              s.Refresh();
              return s.State();
+         }},
+        // Gyroscopic stability of a bullet in a barrel (Miller) at standard
+        // air, for the editors: 0 when an input is missing.
+        {"stability",
+         [](I&, const json& a) -> json {
+             namespace u = ballistics::units;
+             const double sg = ballistics::MillerStability(
+                 u::GrainToKg(Num(a, "massGr")), u::InchToM(Num(a, "diameterIn")), u::InchToM(Num(a, "lengthIn")),
+                 u::InchToM(Num(a, "twistIn")), Num(a, "velocityMps"), 288.15, 101325.0);
+             return {{"sg", sg}};
          }},
         // Pictures of rifles and cartridges
         {"photos",

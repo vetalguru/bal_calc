@@ -459,6 +459,11 @@
     <string name="style_signs">Знаками: + −</string>
     <string name="round_to_clicks">Округлять до целых кликов</string>
     <string name="show_second_unit">Также другая единица и см на цели</string>
+    <string name="sg_with">Стабильность Sg %1$s с %2$s: %3$s</string>
+    <string name="sg_stable">стабильна</string>
+    <string name="sg_marginal">на грани, кучность может пострадать</string>
+    <string name="sg_unstable">нестабильна, пуля может кувыркаться</string>
+    <string name="sg_missing">Стабильность с %1$s: введите шаг нарезов и длину пули.</string>
     <string name="sensor_barometer">С барометра</string>
     <string name="sensor_location">Моё место</string>
     <string name="sensor_angles">Измерить телефоном</string>
