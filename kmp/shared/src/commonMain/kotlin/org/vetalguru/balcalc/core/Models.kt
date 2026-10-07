@@ -310,3 +310,21 @@ data class UiPrefs(
     /** Also the other angle unit and the centimetres at the target, in small print. */
     val showSecondUnit: Boolean = true,
 )
+
+/** A named target of the target card, with its corrections and its hold on the reticle. */
+@Serializable
+data class TargetItem(
+    val name: String = "",
+    val rangeM: Double = 300.0,
+    val lookAngleDeg: Double = 0.0,
+    val windSpeed: Double = 0.0,
+    val windFromDeg: Double = 90.0,
+    val ok: Boolean = false,
+    val elevation: Double = 0.0,
+    val windage: Double = 0.0,
+    val elevationClicks: Double = 0.0,
+    val windageClicks: Double = 0.0,
+    /** Where it is held on the reticle with the turrets as set (reticle mrad, y up). */
+    val holdX: Double = 0.0,
+    val holdY: Double = 0.0,
+)

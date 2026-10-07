@@ -48,6 +48,9 @@ private val coreMessages: Map<String, StringResource> = mapOf(
     "The rifle or cartridge of this situation was deleted." to Res.string.core_34,
     "The picture is too large." to Res.string.core_35,
     "The picture is damaged." to Res.string.core_36,
+    "Enter a name for each target." to Res.string.core_37,
+    "A target range must be between 10 and 3000 m." to Res.string.core_38,
+    "At most 20 targets." to Res.string.core_39,
 )
 
 /** A message from the core in the app's language (unknown ones as they are). */

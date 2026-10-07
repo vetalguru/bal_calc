@@ -402,11 +402,37 @@ class FlowTest {
     }
 
     @Test
+    fun targetCard() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(300)
+        onNodeWithTag("viewTargets").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("editTargets") }
+        onNodeWithTag("editTargets").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("addTarget") }
+        // Two targets from the current conditions; the second moved to 600 m.
+        onNodeWithTag("addTarget").performClick()
+        onNodeWithTag("addTarget").performClick()
+        onNodeWithTag("targetName1").performTextReplacement("Steel 600")
+        type("targetRange1", "600")
+        onNodeWithTag("saveTargets").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("target:Target 1") && exists("target:Steel 600") }
+        shot("targets")
+
+        onNodeWithTag("target:Steel 600").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("solvedFor:600") }
+        onNodeWithTag("viewReticle").performClick()
+        waitForIdle()
+        shot("targets-reticle")
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)
         val far = elevation()
 
+        onNodeWithTag("viewTargets").performClick()
         onNodeWithTag("situations").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("saveSituation") }
         onNodeWithTag("saveSituation").performClick()
@@ -419,6 +445,7 @@ class FlowTest {
         onAllNodesWithText("Close").onFirst().performClick()
 
         setRange(200)
+        onNodeWithTag("viewTargets").performClick()
         onNodeWithTag("situations").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("applySituation:Match") }
         onNodeWithTag("applySituation:Match").performClick()

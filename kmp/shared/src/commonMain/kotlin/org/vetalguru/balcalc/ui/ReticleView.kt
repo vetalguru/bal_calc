@@ -41,8 +41,17 @@ import org.vetalguru.balcalc.core.Api
  * so the target and its surroundings fit. No drawing: a crosshair with
  * 1 mrad ticks.
  */
+/** Another target's hold drawn on the reticle (reticle mrad, y up). */
+data class ReticleMark(val x: Double, val y: Double, val label: String)
+
 @Composable
-fun ReticleView(definition: String, targetX: Double, targetY: Double, modifier: Modifier = Modifier) {
+fun ReticleView(
+    definition: String,
+    targetX: Double,
+    targetY: Double,
+    modifier: Modifier = Modifier,
+    marks: List<ReticleMark> = emptyList(),
+) {
     val drawing = remember(definition) {
         if (definition.isEmpty()) null
         else runCatching { Api.json.parseToJsonElement(definition).jsonObject }.getOrNull()
@@ -50,7 +59,7 @@ fun ReticleView(definition: String, targetX: Double, targetY: Double, modifier: 
     val measurer = rememberTextMeasurer()
     val colors = appColors
     Canvas(modifier.testTag("reticle")) {
-        val reach = max(abs(targetX), abs(targetY))
+        val reach = (marks.map { max(abs(it.x), abs(it.y)) } + max(abs(targetX), abs(targetY))).max()
         val sizeArr = drawing?.get("size")?.jsonArray
         val half = if (sizeArr != null && sizeArr.size >= 2) max(sizeArr[0].jsonPrimitive.double, sizeArr[1].jsonPrimitive.double) / 2 else 10.0
         // The reticle around the centre, widened when the target needs room.
@@ -71,6 +80,15 @@ fun ReticleView(definition: String, targetX: Double, targetY: Double, modifier: 
             for (e in elements) drawElement(e, ::x, ::y, ::w, k, measurer, colors.reticleInk)
         }
         drawCircle(colors.reticleEdge, radius = side / 2 - 1, center = Offset(cx, cy), style = Stroke(2f))
+
+        // The other targets: a small ring and the name.
+        val small = TextStyle(color = colors.target, fontSize = (11f).sp)
+        for (m in marks) {
+            val o = Offset(x(m.x), y(m.y))
+            drawCircle(colors.target.copy(alpha = 0.7f), 5f, o, style = Stroke(1.5f))
+            val label = measurer.measure(m.label, small)
+            drawText(label, topLeft = Offset(o.x + 7f, o.y - label.size.height / 2f))
+        }
 
         // Target.
         val t = Offset(x(targetX), y(targetY))

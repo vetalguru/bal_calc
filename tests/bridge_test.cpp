@@ -370,6 +370,48 @@ TEST_F(Bridge, StabilityForTheEditors) {
     EXPECT_EQ(Ok("stability", {{"twistIn", 10}, {"massGr", 175}}).at("sg"), 0.0); // missing inputs
 }
 
+TEST_F(Bridge, TargetsWithTheirHolds) {
+    Sample();
+    Ok("setConditions", {{"targetRangeM", 300}, {"windSpeed", 0}});
+    EXPECT_TRUE(Ok("targets").empty());
+    const json list = {
+        {{"name", "Gong 300"}, {"rangeM", 300}},
+        {{"name", " Steel 600 "}, {"rangeM", 600}, {"lookAngleDeg", 5}, {"windSpeed", 4}, {"windFromDeg", 90}},
+    };
+    json t = Ok("saveTargets", {{"targets", list}});
+    ASSERT_EQ(t.size(), 2U);
+    EXPECT_EQ(t[1].at("name"), "Steel 600");
+    ASSERT_TRUE(t[0].at("ok").get<bool>());
+    // The current target is the 300 m one, dialled (dial elevation, hold
+    // windage): it is held at the centre, give or take a click's remainder.
+    EXPECT_NEAR(t[0].at("holdY").get<double>(), 0.0, 0.05);
+    // The 600 m one is held lower by what it needs more, and against the wind.
+    const double more = t[1].at("elevation").get<double>() - t[0].at("elevation").get<double>();
+    EXPECT_GT(more, 3.0);
+    EXPECT_NEAR(t[1].at("holdY").get<double>(), -more, 0.06);
+    // Wind from the right: the correction is to the right, the target sits left of the centre.
+    EXPECT_LT(t[1].at("holdX").get<double>(), 0.0);
+    EXPECT_GT(t[1].at("windage").get<double>(), 0.0);
+
+    // Choosing it puts its range, angle and wind into the conditions.
+    const json st = Ok("selectTarget", {{"index", 1}});
+    EXPECT_EQ(st.at("conditions").at("targetRangeM"), 600.0);
+    EXPECT_EQ(st.at("conditions").at("lookAngleDeg"), 5.0);
+    EXPECT_EQ(st.at("conditions").at("windSpeed"), 4.0);
+    // Now that one is at the centre.
+    EXPECT_NEAR(Ok("targets")[1].at("holdY").get<double>(), 0.0, 0.05);
+
+    EXPECT_EQ(Fails("selectTarget", {{"index", 5}}), "No such target.");
+    EXPECT_EQ(Fails("saveTargets", {{"targets", {{{"name", ""}, {"rangeM", 300}}}}}), "Enter a name for each target.");
+    EXPECT_EQ(Fails("saveTargets", {{"targets", {{{"name", "x"}, {"rangeM", 5}}}}}),
+              "A target range must be between 10 and 3000 m.");
+    json many = json::array();
+    for (int i = 0; i < 21; ++i) {
+        many.push_back({{"name", "T" + std::to_string(i)}, {"rangeM", 100 + i * 10}});
+    }
+    EXPECT_EQ(Fails("saveTargets", {{"targets", many}}), "At most 20 targets.");
+}
+
 TEST_F(Bridge, RangeTableAndCurve) {
     Sample();
     Ok("setSettings", {{"tableFromM", 0}, {"tableToM", 1000}, {"tableStepM", 100}});
