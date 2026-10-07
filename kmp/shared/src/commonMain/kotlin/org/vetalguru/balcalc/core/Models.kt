@@ -91,6 +91,9 @@ data class Solution(
     val elevationClicks: Double = 0.0,
     val windageClicks: Double = 0.0,
     val hasScope: Boolean = false,
+    /** One click in the angle unit (0 without a scope). */
+    val clickElevation: Double = 0.0,
+    val clickWindage: Double = 0.0,
     val dropCm: Double = 0.0,
     val windageCm: Double = 0.0,
     val velocity: Double = 0.0,
@@ -300,4 +303,10 @@ data class UiPrefs(
     /** "system" | "light" | "dark" | "night" (red on black). */
     val theme: String = "system",
     val keepScreenOn: Boolean = false,
+    /** How a correction shows its direction: "words" (UP, LEFT), "arrows" (↑ ←) or "signs" (+ −). */
+    val correctionStyle: String = "words",
+    /** Corrections rounded to whole clicks (what the turret can set) instead of exact. */
+    val roundToClicks: Boolean = false,
+    /** Also the other angle unit and the centimetres at the target, in small print. */
+    val showSecondUnit: Boolean = true,
 )

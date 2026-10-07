@@ -369,6 +369,35 @@ class FlowTest {
     }
 
     @Test
+    fun correctionFormat() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        setRange(600)
+        assertEquals("UP", shown("elevationDirection"))
+        assertTrue(shown("elevationSecond").contains("MOA") && shown("elevationSecond").contains("cm"))
+        val exact = shown("elevation")
+
+        onNodeWithTag("navSettings").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("correctionStyle") }
+        onNodeWithTag("correctionStyle").performClick()
+        onAllNodesWithText("Arrows: ↑ ←").onLast().performClick()
+        onNodeWithTag("roundToClicks").performClick()
+        onNodeWithTag("showSecondUnit").performClick()
+        waitUntil(timeoutMillis = 10_000) {
+            testApi!!.let { api -> kotlinx.coroutines.runBlocking { api.call("state") } }.toString()
+                .let { it.contains("\"roundToClicks\":true") && it.contains("\"showSecondUnit\":false") && it.contains("arrows") }
+        }
+        onNodeWithTag("navSolution").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevationDirection") && shown("elevationDirection") == "↑" }
+        // 0.1 mrad clicks: the rounded value is a whole number of tenths.
+        val rounded = shown("elevation").toDouble()
+        assertEquals(rounded, (rounded * 10).let { kotlin.math.round(it) } / 10, 1e-9)
+        assertTrue(kotlin.math.abs(rounded - exact.toDouble()) <= 0.05 + 1e-9)
+        assertTrue(!exists("elevationSecond"))
+        shot("format-arrows")
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)

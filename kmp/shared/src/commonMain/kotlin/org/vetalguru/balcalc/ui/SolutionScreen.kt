@@ -74,7 +74,10 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
 import org.vetalguru.balcalc.coreText
+import org.vetalguru.balcalc.CorrectionText
 import org.vetalguru.balcalc.core.Solution
+import org.vetalguru.balcalc.core.UiPrefs
+import org.vetalguru.balcalc.formatCorrection
 import org.vetalguru.balcalc.core.Warning
 import org.vetalguru.balcalc.fixed
 import org.vetalguru.balcalc.res.Res
@@ -208,7 +211,7 @@ private fun Viewer(
                             )
                         }
                         if (sol.ok) {
-                            Corrections(sol, unit, st.conditions.windGustMps)
+                            Corrections(sol, st.prefs, st.moa, st.conditions.windGustMps)
                             DetailsLine(sol) { scope.launch { pager.animateScrollToPage(2) } }
                             Warnings(sol.warnings)
                             Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -402,59 +405,49 @@ private fun EmptyActions(wide: Boolean, addLabel: String, onAdd: () -> Unit, onS
 }
 
 @Composable
-private fun Corrections(sol: Solution, unit: String, gustMps: Double) {
-    val elevation: @Composable (Modifier) -> Unit = { m ->
-        CorrectionTile(
-            title = stringResource(Res.string.elevation),
-            direction = stringResource(if (sol.elevation >= 0) Res.string.up else Res.string.down),
-            value = abs(sol.elevation).fixed(2),
-            unit = unit,
-            clicks = if (sol.hasScope) stringResource(Res.string.clicks, abs(sol.elevationClicks).roundToInt()) else "",
-            tag = "elevation",
-            modifier = m,
+private fun Corrections(sol: Solution, prefs: UiPrefs, moa: Boolean, gustMps: Double) {
+    val unit = stringResource(if (moa) Res.string.unit_moa else Res.string.unit_mrad)
+    val other = stringResource(if (moa) Res.string.unit_mrad else Res.string.unit_moa)
+    val cm = stringResource(Res.string.unit_cm)
+    // The direction words, arrows or signs for up / down and right / left.
+    val (up, down, right, left) = when (prefs.correctionStyle) {
+        "arrows" -> listOf("↑", "↓", "→", "←")
+        "signs" -> listOf("+", "−", "+", "−")
+        else -> listOf(
+            stringResource(Res.string.up), stringResource(Res.string.down),
+            stringResource(Res.string.right), stringResource(Res.string.left),
         )
     }
-    val windage: @Composable (Modifier) -> Unit = { m ->
-        CorrectionTile(
-            title = stringResource(Res.string.windage),
-            direction = when {
-                abs(sol.windage) < 0.005 -> ""
-                sol.windage > 0 -> stringResource(Res.string.right)
-                else -> stringResource(Res.string.left)
-            },
-            value = abs(sol.windage).fixed(2),
-            unit = unit,
-            clicks = if (sol.hasScope) stringResource(Res.string.clicks, abs(sol.windageClicks).roundToInt()) else "",
-            tag = "windage",
-            modifier = m,
-            extra = if (sol.hasGust) {
-                val side = when {
-                    abs(sol.gustWindage) < 0.005 -> ""
-                    sol.gustWindage > 0 -> " " + stringResource(Res.string.right)
-                    else -> " " + stringResource(Res.string.left)
-                }
-                val clicks = if (sol.hasScope) ", " + stringResource(Res.string.clicks, abs(sol.gustWindageClicks).roundToInt()) else ""
-                stringResource(Res.string.gust_windage, gustMps.fixed(1), "${abs(sol.gustWindage).fixed(2)} $unit$side$clicks")
-            } else {
-                ""
-            },
+    
+    val elevation = formatCorrection(
+        sol.elevation, sol.clickElevation.takeIf { sol.hasScope }, moa, sol.rangeM, prefs.roundToClicks, up, down, other, cm,
+    )
+    val windage = formatCorrection(
+        sol.windage, sol.clickWindage.takeIf { sol.hasScope }, moa, sol.rangeM, prefs.roundToClicks, right, left, other, cm,
+    )
+    val gust = if (sol.hasGust) {
+        val g = formatCorrection(
+            sol.gustWindage, sol.clickWindage.takeIf { sol.hasScope }, moa, sol.rangeM, prefs.roundToClicks, right, left, other, cm,
         )
+        val clicks = g.clicks?.let { ", " + stringResource(Res.string.clicks, it) }.orEmpty()
+        stringResource(Res.string.gust_windage, gustMps.fixed(1), "${g.direction} ${g.value} $unit$clicks".trim())
+    } else {
+        ""
     }
     // Side by side: read together. Tagged with the range it was solved for,
     // so tests can wait for it.
     Row(Modifier.padding(horizontal = 12.dp).testTag("solvedFor:${sol.rangeM.roundToInt()}"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        elevation(Modifier.weight(1f))
-        windage(Modifier.weight(1f))
+        CorrectionTile(stringResource(Res.string.elevation), elevation, unit, prefs.showSecondUnit, "elevation", Modifier.weight(1f))
+        CorrectionTile(stringResource(Res.string.windage), windage, unit, prefs.showSecondUnit, "windage", Modifier.weight(1f), gust)
     }
 }
 
 @Composable
 private fun CorrectionTile(
     title: String,
-    direction: String,
-    value: String,
+    c: CorrectionText,
     unit: String,
-    clicks: String,
+    showSecond: Boolean,
     tag: String,
     modifier: Modifier,
     extra: String = "",
@@ -462,13 +455,24 @@ private fun CorrectionTile(
     Card(modifier, elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                Spacer(Modifier.weight(1f))
-                Text(direction, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Text(title, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, modifier = Modifier.weight(1f))
+                Text(
+                    c.direction, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1, modifier = Modifier.testTag("${tag}Direction"),
+                )
             }
-            Text(value, fontSize = 48.sp, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.testTag(tag))
+            Text(c.value, fontSize = 48.sp, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.testTag(tag))
             // The unit with the clicks: the number keeps the whole width.
-            Text(if (clicks.isNotEmpty()) "$unit · $clicks" else unit, fontSize = 16.sp, maxLines = 1)
+            Text(
+                if (c.clicks != null) "$unit · ${stringResource(Res.string.clicks, c.clicks)}" else unit,
+                fontSize = 16.sp, maxLines = 1,
+            )
+            if (showSecond) {
+                Text(
+                    c.second, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1,
+                    modifier = Modifier.testTag("${tag}Second"),
+                )
+            }
             if (extra.isNotEmpty()) {
                 Text(extra, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.testTag("${tag}Gust"))
             }

@@ -452,6 +452,13 @@
     <string name="view_reticle">Сетка</string>
     <string name="view_more">Ещё</string>
     <string name="look_angle_short">Угол</string>
+    <string name="corrections_format">Поправки</string>
+    <string name="correction_style">Направление</string>
+    <string name="style_words">Словами: ВВЕРХ, ВЛЕВО</string>
+    <string name="style_arrows">Стрелками: ↑ ←</string>
+    <string name="style_signs">Знаками: + −</string>
+    <string name="round_to_clicks">Округлять до целых кликов</string>
+    <string name="show_second_unit">Также другая единица и см на цели</string>
     <string name="sensor_barometer">С барометра</string>
     <string name="sensor_location">Моё место</string>
     <string name="sensor_angles">Измерить телефоном</string>
