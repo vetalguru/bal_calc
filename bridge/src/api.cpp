@@ -1061,11 +1061,11 @@ struct Api::Impl {
 
     // Every rifle with the cartridges of its calibre: what can be compared.
     json PairOptions() {
-        const auto cartridges = Must(al::ListCartridges(db));
+        const auto all_cartridges = Must(al::ListCartridges(db));
         json out = json::array();
         for (const al::RifleSummary& r : Must(al::ListRifles(db))) {
             json list = json::array();
-            for (const al::CartridgeSummary& c : cartridges) {
+            for (const al::CartridgeSummary& c : all_cartridges) {
                 if (al::SameCaliber(c.caliber, r.caliber)) {
                     list.push_back({{"id", c.id}, {"name", c.name}});
                 }
