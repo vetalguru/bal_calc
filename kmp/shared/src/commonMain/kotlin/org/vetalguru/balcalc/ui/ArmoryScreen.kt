@@ -431,11 +431,11 @@ private fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
     val currentCartridge = model.state.currentCartridgeId
     var partner by remember { mutableStateOf<CartridgeForm?>(null) }
     LaunchedEffect(currentCartridge) {
-        partner = if (currentCartridge > 0) runCatching { model.cartridgeForm(currentCartridge) }.getOrNull() else null
+        partner = if (currentCartridge > 0) loadOr(null) { model.cartridgeForm(currentCartridge) } else null
     }
     var sg by remember { mutableStateOf<Double?>(null) }
     LaunchedEffect(f.twistIn, partner) {
-        sg = partner?.let { p -> runCatching { model.stability(f.twistIn, p.massGr, p.diameterIn, p.lengthIn, p.muzzleVelocity) }.getOrNull() }
+        sg = partner?.let { p -> loadOr(null) { model.stability(f.twistIn, p.massGr, p.diameterIn, p.lengthIn, p.muzzleVelocity) } }
     }
     val stability = sg
     val partnerName = partner?.name.orEmpty()
@@ -534,11 +534,11 @@ private fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armory
     val currentRifle = model.state.currentRifleId
     var partner by remember { mutableStateOf<RifleForm?>(null) }
     LaunchedEffect(currentRifle) {
-        partner = if (currentRifle > 0) runCatching { model.rifleForm(currentRifle) }.getOrNull() else null
+        partner = if (currentRifle > 0) loadOr(null) { model.rifleForm(currentRifle) } else null
     }
     var sg by remember { mutableStateOf<Double?>(null) }
     LaunchedEffect(f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity, partner) {
-        sg = partner?.let { r -> runCatching { model.stability(r.twistIn, f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity) }.getOrNull() }
+        sg = partner?.let { r -> loadOr(null) { model.stability(r.twistIn, f.massGr, f.diameterIn, f.lengthIn, f.muzzleVelocity) } }
     }
     val stability = sg
     val partnerName = partner?.name.orEmpty()
