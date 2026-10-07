@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performTouchInput
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -1145,5 +1146,33 @@ class FlowTest {
         waitUntil(timeoutMillis = 5_000) { hasText("Shot angle (uphill +, downhill −)") }
         shot("look-angle-hint")
         db.delete()
+    }
+
+    /** The wind unit: tap it, pick km/h or mph; the value converts, the core keeps m/s. */
+    @Test
+    fun windUnits() {
+        for ((w, h) in listOf(412 to 915, 320 to 700)) runDesktopComposeUiTest(w, h) {
+            val db = startWithSample()
+            type("windSpeed", "5")
+            shotOf("quickWind", "wind-units-$w-mps")
+            onNodeWithTag("windSpeedUnit").performClick()
+            onNodeWithTag("windSpeedUnit-kmh").performClick()
+            waitUntil(timeoutMillis = 10_000) { shown("windSpeed") == "18" }
+            onNodeWithTag("windSpeedPlus").performClick()
+            waitUntil(timeoutMillis = 10_000) { shown("windSpeed") == "19" }
+            shotOf("quickWind", "wind-units-$w-kmh")
+            onNodeWithTag("windSpeedUnit").performClick()
+            onNodeWithTag("windSpeedUnit-mph").performClick()
+            waitUntil(timeoutMillis = 10_000) { shown("windSpeed") == "11.8" } // 19 km/h
+            shotOf("quickWind", "wind-units-$w-mph")
+            // The same unit on the conditions page; the core has m/s.
+            onNodeWithTag("navConditions").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("conditionsWindSpeed") }
+            assertEquals("11.8", shown("conditionsWindSpeed"))
+            assertEquals(19 / 3.6, runBlocking { testApi!!.call("state") }.let {
+                (it as JsonObject).getValue("conditions").let { c -> (c as JsonObject).getValue("windSpeed") as JsonPrimitive }.content.toDouble()
+            }, 1e-6)
+            db.delete()
+        }
     }
 }

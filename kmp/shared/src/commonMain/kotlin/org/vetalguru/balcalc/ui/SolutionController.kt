@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.PI
@@ -76,6 +77,9 @@ internal fun Controller(model: AppModel, narrow: Boolean) {
             HorizontalDivider()
             QuickWind(
                 speed = c.windSpeed,
+                unit = WindUnit.of(model.state.prefs.windUnit),
+                onUnit = { u -> model.setPrefs { it.copy(windUnit = u.key) } },
+                narrow = narrow,
                 fromDeg = c.windFromDeg,
                 onSpeed = { v -> model.updateConditions { it.copy(windSpeed = v.coerceIn(0.0, 40.0)) } },
                 onDirection = { d -> model.updateConditions { it.copy(windFromDeg = d) } },
@@ -119,11 +123,11 @@ internal fun Controller(model: AppModel, narrow: Boolean) {
 
 /** A small ± button of the controller. */
 @Composable
-internal fun Step(label: String, onClick: () -> Unit) {
+internal fun Step(label: String, width: Dp = 50.dp, onClick: () -> Unit) {
     FilledTonalButton(
         onClick = onClick,
         contentPadding = PaddingValues(horizontal = 2.dp),
-        modifier = Modifier.width(50.dp).height(40.dp),
+        modifier = Modifier.width(width).height(40.dp),
     ) { Text(label, fontSize = 13.sp, maxLines = 1) }
 }
 
@@ -152,6 +156,9 @@ internal fun RangeField(rangeM: Double, onRange: (Double) -> Unit, modifier: Mod
 @Composable
 internal fun QuickWind(
     speed: Double,
+    unit: WindUnit,
+    onUnit: (WindUnit) -> Unit,
+    narrow: Boolean,
     fromDeg: Double,
     onSpeed: (Double) -> Unit,
     onDirection: (Double) -> Unit,
@@ -163,22 +170,14 @@ internal fun QuickWind(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        WindDial(fromDeg, onDirection, Modifier.size(76.dp))
+        // Smaller on narrow phones: room for "11.8 mph" between the steps.
+        WindDial(fromDeg, onDirection, Modifier.size(if (narrow) 60.dp else 76.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                Step("−1") { onSpeed(speed - 1) }
-                NumberField(
-                    label = stringResource(Res.string.wind_speed),
-                    value = speed,
-                    onEdited = onSpeed,
-                    unit = stringResource(Res.string.unit_mps),
-                    from = 0.0,
-                    to = 40.0,
-                    modifier = Modifier.weight(1f),
-                    tag = "windSpeed",
-                )
-                Step("+1") { onSpeed(speed + 1) }
-            }
+            // As wide as a number needs: the steps stay near the thumb.
+            WindSpeedField(
+                stringResource(Res.string.wind_speed), speed, onSpeed, unit, onUnit,
+                tag = "windSpeed", fieldMaxWidth = 150.dp, stepWidth = if (narrow) 44.dp else 50.dp,
+            )
             // Smaller rather than cut on narrow phones ("11 o'clock · 330°").
             val bodyMedium = MaterialTheme.typography.bodyMedium
             BasicText(
