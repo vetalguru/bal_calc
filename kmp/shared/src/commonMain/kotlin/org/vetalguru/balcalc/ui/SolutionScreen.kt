@@ -83,8 +83,7 @@ import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.CorrectionText
 import org.vetalguru.balcalc.core.Solution
 import org.vetalguru.balcalc.core.TargetItem
-import org.vetalguru.balcalc.core.UiPrefs
-import org.vetalguru.balcalc.formatCorrection
+import org.vetalguru.balcalc.core.AppState
 import org.vetalguru.balcalc.markRanges
 import org.vetalguru.balcalc.mradPer
 import org.vetalguru.balcalc.core.Warning
@@ -225,7 +224,7 @@ private fun Viewer(
                             )
                         }
                         if (sol.ok) {
-                            Corrections(sol, st.prefs, st.moa, st.conditions.windGustMps)
+                            Corrections(sol, st)
                             DetailsLine(sol) { scope.launch { pager.animateScrollToPage(viewPages.lastIndex) } }
                             Warnings(sol.warnings)
                             Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -427,40 +426,18 @@ private fun EmptyActions(wide: Boolean, addLabel: String, onAdd: () -> Unit, onS
 }
 
 @Composable
-private fun Corrections(sol: Solution, prefs: UiPrefs, moa: Boolean, gustMps: Double) {
-    val unit = stringResource(if (moa) Res.string.unit_moa else Res.string.unit_mrad)
-    val other = stringResource(if (moa) Res.string.unit_mrad else Res.string.unit_moa)
-    val cm = stringResource(Res.string.unit_cm)
-    // The direction words, arrows or signs for up / down and right / left.
-    val (up, down, right, left) = when (prefs.correctionStyle) {
-        "arrows" -> listOf("↑", "↓", "→", "←")
-        "signs" -> listOf("+", "−", "+", "−")
-        else -> listOf(
-            stringResource(Res.string.up), stringResource(Res.string.down),
-            stringResource(Res.string.right), stringResource(Res.string.left),
-        )
-    }
-    
-    val elevation = formatCorrection(
-        sol.elevation, sol.clickElevation.takeIf { sol.hasScope }, moa, sol.rangeM, prefs.roundToClicks, up, down, other, cm,
-    )
-    val windage = formatCorrection(
-        sol.windage, sol.clickWindage.takeIf { sol.hasScope }, moa, sol.rangeM, prefs.roundToClicks, right, left, other, cm,
-    )
-    val gust = if (sol.hasGust) {
-        val g = formatCorrection(
-            sol.gustWindage, sol.clickWindage.takeIf { sol.hasScope }, moa, sol.rangeM, prefs.roundToClicks, right, left, other, cm,
-        )
-        val clicks = g.clicks?.let { ", " + stringResource(Res.string.clicks, it) }.orEmpty()
-        stringResource(Res.string.gust_windage, gustMps.fixed(1), "${g.direction} ${g.value} $unit$clicks".trim())
-    } else {
-        ""
-    }
+private fun Corrections(sol: Solution, state: AppState) {
+    val c = correctionTexts(sol, state)
+    val gust = c.gust?.let { g ->
+        val clicks = g.clicksText()?.let { ", $it" }.orEmpty()
+        stringResource(Res.string.gust_windage, state.conditions.windGustMps.fixed(1), "${g.direction} ${g.value} ${c.unit}$clicks".trim())
+    }.orEmpty()
+    val second = state.prefs.showSecondUnit
     // Side by side: read together. Tagged with the range it was solved for,
     // so tests can wait for it.
     Row(Modifier.padding(horizontal = 12.dp).testTag("solvedFor:${sol.rangeM.roundToInt()}"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        CorrectionTile(stringResource(Res.string.elevation), elevation, unit, prefs.showSecondUnit, "elevation", Modifier.weight(1f))
-        CorrectionTile(stringResource(Res.string.windage), windage, unit, prefs.showSecondUnit, "windage", Modifier.weight(1f), gust)
+        CorrectionTile(stringResource(Res.string.elevation), c.elevation, c.unit, second, "elevation", Modifier.weight(1f))
+        CorrectionTile(stringResource(Res.string.windage), c.windage, c.unit, second, "windage", Modifier.weight(1f), gust)
     }
 }
 
@@ -486,7 +463,7 @@ private fun CorrectionTile(
             Text(c.value, fontSize = 48.sp, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.testTag(tag))
             // The unit with the clicks: the number keeps the whole width.
             Text(
-                if (c.clicks != null) "$unit · ${stringResource(Res.string.clicks, c.clicks)}" else unit,
+                c.clicksText()?.let { "$unit · $it" } ?: unit,
                 fontSize = 16.sp, maxLines = 1,
             )
             if (showSecond) {
@@ -829,20 +806,10 @@ private fun ReticleFullscreen(
 private fun MinimalSolution(model: AppModel, sol: Solution) {
     val st = model.state
     val c = st.conditions
-    val unit = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
-    val other = stringResource(if (st.moa) Res.string.unit_mrad else Res.string.unit_moa)
-    val cm = stringResource(Res.string.unit_cm)
-    val (up, down, right, left) = when (st.prefs.correctionStyle) {
-        "arrows" -> listOf("↑", "↓", "→", "←")
-        "signs" -> listOf("+", "−", "+", "−")
-        else -> listOf(
-            stringResource(Res.string.up), stringResource(Res.string.down),
-            stringResource(Res.string.right), stringResource(Res.string.left),
-        )
-    }
-    val click = { v: Double -> v.takeIf { sol.hasScope } }
-    val e = formatCorrection(sol.elevation, click(sol.clickElevation), st.moa, sol.rangeM, st.prefs.roundToClicks, up, down, other, cm)
-    val w = formatCorrection(sol.windage, click(sol.clickWindage), st.moa, sol.rangeM, st.prefs.roundToClicks, right, left, other, cm)
+    val texts = correctionTexts(sol, st)
+    val unit = texts.unit
+    val e = texts.elevation
+    val w = texts.windage
     Column(
         Modifier.fillMaxSize().padding(16.dp).testTag("minimal"),
         verticalArrangement = Arrangement.SpaceEvenly,
@@ -856,7 +823,7 @@ private fun MinimalSolution(model: AppModel, sol: Solution) {
                 Text("$title  ${corr.direction}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 Text(corr.value, fontSize = 96.sp, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.testTag(tag))
                 Text(
-                    if (corr.clicks != null) "$unit · ${stringResource(Res.string.clicks, corr.clicks)}" else unit,
+                    corr.clicksText()?.let { "$unit · $it" } ?: unit,
                     fontSize = 22.sp,
                 )
             }
