@@ -43,7 +43,7 @@
 //                                        tableFromM, tableToM, tableStepM, conditions}
 //   select {rifleId?, cartridgeId?}   → state
 //   setConditions {any condition keys} → conditions
-//   setSettings {angleUnit?, holdMode?, language?, tableFromM?, tableToM?, tableStepM?}
+//   setSettings {angleUnit?, holdMode?, language?, tableFromM?, tableToM?, tableStepM?, prefs? (merged into the interface preferences)}
 //                                     → state
 //   solution                          → {ok, error, rangeM, elevation, windage, ...}
 //   rangeTable                        → {ok, error, hasScope, computeMs, rows}
@@ -89,6 +89,7 @@ constexpr const char* kCurrentRifleKey = "ui.current_rifle";
 constexpr const char* kCurrentCartridgeKey = "ui.current_cartridge";
 constexpr const char* kAngleUnitKey = "ui.angle_unit";
 constexpr const char* kLanguageKey = "ui.language";
+constexpr const char* kUiPrefsKey = "ui.prefs";
 constexpr std::size_t kMaxExtraWindZones = 2; // three wind zones in all
 constexpr const char* kTargetSpeedUnitKey = "ui.target_speed_unit";
 constexpr const char* kHoldModeKey = "ui.hold_mode";
@@ -481,6 +482,9 @@ struct Api::Impl {
     std::string angle_unit = "mrad";
     std::string hold_mode = "dial_elevation";
     std::string language; // "" = system
+    // Interface preferences of the app (theme, screen, display format): the
+    // core keeps them for it, as one JSON object.
+    json ui_prefs = json::object();
     double table_from_m = 100.0;
     double table_to_m = 1000.0;
     double table_step_m = 50.0;
@@ -543,6 +547,12 @@ struct Api::Impl {
         hold_mode = Setting(kHoldModeKey).value_or(hold_mode);
         language = Setting(kLanguageKey).value_or(language);
         target_speed_unit = Setting(kTargetSpeedUnitKey).value_or(target_speed_unit);
+        if (auto text = Setting(kUiPrefsKey)) {
+            json prefs = json::parse(*text, nullptr, false);
+            if (prefs.is_object()) {
+                ui_prefs = prefs;
+            }
+        }
         for (const auto& [key, value] : {std::pair{kTableFromKey, &table_from_m},
                                          std::pair{kTableToKey, &table_to_m},
                                          std::pair{kTableStepKey, &table_step_m}}) {
@@ -885,6 +895,7 @@ struct Api::Impl {
                 {"angleUnit", angle_unit},
                 {"holdMode", hold_mode},
                 {"language", language},
+                {"prefs", ui_prefs},
                 {"tableFromM", table_from_m},
                 {"tableToM", table_to_m},
                 {"tableStepM", table_step_m},
@@ -1239,6 +1250,10 @@ const std::map<std::string, Api::Impl::Handler>& Api::Impl::Handlers() {
              if (a.contains("language")) {
                  s.language = Str(a, "language");
                  s.Put(kLanguageKey, s.language);
+             }
+             if (a.contains("prefs") && a.at("prefs").is_object()) {
+                 s.ui_prefs.merge_patch(a.at("prefs")); // a null value removes a key
+                 s.Put(kUiPrefsKey, s.ui_prefs.dump());
              }
              for (const auto& [name, key, field] :
                   {std::tuple{"tableFromM", kTableFromKey, &s.table_from_m},

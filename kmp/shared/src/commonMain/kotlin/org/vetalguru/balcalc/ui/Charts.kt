@@ -51,7 +51,6 @@ import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
 
 /** Colours of the compared rifles and cartridges, the current one first. */
-private val SeriesColors = listOf(Transonic, Color(0xFF1E88E5), Color(0xFF8E24AA))
 
 /** What the chart can show: one value per range-card row, in `unit`. */
 private class Quantity(val key: String, val title: String, val unit: String, val decimals: Int, val value: (TableRow) -> Double)
@@ -109,8 +108,8 @@ fun ChartPanel(model: AppModel, curve: RangeTable, maxRangeM: Double, modifier: 
             add(Series(heightLabel, Transonic, points(curve) { it.dropCm }))
             add(Series(driftLabel, DriftColor, points(curve) { it.windageCm }))
         } else {
-            add(Series(currentLabel, SeriesColors[0], points(curve, q.value)))
-            compared.forEachIndexed { i, t -> if (t.ok) add(Series(t.label, SeriesColors[(i + 1) % SeriesColors.size], points(t, q.value))) }
+            add(Series(currentLabel, appColors.series[0], points(curve, q.value)))
+            compared.forEachIndexed { i, t -> if (t.ok) add(Series(t.label, appColors.series[(i + 1) % appColors.series.size], points(t, q.value))) }
         }
     }
 
@@ -127,7 +126,7 @@ fun ChartPanel(model: AppModel, curve: RangeTable, maxRangeM: Double, modifier: 
                     InputChip(
                         selected = true,
                         onClick = { pairs.removeAll { it == t.rifleId to t.cartridgeId } },
-                        label = { Text("● " + t.label + "  ✕", color = SeriesColors[(i + 1) % SeriesColors.size], maxLines = 1) },
+                        label = { Text("● " + t.label + "  ✕", color = appColors.series[(i + 1) % appColors.series.size], maxLines = 1) },
                         modifier = Modifier.testTag("compared$i"),
                     )
                 }

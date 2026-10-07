@@ -141,3 +141,12 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
     override suspend fun pasteText(): String? =
         clipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(activity)?.toString()
 }
+
+@Composable
+actual fun KeepScreenOn(enabled: Boolean) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    androidx.compose.runtime.DisposableEffect(view, enabled) {
+        view.keepScreenOn = enabled
+        onDispose { view.keepScreenOn = false }
+    }
+}

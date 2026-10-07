@@ -627,6 +627,8 @@ TEST(BridgeFile, SessionSelectionAndSettingsPersist) {
         rifle = st.at("currentRifleId");
         api.Call("setConditions", R"({"targetRangeM": 650, "powderFollowsAir": false, "powderC": 5})");
         api.Call("setSettings", R"({"angleUnit": "moa", "holdMode": "dial", "language": "uk"})");
+        api.Call("setSettings", R"({"prefs": {"theme": "night", "keepScreenOn": true, "old": 1}})");
+        api.Call("setSettings", R"({"prefs": {"old": null}})"); // merged; null removes
     }
     {
         Api api;
@@ -637,6 +639,7 @@ TEST(BridgeFile, SessionSelectionAndSettingsPersist) {
         EXPECT_EQ(st.at("angleUnit"), "moa");
         EXPECT_EQ(st.at("holdMode"), "dial");
         EXPECT_EQ(st.at("language"), "uk");
+        EXPECT_EQ(st.at("prefs"), json::parse(R"({"theme": "night", "keepScreenOn": true})"));
         EXPECT_EQ(st.at("conditions").at("targetRangeM"), 650.0);
         EXPECT_FALSE(st.at("conditions").at("powderFollowsAir").get<bool>());
         EXPECT_EQ(st.at("conditions").at("powderC"), 5.0);

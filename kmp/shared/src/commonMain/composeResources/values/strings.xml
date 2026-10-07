@@ -471,6 +471,13 @@
     <string name="photo_bad">This file is not a picture.</string>
     <string name="core_35">The picture is too large.</string>
     <string name="core_36">The picture is damaged.</string>
+    <string name="display">Screen</string>
+    <string name="theme">Theme</string>
+    <string name="theme_system">As the system</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_night">Night (red)</string>
+    <string name="keep_screen_on">Keep the screen on</string>
     <string name="sensor_barometer">From the barometer</string>
     <string name="sensor_location">My location</string>
     <string name="sensor_angles">Measure with the phone</string>

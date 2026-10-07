@@ -35,11 +35,6 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.vetalguru.balcalc.core.Api
 
-private val FieldColor = Color(0xFFF4F1E8)
-private val Ink = Color(0xFF111111)
-private val Edge = Color(0xFF555555)
-private val TargetRed = Color(0xFFE53935)
-
 /**
  * A reticle (the core's JSON drawing in nominal mrad, y up; see
  * applogic/importers.h) with the target marked where it should go. Zooms
@@ -53,6 +48,7 @@ fun ReticleView(definition: String, targetX: Double, targetY: Double, modifier: 
         else runCatching { Api.json.parseToJsonElement(definition).jsonObject }.getOrNull()
     }
     val measurer = rememberTextMeasurer()
+    val colors = appColors
     Canvas(modifier.testTag("reticle")) {
         val reach = max(abs(targetX), abs(targetY))
         val sizeArr = drawing?.get("size")?.jsonArray
@@ -69,20 +65,20 @@ fun ReticleView(definition: String, targetX: Double, targetY: Double, modifier: 
         fun w(v: Double?) = max(1.0, (v ?: 0.0) * k).toFloat()
 
         val field = Path().apply { addOval(Rect(Offset(cx, cy), side / 2 - 1)) }
-        drawPath(field, FieldColor)
+        drawPath(field, colors.reticleField)
         clipPath(field) {
             val elements = drawing?.get("elements")?.jsonArray?.map { it.jsonObject } ?: crosshair(span)
-            for (e in elements) drawElement(e, ::x, ::y, ::w, k, measurer)
+            for (e in elements) drawElement(e, ::x, ::y, ::w, k, measurer, colors.reticleInk)
         }
-        drawCircle(Edge, radius = side / 2 - 1, center = Offset(cx, cy), style = Stroke(2f))
+        drawCircle(colors.reticleEdge, radius = side / 2 - 1, center = Offset(cx, cy), style = Stroke(2f))
 
         // Target.
         val t = Offset(x(targetX), y(targetY))
-        drawCircle(TargetRed.copy(alpha = 0.25f), 9f, t)
-        drawCircle(TargetRed, 9f, t, style = Stroke(2.5f))
+        drawCircle(colors.target.copy(alpha = 0.25f), 9f, t)
+        drawCircle(colors.target, 9f, t, style = Stroke(2.5f))
         for ((a, b) in listOf(-15f to -5f, 5f to 15f)) {
-            drawLine(TargetRed, Offset(t.x + a, t.y), Offset(t.x + b, t.y), 2.5f)
-            drawLine(TargetRed, Offset(t.x, t.y + a), Offset(t.x, t.y + b), 2.5f)
+            drawLine(colors.target, Offset(t.x + a, t.y), Offset(t.x + b, t.y), 2.5f)
+            drawLine(colors.target, Offset(t.x, t.y + a), Offset(t.x, t.y + b), 2.5f)
         }
     }
 }
@@ -113,16 +109,17 @@ private fun DrawScope.drawElement(
     w: (Double?) -> Float,
     k: Double,
     measurer: androidx.compose.ui.text.TextMeasurer,
+    ink: Color,
 ) {
     val fill = e["fill"]?.jsonPrimitive?.booleanOrNull == true
     when (e["t"]?.jsonPrimitive?.content) {
-        "line" -> drawLine(Ink, Offset(x(e.num("x1")), y(e.num("y1"))), Offset(x(e.num("x2")), y(e.num("y2"))), w(e.num("w")))
+        "line" -> drawLine(ink, Offset(x(e.num("x1")), y(e.num("y1"))), Offset(x(e.num("x2")), y(e.num("y2"))), w(e.num("w")))
         "circle" -> {
             val r = max(0.8, e.num("r") * k).toFloat()
-            drawCircle(Ink, r, Offset(x(e.num("x")), y(e.num("y"))), style = if (fill) Fill else Stroke(w(e.num("w"))))
+            drawCircle(ink, r, Offset(x(e.num("x")), y(e.num("y"))), style = if (fill) Fill else Stroke(w(e.num("w"))))
         }
         "text" -> {
-            val layout = measurer.measure(e["s"]?.jsonPrimitive?.content.orEmpty(), TextStyle(color = Ink, fontSize = max(8.0, e.num("h") * k).toFloat().let { (it / density).sp }))
+            val layout = measurer.measure(e["s"]?.jsonPrimitive?.content.orEmpty(), TextStyle(color = ink, fontSize = max(8.0, e.num("h") * k).toFloat().let { (it / density).sp }))
             drawText(layout, topLeft = Offset(x(e.num("x")), y(e.num("y")) - layout.firstBaseline))
         }
         "path" -> {
@@ -141,7 +138,7 @@ private fun DrawScope.drawElement(
                 px = x1
                 py = y1
             }
-            drawPath(p, Ink, style = if (fill) Fill else Stroke(w(e.num("w"))))
+            drawPath(p, ink, style = if (fill) Fill else Stroke(w(e.num("w"))))
         }
     }
 }

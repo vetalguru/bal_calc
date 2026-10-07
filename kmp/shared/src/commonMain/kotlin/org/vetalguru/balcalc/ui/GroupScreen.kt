@@ -195,6 +195,7 @@ private fun TargetPhoto(
     onTap: (PhotoPoint) -> Unit,
 ) {
     val ratio = img.width.toFloat() / img.height
+    val centreColor = Transonic
     Canvas(
         Modifier.fillMaxWidth().aspectRatio(ratio).background(Color.Black).testTag("groupCanvas")
             .pointerInput(img) {
@@ -221,8 +222,8 @@ private fun TargetPhoto(
         if (aim != null && centreCm != null && scale.size == 2) {
             val px = kotlin.math.hypot(scale[1].x - scale[0].x, scale[1].y - scale[0].y) / scaleCm
             val c = at(PhotoPoint(aim.x + centreCm.first * px, aim.y - centreCm.second * px))
-            drawCircle(Transonic, r / 2, c)
-            drawCircle(Transonic, min(size.width, size.height) / 40, c, style = stroke)
+            drawCircle(centreColor, r / 2, c)
+            drawCircle(centreColor, min(size.width, size.height) / 40, c, style = stroke)
         }
     }
 }

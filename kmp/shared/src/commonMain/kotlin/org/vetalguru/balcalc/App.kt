@@ -17,8 +17,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,7 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,6 +37,7 @@ import org.vetalguru.balcalc.core.Api
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
 import org.vetalguru.balcalc.ui.ArmoryNav
+import org.vetalguru.balcalc.ui.BalCalcTheme
 import org.vetalguru.balcalc.ui.ArmoryScreen
 import org.vetalguru.balcalc.ui.ConditionsScreen
 import org.vetalguru.balcalc.ui.SolutionScreen
@@ -55,20 +53,13 @@ private val pages = listOf(
     Page(Res.string.nav_settings, Res.string.nav_settings_short, "navSettings"),
 )
 
-private val Orange = Color(0xFFFF9800)
-private val BlueGrey = Color(0xFF607D8B)
-
 /**
  * The app: five pages, a side rail on desktops and tablets, a bottom bar
- * on phones. [startup] opens the platform's database (once per core).
+ * on phones. [startup] opens the platform's database (once per core);
+ * [dark] is the system's dark mode, for the "system" theme.
  */
 @Composable
 fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, dark: Boolean = false) {
-    val scheme = if (dark) {
-        darkColorScheme(primary = Orange, secondary = BlueGrey)
-    } else {
-        lightColorScheme(primary = Color(0xFFE65100), secondary = BlueGrey)
-    }
     // Above the language switch: changing the language keeps the data and the page.
     val scope = rememberCoroutineScope()
     val model = remember(api) { AppModel(api, scope) }
@@ -76,7 +67,8 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
     var page by rememberSaveable { mutableIntStateOf(0) }
     val armory = remember { ArmoryNav() }
     AppLanguage(model.state.language.ifEmpty { null }) {
-    MaterialTheme(colorScheme = scheme) {
+    BalCalcTheme(model.state.prefs.theme, systemDark = dark) {
+        KeepScreenOn(model.state.prefs.keepScreenOn)
         // Back: an inner page first (handled by it), then to the solution, then out.
         BackHandler(enabled = page != 0) { page = 0 }
         val snackbar = remember { SnackbarHostState() }

@@ -42,3 +42,7 @@ expect fun BackHandler(enabled: Boolean, onBack: () -> Unit)
 val LocalPlatform = androidx.compose.runtime.staticCompositionLocalOf<Platform> {
     error("BalCalcApp provides the platform")
 }
+
+/** Keeps the screen from dimming and locking while [enabled] (phones; nothing on desktops). */
+@Composable
+expect fun KeepScreenOn(enabled: Boolean)

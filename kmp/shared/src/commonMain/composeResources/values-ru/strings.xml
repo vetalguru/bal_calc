@@ -441,6 +441,13 @@
     <string name="photo_bad">Этот файл — не картинка.</string>
     <string name="core_35">Картинка слишком большая.</string>
     <string name="core_36">Картинка повреждена.</string>
+    <string name="display">Экран</string>
+    <string name="theme">Тема</string>
+    <string name="theme_system">Как в системе</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_night">Ночная (красная)</string>
+    <string name="keep_screen_on">Не выключать экран</string>
     <string name="sensor_barometer">С барометра</string>
     <string name="sensor_location">Моё место</string>
     <string name="sensor_angles">Измерить телефоном</string>
