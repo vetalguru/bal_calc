@@ -37,6 +37,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.core.Shot
 import org.vetalguru.balcalc.core.TruingResult
@@ -99,7 +100,7 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
     var offsetError by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     LaunchedEffect(model.shotsRevision, st.currentProfileId, st.angleUnit) {
-        shots = runCatching { model.shots() }.getOrDefault(emptyList())
+        shots = loadOr(emptyList()) { model.shots() }
         result = null
     }
     val unit = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
