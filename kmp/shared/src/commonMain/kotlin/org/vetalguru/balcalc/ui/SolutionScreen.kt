@@ -78,6 +78,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
+import org.vetalguru.balcalc.loadOr
 import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.CorrectionText
 import org.vetalguru.balcalc.core.Solution
@@ -176,7 +177,7 @@ private fun Viewer(
     val sampleCartridge = stringResource(Res.string.sample_cartridge_name)
     // The target card, with the solution: holds follow the current target.
     var targets by remember { mutableStateOf(emptyList<TargetItem>()) }
-    LaunchedEffect(model.revision) { targets = runCatching { model.targets() }.getOrDefault(emptyList()) }
+    LaunchedEffect(model.revision) { targets = loadOr(emptyList()) { model.targets() } }
     // The others: the current target is the big mark already.
     val marks = targets.filter { it.ok && (abs(it.holdX - sol.targetX) > 0.05 || abs(it.holdY - sol.targetY) > 0.05) }
         .map { ReticleMark(it.holdX, it.holdY, it.name) }
