@@ -55,6 +55,11 @@ kotlin {
 // UI tests drive the real core: libbalcalc_jni and the starter library from
 // the desktop app's staged resources.
 tasks.named<Test>("desktopTest") {
+    // Whole exceptions in the log: CI failures must say where they happened.
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        events("failed")
+    }
     val resources = project(":desktopApp").layout.buildDirectory.dir("mergedResources")
     dependsOn(":desktopApp:mergedResources")
     environment("BALCALC_RESOURCES", resources.get().asFile.path)
