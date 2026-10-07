@@ -64,11 +64,9 @@
     <string name="powder_follows_air">Температура пороху = температура повітря</string>
     <string name="powder_temperature">Температура пороху</string>
     <string name="wind">Вітер</string>
-    <string name="speed">Швидкість</string>
-    <string name="wind_from_degrees">Напрямок вітру (0 = від цілі, 90 = справа)</string>
     <string name="angles">Кути</string>
     <string name="shot_angle">Кут місця цілі (вгору +, вниз −)</string>
-    <string name="cant">Завал зброї (за годинниковою +)</string>
+    <string name="cant">Завал зброї</string>
     <string name="coriolis_section">Обертання Землі (Коріоліс)</string>
     <string name="coriolis_on">Враховувати обертання Землі</string>
     <string name="latitude">Широта (північ +)</string>
@@ -280,7 +278,7 @@
     <string name="enter_density_altitude">Вводжу висоту за густиною замість тиску</string>
     <string name="target_section">Ціль</string>
     <string name="target_height">Висота цілі (для прямого пострілу)</string>
-    <string name="wind_gust">Пориви: друга швидкість (0 = немає)</string>
+    <string name="wind_gust">Швидкість у поривах</string>
     <string name="gust_windage">При %1$s м/с: %2$s</string>
     <string name="wind_zones_on">Вітер різний уздовж дистанції (зони)</string>
     <string name="zone_title">Зона %1$s</string>
@@ -511,4 +509,9 @@
     <string name="compass_magnetic">Від магнітної півночі: для істинної спершу візьміть «Моє місце».</string>
     <string name="compass_true">Від істинної півночі.</string>
     <string name="compass_calibrate">Компас погано відкалібровано: поводіть телефоном вісімкою.</string>
+    <string name="wind_gust_hint">0 — без поривів</string>
+    <string name="shot_angle_hint">Вгору +, вниз −</string>
+    <string name="cant_hint">За годинниковою стрілкою +</string>
+    <string name="wind_direction_hint">0° — від цілі, 90° — справа, 270° — зліва</string>
+    <string name="wind_clock_short">%1$s год.</string>
 </resources>

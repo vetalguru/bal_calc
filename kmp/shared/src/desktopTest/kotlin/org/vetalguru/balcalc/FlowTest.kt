@@ -1128,6 +1128,18 @@ class FlowTest {
         type("conditionsWindSpeed", "7.5")
         onNodeWithTag("conditionsWindSpeedMinus").performClick()
         waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "6.5" }
+        // The direction steps by 15° and goes round through 0.
+        onNodeWithTag("windFromMinus").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("windFrom") == "345" }
+        onNodeWithTag("windFromPlus").performClick()
+        onNodeWithTag("windFromPlus").performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("windFrom") == "15" }
+        // The angles too: ±1.
+        onNodeWithTag("lookAnglePlus").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "1" }
+        onNodeWithTag("cantAngleMinus").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { shown("cantAngle") == "-1" }
+        onNodeWithTag("windFrom").performScrollTo()
         shot("conditions-wind-steps")
         onNodeWithTag("navSolution").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("windSpeed") && shown("windSpeed") == "6.5" }

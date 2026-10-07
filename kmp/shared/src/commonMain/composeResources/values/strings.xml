@@ -72,11 +72,9 @@
     <string name="powder_follows_air">Powder temperature = air temperature</string>
     <string name="powder_temperature">Powder temperature</string>
     <string name="wind">Wind</string>
-    <string name="speed">Speed</string>
-    <string name="wind_from_degrees">Wind direction (0 = from the target, 90 = from the right)</string>
     <string name="angles">Angles</string>
     <string name="shot_angle">Shot angle (uphill +, downhill −)</string>
-    <string name="cant">Cant (clockwise +)</string>
+    <string name="cant">Cant</string>
     <string name="coriolis_section">Earth rotation (Coriolis)</string>
     <string name="coriolis_on">Account for Earth rotation</string>
     <string name="latitude">Latitude (north +)</string>
@@ -310,7 +308,7 @@
     <string name="enter_density_altitude">I enter density altitude instead of pressure</string>
     <string name="target_section">Target</string>
     <string name="target_height">Target height (for the point-blank range)</string>
-    <string name="wind_gust">Gusts: second speed (0 = none)</string>
+    <string name="wind_gust">Gust speed</string>
     <string name="gust_windage">At %1$s m/s: %2$s</string>
     <string name="wind_zones_on">The wind differs along the range (zones)</string>
     <string name="zone_title">Zone %1$s</string>
@@ -541,4 +539,9 @@
     <string name="compass_magnetic">From magnetic north: take My location first for true north.</string>
     <string name="compass_true">From true north.</string>
     <string name="compass_calibrate">The compass is poorly calibrated: wave the phone in a figure 8.</string>
+    <string name="wind_gust_hint">0: no gusts</string>
+    <string name="shot_angle_hint">Uphill +, downhill −</string>
+    <string name="cant_hint">Clockwise +</string>
+    <string name="wind_direction_hint">0° from the target, 90° from the right, 270° from the left</string>
+    <string name="wind_clock_short">%1$s o'clock</string>
 </resources>

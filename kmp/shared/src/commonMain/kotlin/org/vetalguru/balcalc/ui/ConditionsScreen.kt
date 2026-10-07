@@ -155,17 +155,13 @@ fun ConditionsScreen(model: AppModel) {
                     wide,
                     { m ->
                         WindSpeedField(
-                            stringResource(Res.string.speed), c.windSpeed,
+                            stringResource(Res.string.wind_speed), c.windSpeed,
                             { v -> model.updateConditions { it.copy(windSpeed = v) } },
-                            windUnit, setWindUnit, m, tag = "conditionsWindSpeed",
+                            windUnit, setWindUnit, m, tag = "conditionsWindSpeed", fieldMaxWidth = FIELD_MAX,
                         )
                     },
                     { m ->
-                        NumberField(
-                            stringResource(Res.string.wind_from_degrees), c.windFromDeg,
-                            { v -> model.updateConditions { it.copy(windFromDeg = v % 360) } },
-                            m, deg, decimals = 0, from = 0.0, to = 360.0,
-                        )
+                        DirectionField(c.windFromDeg, { v -> model.updateConditions { it.copy(windFromDeg = v) } }, m, "windFrom")
                     },
                 )
                 if (zoned) {
@@ -179,7 +175,8 @@ fun ConditionsScreen(model: AppModel) {
                 WindSpeedField(
                     stringResource(Res.string.wind_gust), c.windGustMps,
                     { v -> model.updateConditions { it.copy(windGustMps = v) } },
-                    windUnit, setWindUnit, tag = "windGust",
+                    windUnit, setWindUnit, tag = "windGust", fieldMaxWidth = FIELD_MAX,
+                    hint = stringResource(Res.string.wind_gust_hint),
                 )
                 SwitchRow(
                     stringResource(Res.string.wind_zones_on), zoned,
@@ -224,17 +221,13 @@ fun ConditionsScreen(model: AppModel) {
                         wide,
                         { m ->
                             WindSpeedField(
-                                stringResource(Res.string.speed), z.speedMps,
+                                stringResource(Res.string.wind_speed), z.speedMps,
                                 { v -> change { it.copy(speedMps = v) } },
-                                windUnit, setWindUnit, m, tag = "zoneSpeed${i + 1}",
+                                windUnit, setWindUnit, m, tag = "zoneSpeed${i + 1}", fieldMaxWidth = FIELD_MAX,
                             )
                         },
                         { m ->
-                            NumberField(
-                                stringResource(Res.string.wind_from_degrees), z.fromDeg,
-                                { v -> change { it.copy(fromDeg = v % 360) } },
-                                m, deg, decimals = 0, from = 0.0, to = 360.0, tag = "zoneFrom${i + 1}",
-                            )
+                            DirectionField(z.fromDeg, { v -> change { it.copy(fromDeg = v) } }, m, "zoneFrom${i + 1}")
                         },
                     )
                     if (!last) {
@@ -267,17 +260,19 @@ fun ConditionsScreen(model: AppModel) {
                 Fields(
                     wide,
                     { m ->
-                        NumberField(
-                            stringResource(Res.string.shot_angle), c.lookAngleDeg,
+                        StepperField(
+                            stringResource(Res.string.look_angle_short), c.lookAngleDeg,
                             { v -> model.updateConditions { it.copy(lookAngleDeg = v) } },
-                            m, deg, from = -60.0, to = 60.0, tag = "lookAngle",
+                            m, deg, from = -60.0, to = 60.0, tag = "lookAngle", fieldMaxWidth = FIELD_MAX,
+                            hint = stringResource(Res.string.shot_angle_hint),
                         )
                     },
                     { m ->
-                        NumberField(
+                        StepperField(
                             stringResource(Res.string.cant), c.cantDeg,
                             { v -> model.updateConditions { it.copy(cantDeg = v) } },
-                            m, deg, from = -45.0, to = 45.0, tag = "cantAngle",
+                            m, deg, from = -45.0, to = 45.0, tag = "cantAngle", fieldMaxWidth = FIELD_MAX,
+                            hint = stringResource(Res.string.cant_hint),
                         )
                     },
                 )
@@ -320,4 +315,18 @@ fun ConditionsScreen(model: AppModel) {
             }
         }
     }
+}
+
+/** Fields with steps are no wider than a number needs, even on a wide card. */
+private val FIELD_MAX = 200.dp
+
+/** Where the wind blows from, in degrees with its clock hour; steps of 15° that go round. */
+@Composable
+private fun DirectionField(fromDeg: Double, onDeg: (Double) -> Unit, modifier: Modifier, tag: String) {
+    StepperField(
+        stringResource(Res.string.wind_from), fromDeg, { v -> onDeg(v % 360) }, modifier,
+        "° · " + stringResource(Res.string.wind_clock_short, clockHour(fromDeg)),
+        step = 15.0, from = 0.0, to = 360.0, tag = tag, fieldMaxWidth = FIELD_MAX,
+        hint = stringResource(Res.string.wind_direction_hint), wrap = true, decimals = 0,
+    )
 }
