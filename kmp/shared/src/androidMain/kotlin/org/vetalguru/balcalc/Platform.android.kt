@@ -61,6 +61,24 @@ class AndroidPlatform(private val activity: ComponentActivity) : Platform {
         return true
     }
 
+    // One launcher per kind of file: the document picker takes the type at registration.
+    private val createBinary: Map<String, ActivityResultLauncher<String>> =
+        listOf("text/csv", "image/png").associateWith { mime ->
+            activity.registerForActivityResult(ActivityResultContracts.CreateDocument(mime)) { onCreated?.invoke(it) }
+        }
+
+    override suspend fun saveBytes(suggestedName: String, mimeType: String, bytes: ByteArray): Boolean {
+        val launcher = createBinary[mimeType] ?: return false
+        val uri = suspendCancellableCoroutine<Uri?> { c ->
+            onCreated = { c.resume(it) }
+            launcher.launch(suggestedName)
+        } ?: return false
+        withContext(Dispatchers.IO) {
+            activity.contentResolver.openOutputStream(uri, "wt")!!.use { it.write(bytes) }
+        }
+        return true
+    }
+
     override suspend fun openTexts(extensions: List<String>, multiple: Boolean): List<NamedText> {
         // Providers rarely know .ammo/.drg types: accept anything, the core checks.
         val uris = suspendCancellableCoroutine<List<Uri>> { c ->

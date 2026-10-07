@@ -28,6 +28,18 @@ class DesktopPlatform(private val owner: () -> Frame?) : Platform {
         return true
     }
 
+    override suspend fun saveBytes(suggestedName: String, mimeType: String, bytes: ByteArray): Boolean {
+        val file = withContext(Dispatchers.Main) {
+            FileDialog(owner(), null, FileDialog.SAVE).run {
+                file = suggestedName
+                isVisible = true
+                if (file == null) null else File(directory, file)
+            }
+        } ?: return false
+        withContext(Dispatchers.IO) { file.writeBytes(bytes) }
+        return true
+    }
+
     override suspend fun openTexts(extensions: List<String>, multiple: Boolean): List<NamedText> {
         val files = withContext(Dispatchers.Main) {
             FileDialog(owner(), null, FileDialog.LOAD).run {

@@ -166,6 +166,9 @@ data class TableRow(
     val leadClicks: Double = 0.0,
     val leadCm: Double = 0.0,
     val spinDriftCm: Double = 0.0,
+    /** Windage for each of the table's extra wind speeds (RangeTable.windSpeeds). */
+    val windages: List<Double> = emptyList(),
+    val windageClicksAt: List<Double> = emptyList(),
     val coriolisDriftCm: Double = 0.0,
     val coriolisLiftCm: Double = 0.0,
 )
@@ -176,6 +179,7 @@ data class RangeTable(
     val error: String = "",
     val hasScope: Boolean = false,
     val rows: List<TableRow> = emptyList(),
+    val windSpeeds: List<Double> = emptyList(),
     // For a compared rifle + cartridge (compareCurves).
     val label: String = "",
     val rifleId: Long = 0,
@@ -309,6 +313,10 @@ data class UiPrefs(
     val roundToClicks: Boolean = false,
     /** Also the other angle unit and the centimetres at the target, in small print. */
     val showSecondUnit: Boolean = true,
+    /** Range card columns by key ("elev", "v", ...); empty: chosen for the screen width. */
+    val tableColumns: List<String> = emptyList(),
+    /** Extra wind speeds (m/s) with a windage column each in the range card. */
+    val tableWinds: List<Double> = emptyList(),
 )
 
 /** A named target of the target card, with its corrections and its hold on the reticle. */

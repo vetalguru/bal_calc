@@ -470,6 +470,42 @@ class FlowTest {
     }
 
     @Test
+    fun rangeCardColumnsWindsAndExport() = runDesktopComposeUiTest(412, 915) {
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
+        val platform = FakePlatform()
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        waitUntil(timeoutMillis = 30_000) { exists("sample") }
+        onNodeWithTag("sample").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+        onNodeWithTag("navTable").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("tableColumns") }
+
+        // Range, elevation and two wind columns only.
+        onNodeWithTag("tableColumns").performClick()
+        onNodeWithTag("columnsAuto").performClick()
+        onNodeWithTag("column:elevClicks").performClick()
+        onNodeWithTag("column:wind").performClick()
+        onNodeWithTag("column:windClicks").performClick()
+        onNodeWithTag("windColumns").performTextReplacement("2, 6")
+        onNodeWithTag("columnsSave").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("col:wind@2.0") && exists("col:wind@6.0") && !exists("col:wind") }
+        assertTrue(exists("col:range") && exists("col:elev"))
+        shot("table-columns")
+
+        onNodeWithTag("tableExport").performClick()
+        onNodeWithTag("exportCsv").performClick()
+        waitUntil(timeoutMillis = 10_000) { platform.savedBytes.isNotEmpty() }
+        val csv = platform.savedBytes.last().second.decodeToString()
+        assertTrue(csv.lines()[1].contains("Wind 2 m/s") && csv.lines()[1].contains("Wind 6 m/s"), csv.lines()[1])
+        onNodeWithTag("tableExport").performClick()
+        onNodeWithTag("exportPng").performClick()
+        waitUntil(timeoutMillis = 10_000) { platform.savedBytes.size == 2 }
+        assertTrue(ImageIO.read(platform.savedBytes.last().second.inputStream()) != null)
+        System.getProperty("balcalc.screenshots")?.let { File(it, "table-export.png").writeBytes(platform.savedBytes.last().second) }
+        db.delete()
+    }
+
+    @Test
     fun situationsSwitchConditions() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         setRange(650)

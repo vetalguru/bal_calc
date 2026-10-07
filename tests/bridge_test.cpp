@@ -421,6 +421,20 @@ TEST_F(Bridge, RangeTableAndCurve) {
     EXPECT_NEAR(t.at("rows")[3].at("elevation").get<double>(),
                 Ok("solution").at("elevation").get<double>(), 1e-9); // 300 m
     EXPECT_EQ(Ok("trajectoryCurve", {{"maxRangeM", 1000}, {"points", 250}}).at("rows").size(), 251U);
+
+    // Wind columns: each speed computed in full, from the set direction.
+    Ok("setConditions", {{"windSpeed", 4}, {"windFromDeg", 90}});
+    const json w = Ok("rangeTable", {{"windSpeeds", {2, 4, 8}}});
+    EXPECT_EQ(w.at("windSpeeds").size(), 3U);
+    const json& row = w.at("rows")[5]; // 500 m
+    ASSERT_EQ(row.at("windages").size(), 3U);
+    EXPECT_NEAR(row.at("windages")[1].get<double>(), row.at("windage").get<double>(), 1e-9); // 4 m/s: as set
+    // Spin drift plus a part growing with the wind: 4 more m/s give twice
+    // what 2 more give (point mass: the crosswind part is close to linear).
+    const double w2 = row.at("windages")[0], w4 = row.at("windages")[1], w8 = row.at("windages")[2];
+    EXPECT_NEAR(w8 - w4, 2 * (w4 - w2), 0.01);
+    EXPECT_GT(w2, 0.0);
+    EXPECT_FALSE(Ok("rangeTable").at("rows")[5].contains("windages"));
 }
 
 TEST_F(Bridge, RifleAndCartridgeFormsAndSelection) {

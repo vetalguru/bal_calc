@@ -13,6 +13,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
@@ -491,7 +492,9 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
     fun setHoldMode(mode: String) = setSettings(buildJsonObject { put("holdMode", mode) })
     fun setLanguage(language: String) = setSettings(buildJsonObject { put("language", language) })
 
-    suspend fun rangeTable(): RangeTable = api.get("rangeTable")
+    /** The range card; with [windSpeeds] a windage column for each (computed in full). */
+    suspend fun rangeTable(windSpeeds: List<Double> = emptyList()): RangeTable =
+        api.get("rangeTable", buildJsonObject { putJsonArray("windSpeeds") { windSpeeds.forEach { add(JsonPrimitive(it)) } } })
 
     suspend fun trajectory(maxRangeM: Double, points: Int): RangeTable =
         api.get("trajectoryCurve", buildJsonObject {
