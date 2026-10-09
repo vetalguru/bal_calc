@@ -14,7 +14,7 @@ namespace {
 using sqlite_manager::Error;
 using sqlite_manager::ErrorCode;
 
-Error DataError(std::string message) { return Error(ErrorCode::kError, 0, std::move(message)); }
+Error DataError(std::string message) { return {ErrorCode::kError, 0, std::move(message)}; }
 
 template <typename T>
 Result<T> Require(Database& db, Id id, const char* what) {
@@ -22,10 +22,11 @@ Result<T> Require(Database& db, Id id, const char* what) {
     if (!r) {
         return r.error();
     }
-    if (!r.value()) {
+    auto& found = r.value();
+    if (!found) {
         return DataError(std::string(what) + " " + std::to_string(id) + " not found");
     }
-    return std::move(*r.value());
+    return std::move(*found);
 }
 
 std::optional<DragTableId> TableByName(const std::string& name) {

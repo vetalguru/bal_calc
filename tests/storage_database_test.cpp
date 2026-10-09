@@ -20,7 +20,7 @@ class TempDbFile {
         fs::remove(path_);
     }
     ~TempDbFile() { fs::remove(path_); }
-    std::string path() const { return path_.string(); }
+    [[nodiscard]] std::string path() const { return path_.string(); }
 
    private:
     fs::path path_;

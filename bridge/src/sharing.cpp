@@ -3,8 +3,6 @@
 
 namespace ballistics::bridge {
 
-using namespace detail;
-
 std::string Api::Impl::ExportFileName(const std::string& kind, Id id) const {
     const json& list = kind == "rifle" ? rifles : cartridges;
     for (const json& v : list) {

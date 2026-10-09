@@ -3,6 +3,13 @@ Checks: >
   bugprone-*,
   performance-*,
   modernize-*,
-  -modernize-use-trailing-return-type
-WarningsAsErrors: ''
-HeaderFilterRegex: '(core|cli)/'
+  -modernize-use-trailing-return-type,
+  -bugprone-easily-swappable-parameters,
+  -clang-analyzer-optin.performance.Padding
+# easily-swappable-parameters is off: the physics takes plain doubles in SI
+# (diameter, length, speed...) by design, and it flags every such signature.
+# optin.performance.Padding is off: it asks to reorder fields by size, and
+# the few long-lived structs keep their fields in an order that reads.
+# Every remaining warning is an error: CI keeps the code clean.
+WarningsAsErrors: '*'
+HeaderFilterRegex: '/(core|cli|storage|applogic|bridge|jni|tests)/'

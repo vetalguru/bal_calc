@@ -37,7 +37,10 @@ Apex MaxOrdinate(const Trajectory& trajectory, double max_slant_range_m) {
     const double end = std::min(max_slant_range_m, trajectory.max_slant_range_m());
     Apex best;
     best.height_m = -1e9;
-    for (double r = 0.0; r <= end; r += kScanStepM) {
+    // An integer count, the range computed from it: no rounding error builds up.
+    const auto r_steps = static_cast<int>(std::floor(end / kScanStepM + 1e-9));
+    for (int k = 0; k <= r_steps; ++k) {
+        const double r = kScanStepM * static_cast<double>(k);
         if (const auto h = Height(trajectory, r); h && *h > best.height_m) {
             best = {r, *h};
         }
@@ -72,7 +75,10 @@ std::optional<PointBlank> PointBlankRange(const Trajectory& trajectory, double h
     };
     std::optional<PointBlank> out;
     double prev = 0.0;
-    for (double r = 0.0; r <= end; r += kScanStepM) {
+    // An integer count, the range computed from it: no rounding error builds up.
+    const auto r_steps = static_cast<int>(std::floor(end / kScanStepM + 1e-9));
+    for (int k = 0; k <= r_steps; ++k) {
+        const double r = kScanStepM * static_cast<double>(k);
         const bool in = inside(r);
         if (!out && in) {
             out = PointBlank{r > 0.0 ? Boundary(prev, r, inside) : 0.0, end};

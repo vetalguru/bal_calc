@@ -3,8 +3,6 @@
 
 namespace ballistics::bridge {
 
-using namespace detail;
-
 void Api::Impl::AddReticle(const bs::LoadedProfile& p, const al::SolutionSummary& r, json& out) {
     out["hasReticle"] = false;
     if (!r.ok || !p.scope) {
@@ -26,12 +24,12 @@ void Api::Impl::AddReticle(const bs::LoadedProfile& p, const al::SolutionSummary
     out["maxMagnification"] = scope.max_magnification;
     out["magnification"] = zoom;
     if (scope.reticle_id) {
-        auto ret = bs::Repository<bs::ReticleRecord>(db).Get(*scope.reticle_id);
-        if (ret && ret.value()) {
+        const auto ret = bs::Repository<bs::ReticleRecord>(db).Get(*scope.reticle_id);
+        if (const bs::ReticleRecord* reticle = bs::Found(ret)) {
             out["hasReticle"] = true;
-            out["reticleName"] = ret.value()->name;
-            out["reticleUnits"] = ret.value()->units;
-            out["reticleDefinition"] = ret.value()->definition;
+            out["reticleName"] = reticle->name;
+            out["reticleUnits"] = reticle->units;
+            out["reticleDefinition"] = reticle->definition;
         }
     }
 }
@@ -45,6 +43,7 @@ json Api::Impl::Solution() {
         out = {{"ok", false}, {"error", p.error().message}};
     } else {
         const al::SolutionSummary r = al::Summarize(p.value(), Session(), Unit(), NowUnix());
+        const std::optional<bs::ScopeRecord>& scope = p.value().scope;
         out = {{"ok", r.ok},
                {"error", r.error},
                {"rangeM", r.range_m},
@@ -52,12 +51,10 @@ json Api::Impl::Solution() {
                {"windage", r.windage},
                {"elevationClicks", r.elevation_clicks},
                {"windageClicks", r.windage_clicks},
-               {"hasScope", p.value().scope.has_value()},
+               {"hasScope", scope.has_value()},
                // One click in the angle unit (0 without a scope): for rounding to clicks.
-               {"clickElevation",
-                p.value().scope ? al::FromRad(p.value().scope->click_vertical_rad, Unit()) : 0.0},
-               {"clickWindage",
-                p.value().scope ? al::FromRad(p.value().scope->click_horizontal_rad, Unit()) : 0.0},
+               {"clickElevation", scope ? al::FromRad(scope->click_vertical_rad, Unit()) : 0.0},
+               {"clickWindage", scope ? al::FromRad(scope->click_horizontal_rad, Unit()) : 0.0},
                {"dropCm", r.drop_cm},
                {"windageCm", r.windage_cm},
                {"velocity", r.velocity_mps},

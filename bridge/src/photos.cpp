@@ -3,8 +3,6 @@
 
 namespace ballistics::bridge {
 
-using namespace detail;
-
 void Api::Impl::AddPhotosHandlers(HandlerMap& h) {
     using I = Api::Impl;
     h.insert({

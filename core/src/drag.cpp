@@ -129,7 +129,7 @@ DragModel DragModel::FromBc(DragTableId table, double bc_lb_in2) {
     return m;
 }
 
-DragModel DragModel::FromMultiBc(DragTableId table, std::vector<BcPoint> points) {
+DragModel DragModel::FromMultiBc(DragTableId table, const std::vector<BcPoint>& points) {
     if (points.empty()) {
         throw std::invalid_argument("at least one BC point is required");
     }

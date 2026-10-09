@@ -32,13 +32,14 @@ Result<T> Require(Database& db, Id id, const char* what) {
     if (!r) {
         return r.error();
     }
-    if (!r.value()) {
+    auto& found = r.value();
+    if (!found) {
         return Error(ErrorCode::kNotFound, 0, std::string(what) + " not found");
     }
-    return std::move(*r.value());
+    return std::move(*found);
 }
 
-Error Invalid(const std::string& problem) { return Error(ErrorCode::kConstraint, 0, problem); }
+Error Invalid(const std::string& problem) { return {ErrorCode::kConstraint, 0, problem}; }
 
 // Cartridges brought in from files belong to the library, not the user.
 bool IsLibraryCartridge(const CartridgeRecord& c) { return c.source.rfind("import:", 0) == 0; }
@@ -100,8 +101,8 @@ Status RemovePairs(Database& db, Id rifle_id, Id cartridge_id) {
 
 // A private bullet nothing references any more goes away.
 void RemoveOwnBullet(Database& db, Id bullet_id) {
-    auto b = Repository<BulletRecord>(db).Get(bullet_id);
-    if (b && b.value() && b.value()->source == kSourceUser) {
+    const auto b = Repository<BulletRecord>(db).Get(bullet_id);
+    if (const BulletRecord* rec = storage::Found(b); rec && rec->source == kSourceUser) {
         Repository<BulletRecord>(db).Remove(bullet_id).ok();  // refused while still used
     }
 }
@@ -112,8 +113,9 @@ CartridgeSummary Summary(Database& db, const CartridgeRecord& c) {
     s.name = c.name;
     s.caliber = c.caliber;
     s.muzzle_velocity_mps = c.muzzle_velocity_mps;
-    if (auto b = Repository<BulletRecord>(db).Get(c.bullet_id); b && b.value()) {
-        s.bullet_name = b.value()->name;
+    const auto b = Repository<BulletRecord>(db).Get(c.bullet_id);
+    if (const BulletRecord* rec = storage::Found(b)) {
+        s.bullet_name = rec->name;
     }
     return s;
 }
@@ -307,8 +309,8 @@ Status DeleteRifle(Database& db, Id rifle_id) {
     if (Status s = Repository<RifleRecord>(db).Remove(rifle_id); !s) {
         return s;
     }
-    if (r.value().scope_id) {
-        Repository<ScopeRecord>(db).Remove(*r.value().scope_id).ok();  // kept if shared
+    if (const std::optional<Id>& scope_id = r.value().scope_id) {
+        Repository<ScopeRecord>(db).Remove(*scope_id).ok();  // kept if shared
     }
     return txn.value().Commit();
 }

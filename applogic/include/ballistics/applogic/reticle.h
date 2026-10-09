@@ -3,13 +3,14 @@
 
 #include <ballistics/storage/records.h>
 
+#include <cstdint>
 #include <string>
 
 // Where to put the target in the reticle for a firing solution.
 namespace ballistics::applogic {
 
 // How the correction is applied.
-enum class HoldMode {
+enum class HoldMode : std::uint8_t {
     kDialElevation,  // dial elevation on the turret, hold windage (default)
     kHoldAll,        // hold both on the reticle, turrets stay at zero
     kDialAll,        // dial both

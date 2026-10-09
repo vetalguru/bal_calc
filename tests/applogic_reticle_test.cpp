@@ -7,6 +7,7 @@
 #include <sqlite_manager/connection.h>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -137,7 +138,7 @@ struct Generic {
 };
 
 TEST(Reticle, GenericReticlesHaveTheirMarksWhereTheirNamesSay) {
-    const Generic all[] = {
+    const std::array<Generic, 9> all = {{
         {"generic-mrad-hash-0.5", 0.5, false, 10, 10},
         {"generic-mrad-hash-0.2", 0.2, false, 10, 10},
         {"generic-mrad-tree-0.2", 0.2, false, 6, 10},
@@ -147,7 +148,7 @@ TEST(Reticle, GenericReticlesHaveTheirMarksWhereTheirNamesSay) {
         {"generic-moa-hash-2", 2, true, 40, 40},
         {"generic-moa-tree-2", 2, true, 24, 40},
         {"generic-moa-grid-2", 2, true, 20, 34},
-    };
+    }};
     for (const Generic& g : all) {
         SCOPED_TRACE(g.file);
         std::ifstream in(std::filesystem::path(BALLISTICS_SEED_DIR) / "reticle" /

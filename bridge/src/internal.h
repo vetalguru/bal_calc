@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-namespace ballistics::bridge::detail {
+namespace ballistics::bridge {
 
 namespace al = ballistics::applogic;
 namespace bs = ballistics::storage;
@@ -103,6 +103,6 @@ std::string Dump(const json& j);
 Id FirstId(const json& list);
 bool Contains(const json& list, Id id);
 
-}  // namespace ballistics::bridge::detail
+}  // namespace ballistics::bridge
 
 #endif  // BALLISTICS_BRIDGE_INTERNAL_H

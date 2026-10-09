@@ -40,8 +40,6 @@
 
 namespace ballistics::bridge {
 
-using namespace detail;
-
 struct Api::Impl {
     bs::Database db;
     bool open = false;
@@ -120,10 +118,12 @@ struct Api::Impl {
         }
     }
 
-    al::AngleUnit Unit() const {
+    [[nodiscard]] al::AngleUnit Unit() const {
         return angle_unit == "moa" ? al::AngleUnit::kMoa : al::AngleUnit::kMrad;
     }
-    double UnitRad() const { return angle_unit == "moa" ? u::MoaToRad(1.0) : u::MradToRad(1.0); }
+    [[nodiscard]] double UnitRad() const {
+        return angle_unit == "moa" ? u::MoaToRad(1.0) : u::MradToRad(1.0);
+    }
 
     // ---- Settings and session ------------------------------------------------
 
@@ -132,13 +132,13 @@ struct Api::Impl {
 
     void LoadSettings();
 
-    al::SessionConditions Session() const;
+    [[nodiscard]] al::SessionConditions Session() const;
 
     void ApplySession(const al::SessionConditions& s);
 
-    json Conditions() const;
+    [[nodiscard]] json Conditions() const;
 
-    json ZonesJson() const;
+    [[nodiscard]] json ZonesJson() const;
 
     void SetConditions(const json& a);
 
@@ -159,7 +159,7 @@ struct Api::Impl {
     json TargetsStored();
 
     // The session with a target's range, angle and wind (one zone).
-    al::SessionConditions SessionFor(const json& t) const;
+    [[nodiscard]] al::SessionConditions SessionFor(const json& t) const;
 
     // Every target with its corrections and where to hold it on the reticle
     // with the turrets as set for the current target (the hold mode).
@@ -220,7 +220,7 @@ struct Api::Impl {
 
     // ---- Sharing -------------------------------------------------------------
 
-    std::string ExportFileName(const std::string& kind, Id id) const;
+    [[nodiscard]] std::string ExportFileName(const std::string& kind, Id id) const;
 };
 
 }  // namespace ballistics::bridge

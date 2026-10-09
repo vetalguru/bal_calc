@@ -41,7 +41,7 @@ class Truing : public ::testing::Test {
         p.profile.velocity_scale = v_scale;
         p.profile.drag_scale = d_scale;
         auto sol = storage::Solve(p, ToConditions(s), range_m + 1.0);
-        return sol.value().trajectory.AtSlantRange(range_m)->hold_elevation_rad;
+        return sol.value().trajectory.AtSlantRange(range_m).value().hold_elevation_rad;
     }
 
     SessionConditions Air(double temp_c) {
@@ -155,7 +155,7 @@ double DsfTruthAt(storage::Database& db, Id profile, double range_m, const Sessi
     storage::LoadedProfile p = storage::LoadProfile(db, profile).value();
     p.profile.dsf = kTrueDsf;
     auto sol = storage::Solve(p, ToConditions(s), range_m + 1.0);
-    return sol.value().trajectory.AtSlantRange(range_m)->hold_elevation_rad;
+    return sol.value().trajectory.AtSlantRange(range_m).value().hold_elevation_rad;
 }
 
 TEST_F(Truing, DsfNeedsTransonicShots) {
@@ -168,7 +168,8 @@ TEST_F(Truing, DsfNeedsTransonicShots) {
 
 TEST_F(Truing, DsfFromTheShotLogReproducesTheTransonicDrop) {
     const SessionConditions air = Air(15.0);
-    for (double range = 500.0; range <= 1500.0; range += 100.0) {
+    for (int k = 0; k <= 10; ++k) {
+        const double range = 500.0 + 100.0 * k;  // 500 ... 1500 m
         ASSERT_TRUE(LogShot(db_, profile_, air, range, DsfTruthAt(db_, profile_, range, air)).ok());
     }
     const DsfResult r = ComputeDsf(db_, profile_);
@@ -241,7 +242,8 @@ TEST_F(Truing, BcFromAHitIsTheBcThatMadeIt) {
             const double hit = storage::Solve(real, ToConditions(air), range + 1.0)
                                    .value()
                                    .trajectory.AtSlantRange(range)
-                                   ->hold_elevation_rad;
+                                   .value()
+                                   .hold_elevation_rad;
             const BcResult r =
                 BcFromHit(storage::LoadProfile(db_, profile_).value(), "G7", range, hit, air);
             ASSERT_TRUE(r.ok) << r.error;

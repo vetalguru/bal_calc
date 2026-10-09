@@ -26,7 +26,7 @@ class Database final {
     // Schema version this build creates and understands.
     static std::int64_t LatestSchemaVersion();
 
-    bool IsOpen() const { return conn_.IsOpen(); }
+    [[nodiscard]] bool IsOpen() const { return conn_.IsOpen(); }
 
     // Schema version stored in PRAGMA user_version (0 for a fresh file).
     Result<std::int64_t> SchemaVersion();

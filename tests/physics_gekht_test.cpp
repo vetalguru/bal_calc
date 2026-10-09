@@ -226,19 +226,21 @@ TEST_P(Gekht, MatchesTheTable) {
                 EXPECT_GT(ours / theirs, 0.4) << yd << " yd";
                 EXPECT_LE(ours / theirs, 1.0) << yd << " yd";
             }
-            EXPECT_NEAR(no_rotation.AtSlantRange(r.range_m)->drop_m, off.rows.at(i).drop_m,
+            EXPECT_NEAR(no_rotation.AtSlantRange(r.range_m).value().drop_m, off.rows.at(i).drop_m,
                         tol.drop_moa * moa + units::InchToM(0.05))
                 << yd << " yd";
         }
         if (!tol.flat_fire_coriolis) {
-            EXPECT_NEAR(p->windage_m, r.windage_m, tol.windage_moa * moa + units::InchToM(0.05))
+            EXPECT_NEAR(p.value().windage_m, r.windage_m,
+                        tol.windage_moa * moa + units::InchToM(0.05))
                 << yd << " yd";
         } else {
             const double expected = turned(omega_drift, r.range_m);
-            EXPECT_NEAR(p->windage_m, expected, 0.05 * std::abs(expected) + 1e-4) << yd << " yd";
+            EXPECT_NEAR(p.value().windage_m, expected, 0.05 * std::abs(expected) + 1e-4)
+                << yd << " yd";
             if (std::abs(r.windage_m) > 0.02) {
-                EXPECT_GT(p->windage_m / r.windage_m, 0.4) << yd << " yd";
-                EXPECT_LE(p->windage_m / r.windage_m, 1.0) << yd << " yd";
+                EXPECT_GT(p.value().windage_m / r.windage_m, 0.4) << yd << " yd";
+                EXPECT_LE(p.value().windage_m / r.windage_m, 1.0) << yd << " yd";
             }
         }
     }
@@ -257,7 +259,9 @@ INSTANTIATE_TEST_SUITE_P(
                       Tolerance{"be_coriolis_east", 0.005, 0.4, 0.05, true},
                       Tolerance{"be_coriolis_west", 0.005, 0.4, 0.05, true},
                       Tolerance{"be_coriolis_pole", 0.005, 0.4, 0.05, true}),
-    [](const ::testing::TestParamInfo<Tolerance>& info) { return std::string(info.param.name); });
+    [](const ::testing::TestParamInfo<Tolerance>& param_info) {
+        return std::string(param_info.param.name);
+    });
 
 }  // namespace
 }  // namespace ballistics

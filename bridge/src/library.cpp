@@ -3,8 +3,6 @@
 
 namespace ballistics::bridge {
 
-using namespace detail;
-
 // A seed file that is one of the read-only catalogs: kept in memory.
 bool Api::Impl::TakeCatalog(const std::string& content) {
     const std::string head = content.substr(0, 200);

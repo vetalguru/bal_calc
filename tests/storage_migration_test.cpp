@@ -118,7 +118,7 @@ TEST(StorageMigration, ProfileKeepsItsDsfTable) {
     p.dsf = {{1.2, 1.0}, {0.9, 1.08}, {1.05, 1.03}};
     const Id id = Repository<ProfileRecord>(db).Save(p).value();
 
-    const ProfileRecord back = *Repository<ProfileRecord>(db).Get(id).value();
+    const ProfileRecord back = Repository<ProfileRecord>(db).Get(id).value().value();
     ASSERT_EQ(back.dsf.size(), 3u);
     EXPECT_DOUBLE_EQ(back.dsf[0].mach, 0.9);  // sorted by Mach
     EXPECT_DOUBLE_EQ(back.dsf[0].factor, 1.08);

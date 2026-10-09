@@ -5,7 +5,9 @@
 #include <sqlite_manager/transaction.h>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <sstream>
 #include <string>
@@ -19,9 +21,9 @@ namespace {
 constexpr const char* kPrefix = "session.";
 
 std::string Num(double v) {
-    char buf[40];
-    std::snprintf(buf, sizeof(buf), "%.17g", v);
-    return buf;
+    std::array<char, 40> buf{};
+    std::snprintf(buf.data(), buf.size(), "%.17g", v);
+    return buf.data();
 }
 
 bool ParseNum(const std::string& s, double& v) {
@@ -107,26 +109,26 @@ Result<SessionConditions> LoadSession(storage::Database& db) {
         const char* key;
         double* value;
     };
-    const Field fields[] = {{"temperature_c", &s.temperature_c},
-                            {"pressure_hpa", &s.pressure_hpa},
-                            {"altitude_m", &s.altitude_m},
-                            {"humidity_pct", &s.humidity_pct},
-                            {"look_angle_deg", &s.look_angle_deg},
-                            {"cant_deg", &s.cant_deg},
-                            {"target_range_m", &s.target_range_m},
-                            {"magnification", &s.magnification},
-                            {"target_height_cm", &s.target_height_cm},
-                            {"wind_gust_mps", &s.wind_gust_mps},
-                            {"target_speed_mps", &s.target_speed_mps},
-                            {"target_heading_deg", &s.target_heading_deg},
-                            {"weather_at", &s.weather_at_unix}};
+    const std::array<Field, 13> fields = {{{"temperature_c", &s.temperature_c},
+                                           {"pressure_hpa", &s.pressure_hpa},
+                                           {"altitude_m", &s.altitude_m},
+                                           {"humidity_pct", &s.humidity_pct},
+                                           {"look_angle_deg", &s.look_angle_deg},
+                                           {"cant_deg", &s.cant_deg},
+                                           {"target_range_m", &s.target_range_m},
+                                           {"magnification", &s.magnification},
+                                           {"target_height_cm", &s.target_height_cm},
+                                           {"wind_gust_mps", &s.wind_gust_mps},
+                                           {"target_speed_mps", &s.target_speed_mps},
+                                           {"target_heading_deg", &s.target_heading_deg},
+                                           {"weather_at", &s.weather_at_unix}}};
     for (const Field& f : fields) {
         auto v = get(f.key);
         if (!v) {
             return v.error();
         }
         double d = 0.0;
-        if (v.value() && ParseNum(*v.value(), d)) {
+        if (const auto& text = v.value(); text && ParseNum(*text, d)) {
             *f.value = d;
         }
     }
@@ -134,17 +136,17 @@ Result<SessionConditions> LoadSession(storage::Database& db) {
         const char* key;
         std::optional<double>* value;
     };
-    const OptField opts[] = {{"powder_c", &s.powder_c},
-                             {"latitude_deg", &s.latitude_deg},
-                             {"azimuth_deg", &s.azimuth_deg},
-                             {"density_altitude_m", &s.density_altitude_m}};
+    const std::array<OptField, 4> opts = {{{"powder_c", &s.powder_c},
+                                           {"latitude_deg", &s.latitude_deg},
+                                           {"azimuth_deg", &s.azimuth_deg},
+                                           {"density_altitude_m", &s.density_altitude_m}}};
     for (const OptField& f : opts) {
         auto v = get(f.key);
         if (!v) {
             return v.error();
         }
         double d = 0.0;
-        if (v.value() && ParseNum(*v.value(), d)) {
+        if (const auto& text = v.value(); text && ParseNum(*text, d)) {
             *f.value = d;
         }
     }
@@ -152,8 +154,8 @@ Result<SessionConditions> LoadSession(storage::Database& db) {
     if (!winds) {
         return winds.error();
     }
-    if (winds.value()) {
-        s.winds = WindsFromText(*winds.value());
+    if (const auto& text = winds.value()) {
+        s.winds = WindsFromText(*text);
     }
     return s;
 }
@@ -239,7 +241,10 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
     out.stability = traj.stability();
     out.spin_drift_cm = pt->spin_drift_m * 100.0;
     out.subsonic = pt->mach < 1.0;
-    for (double r = 10.0; r <= s.target_range_m; r += 10.0) {
+    // An integer count, the range computed from it: no rounding error builds up.
+    const auto r_steps = static_cast<int>(std::floor((s.target_range_m - 10.0) / 10.0 + 1e-9));
+    for (int k = 0; k <= r_steps; ++k) {
+        const double r = 10.0 + 10.0 * static_cast<double>(k);
         const auto q = traj.AtSlantRange(r);
         if (q && q->mach < 1.2) {
             out.transonic_range_m = r;
@@ -355,8 +360,8 @@ RangeTable BuildRangeTable(const storage::LoadedProfile& profile, const SessionC
             still = std::move(r.value());
         }
     }
-    const auto count = static_cast<long>(std::floor((to_m - from_m) / step_m + 1e-9));
-    for (long k = 0; k <= count; ++k) {
+    const auto count = static_cast<std::int64_t>(std::floor((to_m - from_m) / step_m + 1e-9));
+    for (std::int64_t k = 0; k <= count; ++k) {
         const double r = from_m + static_cast<double>(k) * step_m;
         const auto pt = traj.AtSlantRange(r);
         if (!pt) {

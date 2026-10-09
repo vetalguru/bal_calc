@@ -12,6 +12,7 @@
 #include <ballistics/version.h>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdio>
 #include <filesystem>
@@ -194,9 +195,9 @@ bool ReadTableSpec(const Args& a, TableSpec& t, std::ostream& err) {
 }
 
 std::string Fixed(double v, int decimals) {
-    char buf[64];
-    std::snprintf(buf, sizeof(buf), "%.*f", decimals, v);
-    return buf;
+    std::array<char, 64> buf{};
+    std::snprintf(buf.data(), buf.size(), "%.*f", decimals, v);
+    return buf.data();
 }
 
 void PrintTable(const Trajectory& traj, const TableSpec& spec, const bs::ScopeRecord* scope,
@@ -212,7 +213,10 @@ void PrintTable(const Trajectory& traj, const TableSpec& spec, const bs::ScopeRe
     head.insert(head.end(), {"Drop cm", "Windage cm", "V m/s", "Mach", "E J", "TOF s"});
 
     std::vector<std::vector<std::string>> rows;
-    for (double r = spec.from; r <= spec.to + 1e-9; r += spec.step) {
+    // An integer count, the range computed from it: no rounding error builds up.
+    const auto r_steps = static_cast<int>(std::floor((spec.to - spec.from) / spec.step + 1e-9));
+    for (int k = 0; k <= r_steps; ++k) {
+        const double r = spec.from + spec.step * static_cast<double>(k);
         const auto pt = traj.AtSlantRange(r);
         if (!pt) {
             break;
@@ -330,8 +334,8 @@ int CmdTable(const Args& a, std::ostream& out, std::ostream& err) {
     }
     out << loaded.value().rifle.name << " / " << loaded.value().cartridge.name << "\n";
     PrintSummary(sol.value().shot, sol.value().trajectory, sol.value().zero, out);
-    PrintTable(sol.value().trajectory, spec,
-               loaded.value().scope ? &*loaded.value().scope : nullptr, a.csv, out);
+    const std::optional<bs::ScopeRecord>& scope = loaded.value().scope;
+    PrintTable(sol.value().trajectory, spec, scope ? &*scope : nullptr, a.csv, out);
     return 0;
 }
 
@@ -352,7 +356,7 @@ int CmdQuick(const Args& a, std::ostream& out, std::ostream& err) {
     p.bullet.drag_kind = bs::kDragKindBc;
     const auto drag = a.opts.find("drag");
     p.bullet.drag_table = drag != a.opts.end() ? drag->second : "G7";
-    p.bullet.bc = *bc;
+    p.bullet.bc = bc;
     p.bullet.mass_kg = u::GrainToKg(mass.value_or(0.0));
     p.bullet.diameter_m = u::InchToM(diam.value_or(0.0));
     p.bullet.length_m = u::InchToM(len.value_or(0.0));
@@ -422,10 +426,12 @@ int CmdList(const Args& a, std::ostream& out, std::ostream& err) {
         return 1;
     }
     for (const auto& p : list.value()) {
-        auto r = bs::Repository<bs::RifleRecord>(db).Get(p.rifle_id);
-        auto c = bs::Repository<bs::CartridgeRecord>(db).Get(p.cartridge_id);
-        if (r && r.value() && c && c.value()) {
-            out << p.id << "  " << r.value()->name << " / " << c.value()->name << "  (rifle "
+        const auto r = bs::Repository<bs::RifleRecord>(db).Get(p.rifle_id);
+        const auto c = bs::Repository<bs::CartridgeRecord>(db).Get(p.cartridge_id);
+        const bs::RifleRecord* rifle = bs::Found(r);
+        const bs::CartridgeRecord* cartridge = bs::Found(c);
+        if (rifle && cartridge) {
+            out << p.id << "  " << rifle->name << " / " << cartridge->name << "  (rifle "
                 << p.rifle_id << ", cartridge " << p.cartridge_id << ")\n";
         }
     }
