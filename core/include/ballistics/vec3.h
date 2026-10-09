@@ -33,7 +33,7 @@ struct Vec3 {
         return *this;
     }
 
-    double Norm() const { return std::sqrt(x * x + y * y + z * z); }
+    [[nodiscard]] double Norm() const { return std::sqrt(x * x + y * y + z * z); }
 };
 
 constexpr Vec3 operator+(Vec3 a, const Vec3& b) { return a += b; }

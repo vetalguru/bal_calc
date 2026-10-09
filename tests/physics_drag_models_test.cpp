@@ -71,7 +71,7 @@ double DropAt(const DragModel& drag, double range_m) {
     shot.sight_height_m = 0.05;
     shot.atmosphere = StandardAtmosphere(0.0);
     shot.elevation_rad = FindZero(shot, 100.0).elevation_rad;
-    return Fly(shot, range_m + 10.0).AtSlantRange(range_m)->drop_m;
+    return Fly(shot, range_m + 10.0).AtSlantRange(range_m).value().drop_m;
 }
 
 TEST(PhysicsDragModels, SingleMultiBcPointEqualsPlainBc) {
@@ -132,7 +132,7 @@ TEST(PhysicsDsf, ScalesTheDragAtEachMach) {
     // Together with the overall scale.
     EXPECT_NEAR(m.Scaled(1.05).WithMachScale({{1.0, 1.2}}).Coefficient(0.5),
                 1.05 * 1.2 * m.Coefficient(0.5), 1e-15);
-    EXPECT_THROW(m.WithMachScale({{1.0, 0.0}}), std::invalid_argument);
+    EXPECT_THROW(static_cast<void>(m.WithMachScale({{1.0, 0.0}})), std::invalid_argument);
 }
 
 }  // namespace

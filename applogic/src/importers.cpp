@@ -7,6 +7,7 @@
 #include <tinyxml2.h>
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
@@ -30,7 +31,7 @@ using storage::DragCurveRecord;
 using storage::Repository;
 using storage::ReticleRecord;
 
-Error Bad(const std::string& what) { return Error(ErrorCode::kFormat, 0, what); }
+Error Bad(const std::string& what) { return {ErrorCode::kFormat, 0, what}; }
 
 // A transaction unless the caller already has one open (SQLite does not
 // nest them); Commit() is then a no-op and the caller commits.
@@ -46,7 +47,7 @@ class Scope {
             }
         }
     }
-    const std::optional<Error>& error() const { return error_; }
+    [[nodiscard]] const std::optional<Error>& error() const { return error_; }
     Status Commit() { return txn_.IsActive() ? txn_.Commit() : sqlite_manager::Ok(); }
 
    private:
@@ -209,8 +210,8 @@ double DiameterFromCaliber(const std::string& caliber) {
     }
     if (rest.find("ga") != std::string::npos) {
         // Shotgun gauges (bore diameter, inches).
-        constexpr std::pair<int, double> kGauges[] = {{10, 0.775}, {12, 0.729}, {16, 0.662},
-                                                      {20, 0.615}, {28, 0.550}, {410, 0.410}};
+        constexpr std::array<std::pair<int, double>, 6> kGauges = {
+            {{10, 0.775}, {12, 0.729}, {16, 0.662}, {20, 0.615}, {28, 0.550}, {410, 0.410}}};
         for (const auto& [gauge, inches] : kGauges) {
             if (static_cast<int>(v) == gauge) {
                 return units::InchToM(inches);
@@ -600,7 +601,8 @@ Result<int> SeededVersion(Database& db) {
     if (!done) {
         return done.error();
     }
-    return done.value() ? std::atoi(done.value()->c_str()) : 0;
+    const std::optional<std::string>& text = done.value();
+    return text ? std::atoi(text->c_str()) : 0;
 }
 
 Result<SeedReport> SeedLibrary(Database& db, const std::vector<SeedFile>& files, int seed_version) {

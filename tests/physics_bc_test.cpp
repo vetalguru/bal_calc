@@ -19,7 +19,7 @@ std::pair<double, double> Chronographs(DragTableId table, double bc, double mv, 
     shot.atmosphere = air;
     shot.elevation_rad = FindZero(shot, 100.0).elevation_rad;
     const Trajectory t = Fly(shot, far_m + 1.0);
-    return {t.AtSlantRange(near_m)->speed_mps, t.AtSlantRange(far_m)->speed_mps};
+    return {t.AtSlantRange(near_m).value().speed_mps, t.AtSlantRange(far_m).value().speed_mps};
 }
 
 TEST(PhysicsBc, FromTwoChronographs) {

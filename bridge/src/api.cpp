@@ -54,8 +54,6 @@
 
 namespace ballistics::bridge {
 
-using namespace detail;
-
 const Api::Impl::HandlerMap& Api::Impl::Handlers() {
     static const HandlerMap handlers = [] {
         HandlerMap h;

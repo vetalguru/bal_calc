@@ -118,7 +118,7 @@ TEST_F(AppLibrary, CartridgeUsesLibraryBulletWithoutChangingIt) {
     const Id cid = SaveCartridgeForm(db_, f).value();
 
     EXPECT_EQ(LoadCartridgeForm(db_, cid).value().library_bullet_id, lib);
-    EXPECT_DOUBLE_EQ(Repository<BulletRecord>(db_).Get(lib).value()->bc.value(), 0.243);
+    EXPECT_DOUBLE_EQ(Repository<BulletRecord>(db_).Get(lib).value().value().bc.value(), 0.243);
     EXPECT_EQ(Repository<BulletRecord>(db_).List().value().size(), 1U);
 
     // Library bullets survive cartridge deletion and refuse deletion in use.

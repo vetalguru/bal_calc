@@ -52,7 +52,7 @@ class Dynamics {
         omega2_ = 2.0 * EarthRotation(shot);
     }
 
-    Vec3 Wind(double x) const {
+    [[nodiscard]] Vec3 Wind(double x) const {
         for (const Zone& z : zones_) {
             if (x < z.until) {
                 return z.air;
@@ -61,7 +61,7 @@ class Dynamics {
         return zones_.empty() ? Vec3{} : zones_.back().air;
     }
 
-    Vec3 Acceleration(const State& s) const {
+    [[nodiscard]] Vec3 Acceleration(const State& s) const {
         const AirState air = air_.At(shot_.atmosphere.altitude_m + s.p.y);
         const Vec3 v_air = s.v - Wind(s.p.x);
         const double speed = v_air.Norm();
@@ -70,7 +70,7 @@ class Dynamics {
         return Vec3{0.0, -shot_.gravity_mps2, 0.0} - k * v_air - Cross(omega2_, s.v);
     }
 
-    State Derivative(const State& s) const { return {s.v, Acceleration(s)}; }
+    [[nodiscard]] State Derivative(const State& s) const { return {s.v, Acceleration(s)}; }
 
    private:
     struct Zone {
@@ -236,8 +236,8 @@ std::vector<TrajectoryPoint> Trajectory::Table(double step_m, double max_m,
     if (!(step_m > 0.0)) {
         return out;
     }
-    const auto count = static_cast<long>(std::floor(max_m / step_m + 1e-9));
-    for (long k = include_zero ? 0 : 1; k <= count; ++k) {
+    const auto count = static_cast<std::int64_t>(std::floor(max_m / step_m + 1e-9));
+    for (std::int64_t k = include_zero ? 0 : 1; k <= count; ++k) {
         auto pt = AtSlantRange(static_cast<double>(k) * step_m);
         if (!pt) {
             break;

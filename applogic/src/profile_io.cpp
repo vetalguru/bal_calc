@@ -16,7 +16,17 @@ namespace {
 using nlohmann::json;
 using sqlite_manager::Error;
 using sqlite_manager::ErrorCode;
-using namespace storage;
+using storage::BulletRecord;
+using storage::CartridgeRecord;
+using storage::Database;
+using storage::DragCurveRecord;
+using storage::Id;
+using storage::kDragKindCurve;
+using storage::ProfileRecord;
+using storage::Repository;
+using storage::ReticleRecord;
+using storage::RifleRecord;
+using storage::ScopeRecord;
 
 constexpr const char* kRifleFormat = "balcalc-rifle";
 constexpr const char* kCartridgeFormat = "balcalc-cartridge";
@@ -24,7 +34,7 @@ constexpr const char* kLegacyProfileFormat = "balcalc-profile";
 constexpr int kVersion = 1;
 
 Error BadFile(const std::string& what) {
-    return Error(ErrorCode::kFormat, 0, "Not a valid Holdmark file: " + what);
+    return {ErrorCode::kFormat, 0, "Not a valid Holdmark file: " + what};
 }
 
 template <typename T>
@@ -33,10 +43,11 @@ Result<T> Require(Database& db, Id id, const char* what) {
     if (!r) {
         return r.error();
     }
-    if (!r.value()) {
+    auto& found = r.value();
+    if (!found) {
         return Error(ErrorCode::kNotFound, 0, std::string(what) + " not found");
     }
-    return std::move(*r.value());
+    return std::move(*found);
 }
 
 json Opt(const std::optional<double>& v) { return v ? json(*v) : json(nullptr); }

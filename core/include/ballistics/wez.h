@@ -3,6 +3,7 @@
 
 #include <ballistics/solver.h>
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -72,7 +73,7 @@ class WezModel final {
 
 // A target as seen from the shooter, centred on the aim point (m).
 struct Target {
-    enum class Kind {
+    enum class Kind : std::uint8_t {
         kRectangle,  // width x height
         kEllipse,    // width x height (a circle when equal)
         kFigure,     // a chest-and-head silhouette width x height (see .cpp)

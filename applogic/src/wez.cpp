@@ -4,7 +4,10 @@
 #include <sqlite_manager/transaction.h>
 
 #include <algorithm>
+#include <array>
+#include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <optional>
 
 namespace ballistics::applogic {
@@ -18,7 +21,7 @@ struct NumField {
     double WezSettings::* value;
 };
 
-const NumField kNumFields[] = {
+const std::array<NumField, 15> kNumFields = {{
     {"range_m", &WezSettings::range_m},
     {"wind_speed_mps", &WezSettings::wind_speed_mps},
     {"wind_direction_deg", &WezSettings::wind_direction_deg},
@@ -34,7 +37,7 @@ const NumField kNumFields[] = {
     {"group_moa", &WezSettings::group_moa},
     {"target_width_cm", &WezSettings::target_width_cm},
     {"target_height_cm", &WezSettings::target_height_cm},
-};
+}};
 
 }  // namespace
 
@@ -45,10 +48,12 @@ Result<WezSettings> LoadWezSettings(storage::Database& db) {
         if (!v) {
             return v.error();
         }
-        if (v.value()) {
-            try {
-                w.*f.value = std::stod(*v.value());
-            } catch (...) {
+        if (const auto& text = v.value()) {
+            // A number that does not read keeps the default.
+            char* end = nullptr;
+            const double d = std::strtod(text->c_str(), &end);
+            if (end != text->c_str()) {
+                w.*f.value = d;
             }
         }
     }
@@ -56,8 +61,8 @@ Result<WezSettings> LoadWezSettings(storage::Database& db) {
     if (!kind) {
         return kind.error();
     }
-    if (kind.value()) {
-        w.target_kind = *kind.value();
+    if (const auto& text = kind.value()) {
+        w.target_kind = *text;
     }
     return w;
 }
@@ -68,9 +73,9 @@ Status SaveWezSettings(storage::Database& db, const WezSettings& w) {
         return txn.error();
     }
     for (const NumField& f : kNumFields) {
-        char buf[40];
-        std::snprintf(buf, sizeof(buf), "%.17g", w.*f.value);
-        if (Status s = storage::SetSetting(db, std::string(kPrefix) + f.key, buf); !s) {
+        std::array<char, 40> buf{};
+        std::snprintf(buf.data(), buf.size(), "%.17g", w.*f.value);
+        if (Status s = storage::SetSetting(db, std::string(kPrefix) + f.key, buf.data()); !s) {
             return s;
         }
     }
@@ -138,7 +143,10 @@ WezResult ComputeWez(const storage::LoadedProfile& profile, const SessionConditi
         return WezRow{r, HitProbability(sp, target), sp.sigma_up_m * 100.0,
                       sp.sigma_right_m * 100.0};
     };
-    for (double r = step_m; r <= to_m + 1e-9; r += step_m) {
+    // An integer count, the range computed from it: no rounding error builds up.
+    const auto r_steps = static_cast<int>(std::floor((to_m - step_m) / step_m + 1e-9));
+    for (int k = 0; k <= r_steps; ++k) {
+        const double r = step_m + step_m * static_cast<double>(k);
         const auto rr = row(r, nullptr);
         if (!rr) {
             break;

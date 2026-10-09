@@ -56,6 +56,16 @@ Status SetPhoto(Database& db, const std::string& kind, Id owner,
 // The owners of the pictures of this kind.
 Result<std::vector<Id>> PhotoOwners(Database& db, const std::string& kind);
 
+// What Get found: the record, or null when the read failed or found none.
+template <typename T>
+const T* Found(const Result<std::optional<T>>& r) {
+    if (!r) {
+        return nullptr;
+    }
+    const std::optional<T>& record = r.value();
+    return record ? &*record : nullptr;
+}
+
 }  // namespace ballistics::storage
 
 #endif  // BALLISTICS_STORAGE_REPOSITORY_H

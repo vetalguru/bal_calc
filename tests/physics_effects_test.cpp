@@ -177,9 +177,9 @@ TEST(PhysicsEffects, HeadwindShortensTailwindLengthens) {
     head.winds = {{1e5, 5.0, 0.0, 0.0}};
     Shot tail = calm;
     tail.winds = {{1e5, 5.0, units::kPi, 0.0}};
-    const double d_calm = Fly(calm, 1010.0).AtSlantRange(1000.0)->drop_m;
-    EXPECT_LT(Fly(head, 1010.0).AtSlantRange(1000.0)->drop_m, d_calm);
-    EXPECT_GT(Fly(tail, 1010.0).AtSlantRange(1000.0)->drop_m, d_calm);
+    const double d_calm = Fly(calm, 1010.0).AtSlantRange(1000.0).value().drop_m;
+    EXPECT_LT(Fly(head, 1010.0).AtSlantRange(1000.0).value().drop_m, d_calm);
+    EXPECT_GT(Fly(tail, 1010.0).AtSlantRange(1000.0).value().drop_m, d_calm);
 }
 
 TEST(PhysicsEffects, AerodynamicJumpRightTwistWindFromRightIsLow) {
@@ -193,7 +193,8 @@ TEST(PhysicsEffects, AerodynamicJumpRightTwistWindFromRightIsLow) {
     EXPECT_LT(with_jump.aerodynamic_jump_rad(), 0.0);
     // Litz: (0.01*Sg - 0.0024*L + 0.032) MOA/mph; Sg ~2.3, L ~4 cal -> ~0.046 MOA/mph.
     EXPECT_NEAR(units::RadToMoa(-with_jump.aerodynamic_jump_rad()) / (5.0 / 0.44704), 0.046, 0.003);
-    EXPECT_LT(with_jump.AtSlantRange(1000.0)->drop_m, without.AtSlantRange(1000.0)->drop_m);
+    EXPECT_LT(with_jump.AtSlantRange(1000.0).value().drop_m,
+              without.AtSlantRange(1000.0).value().drop_m);
 }
 
 TEST(PhysicsEffects, MillerStabilityKnownValue) {

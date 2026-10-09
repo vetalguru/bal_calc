@@ -5,6 +5,7 @@
 #include <ballistics/drag.h>
 #include <ballistics/vec3.h>
 
+#include <cstdint>
 #include <optional>
 #include <vector>
 
@@ -72,7 +73,7 @@ struct SolverOptions {
     double max_drop_m = 10000.0;  // stop this far below the muzzle
 };
 
-enum class StopReason {
+enum class StopReason : std::uint8_t {
     kRangeReached,
     kMinSpeed,
     kMaxTime,
@@ -103,23 +104,24 @@ struct TrajectoryPoint {
 // sampled to integrator accuracy (quintic Hermite interpolation).
 class Trajectory final {
    public:
-    StopReason stop_reason() const { return stop_reason_; }
+    [[nodiscard]] StopReason stop_reason() const { return stop_reason_; }
     // Gyroscopic stability at the muzzle (Miller), 0 if not computed.
-    double stability() const { return stability_; }
+    [[nodiscard]] double stability() const { return stability_; }
     // Vertical aerodynamic jump applied at the muzzle, rad.
-    double aerodynamic_jump_rad() const { return jump_rad_; }
+    [[nodiscard]] double aerodynamic_jump_rad() const { return jump_rad_; }
     // Farthest LOS distance the flight covered.
-    double max_slant_range_m() const;
-    std::size_t step_count() const { return nodes_.empty() ? 0 : nodes_.size() - 1; }
+    [[nodiscard]] double max_slant_range_m() const;
+    [[nodiscard]] std::size_t step_count() const { return nodes_.empty() ? 0 : nodes_.size() - 1; }
 
     // Point where the projectile crosses the plane perpendicular to the
     // LOS at `slant_range_m`; nullopt if the flight ended before it.
-    std::optional<TrajectoryPoint> AtSlantRange(double slant_range_m) const;
-    std::optional<TrajectoryPoint> AtTime(double time_s) const;
+    [[nodiscard]] std::optional<TrajectoryPoint> AtSlantRange(double slant_range_m) const;
+    [[nodiscard]] std::optional<TrajectoryPoint> AtTime(double time_s) const;
 
     // Points every `step_m` from `step_m` (or 0 with `include_zero`) up to
     // `max_m` inclusive, stopping early where the flight ended.
-    std::vector<TrajectoryPoint> Table(double step_m, double max_m, bool include_zero = true) const;
+    [[nodiscard]] std::vector<TrajectoryPoint> Table(double step_m, double max_m,
+                                                     bool include_zero = true) const;
 
     struct Node {
         double t;
@@ -129,9 +131,9 @@ class Trajectory final {
    private:
     friend Trajectory Fly(const Shot&, double, const SolverOptions&);
 
-    TrajectoryPoint Interpolate(std::size_t segment, double t) const;
-    TrajectoryPoint MakePoint(double t, const Vec3& p, const Vec3& v) const;
-    double SlantRange(const Vec3& p) const;
+    [[nodiscard]] TrajectoryPoint Interpolate(std::size_t segment, double t) const;
+    [[nodiscard]] TrajectoryPoint MakePoint(double t, const Vec3& p, const Vec3& v) const;
+    [[nodiscard]] double SlantRange(const Vec3& p) const;
 
     std::vector<Node> nodes_;
     StopReason stop_reason_ = StopReason::kRangeReached;

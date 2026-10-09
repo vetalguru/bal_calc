@@ -81,57 +81,54 @@ WezModel::WezModel(const Shot& shot, const ErrorSources& e, double max_slant_ran
     // dispersion: the shot with it at +1 and -1 sigma.
     std::vector<std::pair<std::string, std::function<void(Shot&, double)>>> sources;
     if (e.wind_speed_mps > 0) {
-        sources.push_back({"windSpeed", [&e](Shot& s, double k) {
-                               s.winds = WithCrosswind(s.winds, k * e.wind_speed_mps);
-                           }});
+        sources.emplace_back("windSpeed", [&e](Shot& s, double k) {
+            s.winds = WithCrosswind(s.winds, k * e.wind_speed_mps);
+        });
     }
     if (e.wind_direction_rad > 0 && !shot.winds.empty()) {
-        sources.push_back({"windDirection", [&e](Shot& s, double k) {
-                               for (WindZone& z : s.winds) {
-                                   z.from_rad += k * e.wind_direction_rad;
-                               }
-                           }});
+        sources.emplace_back("windDirection", [&e](Shot& s, double k) {
+            for (WindZone& z : s.winds) {
+                z.from_rad += k * e.wind_direction_rad;
+            }
+        });
     }
     if (e.muzzle_velocity_mps > 0) {
-        sources.push_back({"muzzleVelocity", [&e](Shot& s, double k) {
-                               s.muzzle_velocity_mps += k * e.muzzle_velocity_mps;
-                           }});
+        sources.emplace_back("muzzleVelocity", [&e](Shot& s, double k) {
+            s.muzzle_velocity_mps += k * e.muzzle_velocity_mps;
+        });
     }
     if (e.drag_fraction > 0) {
-        sources.push_back({"drag", [&e](Shot& s, double k) {
-                               s.drag = s.drag.Scaled(1.0 + k * e.drag_fraction);
-                           }});
+        sources.emplace_back(
+            "drag", [&e](Shot& s, double k) { s.drag = s.drag.Scaled(1.0 + k * e.drag_fraction); });
     }
     if (e.temperature_k > 0) {
-        sources.push_back({"temperature", [&e](Shot& s, double k) {
-                               s.atmosphere.temperature_k += k * e.temperature_k;
-                           }});
+        sources.emplace_back("temperature", [&e](Shot& s, double k) {
+            s.atmosphere.temperature_k += k * e.temperature_k;
+        });
     }
     if (e.pressure_pa > 0) {
-        sources.push_back({"pressure", [&e](Shot& s, double k) {
-                               s.atmosphere.pressure_pa += k * e.pressure_pa;
-                           }});
+        sources.emplace_back(
+            "pressure", [&e](Shot& s, double k) { s.atmosphere.pressure_pa += k * e.pressure_pa; });
     }
     if (e.humidity > 0) {
-        sources.push_back({"humidity", [&e](Shot& s, double k) {
-                               s.atmosphere.humidity =
-                                   std::clamp(s.atmosphere.humidity + k * e.humidity, 0.0, 1.0);
-                           }});
+        sources.emplace_back("humidity", [&e](Shot& s, double k) {
+            s.atmosphere.humidity = std::clamp(s.atmosphere.humidity + k * e.humidity, 0.0, 1.0);
+        });
     }
     if (e.look_angle_rad > 0) {
-        sources.push_back(
-            {"lookAngle", [&e](Shot& s, double k) { s.look_angle_rad += k * e.look_angle_rad; }});
+        sources.emplace_back("lookAngle",
+                             [&e](Shot& s, double k) { s.look_angle_rad += k * e.look_angle_rad; });
     }
     if (e.cant_rad > 0) {
-        sources.push_back({"cant", [&e](Shot& s, double k) { s.cant_rad += k * e.cant_rad; }});
+        sources.emplace_back("cant", [&e](Shot& s, double k) { s.cant_rad += k * e.cant_rad; });
     }
     if (e.azimuth_rad > 0 && shot.azimuth_rad) {
-        sources.push_back(
-            {"azimuth", [&e](Shot& s, double k) { *s.azimuth_rad += k * e.azimuth_rad; }});
+        sources.emplace_back("azimuth",
+                             [&e](Shot& s, double k) { *s.azimuth_rad += k * e.azimuth_rad; });
     }
     if (e.latitude_rad > 0 && shot.latitude_rad) {
-        sources.push_back(
-            {"latitude", [&e](Shot& s, double k) { *s.latitude_rad += k * e.latitude_rad; }});
+        sources.emplace_back("latitude",
+                             [&e](Shot& s, double k) { *s.latitude_rad += k * e.latitude_rad; });
     }
     for (auto& [name, apply] : sources) {
         Shot plus = shot;

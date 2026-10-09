@@ -3,8 +3,6 @@
 
 namespace ballistics::bridge {
 
-using namespace detail;
-
 json Api::Impl::Shots() {
     json out = json::array();
     if (profile_id == 0) {

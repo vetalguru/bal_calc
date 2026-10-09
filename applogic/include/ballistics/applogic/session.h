@@ -4,6 +4,7 @@
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/solution.h>
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
@@ -56,7 +57,7 @@ storage::ConditionsRecord ToConditions(const SessionConditions& s);
 Result<SessionConditions> LoadSession(storage::Database& db);
 Status SaveSession(storage::Database& db, const SessionConditions& s);
 
-enum class AngleUnit { kMrad, kMoa };
+enum class AngleUnit : std::uint8_t { kMrad, kMoa };
 
 // Something the shooter should know about this solution. `code` is stable
 // (the app translates it); `value` is the number the message shows.

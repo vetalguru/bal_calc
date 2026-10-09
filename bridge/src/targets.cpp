@@ -3,8 +3,6 @@
 
 namespace ballistics::bridge {
 
-using namespace detail;
-
 json Api::Impl::TargetsStored() {
     const auto text = Setting(kTargetsKey);
     json list = text ? json::parse(*text, nullptr, false) : json::array();
@@ -149,9 +147,11 @@ json Api::Impl::Situations() {
         const bool ok = Exists(rifle, cartridge);
         const auto r = bs::Repository<bs::RifleRecord>(db).Get(rifle);
         const auto c = bs::Repository<bs::CartridgeRecord>(db).Get(cartridge);
+        const bs::RifleRecord* rifle_record = bs::Found(r);
+        const bs::CartridgeRecord* cartridge_record = bs::Found(c);
         out.push_back({{"name", s.value("name", "")},
-                       {"rifleName", ok ? r.value()->name : ""},
-                       {"cartridgeName", ok ? c.value()->name : ""},
+                       {"rifleName", ok && rifle_record ? rifle_record->name : ""},
+                       {"cartridgeName", ok && cartridge_record ? cartridge_record->name : ""},
                        {"rangeM", s.value("conditions", json::object()).value("targetRangeM", 0.0)},
                        {"available", ok}});
     }

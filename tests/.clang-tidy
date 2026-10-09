@@ -1,0 +1,6 @@
+InheritParentConfig: true
+# Tests check an optional with ASSERT_TRUE(opt) before using it; clang-tidy's
+# flow analysis does not follow gtest's ASSERT macros, so it flags every use
+# after them. Unguarded uses call .value() (a clean failure, not UB).
+Checks: >
+  -bugprone-unchecked-optional-access

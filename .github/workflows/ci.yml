@@ -81,6 +81,30 @@ jobs:
           clang-format --version
           git ls-files '*.cpp' '*.h' | xargs clang-format --dry-run --Werror
 
+  cpp-tidy:
+    name: "C++: clang-tidy"
+    runs-on: ubuntu-24.04
+    # The same clang-tidy as on the developer's Ubuntu 26.04 (21.x).
+    container: ubuntu:26.04
+    steps:
+      - name: Install toolchain and clang-tidy
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends             build-essential cmake ninja-build clang-tidy git ca-certificates
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # .clang-tidy makes every warning an error: the build fails on any.
+      - name: Build with clang-tidy
+        run: |
+          clang-tidy --version
+          cmake -S . -B build/tidy -G Ninja -DCMAKE_BUILD_TYPE=Debug -DENABLE_CLANG_TIDY=ON
+          cmake --build build/tidy
+
   # --- Kotlin app: checks ---------------------------------------------------
 
   desktop-tests-linux:

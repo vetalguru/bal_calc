@@ -16,3 +16,6 @@ target_compile_definitions(ballistics_core PRIVATE
 target_link_libraries(ballistics_core PRIVATE ballistics_warnings)
 
 ballistics_enable_tidy(ballistics_core)
+
+# Generated reference data (laid out in columns, see the file's header): not linted.
+set_source_files_properties(src/standard_drag_tables.cpp PROPERTIES SKIP_LINTING ON)

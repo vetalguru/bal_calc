@@ -95,10 +95,11 @@ Result<BulletForm> LoadBulletForm(storage::Database& db, Id bullet_id) {
     if (!r) {
         return r.error();
     }
-    if (!r.value()) {
+    auto& found = r.value();
+    if (!found) {
         return Error(ErrorCode::kNotFound, 0, "bullet not found");
     }
-    const BulletRecord& b = *r.value();
+    const BulletRecord& b = *found;
     BulletForm f;
     f.id = b.id;
     f.name = b.name;
@@ -128,10 +129,11 @@ Result<Id> SaveBulletForm(storage::Database& db, const BulletForm& f) {
         if (!r) {
             return r.error();
         }
-        if (!r.value()) {
+        auto& found = r.value();
+        if (!found) {
             return Error(ErrorCode::kNotFound, 0, "bullet not found");
         }
-        b = std::move(*r.value());
+        b = std::move(*found);
     }
     b.name = f.name;
     b.manufacturer = f.manufacturer;

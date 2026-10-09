@@ -1,6 +1,8 @@
 #ifndef BALLISTICS_ATMOSPHERE_H
 #define BALLISTICS_ATMOSPHERE_H
 
+#include <cstdint>
+
 namespace ballistics {
 
 // Measured air at the firing point (SI).
@@ -12,7 +14,7 @@ struct Atmosphere {
 };
 
 // How the speed of sound is computed from the air state.
-enum class SoundSpeedModel {
+enum class SoundSpeedModel : std::uint8_t {
     // Ideal-gas mixture of dry air and water vapour: sqrt(gamma R T / M)
     // with humidity-dependent gamma and molar mass. Default.
     kHumidAir,
@@ -67,13 +69,13 @@ class AtmosphereModel final {
     explicit AtmosphereModel(const Atmosphere& base,
                              SoundSpeedModel sound = SoundSpeedModel::kHumidAir);
 
-    const Atmosphere& base() const { return base_; }
+    [[nodiscard]] const Atmosphere& base() const { return base_; }
 
     // Air at the firing point.
-    const AirState& AtBase() const { return base_state_; }
+    [[nodiscard]] const AirState& AtBase() const { return base_state_; }
 
     // Air at `altitude_m` above mean sea level.
-    AirState At(double altitude_m) const;
+    [[nodiscard]] AirState At(double altitude_m) const;
 
    private:
     Atmosphere base_;

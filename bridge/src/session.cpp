@@ -1,9 +1,9 @@
 // Opening the database, the settings and the conditions of the session.
+#include <cstdlib>
+
 #include "impl.h"
 
 namespace ballistics::bridge {
-
-using namespace detail;
 
 std::optional<std::string> Api::Impl::Setting(const char* key) {
     auto v = bs::GetSetting(db, key);
@@ -29,9 +29,11 @@ void Api::Impl::LoadSettings() {
          {std::pair{kTableFromKey, &table_from_m}, std::pair{kTableToKey, &table_to_m},
           std::pair{kTableStepKey, &table_step_m}}) {
         if (auto v = Setting(key)) {
-            try {
-                *value = std::stod(*v);
-            } catch (const std::exception&) {
+            // A number that does not read keeps the default.
+            char* end = nullptr;
+            const double d = std::strtod(v.value().c_str(), &end);
+            if (end != v.value().c_str()) {
+                *value = d;
             }
         }
     }
@@ -236,10 +238,10 @@ void Api::Impl::Open(const std::string& path) {
     cartridge_id = setting_id(kCurrentCartridgeKey);
     if (rifle_id == 0 && cartridge_id == 0) {
         // Upgraded from a version with profiles: keep the profile chosen there.
-        auto p = bs::Repository<bs::ProfileRecord>(db).Get(setting_id(kCurrentProfileKey));
-        if (p && p.value()) {
-            rifle_id = p.value()->rifle_id;
-            cartridge_id = p.value()->cartridge_id;
+        const auto p = bs::Repository<bs::ProfileRecord>(db).Get(setting_id(kCurrentProfileKey));
+        if (const bs::ProfileRecord* profile = bs::Found(p)) {
+            rifle_id = profile->rifle_id;
+            cartridge_id = profile->cartridge_id;
         }
     }
     profile_id = 0;

@@ -1,10 +1,11 @@
 #include <cctype>
 #include <chrono>
 #include <sstream>
+#include <string_view>
 
 #include "internal.h"
 
-namespace ballistics::bridge::detail {
+namespace ballistics::bridge {
 
 double NowUnix() {
     return std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch())
@@ -60,7 +61,7 @@ json Matching(const json& catalog, const std::string& filter) {
 
 // Pictures travel through the JSON as base64 (RFC 4648, with padding).
 std::string ToBase64(const std::vector<std::uint8_t>& data) {
-    static constexpr char kAlphabet[] =
+    static constexpr std::string_view kAlphabet =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     std::string out;
     out.reserve((data.size() + 2) / 3 * 4);
@@ -133,4 +134,4 @@ bool Contains(const json& list, Id id) {
                        [id](const json& v) { return v.at("id").get<Id>() == id; });
 }
 
-}  // namespace ballistics::bridge::detail
+}  // namespace ballistics::bridge

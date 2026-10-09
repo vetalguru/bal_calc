@@ -1,6 +1,8 @@
+#include <array>
+
 #include "internal.h"
 
-namespace ballistics::bridge::detail {
+namespace ballistics::bridge {
 
 namespace {
 
@@ -9,7 +11,7 @@ struct WezKey {
     const char* key;
     double al::WezSettings::* value;
 };
-const WezKey kWezKeys[] = {
+const std::array<WezKey, 15> kWezKeys = {{
     {"rangeM", &al::WezSettings::range_m},
     {"windSpeedMps", &al::WezSettings::wind_speed_mps},
     {"windDirectionDeg", &al::WezSettings::wind_direction_deg},
@@ -25,7 +27,7 @@ const WezKey kWezKeys[] = {
     {"groupMoa", &al::WezSettings::group_moa},
     {"targetWidthCm", &al::WezSettings::target_width_cm},
     {"targetHeightCm", &al::WezSettings::target_height_cm},
-};
+}};
 }  // namespace
 
 // ---- Forms <-> JSON ---------------------------------------------------------
@@ -220,4 +222,4 @@ json ToJson(const al::RangeTable& t, bool has_scope) {
     return {{"ok", t.ok}, {"error", t.error}, {"hasScope", has_scope}, {"rows", rows}};
 }
 
-}  // namespace ballistics::bridge::detail
+}  // namespace ballistics::bridge

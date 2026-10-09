@@ -67,20 +67,16 @@ Column<T> Col(const char* name, M T::* member) {
     Column<T> c{name, nullptr, nullptr};
     c.get = [member](const T& r) -> Value {
         const M& m = r.*member;
-        if constexpr (std::is_same_v<M, double>) {
+        if constexpr (std::is_same_v<M, double> || std::is_same_v<M, std::string>) {
             return m;
         } else if constexpr (std::is_same_v<M, bool>) {
             return std::int64_t{m ? 1 : 0};
         } else if constexpr (std::is_integral_v<M>) {
             return static_cast<std::int64_t>(m);
-        } else if constexpr (std::is_same_v<M, std::string>) {
-            return m;
-        } else if constexpr (std::is_same_v<M, std::optional<double>>) {
-            return m ? Value{*m} : Value{};
-        } else if constexpr (std::is_same_v<M, std::optional<std::int64_t>>) {
-            return m ? Value{*m} : Value{};
-        } else if constexpr (std::is_same_v<M, std::optional<std::string>>) {
-            return m ? Value{*m} : Value{};
+        } else if constexpr (std::is_same_v<M, std::optional<double>> ||
+                             std::is_same_v<M, std::optional<std::int64_t>> ||
+                             std::is_same_v<M, std::optional<std::string>>) {
+            return m ? Value{m.value()} : Value{};
         } else {
             static_assert(sizeof(M) == 0, "unsupported column type");
         }

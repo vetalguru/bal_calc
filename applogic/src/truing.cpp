@@ -110,10 +110,11 @@ Status SetShotUsedForTruing(storage::Database& db, Id shot_id, bool used) {
     if (!d) {
         return d.error();
     }
-    if (!d.value()) {
+    auto& found = d.value();
+    if (!found) {
         return Error(ErrorCode::kNotFound, 0, "shot not found");
     }
-    DopeRecord r = std::move(*d.value());
+    DopeRecord r = std::move(*found);
     r.use_for_truing = used;
     if (auto id = Repository<DopeRecord>(db).Save(r); !id) {
         return id.error();
@@ -277,10 +278,11 @@ Status ApplyTruing(storage::Database& db, Id profile_id, const TruingResult& res
     if (!p) {
         return p.error();
     }
-    if (!p.value()) {
+    auto& found = p.value();
+    if (!found) {
         return Error(ErrorCode::kNotFound, 0, "profile not found");
     }
-    storage::ProfileRecord r = std::move(*p.value());
+    storage::ProfileRecord r = std::move(*found);
     r.velocity_scale = result.velocity_scale;
     r.drag_scale = result.drag_scale;
     if (auto id = Repository<storage::ProfileRecord>(db).Save(r); !id) {
@@ -579,10 +581,11 @@ Status SetDsf(storage::Database& db, Id profile_id, std::vector<DsfPoint> points
     if (!p) {
         return p.error();
     }
-    if (!p.value()) {
+    auto& found = p.value();
+    if (!found) {
         return Error(ErrorCode::kNotFound, 0, "profile not found");
     }
-    storage::ProfileRecord r = std::move(*p.value());
+    storage::ProfileRecord r = std::move(*found);
     r.dsf = std::move(points);
     if (auto id = Repository<storage::ProfileRecord>(db).Save(r); !id) {
         return id.error();

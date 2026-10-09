@@ -5,6 +5,7 @@
 #include <ballistics/storage/database.h>
 #include <gtest/gtest.h>
 
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
@@ -26,8 +27,9 @@ std::string TestBase64(const std::vector<std::uint8_t>& d) {
     static const char* a = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     std::string out;
     for (std::size_t i = 0; i < d.size(); i += 3) {
-        const unsigned n = (d[i] << 16) | (i + 1 < d.size() ? d[i + 1] << 8 : 0) |
-                           (i + 2 < d.size() ? d[i + 2] : 0);
+        const std::uint32_t n = (std::uint32_t{d[i]} << 16) |
+                                (i + 1 < d.size() ? std::uint32_t{d[i + 1]} << 8 : 0) |
+                                (i + 2 < d.size() ? std::uint32_t{d[i + 2]} : 0);
         out += a[(n >> 18) & 63];
         out += a[(n >> 12) & 63];
         out += i + 1 < d.size() ? a[(n >> 6) & 63] : '=';
@@ -61,7 +63,7 @@ class Bridge : public ::testing::Test {
 // Every JSON method the app calls is registered (the method table is
 // assembled from the topic files: none may be lost when code moves).
 TEST_F(Bridge, EveryMethodIsThere) {
-    const char* methods[] = {
+    const std::array<const char*, 59> methods = {{
         "open",
         "seed",
         "seedVersion",
@@ -121,7 +123,7 @@ TEST_F(Bridge, EveryMethodIsThere) {
         "importShared",
         "importFiles",
         "stationPressure",
-    };
+    }};
     EXPECT_EQ(std::size(methods), 59U);
     for (const char* m : methods) {
         const json r = json::parse(api_.Call(m, "{}"));

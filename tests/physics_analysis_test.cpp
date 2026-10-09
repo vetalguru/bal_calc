@@ -74,7 +74,7 @@ TEST(PhysicsAnalysis, MaxOrdinateIsCappedAtTheTarget) {
     // Short of the apex the highest point is the target itself.
     const Apex apex = MaxOrdinate(traj, 50.0);
     EXPECT_NEAR(apex.slant_range_m, 50.0, 0.02);
-    EXPECT_NEAR(apex.height_m, traj.AtSlantRange(50.0)->drop_m, 1e-6);
+    EXPECT_NEAR(apex.height_m, traj.AtSlantRange(50.0).value().drop_m, 1e-6);
 }
 
 TEST(PhysicsAnalysis, PointBlankMatchesDenseScan) {

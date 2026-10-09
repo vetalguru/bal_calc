@@ -7,6 +7,7 @@
 #include <ballistics/units.h>
 #include <gtest/gtest.h>
 
+#include <array>
 #include <string_view>
 
 namespace ballistics::reference {
@@ -17,13 +18,13 @@ struct Cartridge {
     double bc, grains, diameter_in, length_in, v0_mps, sight_cm, zero_m;
 };
 
-inline constexpr Cartridge kCartridges[] = {
+inline constexpr std::array<Cartridge, 5> kCartridges = {{
     {"308_175smk_g7", DragTableId::kG7, 0.243, 175.0, 0.308, 1.240, 800.0, 5.0, 100.0},
     {"65cm_140eldm_g7", DragTableId::kG7, 0.326, 140.0, 0.264, 1.370, 823.0, 4.5, 100.0},
     {"338lm_300hybrid_g7", DragTableId::kG7, 0.419, 300.0, 0.338, 1.700, 838.0, 5.5, 100.0},
     {"50bmg_750amax_g1", DragTableId::kG1, 1.050, 750.0, 0.510, 2.420, 860.0, 7.0, 100.0},
     {"556_m855_g1", DragTableId::kG1, 0.304, 62.0, 0.224, 0.906, 930.0, 6.5, 100.0},
-};
+}};
 
 inline Atmosphere AtmosphereNamed(std::string_view name) {
     if (name == "mountain_cold_humid") {

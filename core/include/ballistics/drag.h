@@ -1,6 +1,7 @@
 #ifndef BALLISTICS_DRAG_H
 #define BALLISTICS_DRAG_H
 
+#include <cstdint>
 #include <vector>
 
 namespace ballistics {
@@ -12,7 +13,7 @@ struct DragPoint {
 };
 
 // Standard reference projectiles.
-enum class DragTableId {
+enum class DragTableId : std::uint8_t {
     kG1,   // flat base (most published BCs)
     kG2,   // Aberdeen J projectile
     kG5,   // short boat-tail
@@ -36,9 +37,9 @@ class DragCurve final {
     // `points` must have >= 2 entries with strictly increasing Mach.
     explicit DragCurve(std::vector<DragPoint> points);
 
-    double Cd(double mach) const;
-    bool empty() const { return x_.empty(); }
-    const std::vector<DragPoint>& points() const { return points_; }
+    [[nodiscard]] double Cd(double mach) const;
+    [[nodiscard]] bool empty() const { return x_.empty(); }
+    [[nodiscard]] const std::vector<DragPoint>& points() const { return points_; }
 
    private:
     std::vector<DragPoint> points_;
@@ -75,7 +76,7 @@ class DragModel final {
     // interpolated linearly in Mach (velocities are converted at the
     // standard 15 C speed of sound, 340.29 m/s) and held constant beyond
     // the first/last point. One point is the same as FromBc.
-    static DragModel FromMultiBc(DragTableId table, std::vector<BcPoint> points);
+    static DragModel FromMultiBc(DragTableId table, const std::vector<BcPoint>& points);
 
     // Projectile-specific Cd(M) curve (e.g. Doppler-radar measured); the
     // BC is the sectional density m/d^2 divided by `form_factor`.
@@ -83,18 +84,18 @@ class DragModel final {
                                double form_factor = 1.0);
 
     // The same model with all drag multiplied by `factor` (truing).
-    DragModel Scaled(double factor) const;
+    [[nodiscard]] DragModel Scaled(double factor) const;
 
     // The same model with the drag at each Mach number also multiplied by
     // the drag scale factor table `dsf` (see DsfFactor); empty = none.
-    DragModel WithMachScale(std::vector<DsfPoint> dsf) const;
-    const std::vector<DsfPoint>& mach_scale() const { return dsf_; }
+    [[nodiscard]] DragModel WithMachScale(std::vector<DsfPoint> dsf) const;
+    [[nodiscard]] const std::vector<DsfPoint>& mach_scale() const { return dsf_; }
 
     // K(M) in m^2/kg; multiply by density and v^2 for the deceleration.
-    double Coefficient(double mach) const;
+    [[nodiscard]] double Coefficient(double mach) const;
 
-    double bc_kg_m2() const { return bc_kg_m2_; }
-    const DragCurve& curve() const { return curve_; }
+    [[nodiscard]] double bc_kg_m2() const { return bc_kg_m2_; }
+    [[nodiscard]] const DragCurve& curve() const { return curve_; }
 
    private:
     DragCurve curve_;

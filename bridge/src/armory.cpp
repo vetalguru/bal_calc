@@ -3,8 +3,6 @@
 
 namespace ballistics::bridge {
 
-using namespace detail;
-
 void Api::Impl::ReloadArmory() {
     rifles = json::array();
     std::string caliber;
