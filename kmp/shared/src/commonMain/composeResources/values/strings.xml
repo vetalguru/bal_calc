@@ -546,4 +546,9 @@
     <string name="chart_computing">Calculating…</string>
     <string name="chart_no_data">Nothing to plot: choose a rifle and a cartridge</string>
     <string name="chart_target">range to the target</string>
+    <string name="weather_temperature">Temp</string>
+    <string name="weather_pressure">Pressure</string>
+    <string name="weather_humidity">Humidity</string>
+    <string name="weather_altitude">Altitude</string>
+    <string name="weather_density_altitude">Density alt.</string>
 </resources>

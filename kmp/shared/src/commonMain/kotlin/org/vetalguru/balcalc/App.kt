@@ -126,7 +126,7 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
                     }
                     Surface(Modifier.weight(1f).fillMaxHeight()) {
                         when (page) {
-                            0 -> SolutionScreen(model, onEditArmory = { page = 3 })
+                            0 -> SolutionScreen(model, onEditArmory = { page = 3 }, onEditConditions = { page = 2 })
                             1 -> TableScreen(model, onRangeChosen = { page = 0 })
                             2 -> ConditionsScreen(model)
                             3 -> ArmoryScreen(model, armory, onChosen = { page = 0 })
