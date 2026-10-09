@@ -52,7 +52,7 @@ import org.vetalguru.balcalc.res.*
 
 /** Firing solution for one target, large enough to read at arm's length. */
 @Composable
-fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
+fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit, onEditConditions: () -> Unit = {}) {
     val st = model.state
     val sol = model.solution
     val unit = stringResource(if (st.moa) Res.string.unit_moa else Res.string.unit_mrad)
@@ -65,19 +65,20 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
     // changes below. Side by side on wide screens.
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 600.dp
-        // The ring: as wide as the screen allows, but at most ~40% of its height
-        // so the corrections above keep their room.
-        val ring = minOf(maxWidth - 16.dp, maxHeight * 0.42f, 320.dp)
+        // The ring: as wide as the screen allows, but at most about half its
+        // height so the corrections above keep their room.
+        // (Short screens keep a little more for the corrections.)
+        val ring = minOf(maxWidth - 8.dp, maxHeight * (if (maxHeight < 700.dp) 0.42f else 0.48f), 420.dp)
         Column(Modifier.fillMaxSize()) {
             Pickers(model)
             if (wide) {
                 Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Viewer(model, sol, unit, wide, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1.3f))
-                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) { Controller(model, 320.dp) }
+                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) { Controller(model, 400.dp, onEditConditions) }
                 }
             } else {
                 Viewer(model, sol, unit, wide, onEditArmory, { logging = true }, { situations = true }, Modifier.weight(1f))
-                Controller(model, ring)
+                Controller(model, ring, onEditConditions)
             }
         }
     }

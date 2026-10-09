@@ -516,4 +516,9 @@
     <string name="chart_computing">Рахую…</string>
     <string name="chart_no_data">Немає даних для графіка: виберіть гвинтівку й набій</string>
     <string name="chart_target">дальність до цілі</string>
+    <string name="weather_temperature">Темп.</string>
+    <string name="weather_pressure">Тиск</string>
+    <string name="weather_humidity">Вологість</string>
+    <string name="weather_altitude">Висота</string>
+    <string name="weather_density_altitude">Густ. висота</string>
 </resources>

@@ -516,4 +516,9 @@
     <string name="chart_computing">Считаю…</string>
     <string name="chart_no_data">Нет данных для графика: выберите винтовку и патрон</string>
     <string name="chart_target">дальность до цели</string>
+    <string name="weather_temperature">Темп.</string>
+    <string name="weather_pressure">Давление</string>
+    <string name="weather_humidity">Влажность</string>
+    <string name="weather_altitude">Высота</string>
+    <string name="weather_density_altitude">Плотн. высота</string>
 </resources>

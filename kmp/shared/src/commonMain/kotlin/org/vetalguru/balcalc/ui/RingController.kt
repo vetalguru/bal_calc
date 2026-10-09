@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,7 +72,7 @@ import org.vetalguru.balcalc.res.*
  * range, wind speed, look angle.
  */
 @Composable
-internal fun Controller(model: AppModel, size: Dp) {
+internal fun Controller(model: AppModel, size: Dp, onWeather: () -> Unit = {}) {
     val c = model.state.conditions
     val windUnit = WindUnit.of(model.state.prefs.windUnit)
     var editing by remember { mutableStateOf<String?>(null) }
@@ -94,6 +95,24 @@ internal fun Controller(model: AppModel, size: Dp) {
         )
         Box(Modifier.size(size), contentAlignment = Alignment.Center) {
             Ring(c.windFromDeg, { d -> model.updateConditions { it.copy(windFromDeg = d) } }, Modifier.fillMaxSize())
+            // The air in the corners the ring leaves free; a tap opens the conditions.
+            if (!compact) {
+                val deg = stringResource(Res.string.unit_c)
+                Weather(stringResource(Res.string.weather_temperature), "${formatNumber(c.temperatureC, 1)} $deg",
+                    Alignment.TopStart, "weatherTemperature", onWeather)
+                if (c.useDensityAltitude) {
+                    Weather(stringResource(Res.string.weather_density_altitude), "${c.densityAltitudeM.roundToInt()} $m",
+                        Alignment.TopEnd, "weatherPressure", onWeather)
+                } else {
+                    Weather(stringResource(Res.string.weather_pressure),
+                        "${c.pressureHpa.roundToInt()} ${stringResource(Res.string.unit_hpa)}",
+                        Alignment.TopEnd, "weatherPressure", onWeather)
+                }
+                Weather(stringResource(Res.string.weather_humidity), "${c.humidityPct.roundToInt()} %",
+                    Alignment.BottomStart, "weatherHumidity", onWeather)
+                Weather(stringResource(Res.string.weather_altitude), "${c.altitudeM.roundToInt()} $m",
+                    Alignment.BottomEnd, "weatherAltitude", onWeather)
+            }
             // The wheels sit inside the ring's band; they take their own touches.
             Row(
                 Modifier.padding(horizontal = size * 0.2f),
@@ -137,6 +156,22 @@ internal fun Controller(model: AppModel, size: Dp) {
                 )
             }
         }
+        if (compact) {
+            // No room in the corners of a small ring: the air in one line under it.
+            val deg = stringResource(Res.string.unit_c)
+            val air = if (c.useDensityAltitude) {
+                "${c.densityAltitudeM.roundToInt()} $m"
+            } else {
+                "${c.pressureHpa.roundToInt()} ${stringResource(Res.string.unit_hpa)}"
+            }
+            Text(
+                "${formatNumber(c.temperatureC, 1)} $deg · $air · ${c.humidityPct.roundToInt()} % · ${c.altitudeM.roundToInt()} $m",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.clickable(onClick = onWeather).padding(4.dp).testTag("weatherLine"),
+            )
+        }
         if (c.windZones.isNotEmpty()) {
             Text(
                 stringResource(Res.string.quick_zone_note, c.windZones.size + 1, c.windUntilM.roundToInt()),
@@ -157,6 +192,19 @@ internal fun Controller(model: AppModel, size: Dp) {
             "lookAngle", hint = stringResource(Res.string.shot_angle_hint), onDone = { editing = null }) { v ->
             model.updateConditions { it.copy(lookAngleDeg = v) }
         }
+    }
+}
+
+/** One of the air's values in a corner of the ring's square: a small name over the value. */
+@Composable
+private fun BoxScope.Weather(label: String, value: String, corner: Alignment, tag: String, onClick: () -> Unit) {
+    val end = corner == Alignment.TopEnd || corner == Alignment.BottomEnd
+    Column(
+        Modifier.align(corner).clickable(onClick = onClick).padding(4.dp).testTag(tag),
+        horizontalAlignment = if (end) Alignment.End else Alignment.Start,
+    ) {
+        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+        Text(value, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 1)
     }
 }
 

@@ -1264,4 +1264,18 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { shown("range") == "310" }
         db.delete()
     }
+
+    /** The air in the ring's corners; a tap on it opens the conditions. */
+    @Test
+    fun ringShowsTheAir() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        assertEquals("Temp15 °C", shown("weatherTemperature"))
+        assertEquals("Pressure1013 hPa", shown("weatherPressure"))
+        assertEquals("Humidity50 %", shown("weatherHumidity"))
+        assertEquals("Altitude0 m", shown("weatherAltitude"))
+        shotOf("quickWind", "ring-weather")
+        onNodeWithTag("weatherTemperature").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("temperature") } // the conditions page
+        db.delete()
+    }
 }
