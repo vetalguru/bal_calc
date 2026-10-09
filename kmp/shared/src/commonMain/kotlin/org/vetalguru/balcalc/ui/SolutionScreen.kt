@@ -60,10 +60,6 @@ fun SolutionScreen(model: AppModel, onEditArmory: () -> Unit) {
     if (logging) LogShotDialog(model, st.conditions.targetRangeM, sol.elevation) { logging = false }
     var situations by remember { mutableStateOf(false) }
     if (situations) SituationsDialog(model) { situations = false }
-    if (st.prefs.minimal && sol.ok) {
-        MinimalSolution(model, sol)
-        return
-    }
 
     // "Viewer on top, controller below": what to read above, what the thumb
     // changes below. Side by side on wide screens.
@@ -201,10 +197,6 @@ private fun Viewer(
                                     Text(stringResource(Res.string.log_hit))
                                 }
                             }
-                            TextButton(
-                                onClick = { model.setPrefs { it.copy(minimal = true) } },
-                                modifier = Modifier.padding(horizontal = 8.dp).testTag("minimalOn"),
-                            ) { Text(stringResource(Res.string.minimal_view)) }
                         }
                     }
                     1 -> if (sol.ok) ReticleCard(model, sol, wide, marks)
