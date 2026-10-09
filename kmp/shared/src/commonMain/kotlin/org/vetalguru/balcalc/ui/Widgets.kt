@@ -142,7 +142,9 @@ internal fun UnitPicker(unit: String, menu: UnitMenu, tag: String?) {
         Text(
             "$unit▾",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
+            // The colour of the other units and labels: the ▾ alone says it opens a list
+            // (an accent colour read as a warning next to the corrections).
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.clickable { open = true }.testTag("${tag}Unit"),
         )
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
