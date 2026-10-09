@@ -486,8 +486,6 @@
     <string name="wind_columns">Дополнительные колонки ветра, %1$s</string>
     <string name="wind_columns_hint">Напр. 2, 4, 6: снос для каждой скорости с заданного направления (до 6)</string>
     <string name="col_wind_at">Ветер %1$s</string>
-    <string name="minimal_view">Минимальный вид</string>
-    <string name="full_view">Полный вид</string>
     <string name="sensor_barometer">С барометра</string>
     <string name="sensor_location">Моё место</string>
     <string name="sensor_angles">Измерить телефоном</string>

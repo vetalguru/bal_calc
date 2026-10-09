@@ -67,28 +67,6 @@ internal fun Step(label: String, width: Dp = 50.dp, onClick: () -> Unit) {
     ) { Text(label, fontSize = 13.sp, maxLines = 1) }
 }
 
-/** The big distance input: whole metres, committed on Done or focus loss. */
-@Composable
-internal fun RangeField(rangeM: Double, onRange: (Double) -> Unit, modifier: Modifier, showUnit: Boolean = true) {
-    var text by remember { mutableStateOf(rangeM.roundToInt().toString()) }
-    var focused by remember { mutableStateOf(false) }
-    LaunchedEffect(rangeM, focused) { if (!focused) text = rangeM.roundToInt().toString() }
-    val focus = LocalFocusManager.current
-    OutlinedTextField(
-        value = text,
-        onValueChange = { t -> if (t.length <= 4 && t.all(Char::isDigit)) text = t },
-        singleLine = true,
-        textStyle = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
-        suffix = if (showUnit) ({ Text(stringResource(Res.string.unit_m)) }) else null,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
-        modifier = modifier.testTag("range").onFocusChanged {
-            if (focused && !it.isFocused) text.toIntOrNull()?.let { m -> onRange(m.toDouble()) }
-            focused = it.isFocused
-        },
-    )
-}
-
 /** Clock hour of a direction (0° = 12 o'clock = from the target). */
 fun clockHour(deg: Double): Int {
     val h = (((deg % 360) + 360) % 360 / 30).roundToInt() % 12
