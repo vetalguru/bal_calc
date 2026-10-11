@@ -37,8 +37,8 @@ def draw_symbol(draw, size, cx, cy, scale):
         x = x0 + (x1 - x0) * t
         y = cy + 0.22 * s - 0.80 * s * t + 0.70 * s * t * t
         pts.append((x, y))
-    draw.line(pts, fill=TRAJECTORY, width=w, joint="curve")
-    # Crosshair centred where the arc lands.
+    # Crosshair centred where the arc lands; drawn first, so the trajectory
+    # lies on top of it.
     tx, ty = pts[-1]
     r = 0.24 * s
     draw.ellipse([tx - r, ty - r, tx + r, ty + r], outline=CROSSHAIR, width=w)
@@ -46,6 +46,7 @@ def draw_symbol(draw, size, cx, cy, scale):
     for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
         draw.line([(tx + dx * gap, ty + dy * gap), (tx + dx * (r + 0.10 * s), ty + dy * (r + 0.10 * s))],
                   fill=CROSSHAIR, width=max(2, w // 2 + 1))
+    draw.line(pts, fill=TRAJECTORY, width=w, joint="curve")
     d = 0.035 * s
     draw.ellipse([tx - d, ty - d, tx + d, ty + d], fill=TRAJECTORY)
 
@@ -99,13 +100,13 @@ def main():
                 '    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>\n'
                 '</adaptive-icon>\n')
     for name in ("ic_launcher.xml", "ic_launcher_round.xml"):
-        (anydpi / name).write_text(adaptive, encoding="utf-8")
+        (anydpi / name).write_text(adaptive, encoding="utf-8", newline="\n")
     values = RES / "values"
     values.mkdir(parents=True, exist_ok=True)
     (values / "ic_launcher_background.xml").write_text(
         '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n'
         '    <color name="ic_launcher_background">#%02X%02X%02X</color>\n</resources>\n' % BACKGROUND,
-        encoding="utf-8")
+        encoding="utf-8", newline="\n")
     print("icons written")
 
 
