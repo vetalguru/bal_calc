@@ -1,5 +1,6 @@
 // Importers for .ammo / .drg / .reticle and the bundled starter library,
 // run against the real files in data/seed.
+#include <ballistics/applogic/armory.h>
 #include <ballistics/applogic/importers.h>
 #include <ballistics/applogic/library.h>
 #include <ballistics/applogic/session.h>
@@ -50,6 +51,7 @@ std::vector<SeedFile> AllSeedFiles() {
         }
     }
     files.push_back({"published_bullets.json", ReadFile(kSeed / "published_bullets.json")});
+    files.push_back({"published_cartridges.json", ReadFile(kSeed / "published_cartridges.json")});
     return files;
 }
 
@@ -173,8 +175,9 @@ TEST_F(ImportDb, SeedImportsEverythingOnce) {
     const auto first = SeedLibrary(db_, files, 1);
     ASSERT_TRUE(first.ok()) << first.error().message;
     EXPECT_TRUE(first.value().problems.empty()) << first.value().problems.front();
-    // 69 ammo + 1 drg + 14 reticles (4 BallisticCalculator + 10 generic) + 253 published bullets.
-    EXPECT_EQ(first.value().imported, 69 + 1 + 14 + 253);
+    // 69 ammo + 1 drg + 14 reticles (4 BallisticCalculator + 10 generic) + 366 published
+    // bullets + 897 published factory loads.
+    EXPECT_EQ(first.value().imported, 69 + 1 + 14 + 366 + 897);
 
     EXPECT_EQ(SeededVersion(db_).value(), 1);
     const auto again = SeedLibrary(db_, files, 1);  // same version: nothing to do
@@ -183,9 +186,11 @@ TEST_F(ImportDb, SeedImportsEverythingOnce) {
 
     const auto newer = SeedLibrary(db_, files, 2);  // new version: existing ones skipped
     EXPECT_EQ(newer.value().imported, 0);
-    EXPECT_EQ(newer.value().skipped, 69 + 1 + 14 + 253);
+    EXPECT_EQ(newer.value().skipped, 69 + 1 + 14 + 366 + 897);
 
-    EXPECT_EQ(ListLibraryBullets(db_).value().size(), 69U + 1U + 253U);
+    // A factory load's own bullet is not offered as a library bullet.
+    EXPECT_EQ(ListLibraryBullets(db_).value().size(), 69U + 1U + 366U);
+    EXPECT_EQ(ListLibraryCartridges(db_).value().size(), 69U + 897U);
     EXPECT_EQ(storage::Repository<storage::ReticleRecord>(db_).List().value().size(), 14U);
     EXPECT_EQ(ListLibraryBullets(db_, "lapua").value().size() >= 50U, true);
 }
@@ -261,7 +266,7 @@ TEST_F(ImportDb, PublishedBulletsAreSane) {
         EXPECT_LE(d, 0.52);
         // Sectional density (lb/in^2) of real rifle bullets.
         const double sd = w / 7000.0 / (d * d);
-        EXPECT_GT(sd, 0.1);
+        EXPECT_GT(sd, 0.09);  // 35 gr .224: 0.0996
         EXPECT_LT(sd, 0.45);
         const double g1 = b.contains("g1") ? b.at("g1").get<double>()
                                            : b.at("g1_bands").at(0).at(1).get<double>();
@@ -277,7 +282,7 @@ TEST_F(ImportDb, PublishedBulletsAreSane) {
             EXPECT_LT(b.at("length_in").get<double>(), 7.0 * d);
         }
     }
-    EXPECT_EQ(count, 253);
+    EXPECT_EQ(count, 366);
 
     // All of them fly: imported and solved to 600 m.
     ASSERT_TRUE(SeedLibrary(db_, AllSeedFiles(), 1).ok());
@@ -297,7 +302,59 @@ TEST_F(ImportDb, PublishedBulletsAreSane) {
         EXPECT_TRUE(sum.ok) << bullet.name << ": " << sum.error;
         solved += sum.ok;
     }
-    EXPECT_EQ(solved, 253);
+    EXPECT_EQ(solved, 366);
+}
+
+// Every published factory load: plausible numbers, a source, and a solution.
+TEST_F(ImportDb, PublishedCartridgesAreSane) {
+    std::ifstream in(kSeed / "published_cartridges.json");
+    const nlohmann::json doc = nlohmann::json::parse(in);
+    std::set<std::string> names;
+    for (const auto& c : doc.at("cartridges")) {
+        const std::string name = c.at("name").get<std::string>();
+        SCOPED_TRACE(name);
+        EXPECT_TRUE(names.insert(name).second) << "duplicate name";
+        EXPECT_EQ(c.at("reference").get<std::string>().rfind("https://", 0), 0U);
+        const auto& b = c.at("bullet");
+        const double d = b.at("diameter_in").get<double>();
+        const double sd = b.at("weight_gr").get<double>() / 7000.0 / (d * d);
+        EXPECT_GT(sd, 0.09);  // 35 gr .224: 0.0996
+        EXPECT_LT(sd, 0.45);
+        const double bc = b.contains("g1") ? b.at("g1").get<double>() : b.at("g7").get<double>();
+        EXPECT_GT(bc, 0.08);
+        EXPECT_LT(bc, 1.1);
+        if (b.contains("g1") && b.contains("g7")) {
+            const double ratio = b.at("g7").get<double>() / b.at("g1").get<double>();
+            EXPECT_GT(ratio, 0.40);
+            EXPECT_LT(ratio, 0.60);
+        }
+    }
+    EXPECT_EQ(names.size(), 897U);
+
+    // All of them imported with a sane muzzle velocity, and solved to 1000 m.
+    ASSERT_TRUE(SeedLibrary(db_, AllSeedFiles(), 1).ok());
+    int solved = 0;
+    const auto all = storage::Repository<storage::CartridgeRecord>(db_).List().value();
+    for (const auto& c : all) {
+        if (c.source != kSourcePublishedCartridge) {
+            continue;
+        }
+        SCOPED_TRACE(c.name);
+        EXPECT_GT(c.muzzle_velocity_mps, 280.0);   // subsonic loads: ~300 m/s
+        EXPECT_LT(c.muzzle_velocity_mps, 1250.0);  // 35 gr .223: 1219 m/s
+        EXPECT_GE(c.barrel_length_m, 0.0);
+        EXPECT_LT(c.barrel_length_m, 0.8);
+        storage::LoadedProfile p;
+        p.bullet = *storage::Repository<storage::BulletRecord>(db_).Get(c.bullet_id).value();
+        p.cartridge = c;
+        p.rifle.sight_height_m = 0.05;
+        SessionConditions s;
+        s.target_range_m = 1000.0;
+        const SolutionSummary sum = Summarize(p, s, AngleUnit::kMrad);
+        EXPECT_TRUE(sum.ok) << sum.error;
+        solved += sum.ok;
+    }
+    EXPECT_EQ(solved, 897);
 }
 
 }  // namespace

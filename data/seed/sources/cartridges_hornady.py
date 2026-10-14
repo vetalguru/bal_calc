@@ -37,14 +37,19 @@ def collect(url):
     mass = re.search(r"(\d+(?:\.\d+)?)\s*gr\b", title)
     bullet = json_field(page, "bullettitle") or ""
     line = re.sub(r"^.*?\d+\s*gr\s*", "", title).strip()
+    barrel_value = float(barrel.group(1)) if barrel else None
+    # Some International pages print metric values under the imperial labels
+    # (8114: "Test Barrel (61")", "Velocity (FPS) 721": 61 cm, 721 m/s).
+    metric = barrel_value is not None and barrel_value > 40
     return row(
         "Hornady", line, str(json_field(page, "sku") or ""), published, bullet,
         float(mass.group(1)) if mass else None,
-        float(velocity.group(1)) if velocity else None, "fps", url,
-        barrel=float(barrel.group(1)) if barrel else None,
+        float(velocity.group(1)) if velocity else None, "m/s" if metric else "fps", url,
+        barrel=barrel_value * 10 if metric else barrel_value, barrel_unit="mm" if metric else "in",
         bc_g1=bcs.get("G1"), bc_g7=bcs.get("G7"),
         bc_note="as labelled on the page" if bcs else "not stated",
-        notes="" if barrel else "test barrel not stated",
+        notes=("the page prints cm and m/s under the inch and FPS labels" if metric
+               else "" if barrel else "test barrel not stated"),
     )
 
 

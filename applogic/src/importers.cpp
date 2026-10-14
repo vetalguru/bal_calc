@@ -14,6 +14,7 @@
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <regex>
+#include <set>
 #include <sstream>
 #include <utility>
 
@@ -289,6 +290,96 @@ Result<Id> ImportBulletsJson(Database& db, const json& doc, int* imported, int* 
         ++*imported;
     }
     return last;
+}
+
+// --- Published factory loads (balcalc-cartridges JSON) ---------------------
+
+constexpr const char* kCartridgesFormat = "balcalc-cartridges";
+
+// Each load brings its own bullet (the BC the maker publishes for that load).
+Result<Id> ImportCartridgesJson(Database& db, const json& doc, int* imported, int* skipped) {
+    // The loads already here, read once (a query per load is slow on phones).
+    auto existing = Repository<CartridgeRecord>(db).List();
+    if (!existing) {
+        return existing.error();
+    }
+    std::set<std::string> have;
+    for (const CartridgeRecord& c : existing.value()) {
+        if (c.source == kSourcePublishedCartridge) {
+            have.insert(c.name);
+        }
+    }
+    Id last = 0;
+    for (const json& j : doc.at("cartridges")) {
+        const std::string name = j.at("name").get<std::string>();
+        if (!have.insert(name).second) {
+            ++*skipped;
+            continue;
+        }
+        const json& jb = j.at("bullet");
+        BulletRecord b;
+        b.name = name;
+        b.manufacturer = j.value("manufacturer", "");
+        b.caliber = jb.value("caliber", "");
+        b.mass_kg = units::GrainToKg(jb.at("weight_gr").get<double>());
+        b.diameter_m = units::InchToM(jb.at("diameter_in").get<double>());
+        b.length_m = units::InchToM(jb.value("length_in", 0.0));
+        b.source = kSourcePublishedCartridge;
+        if (jb.contains("g7")) {
+            b.drag_table = "G7";
+            b.bc = jb.at("g7").get<double>();
+            if (jb.contains("g1")) {
+                b.notes = "G1 BC " + std::to_string(jb.at("g1").get<double>());
+            }
+        } else {
+            b.drag_table = "G1";
+            b.bc = jb.at("g1").get<double>();
+        }
+        if (auto id = Repository<BulletRecord>(db).Save(b); !id) {
+            return id.error();
+        }
+
+        CartridgeRecord c;
+        c.name = name;
+        c.caliber = j.value("caliber", "");
+        c.bullet_id = b.id;
+        c.source = kSourcePublishedCartridge;
+        const std::string velocity = j.at("muzzle_velocity").get<std::string>();
+        if (!ToMps(velocity.c_str(), c.muzzle_velocity_mps)) {
+            return Bad(name + ": muzzle velocity has unknown units.");
+        }
+        if (const std::string barrel = j.value("barrel_length", ""); !barrel.empty()) {
+            ToMeters(barrel.c_str(), c.barrel_length_m);
+        }
+        std::string codes;
+        for (const json& code : j.value("codes", json::array())) {
+            codes += (codes.empty() ? "" : ", ") + code.get<std::string>();
+        }
+        c.notes =
+            (codes.empty() ? "" : "Product codes: " + codes + "\n") + j.value("reference", "");
+        auto id = Repository<CartridgeRecord>(db).Save(c);
+        if (!id) {
+            return id.error();
+        }
+        last = id.value();
+        ++*imported;
+    }
+    return last;
+}
+
+// The JSON lists of the starter library, by their "format".
+Result<Id> ImportPublishedJson(Database& db, const json& doc, int* imported, int* skipped) {
+    return doc.value("format", "") == kCartridgesFormat
+               ? ImportCartridgesJson(db, doc, imported, skipped)
+               : ImportBulletsJson(db, doc, imported, skipped);
+}
+
+bool IsPublishedJson(const json& doc) {
+    if (doc.is_discarded() || !doc.is_object()) {
+        return false;
+    }
+    const std::string format = doc.value("format", "");
+    return format == kBulletsFormat || format == kCartridgesFormat;
 }
 
 }  // namespace
@@ -574,12 +665,12 @@ Result<Id> ImportFile(Database& db, const std::string& file_name, const std::str
     }
     if (EndsWith(name, ".json")) {
         const json doc = json::parse(content, nullptr, false);
-        if (!doc.is_discarded() && doc.is_object() && doc.value("format", "") == kBulletsFormat) {
+        if (IsPublishedJson(doc)) {
             int imported = 0, skipped = 0;
             try {
-                return ImportBulletsJson(db, doc, &imported, &skipped);
+                return ImportPublishedJson(db, doc, &imported, &skipped);
             } catch (const json::exception& e) {
-                return Bad(std::string("Bullet list: ") + e.what());
+                return Bad(std::string("Library list: ") + e.what());
             }
         }
         auto imported = ImportShareJson(db, content);
@@ -646,9 +737,9 @@ Result<SeedReport> SeedLibrary(Database& db, const std::vector<SeedFile>& files,
             }
         } else if (EndsWith(name, ".json")) {
             const json doc = json::parse(f.content, nullptr, false);
-            if (!doc.is_discarded() && doc.value("format", "") == kBulletsFormat) {
+            if (IsPublishedJson(doc)) {
                 try {
-                    auto r = ImportBulletsJson(db, doc, &report.imported, &report.skipped);
+                    auto r = ImportPublishedJson(db, doc, &report.imported, &report.skipped);
                     if (!r) {
                         report.problems.push_back(f.name + ": " + r.error().message);
                     }

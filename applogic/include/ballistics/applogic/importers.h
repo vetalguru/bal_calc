@@ -25,6 +25,8 @@ inline constexpr const char* kSourceAmmoFile = "import:ammo";
 inline constexpr const char* kSourceDrgFile = "import:drg";
 inline constexpr const char* kSourceReticleFile = "import:reticle";
 inline constexpr const char* kSourcePublished = "published";
+// A factory load from published_cartridges.json and the bullet it carries.
+inline constexpr const char* kSourcePublishedCartridge = "import:published";
 
 struct AmmoFile {
     storage::BulletRecord bullet;        // id 0

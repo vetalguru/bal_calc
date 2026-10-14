@@ -19,11 +19,11 @@ the app reads these files yet. Counts come from `cartridges_report.py`.
 | Remington | 17 |  | 4 | 4 | 1 | 1 | 5 | 11 |  | 11 | 2 |  |  |  | 1 |  | **57** |
 | PPU | 7 |  | 2 |  | 5 |  |  | 10 |  | 10 | 7 |  | 2 | 6 | 3 |  | **52** |
 | Lapua | 3 |  | 2 | 6 | 13 |  |  | 12 |  | 4 | 3 |  | 7 |  |  |  | **50** |
-| Berger | 5 |  |  | 8 |  | 3 |  | 7 |  |  | 5 | 2 | 4 |  |  |  | **34** |
+| Berger | 3 |  |  | 8 |  | 3 |  | 7 |  |  | 5 | 3 | 5 |  |  |  | **34** |
 | Geco | 3 |  | 2 | 3 | 3 |  | 3 | 7 |  | 5 | 5 |  |  |  |  |  | **31** |
 | Barnaul |  | 6 |  |  |  |  |  |  | 5 | 4 |  |  |  | 4 | 4 | 3 | **26** |
 | GGG | 4 |  |  |  |  |  |  | 7 |  |  |  |  |  |  |  |  | **11** |
-| **Total** | **134** | **36** | **64** | **108** | **68** | **31** | **65** | **211** | **9** | **156** | **101** | **13** | **27** | **14** | **27** | **5** | **1069** |
+| **Total** | **132** | **36** | **64** | **108** | **68** | **31** | **65** | **211** | **9** | **156** | **101** | **14** | **28** | **14** | **27** | **5** | **1069** |
 
 | Maker | Loads | MV | BC on page | of them G7 | BC via library bullet | No BC | Test barrel |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -32,7 +32,7 @@ the app reads these files yet. Counts come from `cartridges_report.py`.
 | Winchester | 123 | 122 | 116 | 0 | 0 | 7 | 0 |
 | Norma | 121 | 111 | 110 | 0 | 0 | 11 | 112 |
 | Sellier & Bellot | 95 | 95 | 95 | 95 | 0 | 0 | 95 |
-| Nosler | 82 | 67 | 0 | 0 | 17 | 65 | 77 |
+| Nosler | 82 | 67 | 0 | 0 | 71 | 11 | 77 |
 | Sako | 81 | 81 | 81 | 0 | 0 | 0 | 0 |
 | Remington | 57 | 57 | 57 | 0 | 0 | 0 | 0 |
 | PPU | 52 | 52 | 0 | 0 | 0 | 52 | 52 |
@@ -42,7 +42,7 @@ the app reads these files yet. Counts come from `cartridges_report.py`.
 | Barnaul | 26 | 26 | 26 | 0 | 0 | 0 | 0 |
 | GGG | 11 | 11 | 11 | 0 | 0 | 0 | 11 |
 
-Usable now (muzzle velocity and a BC): 908 of 1069
+Usable now (muzzle velocity and a BC): 958 of 1069
 
 "BC via library bullet": the cartridge page has no BC, but the bullet is in
 `../published_bullets.json` (matched by diameter, weight and bullet name).
@@ -53,16 +53,16 @@ Usable now (muzzle velocity and a BC): 908 of 1069
 | Maker | BC | Velocity | Test barrel | Notes |
 |---|---|---|---|---|
 | Federal | G1, plus G7 on 34 | fps | not stated | |
-| Hornady | G1 and/or G7, labelled | fps | 24" (table header) | the 18 "International" pages have no ballistics table (no MV, no barrel) |
+| Hornady | G1 and/or G7, labelled | fps | 24" (table header) | the 18 "International" pages have no ballistics table (no MV, no barrel); 8114 prints cm and m/s under the inch and FPS labels |
 | Winchester | one BC, unlabelled (G1 by convention) | fps | not stated | |
 | Norma | G1 | m/s | 610 mm | ~10 training/indoor loads have no MV or BC |
 | Sellier & Bellot | G1 and G7 | m/s | per load (508–600 mm) | |
-| Nosler | **none** on ammunition pages | fps | 24" | 17 loads matched to a library bullet; 15 pages state no velocity |
+| Nosler | **none** on ammunition pages | fps | 24" | 71 loads take the BC of their bullet (Nosler's hunting bullets were added to the bullet library for this); 15 pages state no velocity; Solid Base is not sold as a component |
 | Sako | one BC, unlabelled | m/s | not stated | grains rounded from the published grams |
 | Remington | G1 | fps | not stated | |
 | PPU | **none** | m/s | 610 mm | the page gives velocities at 0–300 m, so a BC could be fitted later (would be computed, not published) |
 | Lapua | G1 and G7 | m/s | per load | |
-| Berger | G1 and G7 | fps | 20–26" | |
+| Berger | G1 and G7 | fps | 20–26" | calibre taken from the page address (the "Cartridge" row can run into the site menu) |
 | Geco | one BC, unlabelled | m/s | 600 mm | |
 | Barnaul | G1, printed without "0." ("381" = 0.381) | fps | not stated | |
 | GGG (Lithuania) | one BC, unlabelled | m/s | 508–600 mm (C.I.P. barrel) | page typo "barrel lenght" |
@@ -90,6 +90,14 @@ Usable now (muzzle velocity and a BC): 908 of 1069
   (0.2–0.6 for these weights) fit G1, not G7.
 - Fixed while collecting: makers write "6,5" and "6.5×55" (decimal comma,
   multiplication sign); S&B splits numbers into spans ("0 .259", "1,006").
+
+## Added to the app
+
+`../published_cartridges.json` (built by `../collect_cartridges.py`): **897
+factory loads**, every one with a muzzle velocity and a BC. Left out: loads
+without either (PPU 52, Hornady 21, Nosler 18, Norma 11, Winchester 7,
+Lapua 2), and 61 repeats of the same load under another product code (merged,
+codes kept). Norma 20166512 prints its BC as "428" (read as 0.428).
 
 ## Spot checks against the pages
 

@@ -103,3 +103,27 @@ def row(maker, line, code, calibre_published, bullet, mass_gr, velocity, velocit
         "source": source,
         "checked": TODAY,
     }
+
+
+# Bullet diameter (inches) of each calibre collected.
+DIAMETER = {".223 Rem": .224, "5.56x45 NATO": .224, ".243 Win": .243, "6.5 Creedmoor": .264, "6.5x55 SE": .264,
+            "6.5 PRC": .264, "7mm Rem Mag": .284, ".308 Win": .308, "7.62x51 NATO": .308, ".30-06": .308,
+            ".300 Win Mag": .308, ".300 PRC": .308, ".338 Lapua Mag": .338,
+            "7.62x54R": .311, "7.62x39": .311, "5.45x39": .221}
+# Nosler ammunition bullet names -> words in the bullet library's names.
+NOSLER_BULLETS = {"accubond long range": "accubond long range", "accubond": "accubond", "partition": "partition",
+                  "ballistic tip": "ballistic tip", "custom competition": "custom competition", "rdf": "rdf",
+                  "expansion tip": "expansion tip", "varmageddon": "varmageddon"}
+
+
+def library_bullet(r, library):
+    """The Nosler library bullet this Nosler load uses, by diameter, weight and name."""
+    if r["maker"] != "Nosler" or r["calibre"] not in DIAMETER:
+        return None
+    name = (r["line"] + " " + r["bullet"]).lower()
+    key = next((v for k, v in NOSLER_BULLETS.items() if k in name), None)
+    for b in library:
+        if (b["manufacturer"] == "Nosler" and abs(b["diameter_in"] - DIAMETER[r["calibre"]]) < 0.002
+                and b["weight_gr"] == r["mass_gr"] and key and key in b["name"].lower()):
+            return b
+    return None

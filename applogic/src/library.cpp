@@ -1,3 +1,4 @@
+#include <ballistics/applogic/importers.h>
 #include <ballistics/applogic/library.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/units.h>
@@ -36,8 +37,8 @@ Result<std::vector<BulletSummary>> ListLibraryBullets(storage::Database& db,
     const std::string needle = Lower(filter);
     std::vector<BulletSummary> out;
     for (const BulletRecord& b : all.value()) {
-        if (b.source == kSourceUser) {
-            continue;  // private to a profile
+        if (b.source == kSourceUser || b.source == kSourcePublishedCartridge) {
+            continue;  // private to a profile / to its factory load
         }
         if (!needle.empty() && !Contains(b.name, needle) && !Contains(b.manufacturer, needle) &&
             !Contains(b.caliber, needle)) {
