@@ -124,6 +124,7 @@ jobs:
         if: always()
         with:
           name: desktop-tests-linux
+          retention-days: 7  # the repository's artifact storage is limited
           path: |
             kmp/shared/build/screenshots/*.png
             kmp/shared/build/reports/tests/
@@ -145,6 +146,7 @@ jobs:
         if: always()
         with:
           name: desktop-tests-windows
+          retention-days: 7
           path: |
             kmp/shared/build/screenshots/*.png
             kmp/shared/build/reports/tests/
@@ -168,6 +170,7 @@ jobs:
         if: always()
         with:
           name: android-lint-report
+          retention-days: 7
           path: kmp/androidApp/build/reports/lint-results-debug.*
 
   # --- Kotlin app: artifacts ------------------------------------------------
@@ -190,6 +193,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
+          retention-days: 7
           path: kmp/androidApp/build/outputs/apk/debug/*.apk
 
   linux-deb:
@@ -208,6 +212,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: linux-deb
+          retention-days: 7
           path: kmp/desktopApp/build/compose/binaries/main/deb/*.deb
 
   windows-msi:
@@ -227,4 +232,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-msi
+          retention-days: 7
           path: kmp/desktopApp/build/compose/binaries/main/msi/*.msi
