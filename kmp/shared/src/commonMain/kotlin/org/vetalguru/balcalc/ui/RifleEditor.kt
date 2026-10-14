@@ -117,7 +117,13 @@ internal fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
                     NumberField(stringResource(Res.string.zero_temperature), f.zeroTemperatureC,
                         { f = f.copy(zeroTemperatureC = it, zeroPowderC = it) }, mod, c, from = -60.0, to = 60.0)
                 },
-                { mod -> NumberField(stringResource(Res.string.zero_pressure), f.zeroPressureHpa, { f = f.copy(zeroPressureHpa = it) }, mod, stringResource(Res.string.unit_hpa), from = 300.0, to = 1200.0) },
+                { mod ->
+                    PressureField(
+                        stringResource(Res.string.zero_pressure), f.zeroPressureHpa, { f = f.copy(zeroPressureHpa = it) },
+                        PressureUnit.of(model.state.prefs.pressureUnit), { u -> model.setPrefs { it.copy(pressureUnit = u.key) } },
+                        mod, decimals = PressureUnit.of(model.state.prefs.pressureUnit).decimals + 1,
+                    )
+                },
                 { mod -> NumberField(stringResource(Res.string.zero_altitude), f.zeroAltitudeM, { f = f.copy(zeroAltitudeM = it) }, mod, m, 0, -500.0, 6000.0) },
                 { mod -> NumberField(stringResource(Res.string.zero_humidity), f.zeroHumidityPct, { f = f.copy(zeroHumidityPct = it) }, mod, "%", 0, 0.0, 100.0) },
             )

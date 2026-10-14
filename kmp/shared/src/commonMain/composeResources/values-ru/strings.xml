@@ -21,6 +21,8 @@
     <string name="unit_s">с</string>
     <string name="unit_c">°C</string>
     <string name="unit_hpa">гПа</string>
+    <string name="unit_mmhg">мм рт.ст.</string>
+    <string name="unit_inhg">inHg</string>
     <string name="no_rifles">Нет оружия</string>
     <string name="no_cartridges">Нет патронов</string>
     <string name="distance">Дистанция</string>
@@ -59,7 +61,7 @@
     <string name="pressure_station">Давление</string>
     <string name="humidity">Влажность</string>
     <string name="enter_qnh">Ввожу давление на уровне моря (QNH, из прогноза погоды)</string>
-    <string name="station_pressure_is">Давление на месте: %1$s гПа</string>
+    <string name="station_pressure_is">Давление на месте: %1$s</string>
     <string name="powder">Порох</string>
     <string name="powder_follows_air">Температура пороха = температура воздуха</string>
     <string name="powder_temperature">Температура пороха</string>

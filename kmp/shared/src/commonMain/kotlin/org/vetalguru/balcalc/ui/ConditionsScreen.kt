@@ -56,6 +56,8 @@ fun ConditionsScreen(model: AppModel) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Section(stringResource(Res.string.atmosphere)) {
+                val pressureUnit = PressureUnit.of(model.state.prefs.pressureUnit)
+                val setPressureUnit = { u: PressureUnit -> model.setPrefs { it.copy(pressureUnit = u.key) } }
                 CompactFields(
                     { m ->
                         NumberField(
@@ -83,7 +85,7 @@ fun ConditionsScreen(model: AppModel) {
                                 m, stringResource(Res.string.unit_m), decimals = 0, from = -2000.0, to = 8000.0,
                                 tag = "densityAltitude", hint = stringResource(Res.string.density_altitude_hint),
                             )
-                        } else NumberField(
+                        } else PressureField(
                             stringResource(if (qnhMode) Res.string.pressure_qnh else Res.string.pressure_station),
                             if (qnhMode) qnh else c.pressureHpa,
                             { v ->
@@ -94,8 +96,8 @@ fun ConditionsScreen(model: AppModel) {
                                     model.updateConditions { it.copy(pressureHpa = v) }
                                 }
                             },
-                            // Whole hPa: 0.1 hPa changes nothing that matters, and "1013" fits a narrow field.
-                            m, stringResource(Res.string.unit_hpa), decimals = 0, from = 300.0, to = 1200.0, tag = "pressure",
+                            // Whole hPa and mmHg: 1 hPa changes nothing that matters, and it fits a narrow field.
+                            pressureUnit, setPressureUnit, m, tag = "pressure",
                             hint = stringResource(if (qnhMode) Res.string.pressure_qnh_hint else Res.string.pressure_station_hint),
                         )
                     },
@@ -125,7 +127,7 @@ fun ConditionsScreen(model: AppModel) {
                 val sol = model.solution
                 if (sol.ok && (qnhMode || c.useDensityAltitude)) {
                     Text(
-                        stringResource(Res.string.station_pressure_is, sol.pressureHpa.fixed(1)),
+                        stringResource(Res.string.station_pressure_is, pressureText(sol.pressureHpa, pressureUnit)),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -329,15 +331,18 @@ fun ConditionsScreen(model: AppModel) {
 private val COMPACT_FIELD = 150.dp
 
 /**
- * Number fields as wide as their values need, two side by side: narrower
- * (down to 120 dp) on a small phone rather than one per row.
+ * Number fields two side by side, as wide as their values need: the left
+ * column (temperature, pressure with a unit to choose) up to 150 dp, the
+ * right one (altitude, humidity) 100 dp; the left narrows on a small phone
+ * so that two still fit in a row.
  */
 @Composable
 private fun CompactFields(vararg fields: @Composable (Modifier) -> Unit) {
     BoxWithConstraints {
-        val width = ((maxWidth - 12.dp) / 2).coerceIn(120.dp, COMPACT_FIELD)
+        val right = 100.dp
+        val left = (maxWidth - 12.dp - right).coerceIn(120.dp, COMPACT_FIELD)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            fields.forEach { it(Modifier.width(width)) }
+            fields.forEachIndexed { i, field -> field(Modifier.width(if (i % 2 == 0) left else right)) }
         }
     }
 }

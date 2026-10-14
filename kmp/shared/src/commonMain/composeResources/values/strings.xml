@@ -23,6 +23,8 @@
     <string name="unit_s">s</string>
     <string name="unit_c">°C</string>
     <string name="unit_hpa">hPa</string>
+    <string name="unit_mmhg">mmHg</string>
+    <string name="unit_inhg">inHg</string>
     <string name="unit_deg">°</string>
     <string name="unit_percent">%</string>
 
@@ -67,7 +69,7 @@
     <string name="pressure_station">Pressure</string>
     <string name="humidity">Humidity</string>
     <string name="enter_qnh">I enter sea-level pressure (QNH, weather report)</string>
-    <string name="station_pressure_is">Station pressure: %1$s hPa</string>
+    <string name="station_pressure_is">Station pressure: %1$s</string>
     <string name="powder">Powder</string>
     <string name="powder_follows_air">Powder temperature = air temperature</string>
     <string name="powder_temperature">Powder temperature</string>

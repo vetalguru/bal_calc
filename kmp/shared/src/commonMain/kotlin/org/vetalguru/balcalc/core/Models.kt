@@ -319,6 +319,8 @@ data class UiPrefs(
     val tableWinds: List<Double> = emptyList(),
     /** Wind speeds shown and typed in "mps", "kmh" or "mph" (the core keeps m/s). */
     val windUnit: String = "mps",
+    /** Pressures shown and typed in "hpa", "mmhg" or "inhg" (the core keeps hPa). */
+    val pressureUnit: String = "hpa",
 )
 
 /** A named target of the target card, with its corrections and its hold on the reticle. */

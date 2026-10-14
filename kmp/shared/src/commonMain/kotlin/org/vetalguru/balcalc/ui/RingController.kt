@@ -105,7 +105,7 @@ internal fun Controller(model: AppModel, size: Dp, onWeather: () -> Unit = {}) {
                         Alignment.TopEnd, "weatherPressure", onWeather)
                 } else {
                     Weather(stringResource(Res.string.weather_pressure),
-                        "${c.pressureHpa.roundToInt()} ${stringResource(Res.string.unit_hpa)}",
+                        pressureText(c.pressureHpa, PressureUnit.of(model.state.prefs.pressureUnit)),
                         Alignment.TopEnd, "weatherPressure", onWeather)
                 }
                 Weather(stringResource(Res.string.weather_humidity), "${c.humidityPct.roundToInt()} %",
@@ -162,7 +162,7 @@ internal fun Controller(model: AppModel, size: Dp, onWeather: () -> Unit = {}) {
             val air = if (c.useDensityAltitude) {
                 "${c.densityAltitudeM.roundToInt()} $m"
             } else {
-                "${c.pressureHpa.roundToInt()} ${stringResource(Res.string.unit_hpa)}"
+                pressureText(c.pressureHpa, PressureUnit.of(model.state.prefs.pressureUnit))
             }
             Text(
                 "${formatNumber(c.temperatureC, 1)} $deg · $air · ${c.humidityPct.roundToInt()} % · ${c.altitudeM.roundToInt()} $m",
