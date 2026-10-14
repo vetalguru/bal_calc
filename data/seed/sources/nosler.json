@@ -419,6 +419,1455 @@
    "length_in": 1.725,
    "g1": 0.8,
    "reference": "nosler.com product page, #53515 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Lead Free 35 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 35.0,
+   "diameter_in": 0.224,
+   "length_in": 0.73,
+   "g1": 0.201,
+   "reference": "nosler.com product page, #45150 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 35 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 35.0,
+   "diameter_in": 0.224,
+   "g1": 0.12,
+   "reference": "nosler.com product page, #32572 (checked 2026-10)"
+  },
+  {
+   "name": "Tipped Varmageddon 35 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 35.0,
+   "diameter_in": 0.224,
+   "length_in": 0.52,
+   "g1": 0.12,
+   "reference": "nosler.com product page, #36763 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Lead Free 40 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 40.0,
+   "diameter_in": 0.224,
+   "length_in": 0.783,
+   "g1": 0.22,
+   "reference": "nosler.com product page, #45160 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 40 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 40.0,
+   "diameter_in": 0.224,
+   "length_in": 0.705,
+   "g1": 0.221,
+   "reference": "nosler.com product page, #39510 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 40 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 40.0,
+   "diameter_in": 0.224,
+   "g1": 0.221,
+   "reference": "nosler.com product page, #39555 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 40 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 40.0,
+   "diameter_in": 0.224,
+   "g1": 0.221,
+   "reference": "nosler.com product page, #62634 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 40 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 40.0,
+   "diameter_in": 0.224,
+   "length_in": 0.665,
+   "g1": 0.211,
+   "reference": "nosler.com product page, #17230 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 40 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 40.0,
+   "diameter_in": 0.224,
+   "g1": 0.211,
+   "reference": "nosler.com product page, #17260 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Lead Free 50 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 50.0,
+   "diameter_in": 0.224,
+   "length_in": 0.9,
+   "g1": 0.251,
+   "reference": "nosler.com product page, #45498 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 50 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 50.0,
+   "diameter_in": 0.224,
+   "length_in": 0.8,
+   "g1": 0.238,
+   "reference": "nosler.com product page, #39522 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 50 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 50.0,
+   "diameter_in": 0.224,
+   "g1": 0.238,
+   "reference": "nosler.com product page, #39557 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 50 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 50.0,
+   "diameter_in": 0.224,
+   "g1": 0.238,
+   "reference": "nosler.com product page, #15190 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 52 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 52.0,
+   "diameter_in": 0.224,
+   "g1": 0.22,
+   "reference": "nosler.com product page, #53335 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 53 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 53.0,
+   "diameter_in": 0.224,
+   "g1": 0.303,
+   "reference": "nosler.com product page, #36524 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon Bullet 53 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 53.0,
+   "diameter_in": 0.224,
+   "length_in": 0.83,
+   "g1": 0.303,
+   "reference": "nosler.com product page, #36523 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 55.0,
+   "diameter_in": 0.224,
+   "length_in": 0.81,
+   "g1": 0.267,
+   "reference": "nosler.com product page, #39526 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 55.0,
+   "diameter_in": 0.224,
+   "g1": 0.267,
+   "reference": "nosler.com product page, #39560 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 55.0,
+   "diameter_in": 0.224,
+   "g1": 0.267,
+   "reference": "nosler.com product page, #11288 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 55.0,
+   "diameter_in": 0.224,
+   "length_in": 0.89,
+   "g1": 0.305,
+   "reference": "nosler.com product page, #59624 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 55.0,
+   "diameter_in": 0.224,
+   "length_in": 0.795,
+   "g1": 0.255,
+   "reference": "nosler.com product page, #17240 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 55.0,
+   "diameter_in": 0.224,
+   "g1": 0.255,
+   "reference": "nosler.com product page, #17270 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 55.0,
+   "diameter_in": 0.224,
+   "g1": 0.255,
+   "reference": "nosler.com product page, #17291 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 60 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 60.0,
+   "diameter_in": 0.224,
+   "length_in": 0.855,
+   "g1": 0.27,
+   "reference": "nosler.com product page, #34992 (checked 2026-10)"
+  },
+  {
+   "name": "Cann Ballistic Tip Varmint 60 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 60.0,
+   "diameter_in": 0.224,
+   "g1": 0.27,
+   "reference": "nosler.com product page, #39473 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 60 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 60.0,
+   "diameter_in": 0.224,
+   "length_in": 0.79,
+   "g1": 0.228,
+   "reference": "nosler.com product page, #16316 (checked 2026-10)"
+  },
+  {
+   "name": "FBHP Varmageddon 62 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 62.0,
+   "diameter_in": 0.224,
+   "length_in": 0.77,
+   "g1": 0.251,
+   "reference": "nosler.com product page, #35631 (checked 2026-10)"
+  },
+  {
+   "name": "FBHP Varmageddon 62 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 62.0,
+   "diameter_in": 0.224,
+   "g1": 0.251,
+   "reference": "nosler.com product page, #36522 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 69 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 69.0,
+   "diameter_in": 0.224,
+   "g1": 0.305,
+   "reference": "nosler.com product page, #53065 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 69 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 69.0,
+   "diameter_in": 0.224,
+   "g1": 0.305,
+   "reference": "nosler.com product page, #65823 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond SP 70 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 70.0,
+   "diameter_in": 0.224,
+   "length_in": 0.965,
+   "g1": 0.37,
+   "reference": "nosler.com product page, #53780 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 70 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 70.0,
+   "diameter_in": 0.224,
+   "g1": 0.416,
+   "g7": 0.211,
+   "reference": "nosler.com product page, #53067 (checked 2026-10)"
+  },
+  {
+   "name": "Cann HPBT Custom Competition 77 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 77.0,
+   "diameter_in": 0.224,
+   "length_in": 0.98,
+   "g1": 0.34,
+   "reference": "nosler.com product page, #53033 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 77 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 77.0,
+   "diameter_in": 0.224,
+   "g1": 0.34,
+   "reference": "nosler.com product page, #53064 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 77 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 77.0,
+   "diameter_in": 0.224,
+   "g1": 0.34,
+   "reference": "nosler.com product page, #19254 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 77 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 77.0,
+   "diameter_in": 0.224,
+   "g1": 0.454,
+   "g7": 0.228,
+   "reference": "nosler.com product page, #54612 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 80 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 80.0,
+   "diameter_in": 0.224,
+   "g1": 0.415,
+   "reference": "nosler.com product page, #53080 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 80 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 80.0,
+   "diameter_in": 0.224,
+   "g1": 0.415,
+   "reference": "nosler.com product page, #49563 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 85 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".224",
+   "weight_gr": 85.0,
+   "diameter_in": 0.224,
+   "g1": 0.498,
+   "g7": 0.245,
+   "reference": "nosler.com product page, #54601 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Lead Free 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 55.0,
+   "diameter_in": 0.243,
+   "length_in": 0.95,
+   "g1": 0.288,
+   "reference": "nosler.com product page, #45170 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 55.0,
+   "diameter_in": 0.243,
+   "length_in": 0.785,
+   "g1": 0.276,
+   "reference": "nosler.com product page, #24055 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 55.0,
+   "diameter_in": 0.243,
+   "g1": 0.276,
+   "reference": "nosler.com product page, #39565 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 55.0,
+   "diameter_in": 0.243,
+   "length_in": 0.75,
+   "g1": 0.252,
+   "reference": "nosler.com product page, #17250 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 55 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 55.0,
+   "diameter_in": 0.243,
+   "g1": 0.252,
+   "reference": "nosler.com product page, #28115 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 70 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 70.0,
+   "diameter_in": 0.243,
+   "length_in": 0.915,
+   "g1": 0.31,
+   "reference": "nosler.com product page, #39532 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 70 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 70.0,
+   "diameter_in": 0.243,
+   "g1": 0.31,
+   "reference": "nosler.com product page, #39570 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 70 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 70.0,
+   "diameter_in": 0.243,
+   "length_in": 0.875,
+   "g1": 0.305,
+   "reference": "nosler.com product page, #26123 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Varmint 80 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 80.0,
+   "diameter_in": 0.243,
+   "length_in": 0.99,
+   "g1": 0.329,
+   "reference": "nosler.com product page, #24080 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 85 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 85.0,
+   "diameter_in": 0.243,
+   "length_in": 0.95,
+   "g1": 0.315,
+   "reference": "nosler.com product page, #16314 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 90 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 90.0,
+   "diameter_in": 0.243,
+   "length_in": 1.11,
+   "g1": 0.376,
+   "reference": "nosler.com product page, #56357 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 90 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 90.0,
+   "diameter_in": 0.243,
+   "length_in": 1.08,
+   "g1": 0.365,
+   "reference": "nosler.com product page, #24090 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip 90 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 90.0,
+   "diameter_in": 0.243,
+   "length_in": 1.18,
+   "g1": 0.403,
+   "reference": "nosler.com product page, #59165 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Silvertip 95 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 95.0,
+   "diameter_in": 0.243,
+   "length_in": 1.12,
+   "g1": 0.379,
+   "reference": "nosler.com product page, #51040 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 95 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 95.0,
+   "diameter_in": 0.243,
+   "length_in": 1.12,
+   "g1": 0.379,
+   "reference": "nosler.com product page, #24095 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 95 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 95.0,
+   "diameter_in": 0.243,
+   "length_in": 1.025,
+   "g1": 0.365,
+   "reference": "nosler.com product page, #16315 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 100 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 100.0,
+   "diameter_in": 0.243,
+   "length_in": 1.065,
+   "g1": 0.384,
+   "reference": "nosler.com product page, #35642 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 105 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 105.0,
+   "diameter_in": 0.243,
+   "g1": 0.571,
+   "g7": 0.28,
+   "reference": "nosler.com product page, #53411 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 115 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6mm",
+   "weight_gr": 115.0,
+   "diameter_in": 0.243,
+   "g1": 0.634,
+   "g7": 0.312,
+   "reference": "nosler.com product page, #53518 (checked 2026-10)"
+  },
+  {
+   "name": "FB Tipped Varmageddon 90 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 90.0,
+   "diameter_in": 0.264,
+   "g1": 0.35,
+   "reference": "nosler.com product page, #26129 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 100 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 100.0,
+   "diameter_in": 0.264,
+   "length_in": 1.08,
+   "g1": 0.35,
+   "reference": "nosler.com product page, #26100 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 100 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 100.0,
+   "diameter_in": 0.264,
+   "length_in": 0.962,
+   "g1": 0.326,
+   "reference": "nosler.com product page, #16319 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 120 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 120.0,
+   "diameter_in": 0.264,
+   "length_in": 1.22,
+   "g1": 0.458,
+   "reference": "nosler.com product page, #26120 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 120 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 120.0,
+   "diameter_in": 0.264,
+   "length_in": 1.35,
+   "g1": 0.497,
+   "reference": "nosler.com product page, #59765 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 125 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 125.0,
+   "diameter_in": 0.264,
+   "length_in": 1.17,
+   "g1": 0.449,
+   "reference": "nosler.com product page, #16320 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 130 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 130.0,
+   "diameter_in": 0.264,
+   "length_in": 1.32,
+   "g1": 0.488,
+   "reference": "nosler.com product page, #56902 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 130 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 130.0,
+   "diameter_in": 0.264,
+   "g1": 0.615,
+   "g7": 0.307,
+   "reference": "nosler.com product page, #54722 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.264,
+   "length_in": 1.368,
+   "g1": 0.509,
+   "reference": "nosler.com product page, #57873 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.264,
+   "length_in": 1.35,
+   "g1": 0.509,
+   "reference": "nosler.com product page, #26140 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.264,
+   "g1": 0.529,
+   "reference": "nosler.com product page, #49823 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.264,
+   "length_in": 1.29,
+   "g1": 0.49,
+   "reference": "nosler.com product page, #16321 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "6.5mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.264,
+   "g1": 0.658,
+   "g7": 0.33,
+   "reference": "nosler.com product page, #49825 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 130 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 130.0,
+   "diameter_in": 0.277,
+   "length_in": 1.245,
+   "g1": 0.435,
+   "reference": "nosler.com product page, #54987 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Silvertip 130 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 130.0,
+   "diameter_in": 0.277,
+   "length_in": 1.22,
+   "g1": 0.433,
+   "reference": "nosler.com product page, #51075 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 130 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 130.0,
+   "diameter_in": 0.277,
+   "length_in": 1.22,
+   "g1": 0.433,
+   "reference": "nosler.com product page, #27130 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 130 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 130.0,
+   "diameter_in": 0.277,
+   "length_in": 1.345,
+   "g1": 0.459,
+   "reference": "nosler.com product page, #59298 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 130 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 130.0,
+   "diameter_in": 0.277,
+   "length_in": 1.135,
+   "g1": 0.416,
+   "reference": "nosler.com product page, #16322 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 140.0,
+   "diameter_in": 0.277,
+   "length_in": 1.31,
+   "g1": 0.46,
+   "reference": "nosler.com product page, #54765 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 140.0,
+   "diameter_in": 0.277,
+   "length_in": 1.296,
+   "g1": 0.456,
+   "reference": "nosler.com product page, #27140 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 140.0,
+   "diameter_in": 0.277,
+   "length_in": 1.19,
+   "g1": 0.432,
+   "reference": "nosler.com product page, #35200 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 150.0,
+   "diameter_in": 0.277,
+   "length_in": 1.345,
+   "g1": 0.5,
+   "reference": "nosler.com product page, #54801 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Silvertip 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 150.0,
+   "diameter_in": 0.277,
+   "length_in": 1.35,
+   "g1": 0.496,
+   "reference": "nosler.com product page, #51100 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 150.0,
+   "diameter_in": 0.277,
+   "length_in": 1.35,
+   "g1": 0.496,
+   "reference": "nosler.com product page, #27150 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 150.0,
+   "diameter_in": 0.277,
+   "length_in": 1.25,
+   "g1": 0.465,
+   "reference": "nosler.com product page, #16323 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 160 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".277",
+   "weight_gr": 160.0,
+   "diameter_in": 0.277,
+   "length_in": 1.3,
+   "g1": 0.434,
+   "reference": "nosler.com product page, #16324 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 120 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 120.0,
+   "diameter_in": 0.284,
+   "length_in": 1.135,
+   "g1": 0.417,
+   "reference": "nosler.com product page, #28120 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.284,
+   "length_in": 1.27,
+   "g1": 0.485,
+   "reference": "nosler.com product page, #59992 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Silvertip 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.284,
+   "length_in": 1.255,
+   "g1": 0.485,
+   "reference": "nosler.com product page, #51105 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.284,
+   "length_in": 1.255,
+   "g1": 0.485,
+   "reference": "nosler.com product page, #28140 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.284,
+   "length_in": 1.36,
+   "g1": 0.489,
+   "reference": "nosler.com product page, #59955 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 140 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 140.0,
+   "diameter_in": 0.284,
+   "length_in": 1.16,
+   "g1": 0.434,
+   "reference": "nosler.com product page, #16325 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 150.0,
+   "diameter_in": 0.284,
+   "length_in": 1.29,
+   "g1": 0.493,
+   "reference": "nosler.com product page, #54951 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Silvertip 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 150.0,
+   "diameter_in": 0.284,
+   "length_in": 1.3,
+   "g1": 0.493,
+   "reference": "nosler.com product page, #51110 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 150.0,
+   "diameter_in": 0.284,
+   "length_in": 1.3,
+   "g1": 0.493,
+   "reference": "nosler.com product page, #28150 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 150.0,
+   "diameter_in": 0.284,
+   "length_in": 1.425,
+   "g1": 0.498,
+   "reference": "nosler.com product page, #59426 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 150.0,
+   "diameter_in": 0.284,
+   "length_in": 1.22,
+   "g1": 0.456,
+   "reference": "nosler.com product page, #16326 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 160 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 160.0,
+   "diameter_in": 0.284,
+   "length_in": 1.385,
+   "g1": 0.531,
+   "reference": "nosler.com product page, #54932 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 160 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 160.0,
+   "diameter_in": 0.284,
+   "length_in": 1.27,
+   "g1": 0.475,
+   "reference": "nosler.com product page, #16327 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 175 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 175.0,
+   "diameter_in": 0.284,
+   "length_in": 1.36,
+   "g1": 0.519,
+   "reference": "nosler.com product page, #35645 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 185 gr",
+   "manufacturer": "Nosler",
+   "caliber": "7mm",
+   "weight_gr": 185.0,
+   "diameter_in": 0.284,
+   "g1": 0.719,
+   "g7": 0.357,
+   "reference": "nosler.com product page, #53504 (checked 2026-10)"
+  },
+  {
+   "name": "Varmageddon FB Tipped 110 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 110.0,
+   "diameter_in": 0.308,
+   "length_in": 0.92,
+   "g1": 0.293,
+   "reference": "nosler.com product page, #34057 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 125 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 125.0,
+   "diameter_in": 0.308,
+   "length_in": 1.08,
+   "g1": 0.366,
+   "reference": "nosler.com product page, #52165 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 125 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 125.0,
+   "diameter_in": 0.308,
+   "length_in": 1.06,
+   "g1": 0.366,
+   "reference": "nosler.com product page, #30125 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 150.0,
+   "diameter_in": 0.308,
+   "length_in": 1.2,
+   "g1": 0.435,
+   "reference": "nosler.com product page, #56719 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Silvertip 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 150.0,
+   "diameter_in": 0.308,
+   "length_in": 1.22,
+   "g1": 0.435,
+   "reference": "nosler.com product page, #51150 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 150.0,
+   "diameter_in": 0.308,
+   "length_in": 1.22,
+   "g1": 0.435,
+   "reference": "nosler.com product page, #30150 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 150.0,
+   "diameter_in": 0.308,
+   "length_in": 1.293,
+   "g1": 0.469,
+   "reference": "nosler.com product page, #59378 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 150.0,
+   "diameter_in": 0.308,
+   "length_in": 1.1,
+   "g1": 0.387,
+   "reference": "nosler.com product page, #16329 (checked 2026-10)"
+  },
+  {
+   "name": "RN Ballistic Silvertip 150 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 150.0,
+   "diameter_in": 0.308,
+   "length_in": 1.066,
+   "g1": 0.232,
+   "reference": "nosler.com product page, #51165 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 155 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 155.0,
+   "diameter_in": 0.308,
+   "g1": 0.45,
+   "reference": "nosler.com product page, #53169 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 165 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 165.0,
+   "diameter_in": 0.308,
+   "length_in": 1.29,
+   "g1": 0.475,
+   "reference": "nosler.com product page, #55602 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 165 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 165.0,
+   "diameter_in": 0.308,
+   "length_in": 1.29,
+   "g1": 0.475,
+   "reference": "nosler.com product page, #30165 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 165 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 165.0,
+   "diameter_in": 0.308,
+   "length_in": 1.175,
+   "g1": 0.41,
+   "reference": "nosler.com product page, #16330 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Silvertip 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 168.0,
+   "diameter_in": 0.308,
+   "length_in": 1.307,
+   "g1": 0.49,
+   "reference": "nosler.com product page, #51160 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 168.0,
+   "diameter_in": 0.308,
+   "length_in": 1.307,
+   "g1": 0.49,
+   "reference": "nosler.com product page, #30168 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 168.0,
+   "diameter_in": 0.308,
+   "length_in": 1.415,
+   "g1": 0.503,
+   "reference": "nosler.com product page, #59415 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 168.0,
+   "diameter_in": 0.308,
+   "g1": 0.462,
+   "reference": "nosler.com product page, #53168 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 168 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 168.0,
+   "diameter_in": 0.308,
+   "g1": 0.462,
+   "reference": "nosler.com product page, #65934 (checked 2026-10)"
+  },
+  {
+   "name": "RN Partition 170 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 170.0,
+   "diameter_in": 0.308,
+   "length_in": 1.03,
+   "g1": 0.252,
+   "reference": "nosler.com product page, #16333 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 175 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 175.0,
+   "diameter_in": 0.308,
+   "g1": 0.505,
+   "reference": "nosler.com product page, #53167 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 175 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 175.0,
+   "diameter_in": 0.308,
+   "g1": 0.536,
+   "g7": 0.27,
+   "reference": "nosler.com product page, #53171 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 180 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 180.0,
+   "diameter_in": 0.308,
+   "length_in": 1.38,
+   "g1": 0.507,
+   "reference": "nosler.com product page, #54825 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Silvertip 180 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 180.0,
+   "diameter_in": 0.308,
+   "length_in": 1.36,
+   "g1": 0.507,
+   "reference": "nosler.com product page, #51170 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 180 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 180.0,
+   "diameter_in": 0.308,
+   "length_in": 1.36,
+   "g1": 0.507,
+   "reference": "nosler.com product page, #30180 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 180 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 180.0,
+   "diameter_in": 0.308,
+   "length_in": 1.485,
+   "g1": 0.523,
+   "reference": "nosler.com product page, #59180 (checked 2026-10)"
+  },
+  {
+   "name": "PPT Partition 180 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 180.0,
+   "diameter_in": 0.308,
+   "length_in": 1.18,
+   "g1": 0.361,
+   "reference": "nosler.com product page, #25396 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 180 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 180.0,
+   "diameter_in": 0.308,
+   "length_in": 1.26,
+   "g1": 0.474,
+   "reference": "nosler.com product page, #16331 (checked 2026-10)"
+  },
+  {
+   "name": "HPBT Custom Competition 190 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 190.0,
+   "diameter_in": 0.308,
+   "g1": 0.53,
+   "reference": "nosler.com product page, #59156 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 200 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 200.0,
+   "diameter_in": 0.308,
+   "length_in": 1.485,
+   "g1": 0.588,
+   "reference": "nosler.com product page, #54618 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 200 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 200.0,
+   "diameter_in": 0.308,
+   "length_in": 1.35,
+   "g1": 0.481,
+   "reference": "nosler.com product page, #35626 (checked 2026-10)"
+  },
+  {
+   "name": "RDF 210 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 210.0,
+   "diameter_in": 0.308,
+   "g1": 0.707,
+   "g7": 0.348,
+   "reference": "nosler.com product page, #53506 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 220 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 220.0,
+   "diameter_in": 0.308,
+   "length_in": 1.37,
+   "g1": 0.351,
+   "reference": "nosler.com product page, #16332 (checked 2026-10)"
+  },
+  {
+   "name": "RN Ballistic Tip Hunting 220 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".308",
+   "weight_gr": 220.0,
+   "diameter_in": 0.308,
+   "length_in": 1.465,
+   "g1": 0.472,
+   "reference": "nosler.com product page, #30181 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Tip Hunting 180 gr",
+   "manufacturer": "Nosler",
+   "caliber": "8mm",
+   "weight_gr": 180.0,
+   "diameter_in": 0.323,
+   "g1": 0.394,
+   "reference": "nosler.com product page, #32180 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 180 gr",
+   "manufacturer": "Nosler",
+   "caliber": "8mm",
+   "weight_gr": 180.0,
+   "diameter_in": 0.323,
+   "length_in": 1.365,
+   "g1": 0.427,
+   "reference": "nosler.com product page, #59265 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 200 gr",
+   "manufacturer": "Nosler",
+   "caliber": "8mm",
+   "weight_gr": 200.0,
+   "diameter_in": 0.323,
+   "length_in": 1.38,
+   "g1": 0.45,
+   "reference": "nosler.com product page, #54374 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 200 gr",
+   "manufacturer": "Nosler",
+   "caliber": "8mm",
+   "weight_gr": 200.0,
+   "diameter_in": 0.323,
+   "length_in": 1.24,
+   "g1": 0.426,
+   "reference": "nosler.com product page, #35277 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 180 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 180.0,
+   "diameter_in": 0.338,
+   "length_in": 1.24,
+   "g1": 0.372,
+   "reference": "nosler.com product page, #57625 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 200 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 200.0,
+   "diameter_in": 0.338,
+   "length_in": 1.34,
+   "g1": 0.414,
+   "reference": "nosler.com product page, #56382 (checked 2026-10)"
+  },
+  {
+   "name": "Ballistic Silvertip 200 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 200.0,
+   "diameter_in": 0.338,
+   "length_in": 1.34,
+   "g1": 0.414,
+   "reference": "nosler.com product page, #51200 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 200 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 200.0,
+   "diameter_in": 0.338,
+   "length_in": 1.427,
+   "g1": 0.425,
+   "reference": "nosler.com product page, #59186 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 210 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 210.0,
+   "diameter_in": 0.338,
+   "length_in": 1.2,
+   "g1": 0.4,
+   "reference": "nosler.com product page, #16337 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 225 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 225.0,
+   "diameter_in": 0.338,
+   "length_in": 1.45,
+   "g1": 0.55,
+   "reference": "nosler.com product page, #54357 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 225 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 225.0,
+   "diameter_in": 0.338,
+   "length_in": 1.575,
+   "g1": 0.611,
+   "reference": "nosler.com product page, #59372 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 225 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 225.0,
+   "diameter_in": 0.338,
+   "length_in": 1.3,
+   "g1": 0.454,
+   "reference": "nosler.com product page, #16336 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 250 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 250.0,
+   "diameter_in": 0.338,
+   "length_in": 1.567,
+   "g1": 0.575,
+   "reference": "nosler.com product page, #57287 (checked 2026-10)"
+  },
+  {
+   "name": "Expansion Tip Lead Free 250 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 250.0,
+   "diameter_in": 0.338,
+   "length_in": 1.68,
+   "g1": 0.627,
+   "reference": "nosler.com product page, #59385 (checked 2026-10)"
+  },
+  {
+   "name": "Partition 250 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 250.0,
+   "diameter_in": 0.338,
+   "length_in": 1.375,
+   "g1": 0.473,
+   "reference": "nosler.com product page, #35644 (checked 2026-10)"
+  },
+  {
+   "name": "AccuBond 300 gr",
+   "manufacturer": "Nosler",
+   "caliber": ".338",
+   "weight_gr": 300.0,
+   "diameter_in": 0.338,
+   "length_in": 1.75,
+   "g1": 0.72,
+   "reference": "nosler.com product page, #54851 (checked 2026-10)"
   }
  ]
 }
