@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.PI
 import kotlin.math.abs
@@ -97,13 +98,16 @@ fun ReticleView(
             drawText(label, topLeft = Offset(o.x + 7f, o.y - label.size.height / 2f))
         }
 
-        // Target.
+        // Target: the hit marker, 2 mm wider than its old 18 px (1 mm = 6.3 dp: a dp is 1/160 in),
+        // the crosshair ticks and the stroke grown with it.
         val t = Offset(x(targetX), y(targetY))
-        drawCircle(colors.target.copy(alpha = 0.25f), 9f, t)
-        drawCircle(colors.target, 9f, t, style = Stroke(2.5f))
-        for ((a, b) in listOf(-15f to -5f, 5f to 15f)) {
-            drawLine(colors.target, Offset(t.x + a, t.y), Offset(t.x + b, t.y), 2.5f)
-            drawLine(colors.target, Offset(t.x, t.y + a), Offset(t.x, t.y + b), 2.5f)
+        val r = 9f + 6.3.dp.toPx()
+        val stroke = 2.5f * r / 9f
+        drawCircle(colors.target.copy(alpha = 0.25f), r, t)
+        drawCircle(colors.target, r, t, style = Stroke(stroke))
+        for ((a, b) in listOf(-r * 15f / 9f to -r * 5f / 9f, r * 5f / 9f to r * 15f / 9f)) {
+            drawLine(colors.target, Offset(t.x + a, t.y), Offset(t.x + b, t.y), stroke)
+            drawLine(colors.target, Offset(t.x, t.y + a), Offset(t.x, t.y + b), stroke)
         }
     }
 }
