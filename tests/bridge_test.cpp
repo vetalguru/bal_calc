@@ -696,7 +696,7 @@ TEST_F(Bridge, NewerSeedAddsOnlyWhatIsNew) {
     EXPECT_EQ(Ok("seedVersion").at("version"), 1);
     EXPECT_EQ(Ok("seed", {{"version", 2}, {"files", v2_files}}).at("imported"), 10 + 366);
     EXPECT_EQ(Ok("seedVersion").at("version"), 2);
-    EXPECT_EQ(Ok("seed", {{"version", 3}, {"files", files}}).at("imported"), 937);
+    EXPECT_EQ(Ok("seed", {{"version", 3}, {"files", files}}).at("imported"), 936);
     EXPECT_EQ(Ok("seedVersion").at("version"), 3);
     EXPECT_EQ(Ok("seed", {{"version", 3}, {"files", files}}).at("imported"), 0);
     EXPECT_EQ(Ok("reticles").size(), 14U);
@@ -736,10 +736,10 @@ TEST_F(Bridge, StarterLibraryIsSeededOnce) {
         files.push_back({{"name", name}, {"content", text.str()}});
     }
     const json r = Ok("seed", {{"version", 1}, {"files", files}});
-    // 69 ammo + 1 drg + 14 reticles + 366 bullets + 937 factory loads
-    EXPECT_EQ(r.at("imported"), 1387) << r.dump();
+    // 69 ammo + 1 drg + 14 reticles + 366 bullets + 936 factory loads
+    EXPECT_EQ(r.at("imported"), 1386) << r.dump();
     EXPECT_EQ(Ok("libraryBullets").size(), 69U + 1U + 366U);
-    EXPECT_EQ(Ok("libraryCartridges").size(), 69U + 937U);
+    EXPECT_EQ(Ok("libraryCartridges").size(), 69U + 936U);
     EXPECT_EQ(Ok("reticles").size(), 14U);
     EXPECT_EQ(Ok("libraryScopes").size(), 50U);
     EXPECT_EQ(Ok("libraryRifles").size(), 126U);

@@ -176,8 +176,8 @@ TEST_F(ImportDb, SeedImportsEverythingOnce) {
     ASSERT_TRUE(first.ok()) << first.error().message;
     EXPECT_TRUE(first.value().problems.empty()) << first.value().problems.front();
     // 69 ammo + 1 drg + 14 reticles (4 BallisticCalculator + 10 generic) + 366 published
-    // bullets + 937 published factory loads.
-    EXPECT_EQ(first.value().imported, 69 + 1 + 14 + 366 + 937);
+    // bullets + 936 published factory loads.
+    EXPECT_EQ(first.value().imported, 69 + 1 + 14 + 366 + 936);
 
     EXPECT_EQ(SeededVersion(db_).value(), 1);
     const auto again = SeedLibrary(db_, files, 1);  // same version: nothing to do
@@ -186,11 +186,11 @@ TEST_F(ImportDb, SeedImportsEverythingOnce) {
 
     const auto newer = SeedLibrary(db_, files, 2);  // new version: existing ones skipped
     EXPECT_EQ(newer.value().imported, 0);
-    EXPECT_EQ(newer.value().skipped, 69 + 1 + 14 + 366 + 937);
+    EXPECT_EQ(newer.value().skipped, 69 + 1 + 14 + 366 + 936);
 
     // A factory load's own bullet is not offered as a library bullet.
     EXPECT_EQ(ListLibraryBullets(db_).value().size(), 69U + 1U + 366U);
-    EXPECT_EQ(ListLibraryCartridges(db_).value().size(), 69U + 937U);
+    EXPECT_EQ(ListLibraryCartridges(db_).value().size(), 69U + 936U);
     EXPECT_EQ(storage::Repository<storage::ReticleRecord>(db_).List().value().size(), 14U);
     EXPECT_EQ(ListLibraryBullets(db_, "lapua").value().size() >= 50U, true);
 }
@@ -329,7 +329,7 @@ TEST_F(ImportDb, PublishedCartridgesAreSane) {
             EXPECT_LT(ratio, 0.60);
         }
     }
-    EXPECT_EQ(names.size(), 937U);
+    EXPECT_EQ(names.size(), 936U);
 
     // All of them imported with a sane muzzle velocity, and solved to 1000 m.
     ASSERT_TRUE(SeedLibrary(db_, AllSeedFiles(), 1).ok());
@@ -354,7 +354,7 @@ TEST_F(ImportDb, PublishedCartridgesAreSane) {
         EXPECT_TRUE(sum.ok) << sum.error;
         solved += sum.ok;
     }
-    EXPECT_EQ(solved, 937);
+    EXPECT_EQ(solved, 936);
 }
 
 }  // namespace

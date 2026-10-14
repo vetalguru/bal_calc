@@ -9,6 +9,7 @@ copied from the maker's page by sources/cartridges_<maker>.py).
 * The same load sold under several product codes (box sizes, case finishes;
   same product line, numbers and test barrel)
   becomes one cartridge listing every code.
+* A load listed in EXCLUDED (its page contradicts itself) is left out.
 * A G7 BC whose G7/G1 ratio no real bullet has is dropped, as in
   collect_bullets.py.
 """
@@ -33,6 +34,11 @@ BULLET_CALIBRES = {.224: ".224", .243: "6mm", .264: "6.5mm", .284: "7mm", .308: 
 # Product lines that say nothing about the load.
 GENERIC_LINES = re.compile(r"^(rifle ammunition.*|barnaul|civil|rifle|shop (?:by|all) calib.*|\d.*)$", re.I)
 RATIO = (0.40, 0.60)
+# Loads whose page contradicts itself or the maker's own data: left out.
+EXCLUDED = {
+    ("Hornady", "8114"): "prints G1 .220 for a 220 gr RN (Hornady's bullet: .300) and metric "
+                         "values under the inch and FPS labels",
+}
 
 
 def clean(text):
@@ -86,6 +92,8 @@ def main():
     left_out = collections.Counter()
     loads = {}
     for r in rows:
+        if (r["maker"], r["code"]) in EXCLUDED:
+            continue
         bc = bc_of(r, library)
         if not r["velocity"]["value"] or not r["mass_gr"] or not bc:
             left_out[r["maker"]] += 1

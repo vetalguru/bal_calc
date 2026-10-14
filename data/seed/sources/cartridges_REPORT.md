@@ -93,7 +93,7 @@ Usable now (muzzle velocity and a BC): 958 of 1069
 
 ## Added to the app
 
-`../published_cartridges.json` (built by `../collect_cartridges.py`): **937
+`../published_cartridges.json` (built by `../collect_cartridges.py`): **936
 factory loads**, every one with a muzzle velocity and a BC. Left out: loads
 without either (PPU 52, Hornady 21, Nosler 18, Norma 11, Winchester 7,
 Lapua 2), and 21 repeats of the same load under another product code in the
@@ -119,8 +119,9 @@ factors (BC against sectional density) and velocities against similar loads
 are plausible (outliers are subsonic, reduced-recoil, short-barrel loads and
 flat-base hunting bullets).
 
-Suspected maker error, kept as published: Hornady 8114 (.30-06 220 gr RN)
-prints G1 .220, while Hornady's 220 gr RN bullet is listed at .300.
+Left out of the app: Hornady 8114 (.30-06 220 gr RN) prints G1 .220, while
+Hornady's 220 gr RN bullet is listed at .300, and its page prints metric
+values under the inch and FPS labels (`EXCLUDED` in collect_cartridges.py).
 
 ## Spot checks against the pages
 
