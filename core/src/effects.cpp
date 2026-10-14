@@ -77,4 +77,12 @@ double MuzzleVelocityAt(const PowderSensitivity& powder, double powder_temperatu
             powder.fraction_per_kelvin * (powder_temperature_k - powder.reference_temperature_k));
 }
 
+double BarrelVelocityFactor(double reference_barrel_m, double barrel_m, double exponent) {
+    if (!(reference_barrel_m > 0.0 && barrel_m > 0.0)) {
+        return 1.0;
+    }
+    const double ratio = std::clamp(barrel_m / reference_barrel_m, 0.4, 1.6);
+    return std::pow(ratio, exponent);
+}
+
 }  // namespace ballistics

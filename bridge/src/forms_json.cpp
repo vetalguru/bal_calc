@@ -39,6 +39,7 @@ json ToJson(const al::RifleForm& f) {
             {"sightHeightCm", f.sight_height_cm},
             {"twistIn", f.twist_in},
             {"twistLeft", f.twist_left},
+            {"barrelIn", f.barrel_in},
             {"clickUnits", f.click_units},
             {"clickValue", f.click_value},
             {"reticleId", f.reticle_id},
@@ -62,6 +63,7 @@ al::RifleForm RifleFrom(const json& m) {
     f.sight_height_cm = Num(m, "sightHeightCm", f.sight_height_cm);
     f.twist_in = Num(m, "twistIn", f.twist_in);
     f.twist_left = Bool(m, "twistLeft");
+    f.barrel_in = Num(m, "barrelIn");
     f.click_units = Str(m, "clickUnits", f.click_units);
     f.click_value = Num(m, "clickValue", f.click_value);
     f.reticle_id = IdOf(m, "reticleId");
@@ -91,6 +93,7 @@ json ToJson(const al::CartridgeForm& f) {
             {"diameterIn", f.diameter_in},
             {"lengthIn", f.length_in},
             {"muzzleVelocity", f.muzzle_velocity_mps},
+            {"barrelIn", f.barrel_in},
             {"powderReferenceC", f.powder_reference_c},
             {"powderSensitivity", f.powder_sensitivity_pct_per_c}};
 }
@@ -109,6 +112,7 @@ al::CartridgeForm CartridgeFrom(const json& m) {
     f.diameter_in = Num(m, "diameterIn");
     f.length_in = Num(m, "lengthIn");
     f.muzzle_velocity_mps = Num(m, "muzzleVelocity");
+    f.barrel_in = Num(m, "barrelIn");
     f.powder_reference_c = Num(m, "powderReferenceC", f.powder_reference_c);
     f.powder_sensitivity_pct_per_c = Num(m, "powderSensitivity");
     return f;
@@ -120,6 +124,7 @@ json ToJson(const al::CartridgeSummary& c, bool matches) {
             {"caliber", c.caliber},
             {"bulletName", c.bullet_name},
             {"muzzleVelocity", c.muzzle_velocity_mps},
+            {"barrelIn", c.barrel_in},
             {"matches", matches}};
 }
 

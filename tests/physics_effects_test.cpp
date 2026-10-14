@@ -227,5 +227,27 @@ TEST(PhysicsEffects, PowderSensitivity) {
     EXPECT_NEAR(MuzzleVelocityAt(p, units::CToK(40.0)), 819.3333333333, 1e-6);
 }
 
+TEST(PhysicsEffects, BarrelLengthVelocity) {
+    const double in24 = units::InchToM(24.0);
+    // A .308 at 2700 fps from 24": about 25 fps per inch near 24".
+    const double v20 =
+        2700.0 * BarrelVelocityFactor(in24, units::InchToM(20.0), kBarrelExponentStandard);
+    const double v26 =
+        2700.0 * BarrelVelocityFactor(in24, units::InchToM(26.0), kBarrelExponentStandard);
+    EXPECT_NEAR((2700.0 - v20) / 4.0, 26.6, 0.5);
+    EXPECT_NEAR((v26 - 2700.0) / 2.0, 24.0, 0.5);
+    // Shorter barrels lose more per inch; magnums lose more than standard.
+    const double v16 =
+        2700.0 * BarrelVelocityFactor(in24, units::InchToM(16.0), kBarrelExponentStandard);
+    EXPECT_GT((v20 - v16) / 4.0, (2700.0 - v20) / 4.0);
+    EXPECT_LT(BarrelVelocityFactor(in24, units::InchToM(20.0), kBarrelExponentMagnum),
+              BarrelVelocityFactor(in24, units::InchToM(20.0), kBarrelExponentStandard));
+    // Unknown length: no change; the ratio is held to 0.4..1.6.
+    EXPECT_DOUBLE_EQ(BarrelVelocityFactor(0.0, in24, kBarrelExponentStandard), 1.0);
+    EXPECT_DOUBLE_EQ(BarrelVelocityFactor(in24, 0.0, kBarrelExponentStandard), 1.0);
+    EXPECT_DOUBLE_EQ(BarrelVelocityFactor(in24, in24, kBarrelExponentStandard), 1.0);
+    EXPECT_DOUBLE_EQ(BarrelVelocityFactor(in24, units::InchToM(2.0), 0.22), std::pow(0.4, 0.22));
+}
+
 }  // namespace
 }  // namespace ballistics

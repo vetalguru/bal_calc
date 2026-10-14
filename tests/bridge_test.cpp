@@ -2,6 +2,7 @@
 // only, as the app sees it.
 #include <ballistics/applogic/session.h>
 #include <ballistics/bridge/api.h>
+#include <ballistics/effects.h>
 #include <ballistics/storage/database.h>
 #include <gtest/gtest.h>
 
@@ -63,7 +64,7 @@ class Bridge : public ::testing::Test {
 // Every JSON method the app calls is registered (the method table is
 // assembled from the topic files: none may be lost when code moves).
 TEST_F(Bridge, EveryMethodIsThere) {
-    const std::array<const char*, 59> methods = {{
+    const std::array<const char*, 60> methods = {{
         "open",
         "seed",
         "seedVersion",
@@ -91,6 +92,7 @@ TEST_F(Bridge, EveryMethodIsThere) {
         "saveCartridge",
         "deleteCartridge",
         "stability",
+        "barrelVelocity",
         "photos",
         "photo",
         "setPhoto",
@@ -124,7 +126,7 @@ TEST_F(Bridge, EveryMethodIsThere) {
         "importFiles",
         "stationPressure",
     }};
-    EXPECT_EQ(std::size(methods), 59U);
+    EXPECT_EQ(std::size(methods), 60U);
     for (const char* m : methods) {
         const json r = json::parse(api_.Call(m, "{}"));
         if (!r.at("ok").get<bool>()) {
@@ -473,6 +475,49 @@ TEST_F(Bridge, StabilityForTheEditors) {
                     .get<double>(),
                 1.22, 0.01);
     EXPECT_EQ(Ok("stability", {{"twistIn", 10}, {"massGr", 175}}).at("sg"), 0.0);  // missing inputs
+}
+
+// A factory velocity from a 24" test barrel, in the rifle's 20" barrel: the
+// editor's estimate and the solution use the same recalculation.
+TEST_F(Bridge, VelocityFollowsTheRifleBarrel) {
+    const double factor = std::pow(20.0 / 24.0, ballistics::kBarrelExponentStandard);
+    EXPECT_NEAR(Ok("barrelVelocity",
+                   {{"velocity", 800}, {"fromIn", 24}, {"toIn", 20}, {"caliber", ".308 Win"}})
+                    .at("velocity")
+                    .get<double>(),
+                800.0 * factor, 1e-9);
+    EXPECT_EQ(Ok("barrelVelocity", {{"velocity", 800}, {"fromIn", 0}, {"toIn", 20}}).at("velocity"),
+              800.0);
+
+    json r = Ok("rifleForm", {{"id", 0}});
+    r["name"] = "Tikka";
+    r["caliber"] = ".308 Win";
+    r["barrelIn"] = 20;
+    const auto rifle = Ok("saveRifle", {{"form", r}}).at("id").get<int>();
+    EXPECT_EQ(Ok("rifleForm", {{"id", rifle}}).at("barrelIn"), 20.0);
+    json c = Ok("cartridgeForm", {{"id", 0}});
+    c["name"] = "Factory";
+    c["caliber"] = ".308 Win";
+    c["bc"] = 0.243;
+    c["massGr"] = 175;
+    c["diameterIn"] = 0.308;
+    c["muzzleVelocity"] = 790;
+    c["powderReferenceC"] = 15;
+    const auto cartridge = Ok("saveCartridge", {{"form", c}}).at("id").get<int>();
+    Ok("setConditions", {{"temperatureC", 15}});
+    EXPECT_NEAR(Ok("solution").at("muzzleVelocity").get<double>(), 790.0, 1e-6);  // no test barrel
+
+    c["cartridgeId"] = cartridge;
+    c["barrelIn"] = 24;
+    Ok("saveCartridge", {{"form", c}});
+    EXPECT_EQ(Ok("state").at("cartridges")[0].at("barrelIn"), 24.0);
+    const json sol = Ok("solution");
+    EXPECT_NEAR(sol.at("muzzleVelocity").get<double>(), 790.0 * factor, 1e-6);
+    EXPECT_EQ(sol.at("muzzleVelocityBarrelIn"), 20.0);
+    r["rifleId"] = rifle;
+    r["barrelIn"] = 2;
+    EXPECT_EQ(Fails("saveRifle", {{"form", r}}),
+              "Barrel length must be 0 (unknown) or 4 to 40 inches.");
 }
 
 TEST_F(Bridge, TargetsWithTheirHolds) {

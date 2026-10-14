@@ -2,6 +2,8 @@
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
 
+#include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <exception>
 #include <string>
@@ -122,6 +124,32 @@ double MuzzleVelocity(const CartridgeRecord& c, double powder_temp_k, double vel
     return MuzzleVelocityAt(powder, powder_temp_k) * velocity_scale;
 }
 
+namespace {
+
+// Magnums lose more velocity per inch (more powder for the bore).
+bool IsMagnum(std::string caliber) {
+    std::transform(caliber.begin(), caliber.end(), caliber.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    for (const char* word : {"mag", "prc", "wsm", "rum", "wby", "weatherby", "lapua", " wm"}) {
+        if (caliber.find(word) != std::string::npos) {
+            return true;
+        }
+    }
+    return false;
+}
+
+}  // namespace
+
+double BarrelFactor(const RifleRecord& rifle, const CartridgeRecord& cartridge) {
+    if (!cartridge.velocity_points.empty()) {
+        return 1.0;
+    }
+    const std::string& caliber = cartridge.caliber.empty() ? rifle.caliber : cartridge.caliber;
+    return BarrelVelocityFactor(
+        cartridge.barrel_length_m, rifle.barrel_length_m,
+        IsMagnum(caliber) ? kBarrelExponentMagnum : kBarrelExponentStandard);
+}
+
 Result<Solution> Solve(const LoadedProfile& p, const ConditionsRecord& conditions,
                        double max_range_m, const SolverOptions& options) {
     auto drag = MakeDragModel(p.bullet, p.curve ? &*p.curve : nullptr);
@@ -141,8 +169,10 @@ Result<Solution> Solve(const LoadedProfile& p, const ConditionsRecord& condition
     // hit off the rifle's zero by the profile's offsets.
     Shot zero_shot = base;
     zero_shot.atmosphere = p.rifle.zero_atmosphere;
+    // The box velocity in this rifle's barrel, times the truing scale.
+    const double velocity_scale = p.profile.velocity_scale * BarrelFactor(p.rifle, p.cartridge);
     zero_shot.muzzle_velocity_mps =
-        MuzzleVelocity(p.cartridge, p.rifle.zero_powder_temp_k, p.profile.velocity_scale);
+        MuzzleVelocity(p.cartridge, p.rifle.zero_powder_temp_k, velocity_scale);
     if (conditions.latitude_rad) {
         zero_shot.gravity_mps2 =
             LocalGravity(*conditions.latitude_rad, zero_shot.atmosphere.altitude_m);
@@ -157,7 +187,7 @@ Result<Solution> Solve(const LoadedProfile& p, const ConditionsRecord& condition
     shot.atmosphere = conditions.atmosphere;
     shot.muzzle_velocity_mps = MuzzleVelocity(
         p.cartridge, conditions.powder_temp_k.value_or(conditions.atmosphere.temperature_k),
-        p.profile.velocity_scale);
+        velocity_scale);
     shot.look_angle_rad = conditions.look_angle_rad;
     shot.cant_rad = conditions.cant_rad;
     shot.winds = conditions.winds;

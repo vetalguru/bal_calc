@@ -48,6 +48,17 @@ struct PowderSensitivity {
 
 double MuzzleVelocityAt(const PowderSensitivity& powder, double powder_temperature_k);
 
+// Muzzle velocity in a barrel of another length than the one a velocity
+// was measured in, as a factor: (barrel / reference)^exponent. Powder gas
+// pushes the bullet less the further it has expanded, so each inch gives
+// less the longer the barrel. The exponents match the usual figures near
+// 24": some 25 fps per inch for a .308 at 2700 fps (standard) and 35-40 for
+// a magnum at 3000 fps. An estimate: a chronograph on the rifle is exact.
+// 1 when a length is unknown (0); the ratio is held to 0.4..1.6.
+inline constexpr double kBarrelExponentStandard = 0.22;
+inline constexpr double kBarrelExponentMagnum = 0.30;
+double BarrelVelocityFactor(double reference_barrel_m, double barrel_m, double exponent);
+
 }  // namespace ballistics
 
 #endif  // BALLISTICS_EFFECTS_H

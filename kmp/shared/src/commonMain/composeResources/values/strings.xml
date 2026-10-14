@@ -561,4 +561,11 @@
     <string name="target_height_hint">The target's height, for the point-blank range</string>
     <string name="latitude_hint">Latitude of the firing point: north +, south −</string>
     <string name="azimuth_hint">The direction of fire: from north, clockwise</string>
+    <string name="barrel_length">Barrel length</string>
+    <string name="barrel_length_hint">Factory velocities are recalculated for this barrel. 0 = unknown: the velocity is used as printed.</string>
+    <string name="test_barrel">Test barrel</string>
+    <string name="test_barrel_hint">The barrel this velocity was measured in (the maker's test barrel, e.g. 24″). The calculation recalculates the velocity for the rifle's barrel. If you measured it yourself with this rifle, enter 0.</string>
+    <string name="barrel_velocity_line">In the %1$s″ barrel of %2$s: %3$s m/s</string>
+    <string name="barrel_value">barrel %1$s″</string>
+    <string name="core_40">Barrel length must be 0 (unknown) or 4 to 40 inches.</string>
 </resources>

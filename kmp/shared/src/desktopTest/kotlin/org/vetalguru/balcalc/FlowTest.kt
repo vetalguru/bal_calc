@@ -151,6 +151,7 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("rifleName") }
         type("rifleName", "Tikka")
         type("rifleCaliber", ".308 Win")
+        type("barrel", "20")
         shot("armory-rifle-editor")
         onNodeWithTag("save").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("rifle:Tikka") }
@@ -167,6 +168,10 @@ class FlowTest {
         type("mass", "175")
         type("diameter", "0.308")
         type("muzzleVelocity", "790")
+        type("testBarrel", "24")
+        // The velocity in Tikka's 20" barrel, as the solution will use it.
+        waitUntil(timeoutMillis = 10_000) { exists("velocityInBarrel") }
+        onNodeWithTag("velocityInBarrel").performScrollTo()
         shot("armory-cartridge-editor")
         onNodeWithTag("save").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("cartridge:Load") }
@@ -245,13 +250,14 @@ class FlowTest {
         onNodeWithTag("rifleFromLibrary").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("search") }
         onNodeWithTag("search").performTextReplacement("tikka ctr 6.5 creedmoor")
-        waitUntil(timeoutMillis = 10_000) { count("libraryRifle:") == 1 }
+        waitUntil(timeoutMillis = 10_000) { count("libraryRifle:") == 2 } // 20" and 24" barrels
         shot("library-rifles")
-        onNodeWithTag("libraryRifle:Tikka T3x CTR 6.5 Creedmoor 8").performClick()
+        onNodeWithTag("libraryRifle:Tikka T3x CTR 6.5 Creedmoor 8 24").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("rifleName") }
         assertEquals("Tikka T3x CTR 6.5 Creedmoor", shown("rifleName"))
         assertEquals("6.5 Creedmoor", shown("rifleCaliber"))
         assertEquals("8", shown("twist"))
+        assertEquals("24", shown("barrel"))
 
         onNodeWithTag("scopeFromLibrary").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { exists("search") }

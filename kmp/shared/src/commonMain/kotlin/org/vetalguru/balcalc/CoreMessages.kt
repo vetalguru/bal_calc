@@ -13,6 +13,7 @@ import org.vetalguru.balcalc.res.*
 private val coreMessages: Map<String, StringResource> = mapOf(
     "Choose a rifle and a cartridge." to Res.string.choose_pair,
     "Enter a rifle name." to Res.string.core_01,
+    "Barrel length must be 0 (unknown) or 4 to 40 inches." to Res.string.core_40,
     "Enter a cartridge name." to Res.string.core_02,
     "Sight height must be between 0 and 30 cm." to Res.string.core_03,
     "Point-of-impact shift must be within 100 cm." to Res.string.core_04,

@@ -55,7 +55,7 @@ internal fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
     ) { wide ->
         Section(stringResource(Res.string.rifle)) {
             LibraryButton("rifleFromLibrary") {
-                nav.push(Route.LibraryRifles { r -> f = f.withRifle(r) })
+                nav.push(Route.LibraryRifles { r, barrel -> f = f.withRifle(r, barrel) })
             }
             TextInput(stringResource(Res.string.rifle_name_hint), f.name, { f = f.copy(name = it) }, tag = "rifleName")
             TextInput(stringResource(Res.string.caliber_hint), f.caliber, { f = f.copy(caliber = it) }, tag = "rifleCaliber")
@@ -64,6 +64,10 @@ internal fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
                 wide,
                 { mod -> NumberField(stringResource(Res.string.sight_height), f.sightHeightCm, { f = f.copy(sightHeightCm = it) }, mod, cm, from = 0.0, to = 20.0) },
                 { mod -> NumberField(stringResource(Res.string.twist), f.twistIn, { f = f.copy(twistIn = it) }, mod, inch, 2, 0.0, 60.0, tag = "twist") },
+                { mod ->
+                    NumberField(stringResource(Res.string.barrel_length), f.barrelIn, { f = f.copy(barrelIn = it) }, mod, inch, 1, 0.0, 40.0,
+                        tag = "barrel", hint = stringResource(Res.string.barrel_length_hint))
+                },
             )
             SwitchRow(stringResource(Res.string.left_twist), f.twistLeft, { f = f.copy(twistLeft = it) })
             StabilityLine(stability, partnerName)

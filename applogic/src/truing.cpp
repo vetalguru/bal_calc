@@ -257,8 +257,10 @@ TruingResult ComputeTruing(storage::Database& db, Id profile_id) {
     out.velocity_scale = v;
     out.drag_scale = d;
     out.rms_after_rad = Rms(after);
-    out.muzzle_velocity_before_mps = p.cartridge.muzzle_velocity_mps * v0;
-    out.muzzle_velocity_after_mps = p.cartridge.muzzle_velocity_mps * v;
+    const double in_barrel =
+        p.cartridge.muzzle_velocity_mps * storage::BarrelFactor(p.rifle, p.cartridge);
+    out.muzzle_velocity_before_mps = in_barrel * v0;
+    out.muzzle_velocity_after_mps = in_barrel * v;
     std::vector<double> before;
     residuals(v0, d0, before);
     for (std::size_t i = 0; i < used.size(); ++i) {

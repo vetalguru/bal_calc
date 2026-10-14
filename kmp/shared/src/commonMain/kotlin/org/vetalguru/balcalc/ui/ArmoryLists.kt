@@ -163,12 +163,16 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                 )
             } else {
                 val mps = stringResource(Res.string.mps_value, "%s")
+                val barrel = stringResource(Res.string.barrel_value, "%s")
                 ItemList(
                     empty = stringResource(Res.string.no_cartridges_hint),
                     items = st.cartridges.map { c ->
                         Row4(
                             c.id, c.name,
-                            listOf(c.caliber, c.bulletName, mps.replace("%s", c.muzzleVelocity.roundToInt().toString()))
+                            listOf(
+                                c.caliber, mps.replace("%s", c.muzzleVelocity.roundToInt().toString()),
+                                if (c.barrelIn > 0) barrel.replace("%s", c.barrelIn.barrelInches()) else "", c.bulletName,
+                            )
                                 .filter { it.isNotEmpty() }.joinToString(" · "),
                             // Another calibre than the current rifle's: dimmed.
                             c.matches || st.rifles.isEmpty(),

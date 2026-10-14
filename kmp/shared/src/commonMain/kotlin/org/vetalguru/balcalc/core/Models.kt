@@ -15,6 +15,7 @@ data class CartridgeItem(
     val caliber: String = "",
     val bulletName: String = "",
     val muzzleVelocity: Double = 0.0,
+    val barrelIn: Double = 0.0,
     val matches: Boolean = false,
 )
 
@@ -101,6 +102,7 @@ data class Solution(
     val time: Double = 0.0,
     val mach: Double = 0.0,
     val muzzleVelocity: Double = 0.0,
+    val muzzleVelocityBarrelIn: Double = 0.0,
     val stability: Double = 0.0,
     val velocityScale: Double = 1.0,
     val dragScale: Double = 1.0,
