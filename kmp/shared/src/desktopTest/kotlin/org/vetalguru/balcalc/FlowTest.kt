@@ -1147,8 +1147,11 @@ class FlowTest {
         type("conditionsWindSpeed", "7.5")
         onNodeWithTag("conditionsWindSpeedMinus").performClick()
         waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "6.5" }
-        // The direction steps by 15° and goes round through 0.
-        onNodeWithTag("windFromMinus").performScrollTo().performClick()
+        // The direction steps by 15° and goes round through 0 (it starts at 180, 6 o'clock).
+        assertEquals("180", shown("windFrom"))
+        onNodeWithTag("windFrom").performScrollTo()
+        type("windFrom", "0")
+        onNodeWithTag("windFromMinus").performClick()
         waitUntil(timeoutMillis = 10_000) { shown("windFrom") == "345" }
         onNodeWithTag("windFromPlus").performClick()
         onNodeWithTag("windFromPlus").performClick()
