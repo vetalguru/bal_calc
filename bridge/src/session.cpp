@@ -40,8 +40,13 @@ void Api::Impl::LoadSettings() {
     if (auto session = al::LoadSession(db)) {
         ApplySession(session.value());
     }
-    // Every start begins with the wind from 12 o'clock (the speed stays).
-    wind_from_deg = 0.0;
+    // A start is a new day's shooting: the wind starts calm, from 6 o'clock
+    // (from behind), with no gusts or zones; the rest of the air stays.
+    wind_speed = 0.0;
+    wind_from_deg = 180.0;
+    wind_gust_mps = 0.0;
+    wind_zones.clear();
+    wind_until_m = 0.0;
 }
 
 al::SessionConditions Api::Impl::Session() const {

@@ -875,25 +875,31 @@ TEST(BridgeErrors, CallsFailCleanly) {
                 954.6, 0.5);
 }
 
-// Every start begins with the wind from 12 o'clock, whatever was saved;
-// the speed stays.
-TEST(BridgeFile, WindStartsFromNoon) {
+// Every start is a new day's shooting: the wind is calm, from 6 o'clock,
+// without gusts or zones, whatever was saved; the rest of the air stays.
+TEST(BridgeFile, WindStartsCalmFromSixOClock) {
     const auto path = (std::filesystem::temp_directory_path() / "balcalc_wind.db").string();
     std::filesystem::remove(path);
     {
         ballistics::storage::Database db;
         ASSERT_TRUE(db.Open(path).ok());
         ballistics::applogic::SessionConditions s;
-        s.winds = {{5.0, 90.0, 0.0}};
+        s.winds = {{5.0, 90.0, 200.0}, {8.0, 270.0, 0.0}};
+        s.wind_gust_mps = 9.0;
+        s.temperature_c = -7.0;
         ASSERT_TRUE(ballistics::applogic::SaveSession(db, s).ok());
     }
     for (int start = 0; start < 2; ++start) {
         Api api;
         api.Call("open", json{{"path", path}}.dump());
         const json c = json::parse(api.Call("state", "")).at("result").at("conditions");
-        EXPECT_EQ(c.at("windFromDeg"), 0.0) << start;
-        EXPECT_EQ(c.at("windSpeed"), 5.0) << start;
-        api.Call("setConditions", R"({"windFromDeg": 90})");  // not kept to the next start
+        EXPECT_EQ(c.at("windFromDeg"), 180.0) << start;
+        EXPECT_EQ(c.at("windSpeed"), 0.0) << start;
+        EXPECT_EQ(c.at("windGustMps"), 0.0) << start;
+        EXPECT_TRUE(c.at("windZones").empty()) << start;
+        EXPECT_EQ(c.at("temperatureC"), -7.0) << start;  // the air stays
+        // Not kept to the next start.
+        api.Call("setConditions", R"({"windFromDeg": 90, "windSpeed": 4, "windGustMps": 6})");
     }
     std::filesystem::remove(path);
 }
