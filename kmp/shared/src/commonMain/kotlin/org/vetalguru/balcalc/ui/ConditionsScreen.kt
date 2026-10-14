@@ -1,6 +1,8 @@
 package org.vetalguru.balcalc.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,8 +56,7 @@ fun ConditionsScreen(model: AppModel) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Section(stringResource(Res.string.atmosphere)) {
-                Fields(
-                    wide,
+                CompactFields(
                     { m ->
                         NumberField(
                             stringResource(Res.string.temperature), c.temperatureC,
@@ -71,15 +72,16 @@ fun ConditionsScreen(model: AppModel) {
                                 if (qnhMode) stationFrom(qnh, v)
                             },
                             m, stringResource(Res.string.unit_m), decimals = 0, from = -500.0, to = 6000.0, tag = "altitude",
+                            hint = stringResource(Res.string.altitude_hint),
                         )
                     },
                     { m ->
                         if (c.useDensityAltitude) {
                             NumberField(
-                                stringResource(Res.string.density_altitude), c.densityAltitudeM,
+                                stringResource(Res.string.weather_density_altitude), c.densityAltitudeM,
                                 { v -> model.updateConditions { it.copy(densityAltitudeM = v) } },
                                 m, stringResource(Res.string.unit_m), decimals = 0, from = -2000.0, to = 8000.0,
-                                tag = "densityAltitude",
+                                tag = "densityAltitude", hint = stringResource(Res.string.density_altitude_hint),
                             )
                         } else NumberField(
                             stringResource(if (qnhMode) Res.string.pressure_qnh else Res.string.pressure_station),
@@ -93,6 +95,7 @@ fun ConditionsScreen(model: AppModel) {
                                 }
                             },
                             m, stringResource(Res.string.unit_hpa), from = 300.0, to = 1200.0, tag = "pressure",
+                            hint = stringResource(if (qnhMode) Res.string.pressure_qnh_hint else Res.string.pressure_station_hint),
                         )
                     },
                     { m ->
@@ -100,6 +103,7 @@ fun ConditionsScreen(model: AppModel) {
                             stringResource(Res.string.humidity), c.humidityPct,
                             { v -> model.updateConditions { it.copy(humidityPct = v) } },
                             m, stringResource(Res.string.unit_percent), decimals = 0, from = 0.0, to = 100.0,
+                            hint = stringResource(Res.string.humidity_hint),
                         )
                     },
                 )
@@ -141,7 +145,7 @@ fun ConditionsScreen(model: AppModel) {
                     NumberField(
                         stringResource(Res.string.powder_temperature), c.powderC,
                         { v -> model.updateConditions { it.copy(powderC = v) } },
-                        unit = stringResource(Res.string.unit_c), from = -60.0, to = 80.0,
+                        Modifier.width(COMPACT_FIELD), stringResource(Res.string.unit_c), from = -60.0, to = 80.0,
                     )
                 }
             }
@@ -168,7 +172,7 @@ fun ConditionsScreen(model: AppModel) {
                     NumberField(
                         stringResource(Res.string.zone_until), c.windUntilM,
                         { v -> model.updateConditions { it.copy(windUntilM = v) } },
-                        unit = stringResource(Res.string.unit_m), decimals = 0, from = 10.0, to = 3000.0,
+                        Modifier.width(COMPACT_FIELD), stringResource(Res.string.unit_m), decimals = 0, from = 10.0, to = 3000.0,
                         tag = "zoneUntil0",
                     )
                 }
@@ -234,7 +238,7 @@ fun ConditionsScreen(model: AppModel) {
                         NumberField(
                             stringResource(Res.string.zone_until), z.untilM,
                             { v -> change { it.copy(untilM = v) } },
-                            unit = stringResource(Res.string.unit_m), decimals = 0, from = 10.0, to = 3000.0,
+                            Modifier.width(COMPACT_FIELD), stringResource(Res.string.unit_m), decimals = 0, from = 10.0, to = 3000.0,
                             tag = "zoneUntil${i + 1}",
                         )
                     }
@@ -283,8 +287,9 @@ fun ConditionsScreen(model: AppModel) {
                 NumberField(
                     stringResource(Res.string.target_height), c.targetHeightCm,
                     { v -> model.updateConditions { it.copy(targetHeightCm = v) } },
-                    unit = stringResource(Res.string.unit_cm), decimals = 0, from = 1.0, to = 300.0,
+                    Modifier.width(COMPACT_FIELD), stringResource(Res.string.unit_cm), decimals = 0, from = 1.0, to = 300.0,
                     tag = "targetHeight",
+                    hint = stringResource(Res.string.target_height_hint),
                 )
             }
 
@@ -297,7 +302,8 @@ fun ConditionsScreen(model: AppModel) {
                     NumberField(
                         stringResource(Res.string.latitude), c.latitudeDeg,
                         { v -> model.updateConditions { it.copy(latitudeDeg = v) } },
-                        unit = deg, from = -90.0, to = 90.0, tag = "latitude",
+                        Modifier.width(COMPACT_FIELD), deg, from = -90.0, to = 90.0, tag = "latitude",
+                        hint = stringResource(Res.string.latitude_hint),
                     )
                     SwitchRow(
                         stringResource(Res.string.known_direction), c.useAzimuth,
@@ -308,12 +314,24 @@ fun ConditionsScreen(model: AppModel) {
                         NumberField(
                             stringResource(Res.string.azimuth), c.azimuthDeg,
                             { v -> model.updateConditions { it.copy(azimuthDeg = v % 360) } },
-                            unit = deg, decimals = 0, from = 0.0, to = 360.0, tag = "azimuth",
+                            Modifier.width(COMPACT_FIELD), deg, decimals = 0, from = 0.0, to = 360.0, tag = "azimuth",
+                            hint = stringResource(Res.string.azimuth_hint),
                         )
                     }
                 }
             }
         }
+    }
+}
+
+/** A plain number field: as wide as its value and unit need. */
+private val COMPACT_FIELD = 150.dp
+
+/** Number fields as wide as their values need, side by side, wrapping on narrow screens. */
+@Composable
+private fun CompactFields(vararg fields: @Composable (Modifier) -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        fields.forEach { it(Modifier.width(COMPACT_FIELD)) }
     }
 }
 

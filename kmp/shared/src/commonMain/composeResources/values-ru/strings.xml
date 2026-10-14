@@ -54,10 +54,10 @@
     <string name="stability">Устойчивость Sg</string>
     <string name="atmosphere">Атмосфера</string>
     <string name="temperature">Температура</string>
-    <string name="altitude">Высота над уровнем моря</string>
-    <string name="pressure_qnh">Давление, приведённое к уровню моря (QNH)</string>
-    <string name="pressure_station">Давление на месте (абсолютное)</string>
-    <string name="humidity">Относительная влажность</string>
+    <string name="altitude">Высота</string>
+    <string name="pressure_qnh">Давление QNH</string>
+    <string name="pressure_station">Давление</string>
+    <string name="humidity">Влажность</string>
     <string name="enter_qnh">Ввожу давление на уровне моря (QNH, из прогноза погоды)</string>
     <string name="station_pressure_is">Давление на месте: %1$s гПа</string>
     <string name="powder">Порох</string>
@@ -69,9 +69,9 @@
     <string name="cant">Завал оружия</string>
     <string name="coriolis_section">Вращение Земли (Кориолис)</string>
     <string name="coriolis_on">Учитывать вращение Земли</string>
-    <string name="latitude">Широта (север +)</string>
+    <string name="latitude">Широта</string>
     <string name="known_direction">Известно направление стрельбы</string>
-    <string name="azimuth">Азимут (от севера, по часовой)</string>
+    <string name="azimuth">Азимут</string>
     <string name="tab_table">Таблица</string>
     <string name="tab_chart">График</string>
     <string name="from">От</string>
@@ -277,7 +277,7 @@
     <string name="density_altitude">Плотностная высота</string>
     <string name="enter_density_altitude">Ввожу плотностную высоту вместо давления</string>
     <string name="target_section">Цель</string>
-    <string name="target_height">Высота цели (для прямого выстрела)</string>
+    <string name="target_height">Высота цели</string>
     <string name="wind_gust">Скорость в порывах</string>
     <string name="gust_windage">При %1$s м/с: %2$s</string>
     <string name="wind_zones_on">Ветер разный вдоль дистанции (зоны)</string>
@@ -521,4 +521,12 @@
     <string name="weather_humidity">Влажность</string>
     <string name="weather_altitude">Высота</string>
     <string name="weather_density_altitude">Плотн. высота</string>
+    <string name="altitude_hint">Высота места стрельбы над уровнем моря</string>
+    <string name="pressure_station_hint">Давление на месте стрельбы, как его показывает барометр: абсолютное, не приведённое к уровню моря</string>
+    <string name="pressure_qnh_hint">Давление, приведённое к уровню моря (QNH), как в прогнозе погоды; давление на месте посчитается по высоте</string>
+    <string name="density_altitude_hint">Высота стандартной атмосферы с той же плотностью воздуха; вводится вместо давления</string>
+    <string name="humidity_hint">Относительная влажность воздуха</string>
+    <string name="target_height_hint">Высота цели для расчёта дальности прямого выстрела</string>
+    <string name="latitude_hint">Широта места стрельбы: северная +, южная −</string>
+    <string name="azimuth_hint">Направление стрельбы: от севера по часовой стрелке</string>
 </resources>

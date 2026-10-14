@@ -62,10 +62,10 @@
     <!-- Conditions -->
     <string name="atmosphere">Atmosphere</string>
     <string name="temperature">Temperature</string>
-    <string name="altitude">Altitude above sea level</string>
-    <string name="pressure_qnh">Pressure at sea level (QNH)</string>
-    <string name="pressure_station">Station pressure (absolute)</string>
-    <string name="humidity">Relative humidity</string>
+    <string name="altitude">Altitude</string>
+    <string name="pressure_qnh">Pressure QNH</string>
+    <string name="pressure_station">Pressure</string>
+    <string name="humidity">Humidity</string>
     <string name="enter_qnh">I enter sea-level pressure (QNH, weather report)</string>
     <string name="station_pressure_is">Station pressure: %1$s hPa</string>
     <string name="powder">Powder</string>
@@ -77,9 +77,9 @@
     <string name="cant">Cant</string>
     <string name="coriolis_section">Earth rotation (Coriolis)</string>
     <string name="coriolis_on">Account for Earth rotation</string>
-    <string name="latitude">Latitude (north +)</string>
+    <string name="latitude">Latitude</string>
     <string name="known_direction">Known shot direction</string>
-    <string name="azimuth">Azimuth (from north, clockwise)</string>
+    <string name="azimuth">Azimuth</string>
 
     <!-- Range table -->
     <string name="tab_table">Table</string>
@@ -307,7 +307,7 @@
     <string name="density_altitude">Density altitude</string>
     <string name="enter_density_altitude">I enter density altitude instead of pressure</string>
     <string name="target_section">Target</string>
-    <string name="target_height">Target height (for the point-blank range)</string>
+    <string name="target_height">Target height</string>
     <string name="wind_gust">Gust speed</string>
     <string name="gust_windage">At %1$s m/s: %2$s</string>
     <string name="wind_zones_on">The wind differs along the range (zones)</string>
@@ -551,4 +551,12 @@
     <string name="weather_humidity">Humidity</string>
     <string name="weather_altitude">Altitude</string>
     <string name="weather_density_altitude">Density alt.</string>
+    <string name="altitude_hint">The firing point's height above sea level</string>
+    <string name="pressure_station_hint">The pressure where you shoot, as a barometer shows it: absolute, not reduced to sea level</string>
+    <string name="pressure_qnh_hint">Pressure reduced to sea level (QNH), as in a weather report; the pressure where you shoot follows from the altitude</string>
+    <string name="density_altitude_hint">The standard-atmosphere altitude with the same air density; entered instead of the pressure</string>
+    <string name="humidity_hint">Relative humidity of the air</string>
+    <string name="target_height_hint">The target's height, for the point-blank range</string>
+    <string name="latitude_hint">Latitude of the firing point: north +, south −</string>
+    <string name="azimuth_hint">The direction of fire: from north, clockwise</string>
 </resources>
