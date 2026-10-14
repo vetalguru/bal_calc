@@ -93,11 +93,34 @@ Usable now (muzzle velocity and a BC): 958 of 1069
 
 ## Added to the app
 
-`../published_cartridges.json` (built by `../collect_cartridges.py`): **897
+`../published_cartridges.json` (built by `../collect_cartridges.py`): **937
 factory loads**, every one with a muzzle velocity and a BC. Left out: loads
 without either (PPU 52, Hornady 21, Nosler 18, Norma 11, Winchester 7,
-Lapua 2), and 61 repeats of the same load under another product code (merged,
-codes kept). Norma 20166512 prints its BC as "428" (read as 0.428).
+Lapua 2), and 21 repeats of the same load under another product code in the
+same line with the same test barrel (box sizes; merged, codes kept). Norma 20166512 prints its BC as "428" (read as 0.428).
+
+## Verification
+
+`cartridges_verify.py` re-reads every row's page, independently of the
+collectors, and checks that each value is printed there and that the calibre
+agrees with the page's title or address. All 1069 rows pass, apart from cases
+explained by where the values live:
+
+- Winchester (123): the product pages load their data by script; all 123 rows
+  match the catalogue listing they were read from.
+- PPU (52): the test barrel is on the calibre search page, not on the cited
+  ballistics page (PPU loads are not in the app: no BC).
+- Hornady 8114: "61"" barrel and "721" FPS are cm and m/s (see above).
+- S&B V334992: its address is ".../detail/223/" (an id), the page is 6.5×55.
+
+Also checked: every value in `published_cartridges.json` equals its source
+rows; the 148 Nosler bullets added to the library match their pages; form
+factors (BC against sectional density) and velocities against similar loads
+are plausible (outliers are subsonic, reduced-recoil, short-barrel loads and
+flat-base hunting bullets).
+
+Suspected maker error, kept as published: Hornady 8114 (.30-06 220 gr RN)
+prints G1 .220, while Hornady's 220 gr RN bullet is listed at .300.
 
 ## Spot checks against the pages
 

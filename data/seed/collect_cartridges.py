@@ -6,7 +6,8 @@ copied from the maker's page by sources/cartridges_<maker>.py).
 
 * A load without a muzzle velocity, or without a BC (on its page or, for
   Nosler, on its bullet's page in published_bullets.json), is left out.
-* The same load sold under several product codes (box sizes, case finishes)
+* The same load sold under several product codes (box sizes, case finishes;
+  same product line, numbers and test barrel)
   becomes one cartridge listing every code.
 * A G7 BC whose G7/G1 ratio no real bullet has is dropped, as in
   collect_bullets.py.
@@ -90,9 +91,15 @@ def main():
             left_out[r["maker"]] += 1
             continue
         g1, g7, length, where = bc
-        key = (r["maker"], r["calibre"], r["mass_gr"], r["velocity"]["value"], g1, g7)
-        if key in loads:
-            loads[key]["codes"].append(r["code"])
+        key = (r["maker"], r["line"], r["calibre"], r["mass_gr"], r["velocity"]["value"], g1, g7)
+        barrel = f"{r['barrel']['value']:g} {r['barrel']['unit']}" if r["barrel"] else ""
+        # The same load: same numbers and the same test barrel, or one page
+        # does not state it (a load for short barrels is another load).
+        same = next((c for c in loads.get(key, []) if not barrel or not c["barrel_length"]
+                     or c["barrel_length"] == barrel), None)
+        if same:
+            same["codes"].append(r["code"])
+            same["barrel_length"] = same["barrel_length"] or barrel
             continue
         calibre = CALIBRE_NAMES.get(r["calibre"], r["calibre"])
         diameter = DIAMETER[r["calibre"]]
@@ -103,17 +110,17 @@ def main():
             bullet["g1"] = g1
         if g7:
             bullet["g7"] = g7
-        loads[key] = {
+        loads.setdefault(key, []).append({
             "name": f"{r['maker']} {calibre} {r['mass_gr']:g} gr {describe(r)}".strip(),
             "manufacturer": r["maker"],
             "caliber": calibre,
             "codes": [r["code"]] if r["code"] else [],
             "bullet": bullet,
             "muzzle_velocity": f"{r['velocity']['value']:g} {r['velocity']['unit']}",
-            "barrel_length": f"{r['barrel']['value']:g} {r['barrel']['unit']}" if r["barrel"] else "",
+            "barrel_length": barrel,
             "reference": f"{r['source']} (checked {r['checked']}); BC: {where}, {r['bc_note']}",
-        }
-    out = sorted(loads.values(), key=lambda c: (c["manufacturer"], c["caliber"], c["bullet"]["weight_gr"], c["name"]))
+        })
+    out = sorted((c for same in loads.values() for c in same), key=lambda c: (c["manufacturer"], c["caliber"], c["bullet"]["weight_gr"], c["name"]))
     # Names identify records: two loads that read the same get their codes.
     names = collections.Counter(c["name"] for c in out)
     for c in out:
