@@ -1,6 +1,15 @@
 package org.vetalguru.balcalc.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import kotlinx.coroutines.delay
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DropdownMenu
@@ -81,6 +90,8 @@ fun NumberField(
     hintPicture: (@Composable () -> Unit)? = null,
     /** After every commit (Done or focus lost), changed or not. */
     onCommitted: (() -> Unit)? = null,
+    /** Up/down halves at the field's right end (like a combo box's button): +1 or −1 step. */
+    onSpin: ((Int) -> Unit)? = null,
 ) {
     var text by remember { mutableStateOf(formatNumber(value, decimals)) }
     var focused by remember { mutableStateOf(false) }
@@ -119,6 +130,7 @@ fun NumberField(
                 }
             }
         }),
+        trailingIcon = onSpin?.let { spin -> { SpinButtons(tag, spin) } },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
@@ -129,6 +141,49 @@ fun NumberField(
             }
             .let { m -> if (tag != null) m.testTag(tag) else m },
     )
+}
+
+/**
+ * A field's spin button: as tall as the box, split across into ▲ (a step
+ * up) and ▼ (a step down). A press steps once; held, it keeps stepping.
+ */
+@Composable
+private fun SpinButtons(tag: String?, onSpin: (Int) -> Unit) {
+    val line = MaterialTheme.colorScheme.outline
+    Row(Modifier.height(56.dp)) {
+        VerticalDivider(color = line)
+        Column(Modifier.width(36.dp).fillMaxHeight()) {
+            SpinHalf("▲", +1, onSpin, Modifier.weight(1f).fillMaxWidth().testTag("${tag}Plus"))
+            HorizontalDivider(color = line)
+            SpinHalf("▼", -1, onSpin, Modifier.weight(1f).fillMaxWidth().testTag("${tag}Minus"))
+        }
+    }
+}
+
+@Composable
+private fun SpinHalf(arrow: String, dir: Int, onSpin: (Int) -> Unit, modifier: Modifier) {
+    val spin by rememberUpdatedState(onSpin)
+    val scope = rememberCoroutineScope()
+    Box(
+        modifier.pointerInput(dir) {
+            detectTapGestures(onPress = {
+                spin(dir)
+                // Held: after a pause, a step every 90 ms until released.
+                val repeat = scope.launch {
+                    delay(400)
+                    while (true) {
+                        spin(dir)
+                        delay(90)
+                    }
+                }
+                tryAwaitRelease()
+                repeat.cancel()
+            })
+        },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(arrow, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
 }
 
 /** Units a field can switch between: (key, label) pairs; [onPick] gets the key. */
@@ -191,7 +246,10 @@ fun Hint(
     }
 }
 
-/** A [NumberField] with − and + beside it: set by thumb, or typed. */
+/**
+ * A number field with a spin button at its right end: ▲/▼ step by [step]
+ * (held, they keep stepping); typing still works.
+ */
 @Composable
 fun StepperField(
     label: String,
@@ -204,34 +262,26 @@ fun StepperField(
     to: Double = 1e9,
     tag: String? = null,
     unitMenu: UnitMenu? = null,
-    /** Narrower than the space there is (the steps stay beside it); unspecified: all of it. */
+    /** Narrower than the space there is; unspecified: all of it. */
     fieldMaxWidth: Dp = Dp.Unspecified,
-    stepWidth: Dp = 50.dp,
     hint: String? = null,
     hintPicture: (@Composable () -> Unit)? = null,
     /** Steps go round (a direction: 345 + 15 = 0) instead of stopping at [to]. */
     wrap: Boolean = false,
     decimals: Int = 1,
 ) {
+    val current by rememberUpdatedState(value)
+    val edited by rememberUpdatedState(onEdited)
     fun by(d: Double) {
-        val v = if (wrap) ((value + d) % to + to) % to else (value + d).coerceIn(from, to)
-        if (v != value) onEdited(v)
+        val v = if (wrap) ((current + d) % to + to) % to else (current + d).coerceIn(from, to)
+        if (v != current) edited(v)
     }
-    // Top-aligned: the steps level with the box, below the label's notch.
-    // Narrow (a small phone): smaller steps leave the number room.
-    BoxWithConstraints(modifier) {
-        val stepWidth = if (maxWidth < 300.dp) minOf(stepWidth, 44.dp) else stepWidth
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Box(Modifier.padding(top = 16.dp).testTag("${tag}Minus")) { Step("−${formatNumber(step, 0)}", stepWidth) { by(-step) } }
-            val field = if (fieldMaxWidth == Dp.Unspecified) {
-                Modifier.weight(1f)
-            } else {
-                Modifier.weight(1f, fill = false).widthIn(max = fieldMaxWidth)
-            }
-            NumberField(label, value, onEdited, field, unit, decimals, from, to, tag, unitMenu, hint, hintPicture)
-            Box(Modifier.padding(top = 16.dp).testTag("${tag}Plus")) { Step("+${formatNumber(step, 0)}", stepWidth) { by(step) } }
-        }
-    }
+    // The cap first: a fill-the-row modifier after it fills only up to the cap.
+    val field = if (fieldMaxWidth == Dp.Unspecified) modifier else Modifier.widthIn(max = fieldMaxWidth).then(modifier)
+    NumberField(
+        label, value, onEdited, field, unit, decimals, from, to, tag, unitMenu, hint, hintPicture,
+        onSpin = { dir -> by(dir * step) },
+    )
 }
 
 @Composable

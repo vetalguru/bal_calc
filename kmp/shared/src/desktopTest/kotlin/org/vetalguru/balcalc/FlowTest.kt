@@ -691,9 +691,9 @@ class FlowTest {
         onNodeWithTag("movesLeft").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { shown("lead").contains("LEFT") }
         // The angle: ±15, its meaning drawn behind the ⓘ.
-        onNodeWithTag("targetAngleMinus").performScrollTo().performClick()
+        onNodeWithTag("targetAngleMinus", useUnmergedTree = true).performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { shown("targetAngle") == "75" }
-        onNodeWithTag("targetAnglePlus").performClick()
+        onNodeWithTag("targetAnglePlus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 10_000) { shown("targetAngle") == "90" }
         onNodeWithTag("targetAngleInfo").performClick()
         waitUntil(timeoutMillis = 5_000) { exists("headingPicture") }
@@ -1137,29 +1137,29 @@ class FlowTest {
     fun windSpeedSteps() = runDesktopComposeUiTest(412, 915) {
         val db = startWithSample()
         onNodeWithTag("navConditions").performClick()
-        waitUntil(timeoutMillis = 10_000) { exists("conditionsWindSpeedPlus") }
-        onNodeWithTag("conditionsWindSpeedPlus").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("conditionsWindSpeed") }
+        onNodeWithTag("conditionsWindSpeedPlus", useUnmergedTree = true).performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "1" }
-        onNodeWithTag("conditionsWindSpeedPlus").performClick()
+        onNodeWithTag("conditionsWindSpeedPlus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "2" }
-        onNodeWithTag("conditionsWindSpeedMinus").performClick()
+        onNodeWithTag("conditionsWindSpeedMinus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "1" }
         type("conditionsWindSpeed", "7.5")
-        onNodeWithTag("conditionsWindSpeedMinus").performClick()
+        onNodeWithTag("conditionsWindSpeedMinus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 10_000) { shown("conditionsWindSpeed") == "6.5" }
         // The direction steps by 15° and goes round through 0 (it starts at 180, 6 o'clock).
         assertEquals("180", shown("windFrom"))
         onNodeWithTag("windFrom").performScrollTo()
         type("windFrom", "0")
-        onNodeWithTag("windFromMinus").performClick()
+        onNodeWithTag("windFromMinus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 10_000) { shown("windFrom") == "345" }
-        onNodeWithTag("windFromPlus").performClick()
-        onNodeWithTag("windFromPlus").performClick()
+        onNodeWithTag("windFromPlus", useUnmergedTree = true).performClick()
+        onNodeWithTag("windFromPlus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 10_000) { shown("windFrom") == "15" }
         // The angles too: ±1.
-        onNodeWithTag("lookAnglePlus").performScrollTo().performClick()
+        onNodeWithTag("lookAnglePlus", useUnmergedTree = true).performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { shown("lookAngle") == "1" }
-        onNodeWithTag("cantAngleMinus").performScrollTo().performClick()
+        onNodeWithTag("cantAngleMinus", useUnmergedTree = true).performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { shown("cantAngle") == "-1" }
         // The cant's ⓘ shows what cant is, drawn.
         onNodeWithTag("cantAngleInfo").performScrollTo().performClick()

@@ -50,7 +50,6 @@ fun WindSpeedField(
     tag: String? = null,
     steps: Boolean = true,
     fieldMaxWidth: Dp = Dp.Unspecified,
-    stepWidth: Dp = 50.dp,
     hint: String? = null,
     maxMps: Double = MAX_WIND_MPS,
 ) {
@@ -60,7 +59,7 @@ fun WindSpeedField(
     val menu = windUnitMenu(onUnit)
     if (steps) {
         StepperField(label, shown, edited, modifier, stringResource(unit.label), from = 0.0, to = max, tag = tag,
-            unitMenu = menu, fieldMaxWidth = fieldMaxWidth, stepWidth = stepWidth, hint = hint)
+            unitMenu = menu, fieldMaxWidth = fieldMaxWidth, hint = hint)
     } else {
         NumberField(label, shown, edited, modifier, stringResource(unit.label), from = 0.0, to = max, tag = tag, unitMenu = menu, hint = hint)
     }
