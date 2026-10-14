@@ -54,10 +54,10 @@
     <string name="stability">Стійкість Sg</string>
     <string name="atmosphere">Атмосфера</string>
     <string name="temperature">Температура</string>
-    <string name="altitude">Висота над рівнем моря</string>
-    <string name="pressure_qnh">Тиск, приведений до рівня моря (QNH)</string>
-    <string name="pressure_station">Тиск на місці (абсолютний)</string>
-    <string name="humidity">Відносна вологість</string>
+    <string name="altitude">Висота</string>
+    <string name="pressure_qnh">Тиск QNH</string>
+    <string name="pressure_station">Тиск</string>
+    <string name="humidity">Вологість</string>
     <string name="enter_qnh">Вводжу тиск на рівні моря (QNH, з прогнозу погоди)</string>
     <string name="station_pressure_is">Тиск на місці: %1$s гПа</string>
     <string name="powder">Порох</string>
@@ -69,9 +69,9 @@
     <string name="cant">Завал зброї</string>
     <string name="coriolis_section">Обертання Землі (Коріоліс)</string>
     <string name="coriolis_on">Враховувати обертання Землі</string>
-    <string name="latitude">Широта (північ +)</string>
+    <string name="latitude">Широта</string>
     <string name="known_direction">Відомий напрямок стрільби</string>
-    <string name="azimuth">Азимут (від півночі, за годинниковою)</string>
+    <string name="azimuth">Азимут</string>
     <string name="tab_table">Таблиця</string>
     <string name="tab_chart">Графік</string>
     <string name="from">Від</string>
@@ -277,7 +277,7 @@
     <string name="density_altitude">Висота за густиною</string>
     <string name="enter_density_altitude">Вводжу висоту за густиною замість тиску</string>
     <string name="target_section">Ціль</string>
-    <string name="target_height">Висота цілі (для прямого пострілу)</string>
+    <string name="target_height">Висота цілі</string>
     <string name="wind_gust">Швидкість у поривах</string>
     <string name="gust_windage">При %1$s м/с: %2$s</string>
     <string name="wind_zones_on">Вітер різний уздовж дистанції (зони)</string>
@@ -521,4 +521,12 @@
     <string name="weather_humidity">Вологість</string>
     <string name="weather_altitude">Висота</string>
     <string name="weather_density_altitude">Густ. висота</string>
+    <string name="altitude_hint">Висота місця стрільби над рівнем моря</string>
+    <string name="pressure_station_hint">Тиск на місці стрільби, як його показує барометр: абсолютний, не приведений до рівня моря</string>
+    <string name="pressure_qnh_hint">Тиск, приведений до рівня моря (QNH), як у прогнозі погоди; тиск на місці порахується за висотою</string>
+    <string name="density_altitude_hint">Висота стандартної атмосфери з тією ж густиною повітря; вводиться замість тиску</string>
+    <string name="humidity_hint">Відносна вологість повітря</string>
+    <string name="target_height_hint">Висота цілі для розрахунку дальності прямого пострілу</string>
+    <string name="latitude_hint">Широта місця стрільби: північна +, південна −</string>
+    <string name="azimuth_hint">Напрямок стрільби: від півночі за годинниковою стрілкою</string>
 </resources>

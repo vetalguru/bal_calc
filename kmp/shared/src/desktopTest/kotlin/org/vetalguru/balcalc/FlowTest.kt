@@ -965,7 +965,7 @@ class FlowTest {
 
         // Barometer and location fill the air.
         onNodeWithTag("fromBarometer").performClick()
-        waitUntil(timeoutMillis = 10_000) { shown("pressure") == "987.6" }
+        waitUntil(timeoutMillis = 10_000) { shown("pressure") == "988" } // 987.6 hPa, shown in whole hPa
         onNodeWithTag("myLocation").performClick()
         waitUntil(timeoutMillis = 10_000) { shown("altitude") == "296" }
         assertTrue(shown("sensorNote").contains("296"), shown("sensorNote"))
