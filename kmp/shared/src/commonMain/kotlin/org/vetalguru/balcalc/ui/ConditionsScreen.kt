@@ -94,7 +94,8 @@ fun ConditionsScreen(model: AppModel) {
                                     model.updateConditions { it.copy(pressureHpa = v) }
                                 }
                             },
-                            m, stringResource(Res.string.unit_hpa), from = 300.0, to = 1200.0, tag = "pressure",
+                            // Whole hPa: 0.1 hPa changes nothing that matters, and "1013" fits a narrow field.
+                            m, stringResource(Res.string.unit_hpa), decimals = 0, from = 300.0, to = 1200.0, tag = "pressure",
                             hint = stringResource(if (qnhMode) Res.string.pressure_qnh_hint else Res.string.pressure_station_hint),
                         )
                     },
@@ -327,11 +328,17 @@ fun ConditionsScreen(model: AppModel) {
 /** A plain number field: as wide as its value and unit need. */
 private val COMPACT_FIELD = 150.dp
 
-/** Number fields as wide as their values need, side by side, wrapping on narrow screens. */
+/**
+ * Number fields as wide as their values need, two side by side: narrower
+ * (down to 120 dp) on a small phone rather than one per row.
+ */
 @Composable
 private fun CompactFields(vararg fields: @Composable (Modifier) -> Unit) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        fields.forEach { it(Modifier.width(COMPACT_FIELD)) }
+    BoxWithConstraints {
+        val width = ((maxWidth - 12.dp) / 2).coerceIn(120.dp, COMPACT_FIELD)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            fields.forEach { it(Modifier.width(width)) }
+        }
     }
 }
 
