@@ -157,7 +157,14 @@ fun WezPanel(model: AppModel, toM: Double, modifier: Modifier) {
                 Fields(
                     wide,
                     { mod -> NumberField(stringResource(Res.string.src_temperature), s.temperatureC, { v -> change { it.copy(temperatureC = v) } }, mod, stringResource(Res.string.unit_c), from = 0.0, to = 30.0) },
-                    { mod -> NumberField(stringResource(Res.string.src_pressure), s.pressureHpa, { v -> change { it.copy(pressureHpa = v) } }, mod, stringResource(Res.string.unit_hpa), from = 0.0, to = 100.0) },
+                    { mod ->
+                        // An error of the pressure, in the chosen unit like the pressure itself.
+                        PressureField(
+                            stringResource(Res.string.src_pressure), s.pressureHpa, { v -> change { it.copy(pressureHpa = v) } },
+                            PressureUnit.of(model.state.prefs.pressureUnit), { u -> model.setPrefs { it.copy(pressureUnit = u.key) } },
+                            mod, fromHpa = 0.0, toHpa = 100.0, decimals = PressureUnit.of(model.state.prefs.pressureUnit).decimals + 1,
+                        )
+                    },
                 )
                 Fields(
                     wide,

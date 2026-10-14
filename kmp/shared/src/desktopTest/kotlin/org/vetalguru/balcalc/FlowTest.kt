@@ -1281,4 +1281,32 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("temperature") } // the conditions page
         db.delete()
     }
+
+    /** The pressure unit: tap it, pick mmHg or inHg; the field and the ring's corner follow, the core keeps hPa. */
+    @Test
+    fun pressureUnits() {
+        for ((w, h) in listOf(412 to 915, 320 to 700)) runDesktopComposeUiTest(w, h) {
+            val db = startWithSample()
+            onNodeWithTag("navConditions").performClick()
+            waitUntil(timeoutMillis = 10_000) { exists("pressure") }
+            assertEquals("1013", shown("pressure"))
+            onNodeWithTag("pressureUnit").performClick()
+            onNodeWithTag("pressureUnit-mmhg").performClick()
+            waitUntil(timeoutMillis = 10_000) { shown("pressure") == "760" }
+            shot("conditions-pressure-mmhg-$w")
+            onNodeWithTag("pressureUnit").performClick()
+            onNodeWithTag("pressureUnit-inhg").performClick()
+            waitUntil(timeoutMillis = 10_000) { shown("pressure") == "29.92" }
+            // Typed in inHg, kept in hPa.
+            type("pressure", "30")
+            waitUntil(timeoutMillis = 10_000) {
+                (runBlocking { testApi!!.call("state") } as JsonObject).getValue("conditions").let { c ->
+                    kotlin.math.abs(((c as JsonObject).getValue("pressureHpa") as JsonPrimitive).content.toDouble() - 1015.9) < 0.1
+                }
+            }
+            onNodeWithTag("navSolution").performClick()
+            if (w >= 400) waitUntil(timeoutMillis = 10_000) { shown("weatherPressure").contains("30 inHg") }
+            db.delete()
+        }
+    }
 }
