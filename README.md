@@ -66,7 +66,8 @@ cd kmp
 ```
 
 Packages and signed releases: [`docs/desktop-release.md`](docs/desktop-release.md),
-[`docs/android-release.md`](docs/android-release.md).
+[`docs/android-release.md`](docs/android-release.md); a GitHub release from a tag:
+[`docs/github-release.md`](docs/github-release.md).
 
 ## Command line
 
