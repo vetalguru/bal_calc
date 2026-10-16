@@ -42,6 +42,7 @@
 //   importFiles {files:[{name, content}]} → {imported, problems:[{file, message}]}
 //   stationPressure {qnhHpa, altitudeM} → hPa
 //   stability {twistIn, massGr, diameterIn, lengthIn, velocityMps} → {sg} (standard air)
+//   barrelVelocity {velocity, fromIn, toIn, caliber} → {velocity} (in the other barrel)
 //   photos {kind} → {id: base64} / photo {kind, id} → base64 / setPhoto {kind, id, image} (empty
 //   removes) targets → [{name, rangeM, lookAngleDeg, windSpeed, windFromDeg, ok, elevation,
 //   windage, *Clicks, holdX, holdY}] saveTargets {targets} → targets / selectTarget {index} → state

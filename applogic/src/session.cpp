@@ -238,6 +238,8 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
     out.time_s = pt->time_s;
     out.mach = pt->mach;
     out.muzzle_velocity_mps = sol.value().shot.muzzle_velocity_mps;
+    out.muzzle_velocity_barrel_in =
+        std::round(units::MToInch(profile.rifle.barrel_length_m) * 1e4) / 1e4;
     out.stability = traj.stability();
     out.spin_drift_cm = pt->spin_drift_m * 100.0;
     out.subsonic = pt->mach < 1.0;

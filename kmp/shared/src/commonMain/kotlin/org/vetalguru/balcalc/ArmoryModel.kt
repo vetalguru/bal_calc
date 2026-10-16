@@ -60,6 +60,15 @@ class ArmoryModel internal constructor(private val app: AppModel) {
             put("velocityMps", velocityMps)
         }).jsonObject.getValue("sg").jsonPrimitive.double
 
+    /** A velocity measured in a [fromIn] barrel, in a [toIn] one (the calculation's estimate). */
+    suspend fun barrelVelocity(velocity: Double, fromIn: Double, toIn: Double, caliber: String): Double =
+        api.call("barrelVelocity", buildJsonObject {
+            put("velocity", velocity)
+            put("fromIn", fromIn)
+            put("toIn", toIn)
+            put("caliber", caliber)
+        }).jsonObject.getValue("velocity").jsonPrimitive.double
+
     /** A rifle or cartridge as a file: (JSON, suggested file name). */
     suspend fun exportJson(kind: String, id: Long): ExportedJson =
         api.get("exportJson", buildJsonObject {

@@ -92,6 +92,7 @@ internal fun TwoLines(title: String, subtitle: String, tag: String, onClick: () 
 @Composable
 internal fun FactoryCartridges(model: AppModel, onBack: () -> Unit, onPick: (Long) -> Unit) {
     val mps = stringResource(Res.string.mps_value, "%s")
+    val barrel = stringResource(Res.string.barrel_value, "%s")
     SearchList<CartridgeItem>(
         stringResource(Res.string.factory_cartridges),
         stringResource(Res.string.search_name_caliber),
@@ -101,7 +102,10 @@ internal fun FactoryCartridges(model: AppModel, onBack: () -> Unit, onPick: (Lon
     ) { c ->
         TwoLines(
             c.name,
-            listOf(c.caliber, c.bulletName, mps.replace("%s", c.muzzleVelocity.roundToInt().toString()))
+            listOf(
+                c.caliber, mps.replace("%s", c.muzzleVelocity.roundToInt().toString()),
+                if (c.barrelIn > 0) barrel.replace("%s", c.barrelIn.barrelInches()) else "", c.bulletName,
+            )
                 .filter { it.isNotEmpty() }.joinToString(" · "),
             "factory:${c.name}",
         ) { onPick(c.id) }

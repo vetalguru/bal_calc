@@ -41,6 +41,8 @@ struct RifleForm {
     double sight_height_cm = 5.0;
     double twist_in = 10.0;  // 0 = unknown (no spin effects)
     bool twist_left = false;
+    // Barrel length: factory velocities are recalculated for it (0 = unknown).
+    double barrel_in = 0.0;
 
     // Scope
     std::string click_units = kClickMrad;
@@ -81,7 +83,7 @@ Status DeleteRifle(storage::Database& db, Id rifle_id);
 struct CartridgeForm {
     Id cartridge_id = 0;  // 0 = new cartridge
     // A new cartridge copied from this (library) cartridge keeps what the
-    // form does not show: measured velocities, barrel length, notes.
+    // form does not show: measured velocities, notes.
     Id copy_of = 0;
 
     std::string name;
@@ -99,6 +101,9 @@ struct CartridgeForm {
     double length_in = 0.0;
 
     double muzzle_velocity_mps = 0.0;
+    // The barrel that velocity was measured in (a maker's test barrel); the
+    // calculation recalculates it for the rifle's barrel. 0 = this rifle's.
+    double barrel_in = 0.0;
     double powder_reference_c = 15.0;
     double powder_sensitivity_pct_per_c = 0.0;  // % of V0 per C
 };
@@ -109,6 +114,7 @@ struct CartridgeSummary {
     std::string caliber;
     std::string bullet_name;
     double muzzle_velocity_mps = 0.0;
+    double barrel_in = 0.0;  // the velocity's test barrel, 0 = not stated
 };
 
 std::string Validate(const CartridgeForm& form);

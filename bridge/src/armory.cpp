@@ -129,6 +129,17 @@ void Api::Impl::AddArmoryHandlers(HandlerMap& h) {
                  Num(a, "velocityMps"), 288.15, 101325.0);
              return {{"sg", sg}};
          }},
+        // A velocity measured in one barrel, in another (the calculation's
+        // estimate), for the cartridge editor: velocity when a length is 0.
+        {"barrelVelocity",
+         [](I&, const json& a) -> json {
+             storage::RifleRecord rifle;
+             rifle.barrel_length_m = u::InchToM(Num(a, "toIn"));
+             storage::CartridgeRecord cartridge;
+             cartridge.caliber = Str(a, "caliber");
+             cartridge.barrel_length_m = u::InchToM(Num(a, "fromIn"));
+             return {{"velocity", Num(a, "velocity") * storage::BarrelFactor(rifle, cartridge)}};
+         }},
         {"cartridgeFormWithBullet",
          [](I& s, const json& a) -> json {
              return ToJson(Must(al::WithLibraryBullet(

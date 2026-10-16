@@ -32,6 +32,12 @@ Result<DragModel> MakeDragModel(const BulletRecord& bullet, const DragCurveRecor
 double MuzzleVelocity(const CartridgeRecord& cartridge, double powder_temp_k,
                       double velocity_scale = 1.0);
 
+// The cartridge's velocity in the rifle's barrel as a factor: the box
+// velocity was measured in the cartridge's test barrel (BarrelVelocityFactor,
+// magnum exponent for magnum cartridges). 1 when either length is unknown or
+// the cartridge has measured velocities (a chronograph table on this rifle).
+double BarrelFactor(const RifleRecord& rifle, const CartridgeRecord& cartridge);
+
 struct Solution {
     Shot shot;        // as fired: conditions applied, zero angles set
     ZeroResult zero;  // bore angles found at the rifle's zero conditions

@@ -13,6 +13,7 @@ data class RifleForm(
     val sightHeightCm: Double = 5.0,
     val twistIn: Double = 10.0,
     val twistLeft: Boolean = false,
+    val barrelIn: Double = 0.0,
     val clickUnits: String = "mrad",
     val clickValue: Double = 0.1,
     val reticleId: Long = 0,
@@ -42,6 +43,7 @@ data class CartridgeForm(
     val diameterIn: Double = 0.0,
     val lengthIn: Double = 0.0,
     val muzzleVelocity: Double = 0.0,
+    val barrelIn: Double = 0.0,
     val powderReferenceC: Double = 15.0,
     val powderSensitivity: Double = 0.0,
 )

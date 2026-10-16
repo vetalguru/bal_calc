@@ -1,3 +1,4 @@
+#include <ballistics/effects.h>
 #include <ballistics/storage/database.h>
 #include <ballistics/storage/repository.h>
 #include <ballistics/storage/solution.h>
@@ -118,6 +119,31 @@ TEST_F(StorageSolution, TruingScalesApply) {
     ASSERT_TRUE(base.ok() && draggy.ok());
     EXPECT_LT(draggy.value().trajectory.AtSlantRange(1000.0)->drop_m,
               base.value().trajectory.AtSlantRange(1000.0)->drop_m - 0.1);
+}
+
+// A factory velocity from a 24" test barrel, fired from a 20" barrel.
+TEST_F(StorageSolution, VelocityFollowsTheRifleBarrel) {
+    LoadedProfile p = Load();
+    p.cartridge.caliber = ".308 Win";
+    p.cartridge.barrel_length_m = units::InchToM(24.0);
+    p.rifle.barrel_length_m = units::InchToM(20.0);
+    const double factor = std::pow(20.0 / 24.0, kBarrelExponentStandard);
+    EXPECT_NEAR(BarrelFactor(p.rifle, p.cartridge), factor, 1e-12);
+    ConditionsRecord cond;
+    cond.powder_temp_k = p.cartridge.reference_powder_temp_k;
+    auto sol = Solve(p, cond, 810.0);
+    ASSERT_TRUE(sol.ok());
+    EXPECT_NEAR(sol.value().shot.muzzle_velocity_mps, 790.0 * factor, 1e-9);
+
+    // A magnum loses more; unknown lengths and chronographed velocities none.
+    p.cartridge.caliber = ".300 Win Mag";
+    EXPECT_NEAR(BarrelFactor(p.rifle, p.cartridge), std::pow(20.0 / 24.0, kBarrelExponentMagnum),
+                1e-12);
+    p.rifle.barrel_length_m = 0.0;
+    EXPECT_DOUBLE_EQ(BarrelFactor(p.rifle, p.cartridge), 1.0);
+    p.rifle.barrel_length_m = units::InchToM(20.0);
+    p.cartridge.velocity_points = {{288.15, 780.0}, {298.15, 790.0}};
+    EXPECT_DOUBLE_EQ(BarrelFactor(p.rifle, p.cartridge), 1.0);
 }
 
 TEST_F(StorageSolution, BadBulletDataIsReported) {

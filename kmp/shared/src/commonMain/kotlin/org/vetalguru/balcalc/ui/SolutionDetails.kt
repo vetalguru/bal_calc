@@ -63,7 +63,12 @@ internal fun Details(sol: Solution, targetHeightCm: Double, wide: Boolean) {
         Triple(stringResource(Res.string.drop), "${sol.dropCm.fixed(1)} $cm", false),
         Triple(stringResource(Res.string.drift), "${sol.windageCm.fixed(1)} $cm", false),
         Triple(stringResource(Res.string.spin_drift), "${sol.spinDriftCm.fixed(1)} $cm", false),
-        Triple(stringResource(Res.string.muzzle_velocity), "${sol.muzzleVelocity.fixed(1)} $m", false),
+        Triple(
+            stringResource(Res.string.muzzle_velocity),
+            "${sol.muzzleVelocity.fixed(1)} $m" +
+                if (sol.muzzleVelocityBarrelIn > 0) " · " + stringResource(Res.string.barrel_value, sol.muzzleVelocityBarrelIn.barrelInches()) else "",
+            false,
+        ),
         Triple(
             stringResource(Res.string.stability),
             if (sol.stability > 0) sol.stability.fixed(2) else "—",

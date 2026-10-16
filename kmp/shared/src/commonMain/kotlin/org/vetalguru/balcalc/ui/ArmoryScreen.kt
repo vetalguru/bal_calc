@@ -23,7 +23,7 @@ internal sealed interface Route {
     }
     /** The published scope or rifle catalogs; a pick fills the rifle form. */
     class LibraryScopes(val pick: (LibraryScope, ScopeClick) -> Unit) : Route
-    class LibraryRifles(val pick: (LibraryRifle) -> Unit) : Route
+    class LibraryRifles(val pick: (LibraryRifle, Double) -> Unit) : Route
     class Cartridge(form: CartridgeForm) : Route, WithPhoto() {
         var form by mutableStateOf(form)
     }
@@ -76,7 +76,7 @@ fun ArmoryScreen(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
         Route.Lists -> Lists(model, nav, onChosen)
         is Route.Rifle -> RifleEditor(model, r, nav)
         is Route.LibraryScopes -> LibraryScopes(model, onBack = nav::back) { s, c -> nav.back(); r.pick(s, c) }
-        is Route.LibraryRifles -> LibraryRifles(model, onBack = nav::back) { rifle -> nav.back(); r.pick(rifle) }
+        is Route.LibraryRifles -> LibraryRifles(model, onBack = nav::back) { rifle, barrel -> nav.back(); r.pick(rifle, barrel) }
         is Route.Cartridge -> CartridgeEditor(model, r, nav)
         is Route.Factory -> FactoryCartridges(model, onBack = nav::back) { id ->
             nav.back()

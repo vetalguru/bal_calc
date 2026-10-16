@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.AppModel
@@ -48,6 +49,15 @@ internal fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armor
     }
     val stability = sg
     val partnerName = partner?.name.orEmpty()
+    // The velocity in the current rifle's barrel, as the calculation will use it.
+    var inBarrel by remember { mutableStateOf<Double?>(null) }
+    LaunchedEffect(f.muzzleVelocity, f.barrelIn, f.caliber, partner) {
+        inBarrel = partner?.takeIf { it.barrelIn > 0 && f.barrelIn > 0 && it.barrelIn != f.barrelIn }?.let { r ->
+            loadOr(null) { model.armory.barrelVelocity(f.muzzleVelocity, f.barrelIn, r.barrelIn, f.caliber.ifBlank { r.caliber }) }
+        }
+    }
+    val velocityInBarrel = inBarrel
+    val partnerBarrel = partner?.barrelIn ?: 0.0
     val inch = stringResource(Res.string.unit_in)
     EditorPage(
         title = stringResource(if (f.cartridgeId > 0) Res.string.edit_cartridge else Res.string.new_cartridge),
@@ -99,6 +109,20 @@ internal fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armor
             Fields(
                 wide,
                 { mod -> NumberField(stringResource(Res.string.muzzle_velocity), f.muzzleVelocity, { f = f.copy(muzzleVelocity = it) }, mod, stringResource(Res.string.unit_mps), from = 0.0, to = 2000.0, tag = "muzzleVelocity") },
+                { mod ->
+                    NumberField(stringResource(Res.string.test_barrel), f.barrelIn, { f = f.copy(barrelIn = it) }, mod, inch, 1, 0.0, 40.0,
+                        tag = "testBarrel", hint = stringResource(Res.string.test_barrel_hint))
+                },
+            )
+            if (velocityInBarrel != null) {
+                Text(
+                    stringResource(Res.string.barrel_velocity_line, partnerBarrel.barrelInches(), partnerName, velocityInBarrel.roundToInt().toString()),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.testTag("velocityInBarrel"),
+                )
+            }
+            Fields(
+                wide,
                 { mod -> NumberField(stringResource(Res.string.measured_at_powder), f.powderReferenceC, { f = f.copy(powderReferenceC = it) }, mod, stringResource(Res.string.unit_c), from = -60.0, to = 80.0) },
                 { mod -> NumberField(stringResource(Res.string.powder_sensitivity), f.powderSensitivity, { f = f.copy(powderSensitivity = it) }, mod, stringResource(Res.string.unit_pct_per_c), 3, -2.0, 2.0) },
             )

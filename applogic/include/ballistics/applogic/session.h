@@ -100,6 +100,8 @@ struct SolutionSummary {
     double time_s = 0.0;
     double mach = 0.0;
     double muzzle_velocity_mps = 0.0;
+    // The barrel that velocity is for (the rifle's; 0 = not stated).
+    double muzzle_velocity_barrel_in = 0.0;
     double stability = 0.0;  // 0 when twist/length unknown
     double spin_drift_cm = 0.0;
     bool subsonic = false;           // at the target

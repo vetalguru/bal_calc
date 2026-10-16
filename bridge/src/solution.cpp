@@ -62,6 +62,7 @@ json Api::Impl::Solution() {
                {"time", r.time_s},
                {"mach", r.mach},
                {"muzzleVelocity", r.muzzle_velocity_mps},
+               {"muzzleVelocityBarrelIn", r.muzzle_velocity_barrel_in},
                {"stability", r.stability},
                {"velocityScale", p.value().profile.velocity_scale},
                {"dragScale", p.value().profile.drag_scale},

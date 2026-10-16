@@ -107,12 +107,20 @@ void RemoveOwnBullet(Database& db, Id bullet_id) {
     }
 }
 
+// A stored barrel length in inches, without the metre round trip's last
+// digits (24 in, not 23.999999999999996).
+double BarrelInches(double m) { return std::round(units::MToInch(m) * 1e4) / 1e4; }
+// A barrel length: unknown (0) or a real barrel.
+constexpr const char* kBarrelProblem = "Barrel length must be 0 (unknown) or 4 to 40 inches.";
+bool BarrelOk(double inches) { return inches == 0.0 || (inches >= 4.0 && inches <= 40.0); }
+
 CartridgeSummary Summary(Database& db, const CartridgeRecord& c) {
     CartridgeSummary s;
     s.id = c.id;
     s.name = c.name;
     s.caliber = c.caliber;
     s.muzzle_velocity_mps = c.muzzle_velocity_mps;
+    s.barrel_in = BarrelInches(c.barrel_length_m);
     const auto b = Repository<BulletRecord>(db).Get(c.bullet_id);
     if (const BulletRecord* rec = storage::Found(b)) {
         s.bullet_name = rec->name;
@@ -169,6 +177,9 @@ std::string Validate(const RifleForm& f) {
     if (f.twist_in < 0.0) {
         return "Bullet length and twist cannot be negative.";
     }
+    if (!BarrelOk(f.barrel_in)) {
+        return kBarrelProblem;
+    }
     if (!(f.sight_height_cm >= 0.0 && f.sight_height_cm < 30.0)) {
         return "Sight height must be between 0 and 30 cm.";
     }
@@ -216,6 +227,7 @@ Result<RifleForm> LoadRifleForm(Database& db, Id rifle_id) {
     f.sight_height_cm = r.sight_height_m * 100.0;
     f.twist_in = units::MToInch(std::fabs(r.twist_m));
     f.twist_left = r.twist_m < 0.0;
+    f.barrel_in = BarrelInches(r.barrel_length_m);
     if (r.scope_id) {
         auto scope = Require<ScopeRecord>(db, *r.scope_id, "scope");
         if (!scope) {
@@ -280,6 +292,9 @@ Result<Id> SaveRifleForm(Database& db, const RifleForm& f) {
     r.caliber = f.caliber;
     r.sight_height_m = f.sight_height_cm / 100.0;
     r.twist_m = units::InchToM(f.twist_in) * (f.twist_left ? -1.0 : 1.0);
+    if (f.barrel_in != BarrelInches(r.barrel_length_m)) {  // unchanged: keep the stored length
+        r.barrel_length_m = units::InchToM(f.barrel_in);
+    }
     r.scope_id = s.id;
     r.zero_range_m = f.zero_range_m;
     r.zero_atmosphere = {f.zero_altitude_m, f.zero_pressure_hpa * 100.0,
@@ -323,6 +338,9 @@ std::string Validate(const CartridgeForm& f) {
     }
     if (!(f.muzzle_velocity_mps > 50.0 && f.muzzle_velocity_mps < 2000.0)) {
         return "Muzzle velocity must be between 50 and 2000 m/s.";
+    }
+    if (!BarrelOk(f.barrel_in)) {
+        return kBarrelProblem;
     }
     if (f.library_bullet_id == 0) {
         if (!(f.bc > 0.0 && f.bc < 2.0)) {
@@ -420,6 +438,7 @@ Result<CartridgeForm> LoadCartridgeForm(Database& db, Id cartridge_id) {
     f.library_bullet_id = b.source == kSourceUser ? 0 : b.id;
     FillBullet(f, b);
     f.muzzle_velocity_mps = c.muzzle_velocity_mps;
+    f.barrel_in = BarrelInches(c.barrel_length_m);
     f.powder_reference_c = units::KToC(c.reference_powder_temp_k);
     f.powder_sensitivity_pct_per_c = c.powder_sensitivity_per_k * 100.0;
     return f;
@@ -493,6 +512,9 @@ Result<Id> SaveCartridgeForm(Database& db, const CartridgeForm& f) {
     c.caliber = f.caliber;
     c.bullet_id = b.id;
     c.muzzle_velocity_mps = f.muzzle_velocity_mps;
+    if (f.barrel_in != BarrelInches(c.barrel_length_m)) {  // unchanged: keep the stored length
+        c.barrel_length_m = units::InchToM(f.barrel_in);
+    }
     c.reference_powder_temp_k = units::CToK(f.powder_reference_c);
     c.powder_sensitivity_per_k = f.powder_sensitivity_pct_per_c / 100.0;
     if (auto id = Repository<CartridgeRecord>(db).Save(c); !id) {

@@ -28,12 +28,16 @@ internal fun LibraryButton(tag: String, onClick: () -> Unit) {
     }
 }
 
-/** A library rifle into the form: its twist and caliber, and its name if none yet. */
-internal fun RifleForm.withRifle(r: LibraryRifle) = copy(
+/** A library rifle into the form: its twist, caliber and barrel, and its name if none yet. */
+internal fun RifleForm.withRifle(r: LibraryRifle, barrelIn: Double) = copy(
     name = name.ifBlank { "${r.maker} ${r.model} ${r.caliber}" },
     caliber = r.caliber,
     twistIn = r.twistIn,
+    barrelIn = barrelIn,
 )
+
+/** A catalog rifle with one of the barrels it is sold with (0 = not stated). */
+private data class RifleChoice(val rifle: LibraryRifle, val barrelIn: Double)
 
 /**
  * A library scope into the form. An SFP reticle is taken as true at the
@@ -53,20 +57,21 @@ internal fun RifleForm.withScope(s: LibraryScope, click: ScopeClick) = copy(
 )
 
 @Composable
-internal fun LibraryRifles(model: AppModel, onBack: () -> Unit, onPick: (LibraryRifle) -> Unit) {
-    SearchList<LibraryRifle>(
+internal fun LibraryRifles(model: AppModel, onBack: () -> Unit, onPick: (LibraryRifle, Double) -> Unit) {
+    // One row per barrel: the barrel length sets the factory velocities.
+    SearchList<RifleChoice>(
         stringResource(Res.string.library_rifles),
         stringResource(Res.string.library_search_rifle),
         stringResource(Res.string.catalog_empty),
-        model.library::rifles,
+        { filter -> model.library.rifles(filter).flatMap { r -> r.barrelsIn.ifEmpty { listOf(0.0) }.map { RifleChoice(r, it) } } },
         onBack,
         header = { LibraryNote() },
-    ) { r ->
+    ) { (r, barrel) ->
         TwoLines(
             "${r.maker} ${r.model} · ${r.caliber}",
-            stringResource(Res.string.library_rifle_line, r.twistIn.trimmed(), r.barrelsIn.joinToString(", ") { it.trimmed() }),
-            "libraryRifle:${r.maker} ${r.model} ${r.caliber} ${r.twistIn.trimmed()}",
-        ) { onPick(r) }
+            stringResource(Res.string.library_rifle_line, r.twistIn.trimmed(), barrel.barrelInches()),
+            "libraryRifle:${r.maker} ${r.model} ${r.caliber} ${r.twistIn.trimmed()} ${barrel.trimmed()}",
+        ) { onPick(r, barrel) }
     }
 }
 
@@ -106,4 +111,7 @@ private fun LibraryNote() = Text(
 )
 
 /** 8.0 -> "8", 9.375 -> "9.375". */
-private fun Double.trimmed(): String = if (this == kotlin.math.floor(this)) toLong().toString() else toString()
+internal fun Double.trimmed(): String = if (this == kotlin.math.floor(this)) toLong().toString() else toString()
+
+/** A barrel length for display: one decimal at most (605 mm is 23.8″, not 23.8189″). */
+internal fun Double.barrelInches(): String = (kotlin.math.round(this * 10) / 10).trimmed()

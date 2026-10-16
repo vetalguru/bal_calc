@@ -110,15 +110,22 @@ TEST_F(AppLogic, RifleRoundTrip) {
     EXPECT_NEAR(f.zero_temperature_c, 10.0, 1e-9);
     EXPECT_NEAR(f.zero_pressure_hpa, 990.0, 1e-9);
 
+    EXPECT_DOUBLE_EQ(f.barrel_in, 0.0);  // unknown until entered
+
     RifleForm g = f;
     g.twist_left = true;
     g.zero_range_m = 200.0;
+    g.barrel_in = 20.0;
     ASSERT_TRUE(SaveRifleForm(db_, g).ok());
     EXPECT_EQ(Count<storage::RifleRecord>(db_), 1U);
     EXPECT_EQ(Count<storage::ScopeRecord>(db_), 1U);  // the same scope updated
     const RifleForm h = LoadRifleForm(db_, id.value()).value();
     EXPECT_TRUE(h.twist_left);
     EXPECT_DOUBLE_EQ(h.zero_range_m, 200.0);
+    EXPECT_NEAR(h.barrel_in, 20.0, 1e-9);
+
+    g.barrel_in = 2.0;  // not a barrel
+    EXPECT_NE(Validate(g).find("Barrel"), std::string::npos);
 }
 
 TEST_F(AppLogic, CartridgeRoundTrip) {
@@ -133,7 +140,10 @@ TEST_F(AppLogic, CartridgeRoundTrip) {
     EXPECT_NEAR(f.powder_sensitivity_pct_per_c, 0.1, 1e-12);
 
     f.muzzle_velocity_mps = 805.0;
+    f.barrel_in = 24.0;
     ASSERT_TRUE(SaveCartridgeForm(db_, f).ok());
+    EXPECT_NEAR(LoadCartridgeForm(db_, id.value()).value().barrel_in, 24.0, 1e-9);
+    EXPECT_NEAR(ListCartridges(db_).value().at(0).barrel_in, 24.0, 1e-9);
     EXPECT_EQ(Count<storage::CartridgeRecord>(db_), 1U);
     EXPECT_EQ(Count<storage::BulletRecord>(db_), 1U);
     EXPECT_DOUBLE_EQ(LoadCartridgeForm(db_, id.value()).value().muzzle_velocity_mps, 805.0);
