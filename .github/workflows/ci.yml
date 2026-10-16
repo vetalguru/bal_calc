@@ -2,6 +2,10 @@ name: CI
 
 # One job per check and one per artifact: each shows on its own in a PR, a
 # failure names exactly what broke, and they all run side by side.
+#
+# Artifacts (the private repository's storage is small): packages are kept
+# only from master or a manual run, test reports only when a job fails, and
+# all of them for 3 days. A PR builds the packages without keeping them.
 
 on:
   push:
@@ -121,10 +125,10 @@ jobs:
         run: ./gradlew :shared:desktopTest
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: desktop-tests-linux
-          retention-days: 7  # the repository's artifact storage is limited
+          retention-days: 3
           path: |
             kmp/shared/build/screenshots/*.png
             kmp/shared/build/reports/tests/
@@ -143,10 +147,10 @@ jobs:
         run: ./gradlew.bat :shared:desktopTest
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: desktop-tests-windows
-          retention-days: 7
+          retention-days: 3
           path: |
             kmp/shared/build/screenshots/*.png
             kmp/shared/build/reports/tests/
@@ -167,10 +171,10 @@ jobs:
         run: ./gradlew :androidApp:lintDebug
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: android-lint-report
-          retention-days: 7
+          retention-days: 3
           path: kmp/androidApp/build/reports/lint-results-debug.*
 
   # --- Kotlin app: artifacts ------------------------------------------------
@@ -191,9 +195,10 @@ jobs:
         run: ./gradlew :androidApp:assembleDebug
 
       - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
         with:
           name: android-apk
-          retention-days: 7
+          retention-days: 3
           path: kmp/androidApp/build/outputs/apk/debug/*.apk
 
   linux-deb:
@@ -210,9 +215,10 @@ jobs:
         run: ./gradlew :desktopApp:packageDeb
 
       - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
         with:
           name: linux-deb
-          retention-days: 7
+          retention-days: 3
           path: kmp/desktopApp/build/compose/binaries/main/deb/*.deb
 
   windows-msi:
@@ -230,7 +236,8 @@ jobs:
         run: ./gradlew.bat :desktopApp:packageMsi
 
       - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
         with:
           name: windows-msi
-          retention-days: 7
+          retention-days: 3
           path: kmp/desktopApp/build/compose/binaries/main/msi/*.msi
