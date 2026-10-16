@@ -1,0 +1,151 @@
+name: Release
+
+# A tag vX.Y.Z builds the signed Android APK, the Windows MSI and the Linux
+# DEB and puts them in a draft GitHub release, with the changes since the
+# previous tag. The tag must match the version in CMakeLists.txt. Check the
+# draft and publish it by hand. Setup and steps: docs/github-release.md.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write  # create the release
+
+jobs:
+  version:
+    name: "Check the version"
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: version
+        name: The tag matches CMakeLists.txt
+        run: |
+          version=$(sed -n 's/^project(ballistics VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match the version $version in CMakeLists.txt (expected v$version)."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  android:
+    name: "Android APK (signed)"
+    needs: version
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+        with:
+          android: "true"
+
+      # The same key as the installed app: an update signed with another key
+      # does not install over it.
+      - name: The keystore from the secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Add the ANDROID_KEYSTORE_* secrets first (docs/github-release.md)."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          echo "BALCALC_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+
+      # --no-configuration-cache: the password stays out of Gradle's cache.
+      - name: Build the release APK
+        working-directory: kmp
+        env:
+          BALCALC_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          BALCALC_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: ./gradlew :androidApp:assembleRelease --no-configuration-cache
+
+      - name: Check the signature
+        env:
+          EXPECTED_SHA256: ${{ vars.ANDROID_CERT_SHA256 }}
+        run: |
+          apksigner=$(ls -d "$ANDROID_SDK_ROOT"/build-tools/*/ | sort -V | tail -1)apksigner
+          apk=$(ls kmp/androidApp/build/outputs/apk/release/*.apk)
+          "$apksigner" verify --print-certs "$apk" | tee certs.txt
+          if [ -n "$EXPECTED_SHA256" ]; then
+            expected=$(echo "$EXPECTED_SHA256" | tr -d ': ' | tr 'A-F' 'a-f')
+            if ! grep -q "SHA-256 digest: $expected" certs.txt; then
+              echo "::error::The APK is not signed with the key of the installed app (ANDROID_CERT_SHA256)."
+              exit 1
+            fi
+          fi
+
+      - name: Remove the keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          retention-days: 1
+          path: kmp/androidApp/build/outputs/apk/release/*.apk
+
+  windows-msi:
+    name: "Windows MSI"
+    needs: version
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+
+      - name: Build the MSI
+        working-directory: kmp
+        run: ./gradlew.bat :desktopApp:packageMsi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-msi
+          retention-days: 1
+          path: kmp/desktopApp/build/compose/binaries/main/msi/*.msi
+
+  linux-deb:
+    name: "Linux DEB"
+    needs: version
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+
+      - name: Build the DEB
+        working-directory: kmp
+        run: ./gradlew :desktopApp:packageDeb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-deb
+          retention-days: 1
+          path: kmp/desktopApp/build/compose/binaries/main/deb/*.deb
+
+  release:
+    name: "Draft the GitHub release"
+    needs: [version, android, windows-msi, linux-deb]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          ls -l dist
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft --verify-tag --generate-notes \
+            --title "Holdmark $VERSION"
