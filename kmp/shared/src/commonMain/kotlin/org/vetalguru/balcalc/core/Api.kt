@@ -78,8 +78,9 @@ class Api(private val engine: Engine) {
          * Bump when the starter library grows: a database seeded with an older
          * version gets the new records (the ones it has are skipped).
          * 2: published bullets and the generic reticles.
+         * 3: published factory loads and Nosler's hunting bullets.
          */
-        const val SEED_VERSION = 2
+        const val SEED_VERSION = 3
 
         val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
