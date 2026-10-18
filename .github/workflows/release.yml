@@ -1,28 +1,32 @@
 name: Release
 
-# A tag vX.Y.Z builds the signed Android APK, the Windows MSI and the Linux
-# DEB and puts them in a draft GitHub release, with the changes since the
-# previous tag. The tag must match the version in CMakeLists.txt. Check the
-# draft and publish it by hand. Setup and steps: docs/github-release.md.
+# A tag vX.Y.Z creates a draft GitHub release, with the changes since the
+# previous tag, and attaches the signed Android APK, the Windows MSI and the
+# Linux DEB to it. The tag must match the version in CMakeLists.txt. Check
+# the draft and publish it by hand. Setup and steps: docs/github-release.md.
+#
+# Each build uploads its file straight into the release: release files are
+# not Actions artifacts and do not count against their storage quota.
 
 on:
   push:
     tags: ["v*"]
 
 permissions:
-  contents: write  # create the release
+  contents: write  # create the release and upload its files
+
+env:
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
-  version:
-    name: "Check the version"
+  draft:
+    name: "Check the version and draft the release"
     runs-on: ubuntu-24.04
-    outputs:
-      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
-      - id: version
-        name: The tag matches CMakeLists.txt
+      - name: The tag matches CMakeLists.txt
+        id: version
         run: |
           version=$(sed -n 's/^project(ballistics VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
           if [ "$GITHUB_REF_NAME" != "v$version" ]; then
@@ -31,9 +35,21 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+      # A re-run keeps the draft it already made.
+      - name: Create the draft release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "The release $GITHUB_REF_NAME exists: its files are replaced."
+          else
+            gh release create "$GITHUB_REF_NAME" --draft --verify-tag --generate-notes \
+              --title "Holdmark $VERSION"
+          fi
+
   android:
     name: "Android APK (signed)"
-    needs: version
+    needs: draft
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -64,6 +80,10 @@ jobs:
           BALCALC_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: ./gradlew :androidApp:assembleRelease --no-configuration-cache
 
+      - name: Remove the keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"
+
       - name: Check the signature
         env:
           EXPECTED_SHA256: ${{ vars.ANDROID_CERT_SHA256 }}
@@ -79,19 +99,12 @@ jobs:
             fi
           fi
 
-      - name: Remove the keystore
-        if: always()
-        run: rm -f "$RUNNER_TEMP/release.keystore"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-apk
-          retention-days: 1
-          path: kmp/androidApp/build/outputs/apk/release/*.apk
+      - name: Attach to the release
+        run: gh release upload "$GITHUB_REF_NAME" kmp/androidApp/build/outputs/apk/release/*.apk --clobber
 
   windows-msi:
     name: "Windows MSI"
-    needs: version
+    needs: draft
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -103,15 +116,13 @@ jobs:
         working-directory: kmp
         run: ./gradlew.bat :desktopApp:packageMsi
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-msi
-          retention-days: 1
-          path: kmp/desktopApp/build/compose/binaries/main/msi/*.msi
+      - name: Attach to the release
+        shell: bash
+        run: gh release upload "$GITHUB_REF_NAME" kmp/desktopApp/build/compose/binaries/main/msi/*.msi --clobber
 
   linux-deb:
     name: "Linux DEB"
-    needs: version
+    needs: draft
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -123,29 +134,5 @@ jobs:
         working-directory: kmp
         run: ./gradlew :desktopApp:packageDeb
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-deb
-          retention-days: 1
-          path: kmp/desktopApp/build/compose/binaries/main/deb/*.deb
-
-  release:
-    name: "Draft the GitHub release"
-    needs: [version, android, windows-msi, linux-deb]
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
-
-      - name: Create the draft release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ needs.version.outputs.version }}
-        run: |
-          ls -l dist
-          gh release create "$GITHUB_REF_NAME" dist/* \
-            --repo "$GITHUB_REPOSITORY" \
-            --draft --verify-tag --generate-notes \
-            --title "Holdmark $VERSION"
+      - name: Attach to the release
+        run: gh release upload "$GITHUB_REF_NAME" kmp/desktopApp/build/compose/binaries/main/deb/*.deb --clobber

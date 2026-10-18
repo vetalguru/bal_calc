@@ -8,8 +8,10 @@ pushed:
 - the Windows MSI and the Linux DEB
   (`Holdmark-<version>-windows-x64-release.msi`, `...-linux-amd64-release.deb`).
 
-The files are attached to a **draft** release whose notes list the changes
-since the previous tag. You check the draft and publish it.
+The workflow first creates a **draft** release whose notes list the changes
+since the previous tag; each build then uploads its file straight into it
+(release files are not Actions artifacts, so the artifact storage quota does
+not apply). You check the draft and publish it.
 
 ## Once: the signing secrets
 
@@ -53,7 +55,8 @@ gh variable set ANDROID_CERT_SHA256 --body "D2:61:41:...:C7:C0"
 4. Open the draft under Releases, edit the notes if needed, and press
    Publish release.
 
-A failed run can be re-run from the Actions tab. To redo a release, delete
+A failed build can be re-run from the Actions tab: it keeps the draft and
+replaces its own file there. To redo a release, delete
 the draft and the tag (`git push --delete origin vX.Y.Z`), then tag again.
 
 The locally signed APK (`tools/android-release.ps1`, see
