@@ -1,0 +1,138 @@
+name: Release
+
+# A tag vX.Y.Z creates a draft GitHub release, with the changes since the
+# previous tag, and attaches the signed Android APK, the Windows MSI and the
+# Linux DEB to it. The tag must match the version in CMakeLists.txt. Check
+# the draft and publish it by hand. Setup and steps: docs/github-release.md.
+#
+# Each build uploads its file straight into the release: release files are
+# not Actions artifacts and do not count against their storage quota.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write  # create the release and upload its files
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  draft:
+    name: "Check the version and draft the release"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: The tag matches CMakeLists.txt
+        id: version
+        run: |
+          version=$(sed -n 's/^project(ballistics VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match the version $version in CMakeLists.txt (expected v$version)."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # A re-run keeps the draft it already made.
+      - name: Create the draft release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "The release $GITHUB_REF_NAME exists: its files are replaced."
+          else
+            gh release create "$GITHUB_REF_NAME" --draft --verify-tag --generate-notes \
+              --title "Holdmark $VERSION"
+          fi
+
+  android:
+    name: "Android APK (signed)"
+    needs: draft
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+        with:
+          android: "true"
+
+      # The same key as the installed app: an update signed with another key
+      # does not install over it.
+      - name: The keystore from the secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Add the ANDROID_KEYSTORE_* secrets first (docs/github-release.md)."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          echo "BALCALC_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+
+      # --no-configuration-cache: the password stays out of Gradle's cache.
+      - name: Build the release APK
+        working-directory: kmp
+        env:
+          BALCALC_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          BALCALC_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: ./gradlew :androidApp:assembleRelease --no-configuration-cache
+
+      - name: Remove the keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"
+
+      - name: Check the signature
+        env:
+          EXPECTED_SHA256: ${{ vars.ANDROID_CERT_SHA256 }}
+        run: |
+          apksigner=$(ls -d "$ANDROID_SDK_ROOT"/build-tools/*/ | sort -V | tail -1)apksigner
+          apk=$(ls kmp/androidApp/build/outputs/apk/release/*.apk)
+          "$apksigner" verify --print-certs "$apk" | tee certs.txt
+          if [ -n "$EXPECTED_SHA256" ]; then
+            expected=$(echo "$EXPECTED_SHA256" | tr -d ': ' | tr 'A-F' 'a-f')
+            if ! grep -q "SHA-256 digest: $expected" certs.txt; then
+              echo "::error::The APK is not signed with the key of the installed app (ANDROID_CERT_SHA256)."
+              exit 1
+            fi
+          fi
+
+      - name: Attach to the release
+        run: gh release upload "$GITHUB_REF_NAME" kmp/androidApp/build/outputs/apk/release/*.apk --clobber
+
+  windows-msi:
+    name: "Windows MSI"
+    needs: draft
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+
+      - name: Build the MSI
+        working-directory: kmp
+        run: ./gradlew.bat :desktopApp:packageMsi
+
+      - name: Attach to the release
+        shell: bash
+        run: gh release upload "$GITHUB_REF_NAME" kmp/desktopApp/build/compose/binaries/main/msi/*.msi --clobber
+
+  linux-deb:
+    name: "Linux DEB"
+    needs: draft
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+
+      - name: Build the DEB
+        working-directory: kmp
+        run: ./gradlew :desktopApp:packageDeb
+
+      - name: Attach to the release
+        run: gh release upload "$GITHUB_REF_NAME" kmp/desktopApp/build/compose/binaries/main/deb/*.deb --clobber
