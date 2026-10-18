@@ -4,8 +4,9 @@ name: CI
 # failure names exactly what broke, and they all run side by side.
 #
 # Artifacts (the private repository's storage is small): packages are kept
-# only from master or a manual run, test reports only when a job fails, and
-# all of them for 3 days. A PR builds the packages without keeping them.
+# only from a manual run (Actions -> CI -> Run workflow), test reports only
+# when a job fails, and all of them for 3 days. Pushes and PRs build and
+# check the packages without keeping them.
 
 on:
   push:
@@ -195,7 +196,7 @@ jobs:
         run: ./gradlew :androidApp:assembleDebug
 
       - uses: actions/upload-artifact@v4
-        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
         with:
           name: android-apk
           retention-days: 3
@@ -215,7 +216,7 @@ jobs:
         run: ./gradlew :desktopApp:packageDeb
 
       - uses: actions/upload-artifact@v4
-        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
         with:
           name: linux-deb
           retention-days: 3
@@ -236,7 +237,7 @@ jobs:
         run: ./gradlew.bat :desktopApp:packageMsi
 
       - uses: actions/upload-artifact@v4
-        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
         with:
           name: windows-msi
           retention-days: 3
