@@ -920,13 +920,18 @@ TEST_F(BridgeApiFile, PairThatNoLongerLoads) {
     EXPECT_EQ(Fails("logShot", {{"rangeM", 300}, {"elevation", 1}}), sol.at("error"));
 }
 
-// A pair whose truing on disk is impossible (a drag scale of 0): the
-// engine's own complaint comes back as the error.
+// A pair whose truing on disk is impossible (a drag scale of 0): a
+// solution that is not ok and says it is the truing, like other bad data.
 TEST_F(BridgeApiFile, ImpossibleTruingOnDisk) {
     Sample();
     Sql("UPDATE profile SET drag_scale = 0");
-    EXPECT_EQ(Fails("solution"), "drag scale must be positive");
-    EXPECT_EQ(Fails("rangeTable"), "drag scale must be positive");
+    const std::string why = "profile truing: drag scale must be positive";
+    const json sol = Ok("solution");
+    EXPECT_FALSE(sol.at("ok").get<bool>());
+    EXPECT_EQ(sol.at("error"), why);
+    const json table = Ok("rangeTable");
+    EXPECT_FALSE(table.at("ok").get<bool>());
+    EXPECT_EQ(table.at("error"), why);
     Sql("UPDATE profile SET drag_scale = 1");
     EXPECT_TRUE(Ok("solution").at("ok").get<bool>());
 }
@@ -945,21 +950,54 @@ TEST_F(BridgeApiFile, ExportOfARifleNotListedYet) {
     EXPECT_EQ(Ok("select", {{"rifleId", hidden}}).at("rifles").size(), 2U);
 }
 
-// A damaged target list in the settings is reported, not a crash.
+// A damaged target list in the settings: a field of the wrong type takes
+// its default, the list still loads.
 TEST_F(BridgeApiFile, DamagedTargetEntry) {
     Sample();
-    Setting("ui.targets", R"([{"name": "A", "rangeM": "far"}])");
-    EXPECT_NE(Fails("targets").find("Bad arguments"), std::string::npos);
+    Setting("ui.targets", R"([{"name": 5, "rangeM": "far"}, 7])");
+    json t = Ok("targets");
+    ASSERT_EQ(t.size(), 2U);
+    EXPECT_EQ(t[0].at("name"), "");
+    EXPECT_EQ(t[0].at("rangeM"), 0.0);
+    EXPECT_EQ(t[1].at("rangeM"), 0.0);
+    EXPECT_EQ(Ok("selectTarget", {{"index", 0}}).at("conditions").at("targetRangeM"), 300.0);
     for (const char* key : {"lookAngleDeg", "windSpeed", "windFromDeg"}) {
         Setting("ui.targets", json::array({{{"name", "A"}, {"rangeM", 300}, {key, "x"}}}).dump());
-        EXPECT_NE(Fails("targets").find("Bad arguments"), std::string::npos) << key;
+        t = Ok("targets");
+        ASSERT_EQ(t.size(), 1U) << key;
+        EXPECT_EQ(t[0].at(key), 0.0) << key;
+        EXPECT_TRUE(t[0].at("ok").get<bool>()) << key;
     }
     Setting("ui.targets", R"([{"name": "A"}])");  // no range: the session's
-    const json t = Ok("targets");
+    t = Ok("targets");
     ASSERT_EQ(t.size(), 1U);
     EXPECT_EQ(t[0].at("rangeM"), 0.0);
     EXPECT_TRUE(t[0].at("ok").get<bool>());
     EXPECT_EQ(Ok("selectTarget", {{"index", 0}}).at("conditions").at("targetRangeM"), 300.0);
+}
+
+// A damaged situation: fields of the wrong type take their defaults.
+TEST_F(BridgeApiFile, DamagedSituationEntry) {
+    const json st = Sample();
+    Setting("ui.situations",
+            json::array({{{"name", "Range"},
+                          {"rifleId", st.at("currentRifleId")},
+                          {"cartridgeId", st.at("currentCartridgeId")},
+                          {"holdMode", 3},
+                          {"conditions", "windy"}},
+                         {{"name", 1}, {"rifleId", "x"}, {"conditions", {{"targetRangeM", 450}}}},
+                         5})
+                .dump());
+    const json list = Ok("situations");
+    ASSERT_EQ(list.size(), 3U);
+    EXPECT_EQ(list[0].at("rangeM"), 0.0);
+    EXPECT_TRUE(list[0].at("available").get<bool>());
+    EXPECT_EQ(list[1].at("name"), "");
+    EXPECT_EQ(list[1].at("rangeM"), 450.0);
+    EXPECT_FALSE(list[1].at("available").get<bool>());
+    const json applied = Ok("applySituation", {{"name", "Range"}});
+    EXPECT_EQ(applied.at("holdMode"), st.at("holdMode"));
+    EXPECT_EQ(applied.at("conditions"), st.at("conditions"));
 }
 
 // Tables gone from the file: each call reports the storage error.

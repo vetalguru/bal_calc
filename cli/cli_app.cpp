@@ -509,17 +509,18 @@ std::string ReadFile(const std::filesystem::path& path, bool& ok) {
     return text.str();
 }
 
-bool OpenDb(const Args& a, bs::Database& db, std::ostream& err) {
+// Opens --db; the exit code when it cannot (2: no --db, 1: not opened), or 0.
+int OpenDb(const Args& a, bs::Database& db, std::ostream& err) {
     const auto db_path = a.opts.find("db");
     if (db_path == a.opts.end()) {
         err << a.command << " needs --db FILE\n";
-        return false;
+        return 2;
     }
     if (auto s = db.Open(db_path->second); !s) {
         err << "cannot open " << db_path->second << ": " << s.error().message << "\n";
-        return false;
+        return 1;
     }
-    return true;
+    return 0;
 }
 
 int CmdImport(const Args& a, std::ostream& out, std::ostream& err) {
@@ -528,8 +529,8 @@ int CmdImport(const Args& a, std::ostream& out, std::ostream& err) {
         return 2;
     }
     bs::Database db;
-    if (!OpenDb(a, db, err)) {
-        return 1;
+    if (const int code = OpenDb(a, db, err); code != 0) {
+        return code;
     }
     int failed = 0;
     for (const std::string& file : a.files) {
@@ -558,8 +559,8 @@ int CmdSeed(const Args& a, std::ostream& out, std::ostream& err) {
         return 2;
     }
     bs::Database db;
-    if (!OpenDb(a, db, err)) {
-        return 1;
+    if (const int code = OpenDb(a, db, err); code != 0) {
+        return code;
     }
     std::vector<ballistics::applogic::SeedFile> files;
     std::error_code ec;
