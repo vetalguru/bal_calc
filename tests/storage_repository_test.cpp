@@ -16,6 +16,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -950,6 +951,24 @@ TEST_F(StorageSolutionEdges, SolveReportsBadDragAndUnreachableZero) {
     auto sol = Solve(far, ConditionsRecord{}, 300.0);
     ASSERT_FALSE(sol.ok());
     EXPECT_NE(sol.error().message.find("could not zero"), std::string::npos);
+}
+
+TEST_F(StorageSolutionEdges, ImpossibleTruingIsAnErrorNotAThrow) {
+    auto p = LoadProfile(db_, profile_id_);
+    ASSERT_TRUE(p.ok());
+    LoadedProfile zero_scale = p.value();
+    zero_scale.profile.drag_scale = 0.0;
+    std::optional<Result<Solution>> sol;
+    ASSERT_NO_THROW(sol.emplace(Solve(zero_scale, ConditionsRecord{}, 300.0)));
+    ASSERT_FALSE(sol->ok());
+    EXPECT_EQ(sol->error().message, "profile truing: drag scale must be positive");
+
+    LoadedProfile bad_dsf = p.value();
+    bad_dsf.profile.dsf = {{1.0, 0.0}};
+    sol.reset();
+    ASSERT_NO_THROW(sol.emplace(Solve(bad_dsf, ConditionsRecord{}, 300.0)));
+    ASSERT_FALSE(sol->ok());
+    EXPECT_EQ(sol->error().message.rfind("profile truing: ", 0), 0U);
 }
 
 TEST(StorageClicksEdges, NoClickValueGivesNoClicks) {

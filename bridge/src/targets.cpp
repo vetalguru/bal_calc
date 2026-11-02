@@ -3,6 +3,15 @@
 
 namespace ballistics::bridge {
 
+namespace {
+
+// A stored entry's object (a situation's conditions), empty when damaged.
+json ObjectAt(const json& j, const char* key) {
+    return j.contains(key) && j.at(key).is_object() ? j.at(key) : json::object();
+}
+
+}  // namespace
+
 json Api::Impl::TargetsStored() {
     const auto text = Setting(kTargetsKey);
     json list = text ? json::parse(*text, nullptr, false) : json::array();
@@ -12,9 +21,9 @@ json Api::Impl::TargetsStored() {
 // The session with a target's range, angle and wind (one zone).
 al::SessionConditions Api::Impl::SessionFor(const json& t) const {
     al::SessionConditions s = Session();
-    s.target_range_m = t.value("rangeM", s.target_range_m);
-    s.look_angle_deg = t.value("lookAngleDeg", 0.0);
-    s.winds = {al::WindInput{t.value("windSpeed", 0.0), t.value("windFromDeg", 180.0), 0.0}};
+    s.target_range_m = Num(t, "rangeM", s.target_range_m);
+    s.look_angle_deg = Num(t, "lookAngleDeg", 0.0);
+    s.winds = {al::WindInput{Num(t, "windSpeed", 0.0), Num(t, "windFromDeg", 180.0), 0.0}};
     s.wind_gust_mps = 0.0;
     s.target_speed_mps = 0.0;
     return s;
@@ -46,11 +55,11 @@ json Api::Impl::Targets() {
         }
     }
     for (const json& t : list) {
-        json item = {{"name", t.value("name", "")},
-                     {"rangeM", t.value("rangeM", 0.0)},
-                     {"lookAngleDeg", t.value("lookAngleDeg", 0.0)},
-                     {"windSpeed", t.value("windSpeed", 0.0)},
-                     {"windFromDeg", t.value("windFromDeg", 180.0)},
+        json item = {{"name", Str(t, "name")},
+                     {"rangeM", Num(t, "rangeM", 0.0)},
+                     {"lookAngleDeg", Num(t, "lookAngleDeg", 0.0)},
+                     {"windSpeed", Num(t, "windSpeed", 0.0)},
+                     {"windFromDeg", Num(t, "windFromDeg", 180.0)},
                      {"ok", false}};
         if (p) {
             const al::SolutionSummary r = al::Summarize(*p, SessionFor(t), Unit());
@@ -115,10 +124,10 @@ json Api::Impl::SelectTarget(std::size_t index) {
     }
     const json& t = list.at(index);
     json c = Conditions();
-    c["targetRangeM"] = t.value("rangeM", 300.0);
-    c["lookAngleDeg"] = t.value("lookAngleDeg", 0.0);
-    c["windSpeed"] = t.value("windSpeed", 0.0);
-    c["windFromDeg"] = t.value("windFromDeg", 180.0);
+    c["targetRangeM"] = Num(t, "rangeM", 300.0);
+    c["lookAngleDeg"] = Num(t, "lookAngleDeg", 0.0);
+    c["windSpeed"] = Num(t, "windSpeed", 0.0);
+    c["windFromDeg"] = Num(t, "windFromDeg", 180.0);
     c["windZones"] = json::array();
     SetConditions(c);
     return State();
@@ -142,17 +151,17 @@ bool Api::Impl::Exists(Id rifle, Id cartridge) {
 json Api::Impl::Situations() {
     json out = json::array();
     for (const json& s : SituationsStored()) {
-        const Id rifle = s.value("rifleId", Id{0});
-        const Id cartridge = s.value("cartridgeId", Id{0});
+        const Id rifle = IdOf(s, "rifleId");
+        const Id cartridge = IdOf(s, "cartridgeId");
         const bool ok = Exists(rifle, cartridge);
         const auto r = bs::Repository<bs::RifleRecord>(db).Get(rifle);
         const auto c = bs::Repository<bs::CartridgeRecord>(db).Get(cartridge);
         const bs::RifleRecord* rifle_record = bs::Found(r);
         const bs::CartridgeRecord* cartridge_record = bs::Found(c);
-        out.push_back({{"name", s.value("name", "")},
+        out.push_back({{"name", Str(s, "name")},
                        {"rifleName", ok && rifle_record ? rifle_record->name : ""},
                        {"cartridgeName", ok && cartridge_record ? cartridge_record->name : ""},
-                       {"rangeM", s.value("conditions", json::object()).value("targetRangeM", 0.0)},
+                       {"rangeM", Num(ObjectAt(s, "conditions"), "targetRangeM")},
                        {"available", ok}});
     }
     return out;
@@ -167,7 +176,7 @@ json Api::Impl::SaveSituation(const std::string& name) {
     }
     json list = json::array();
     for (const json& s : SituationsStored()) {
-        if (s.value("name", "") != name) {
+        if (Str(s, "name") != name) {
             list.push_back(s);
         }
     }
@@ -182,17 +191,17 @@ json Api::Impl::SaveSituation(const std::string& name) {
 
 json Api::Impl::ApplySituation(const std::string& name) {
     for (const json& s : SituationsStored()) {
-        if (s.value("name", "") != name) {
+        if (Str(s, "name") != name) {
             continue;
         }
-        const Id rifle = s.value("rifleId", Id{0});
-        const Id cartridge = s.value("cartridgeId", Id{0});
+        const Id rifle = IdOf(s, "rifleId");
+        const Id cartridge = IdOf(s, "cartridgeId");
         if (!Exists(rifle, cartridge)) {
             throw Failure("The rifle or cartridge of this situation was deleted.");
         }
         Select(rifle, cartridge);
-        SetConditions(s.value("conditions", json::object()));
-        hold_mode = al::ToString(al::HoldModeFromString(s.value("holdMode", hold_mode)));
+        SetConditions(ObjectAt(s, "conditions"));
+        hold_mode = al::ToString(al::HoldModeFromString(Str(s, "holdMode", hold_mode)));
         Put(kHoldModeKey, hold_mode);
         return State();
     }
@@ -202,7 +211,7 @@ json Api::Impl::ApplySituation(const std::string& name) {
 json Api::Impl::DeleteSituation(const std::string& name) {
     json list = json::array();
     for (const json& s : SituationsStored()) {
-        if (s.value("name", "") != name) {
+        if (Str(s, "name") != name) {
             list.push_back(s);
         }
     }

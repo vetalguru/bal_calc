@@ -310,10 +310,9 @@ TEST(CliEdgeDb, CommandsNeedADatabase) {
     EXPECT_EQ(err, table_msg);
     EXPECT_EQ(RunCli({"--db", "x.db", "table", "--profile", "one"}, out, err), 2);
     EXPECT_EQ(err, "--profile: not a number: one\n");
-    // Import and seed say so too, but exit with 1 (see the report).
-    EXPECT_EQ(RunCli({"import", "a.ammo"}, out, err), 1);
+    EXPECT_EQ(RunCli({"import", "a.ammo"}, out, err), 2);
     EXPECT_EQ(err, "import needs --db FILE\n");
-    EXPECT_EQ(RunCli({"seed", "dir"}, out, err), 1);
+    EXPECT_EQ(RunCli({"seed", "dir"}, out, err), 2);
     EXPECT_EQ(err, "seed needs --db FILE\n");
     EXPECT_FALSE(fs::exists("x.db"));
 }
