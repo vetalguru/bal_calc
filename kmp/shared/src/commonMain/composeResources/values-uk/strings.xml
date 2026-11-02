@@ -289,6 +289,7 @@
     <string name="add_zone">Додати зону</string>
     <string name="remove_zone">Прибрати</string>
     <string name="quick_zone_note">Зона 1 з %1$s, до %2$s м: решта — на сторінці «Умови».</string>
+    <string name="wind_along_note">Вітер дме вздовж лінії вогню: бічного зносу немає, вертикаль майже не змінюється. Вкажіть на кільці, звідки він дме.</string>
     <string name="moving_target">Рухома ціль</string>
     <string name="target_speed">Швидкість цілі</string>
     <string name="unit_kmh">км/год</string>

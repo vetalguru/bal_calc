@@ -172,6 +172,17 @@ internal fun Controller(model: AppModel, size: Dp, onWeather: () -> Unit = {}) {
                 modifier = Modifier.clickable(onClick = onWeather).padding(4.dp).testTag("weatherLine"),
             )
         }
+        // A head or tail wind (12 or 6 o'clock) has no side to it: the speed
+        // then barely moves the solution, which would look like a fault.
+        if (c.windSpeed > 0.0 && c.windZones.isEmpty() && abs(sin(c.windFromDeg * PI / 180)) < 1e-3) {
+            Text(
+                stringResource(Res.string.wind_along_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.testTag("windAlongNote"),
+            )
+        }
         if (c.windZones.isNotEmpty()) {
             Text(
                 stringResource(Res.string.quick_zone_note, c.windZones.size + 1, c.windUntilM.roundToInt()),
