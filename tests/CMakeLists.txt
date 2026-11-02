@@ -10,16 +10,21 @@ set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)  # keep GoogleTest out of packages
 FetchContent_MakeAvailable(googletest)
 
 add_executable(core_tests
+    applogic_armory_test.cpp
     applogic_import_test.cpp
     applogic_library_test.cpp
+    applogic_profile_io_test.cpp
     applogic_reticle_test.cpp
-    applogic_truing_test.cpp
+    applogic_session_test.cpp
     applogic_test.cpp
+    applogic_truing_test.cpp
+    bridge_api_test.cpp
     bridge_test.cpp
     physics_analysis_test.cpp
     physics_basics_test.cpp
     physics_bc_test.cpp
     physics_drag_models_test.cpp
+    physics_edge_test.cpp
     physics_effects_test.cpp
     physics_gekht_test.cpp
     physics_reference_test.cpp
@@ -27,6 +32,7 @@ add_executable(core_tests
     smoke_test.cpp
     storage_database_test.cpp
     storage_migration_test.cpp
+    storage_repository_test.cpp
     storage_solution_test.cpp
 )
 target_link_libraries(core_tests PRIVATE
@@ -47,7 +53,7 @@ target_compile_definitions(core_tests PRIVATE
     BALLISTICS_TEST_REFERENCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/reference")
 
 if(TARGET bal_cli_lib)
-    target_sources(core_tests PRIVATE cli_test.cpp)
+    target_sources(core_tests PRIVATE cli_test.cpp cli_edge_test.cpp)
     target_link_libraries(core_tests PRIVATE bal_cli_lib)
 endif()
 
