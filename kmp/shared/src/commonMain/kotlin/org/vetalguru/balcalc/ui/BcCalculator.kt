@@ -74,7 +74,7 @@ fun BcCalculatorDialog(model: AppModel, onClose: () -> Unit) {
                         modifier = Modifier.testTag("bcModeHit"))
                 }
                 ChoiceField(stringResource(Res.string.bc_table), listOf("G1" to "G1", "G7" to "G7"), table,
-                    { table = it; result = null }, Modifier.fillMaxWidth())
+                    { table = it; result = null }, Modifier.fillMaxWidth().testTag("bcTable"))
                 if (!hitMode) {
                     NumberField(stringResource(Res.string.bc_v_near), vNear, { vNear = it }, Modifier.fillMaxWidth(), mps,
                         decimals = 1, from = 0.0, to = 2000.0, tag = "bcVNear")

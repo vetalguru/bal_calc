@@ -178,6 +178,31 @@ jobs:
           retention-days: 3
           path: kmp/androidApp/build/reports/lint-results-debug.*
 
+  android-tests:
+    name: "Kotlin: Android tests (Robolectric)"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup-kotlin
+        with:
+          android: "true"
+
+      # The Android code on the JVM: sensors, pickers, camera, QR, pictures,
+      # the widget and the seed assets. The core (an arm64 .so) is not loaded.
+      - name: Android host tests
+        working-directory: kmp
+        run: ./gradlew :shared:testAndroidHostTest :androidApp:testDebugUnitTest
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-tests
+          path: |
+            kmp/shared/build/reports/tests/testAndroidHostTest/
+            kmp/androidApp/build/reports/tests/testDebugUnitTest/
+
   # --- Kotlin app: artifacts ------------------------------------------------
 
   android-apk:
