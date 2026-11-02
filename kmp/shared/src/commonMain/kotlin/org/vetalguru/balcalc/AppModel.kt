@@ -116,7 +116,10 @@ class AppModel(val api: Api, private val scope: CoroutineScope) {
      * solution) even if the screen that asked is gone meanwhile, e.g. a tab
      * switched right after Save.
      */
-    internal suspend fun <T> detached(block: suspend () -> T): T = scope.async { block() }.await()
+    internal suspend fun <T> detached(block: suspend () -> T): T =
+        // A failure reaches the caller only: thrown in the async it would
+        // cancel the model's scope, and with it every later action.
+        scope.async { runCatching { block() } }.await().getOrThrow()
 
     /**
      * Saves a form; the saved record becomes current. [then] gets the core's

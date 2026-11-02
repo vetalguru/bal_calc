@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.testTag
@@ -422,17 +423,26 @@ private fun WheelEditDialog(
     // The keyboard comes up with the dialog.
     val field = remember { FocusRequester() }
     LaunchedEffect(Unit) { field.requestFocus() }
+    // Closing takes the focus from the field, which commits it: after Cancel
+    // (or a tap outside) that commit is thrown away. Cancel takes no focus
+    // itself, or the field would commit before it is pressed.
+    var cancelled by remember { mutableStateOf(false) }
+    val cancel = { cancelled = true; onDone() }
     AlertDialog(
-        onDismissRequest = onDone,
+        onDismissRequest = cancel,
         title = { Text(title) },
         text = {
             NumberField(
-                title, value, onValue, Modifier.fillMaxWidth().focusRequester(field), unit, decimals, from, to,
-                "${tag}Input", hint = hint, onCommitted = onDone,
+                title, value, { v -> if (!cancelled) onValue(v) }, Modifier.fillMaxWidth().focusRequester(field), unit,
+                decimals, from, to, "${tag}Input", hint = hint, onCommitted = { if (!cancelled) onDone() },
             )
         },
         // Losing the focus commits the field, which closes the dialog.
         confirmButton = { TextButton(onClick = { focus.clearFocus(); onDone() }, modifier = Modifier.testTag("wheelOk")) { Text("OK") } },
-        dismissButton = { TextButton(onClick = onDone) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = {
+            TextButton(onClick = cancel, modifier = Modifier.focusProperties { canFocus = false }) {
+                Text(stringResource(Res.string.cancel))
+            }
+        },
     )
 }
