@@ -34,7 +34,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.abs
@@ -155,7 +158,14 @@ private fun Viewer(
             }
         }
         // Every page stays composed: switching is instant and keeps its scroll.
-        HorizontalPager(pager, Modifier.fillMaxWidth().weight(1f), beyondViewportPageCount = viewPages.size - 1) { page ->
+        // The page's height, for the reticle to fit whole above the controller.
+        val density = LocalDensity.current
+        var pageHeight by remember { mutableStateOf(Dp.Infinity) }
+        HorizontalPager(
+            pager,
+            Modifier.fillMaxWidth().weight(1f).onSizeChanged { pageHeight = with(density) { it.height.toDp() } },
+            beyondViewportPageCount = viewPages.size - 1,
+        ) { page ->
             Column(
                 Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -200,7 +210,8 @@ private fun Viewer(
                             }
                         }
                     }
-                    1 -> if (sol.ok) ReticleCard(model, sol, wide, marks)
+                    // Less the page's and the card's padding, and a little air.
+                    1 -> if (sol.ok) ReticleCard(model, sol, wide, marks, maxSide = (pageHeight - 64.dp).coerceAtLeast(120.dp))
                     2 -> {
                         // Saved situations live by the targets: both switch what is shot at.
                         if (st.rifles.isNotEmpty()) {
