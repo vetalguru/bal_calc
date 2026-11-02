@@ -7,11 +7,13 @@ import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -32,7 +34,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -48,7 +52,13 @@ import org.vetalguru.balcalc.res.*
 
 /** The reticle with the hold, the hold mode and the turret settings. */
 @Composable
-internal fun ReticleCard(model: AppModel, sol: Solution, wide: Boolean, marks: List<ReticleMark> = emptyList()) {
+internal fun ReticleCard(
+    model: AppModel,
+    sol: Solution,
+    wide: Boolean,
+    marks: List<ReticleMark> = emptyList(),
+    maxSide: Dp = Dp.Infinity, // the reticle whole on the page, the controller below it
+) {
     // The range at each mark below the centre, for the elevation on the turret.
     var showRanges by remember { mutableStateOf(false) }
     var dialedClicks by remember { mutableStateOf<Double?>(null) } // null: as solved
@@ -160,12 +170,14 @@ internal fun ReticleCard(model: AppModel, sol: Solution, wide: Boolean, marks: L
     Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         if (wide) {
             Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                reticle(Modifier.width(320.dp))
+                reticle(Modifier.width(min(320.dp, maxSide)))
                 text(Modifier.weight(1f))
             }
         } else {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                reticle(Modifier.fillMaxWidth())
+                BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    reticle(Modifier.size(min(maxWidth, maxSide)))
+                }
                 text(Modifier.fillMaxWidth())
             }
         }
