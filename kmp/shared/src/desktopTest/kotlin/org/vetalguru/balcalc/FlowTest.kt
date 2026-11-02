@@ -1315,4 +1315,21 @@ class FlowTest {
             db.delete()
         }
     }
+
+    /** A wind from 12 o'clock has no side to it: a note says so until the ring turns it. */
+    @Test
+    fun windAlongTheLineOfFireIsExplained() = runDesktopComposeUiTest(412, 915) {
+        val db = startWithSample()
+        assertTrue(!exists("windAlongNote")) // calm
+        type("windSpeed", "5")
+        waitUntil(timeoutMillis = 10_000) { exists("windAlongNote") }
+        shotOf("quickWind", "wind-along-note")
+        onNodeWithTag("windDial").performTouchInput {
+            val r = minOf(width, height) / 2f * 0.8f
+            click(androidx.compose.ui.geometry.Offset(width / 2f + r, height / 2f)) // 3 o'clock
+        }
+        waitUntil(timeoutMillis = 10_000) { shown("windDirectionText").contains("3 o'clock") }
+        waitUntil(timeoutMillis = 10_000) { !exists("windAlongNote") }
+        db.delete()
+    }
 }

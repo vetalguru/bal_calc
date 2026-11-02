@@ -319,6 +319,7 @@
     <string name="add_zone">Add a zone</string>
     <string name="remove_zone">Remove</string>
     <string name="quick_zone_note">Zone 1 of %1$s, up to %2$s m: the others are on the Air page.</string>
+    <string name="wind_along_note">The wind blows along the line of fire: no drift to the side, the elevation hardly changes. Set on the ring where it blows from.</string>
     <string name="moving_target">Moving target</string>
     <string name="target_speed">Target speed</string>
     <string name="unit_kmh">km/h</string>
