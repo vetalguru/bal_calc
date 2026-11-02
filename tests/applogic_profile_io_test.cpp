@@ -713,12 +713,9 @@ TEST_F(ProfileIo, ValuesTheDatabaseRefusesFailTheWholeImport) {
     }
 }
 
-// A file whose header fields have the wrong JSON types must be refused like
-// any other malformed file. BUG: ImportShareJson reads "format" and
-// "version" with json::value() outside the try block, so a non-string
-// format or a non-number version throws nlohmann::json::type_error out of
-// ImportShareJson instead of returning a kFormat error.
-TEST_F(ProfileIo, DISABLED_MistypedHeaderIsRefusedNotThrown) {
+// A file whose header fields have the wrong JSON types is refused like any
+// other malformed file, not thrown out of ImportShareJson.
+TEST_F(ProfileIo, MistypedHeaderIsRefusedNotThrown) {
     for (const char* text :
          {R"({"format": 1})", R"({"format": "balcalc-rifle", "version": "1"})"}) {
         SCOPED_TRACE(text);
@@ -1289,10 +1286,8 @@ TEST_F(Importers, ShareFilesImportThroughImportFile) {
     EXPECT_TRUE(ImportFile(db_, "drag.DRG", kDrg).ok());
 }
 
-// Same for ImportFile. BUG: importers.cpp reads doc.value("format", "") of
-// a .json file without a try block, so {"format": 5} throws
-// nlohmann::json::type_error out of ImportFile instead of failing.
-TEST_F(Importers, DISABLED_ImportFileRefusesMistypedFormat) {
+// Same for ImportFile: {"format": 5} fails, it does not throw.
+TEST_F(Importers, ImportFileRefusesMistypedFormat) {
     Result<Id> r = Id{0};
     ASSERT_NO_THROW(r = ImportFile(db_, "x.json", R"({"format": 5})"));
     EXPECT_FALSE(r.ok());
@@ -1423,13 +1418,9 @@ TEST_F(LockedDatabase, ShareImportFailsWhenTheCommitCannotTakeTheFile) {
     EXPECT_TRUE(ImportShareJson(db_, text).ok());
 }
 
-// A rifle or cartridge share file among the seed files should import like
-// it does through ImportFile. BUG: SeedLibrary runs every file inside its
-// own transaction, but ImportFile -> ImportShareJson always calls
-// Transaction::Begin (unlike the other importers, which join an open
-// transaction), so SQLite refuses the nested BEGIN and the file is reported
-// as a problem ("cannot start a transaction within a transaction").
-TEST_F(Importers, DISABLED_SeedImportsShareFiles) {
+// A rifle or cartridge share file among the seed files imports like it does
+// through ImportFile, inside the seed's transaction.
+TEST_F(Importers, SeedImportsShareFiles) {
     const std::string rifle = ExportRifleJson(db_, Store(Rifle(std::nullopt))).value();
     const auto report = SeedLibrary(db_, {{"rifle.json", rifle}}, 1);
     ASSERT_TRUE(report.ok()) << report.error().message;
@@ -1438,11 +1429,30 @@ TEST_F(Importers, DISABLED_SeedImportsShareFiles) {
     EXPECT_EQ(Count<RifleRecord>(), 2U);
 }
 
-// Any .json seed file should be either imported or reported. BUG:
-// SeedLibrary calls doc.value("format", "") without checking that the
-// document is an object (ImportFile does), so a JSON array or number throws
-// nlohmann::json::type_error out of SeedLibrary.
-TEST_F(Importers, DISABLED_SeedReportsJsonThatIsNotAnObject) {
+// A share file that fails half-way in the seed leaves none of itself behind
+// (its savepoint is rolled back); the seed's other files still import.
+TEST_F(Importers, SeedRollsBackAShareFileThatFails) {
+    const std::string rifle = ExportRifleJson(db_, Store(Rifle(std::nullopt))).value();
+    // The bullet is stored first, then the cartridge standing still is refused.
+    const std::string standing =
+        R"({"format":"balcalc-cartridge","cartridge":{"name":"C","muzzle_velocity_mps":0},
+            "bullet":{"name":"B","diameter_m":0.0078,"mass_kg":0.011,"drag_kind":"bc","bc":0.3}})";
+    const std::size_t bullets = Count<BulletRecord>();
+    const auto report = SeedLibrary(db_, {{"standing.json", standing}, {"rifle.json", rifle}}, 1);
+    ASSERT_TRUE(report.ok()) << report.error().message;
+    EXPECT_EQ(report.value().imported, 1);
+    EXPECT_EQ(report.value().skipped, 1);
+    ASSERT_EQ(report.value().problems.size(), 1U);
+    EXPECT_EQ(report.value().problems.front().rfind("standing.json: ", 0), 0U);
+    EXPECT_EQ(Count<BulletRecord>(), bullets);
+    EXPECT_EQ(Count<CartridgeRecord>(), 0U);
+    EXPECT_EQ(Count<RifleRecord>(), 2U);
+    EXPECT_FALSE(db_.connection().InTransaction());
+}
+
+// Any .json seed file is either imported or reported, even one that is
+// not a JSON object.
+TEST_F(Importers, SeedReportsJsonThatIsNotAnObject) {
     Result<SeedReport> report = SeedReport{};
     ASSERT_NO_THROW(report = SeedLibrary(db_, {{"list.json", "[1, 2]"}}, 1));
     ASSERT_TRUE(report.ok());

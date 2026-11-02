@@ -34,6 +34,15 @@ using storage::ReticleRecord;
 
 Error Bad(const std::string& what) { return {ErrorCode::kFormat, 0, what}; }
 
+// A JSON file's "format", or "" when it is not an object or has no text there.
+std::string FormatOf(const json& doc) {
+    if (!doc.is_object()) {
+        return {};
+    }
+    const auto f = doc.find("format");
+    return f != doc.end() && f->is_string() ? f->get<std::string>() : std::string();
+}
+
 // A transaction unless the caller already has one open (SQLite does not
 // nest them); Commit() is then a no-op and the caller commits.
 class Scope {
@@ -375,10 +384,7 @@ Result<Id> ImportPublishedJson(Database& db, const json& doc, int* imported, int
 }
 
 bool IsPublishedJson(const json& doc) {
-    if (doc.is_discarded() || !doc.is_object()) {
-        return false;
-    }
-    const std::string format = doc.value("format", "");
+    const std::string format = FormatOf(doc);
     return format == kBulletsFormat || format == kCartridgesFormat;
 }
 

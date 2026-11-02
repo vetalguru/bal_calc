@@ -372,8 +372,10 @@ ZeroResult FindZero(Shot shot, double zero_range_m, double offset_up_m,
                 elevation_ok = true;
                 break;
             }
+            // A stalled secant (equal elevations: 0/0) steps like the first one.
             const double slope = (f1 - f0) / (e1 - e0);
-            const double e2 = slope != 0.0 ? e1 - f1 / slope : e1 - f1 / zero_range_m;
+            const bool secant = std::isfinite(slope) && slope != 0.0;
+            const double e2 = secant ? e1 - f1 / slope : e1 - f1 / zero_range_m;
             e0 = e1;
             f0 = f1;
             e1 = e2;

@@ -1,6 +1,7 @@
 #include <ballistics/applogic/library.h>
 #include <ballistics/applogic/profile_io.h>
 #include <ballistics/storage/repository.h>
+#include <sqlite_manager/connection.h>
 #include <sqlite_manager/transaction.h>
 
 #include <cmath>
@@ -36,6 +37,55 @@ constexpr int kVersion = 1;
 Error BadFile(const std::string& what) {
     return {ErrorCode::kFormat, 0, "Not a valid Holdmark file: " + what};
 }
+
+// The file's "format", or "" when it is missing or not text.
+std::string FormatOf(const json& doc) {
+    const auto f = doc.find("format");
+    return f != doc.end() && f->is_string() ? f->get<std::string>() : std::string();
+}
+
+// A transaction of the import's own, or a savepoint in the caller's (the
+// seed imports share files inside its transaction): a file that fails
+// leaves nothing behind either way.
+class ImportScope {
+   public:
+    explicit ImportScope(Database& db) : conn_(db.connection()) {
+        if (conn_.InTransaction()) {
+            if (Status s = conn_.Execute("SAVEPOINT share_import"); s) {
+                savepoint_ = true;
+            } else {
+                error_ = s.error();
+            }
+        } else if (auto t = sqlite_manager::Transaction::Begin(conn_); t) {
+            txn_ = std::move(t).value();
+        } else {
+            error_ = t.error();
+        }
+    }
+    ~ImportScope() {
+        if (savepoint_) {
+            conn_.Execute("ROLLBACK TO share_import; RELEASE share_import").ok();
+        }
+    }
+    ImportScope(const ImportScope&) = delete;
+    ImportScope& operator=(const ImportScope&) = delete;
+
+    const std::optional<Error>& error() const { return error_; }
+    Status Commit() {
+        if (!savepoint_) {
+            return txn_.Commit();
+        }
+        Status s = conn_.Execute("RELEASE share_import");
+        savepoint_ = !s;
+        return s;
+    }
+
+   private:
+    sqlite_manager::Connection& conn_;
+    sqlite_manager::Transaction txn_;
+    bool savepoint_ = false;
+    std::optional<Error> error_;
+};
 
 template <typename T>
 Result<T> Require(Database& db, Id id, const char* what) {
@@ -436,16 +486,21 @@ Result<Imported> ImportShareJson(Database& db, const std::string& text) {
     if (doc.is_discarded() || !doc.is_object()) {
         return BadFile("it is not JSON");
     }
-    const std::string format = doc.value("format", "");
+    const std::string format = FormatOf(doc);
     if (format != kRifleFormat && format != kCartridgeFormat && format != kLegacyProfileFormat) {
         return BadFile("unknown format");
     }
-    if (doc.value("version", 0) > kVersion) {
-        return BadFile("made by a newer version of the app");
+    if (const auto v = doc.find("version"); v != doc.end()) {
+        if (!v->is_number()) {
+            return BadFile("unknown version");
+        }
+        if (v->get<double>() > kVersion) {
+            return BadFile("made by a newer version of the app");
+        }
     }
-    auto txn = sqlite_manager::Transaction::Begin(db.connection());
-    if (!txn) {
-        return txn.error();
+    ImportScope txn(db);
+    if (txn.error()) {
+        return *txn.error();
     }
     Imported out;
     try {
@@ -455,7 +510,7 @@ Result<Imported> ImportShareJson(Database& db, const std::string& text) {
     } catch (const json::exception& e) {
         return BadFile(e.what());
     }
-    if (auto s = txn.value().Commit(); !s) {
+    if (auto s = txn.Commit(); !s) {
         return s.error();
     }
     return out;

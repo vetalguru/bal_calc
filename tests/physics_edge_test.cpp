@@ -319,12 +319,10 @@ TEST(PhysicsEdgeZero, UnreachablePrecisionStopsAfterThirtyIterations) {
     EXPECT_EQ(z.iterations, 30);
 }
 
-// BUG (core/src/solver.cpp:375-376): once the secant stalls - two equal
-// elevations, a miss still above 1e-9 m - the slope is 0/0 = NaN, the
-// `slope != 0.0` guard lets it through, and every later elevation, and the
-// one returned, is NaN instead of the last estimate (here within an ulp
-// of the exact atan(2e7 / 1e8)). Disabled until the solver is fixed.
-TEST(PhysicsEdgeZero, DISABLED_UnconvergedZeroKeepsTheLastEstimate) {
+// Once the secant stalls - two equal elevations, a miss still above
+// 1e-9 m - its slope is 0/0; the search keeps the last estimate (here
+// within an ulp of the exact atan(2e7 / 1e8)) instead of turning to NaN.
+TEST(PhysicsEdgeZero, UnconvergedZeroKeepsTheLastEstimate) {
     const ZeroResult z = ZeroBeyondDoublePrecision();
     EXPECT_FALSE(z.converged);
     EXPECT_TRUE(std::isfinite(z.elevation_rad));
