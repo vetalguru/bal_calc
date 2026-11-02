@@ -473,6 +473,21 @@ TEST_F(ApplogicEdges, DsfCannotGoBelowHalfTheDrag) {
     EXPECT_GT(r.shots[0].predicted_after_rad, r.shots[0].observed_rad);
 }
 
+// One hit no factor explains among good ones: it stays unexplained, but
+// does not pull the other points off their own hits.
+TEST_F(ApplogicEdges, DsfUnexplainedHitLeavesTheOthersFitted) {
+    const storage::LoadedProfile p = Loaded();
+    Log(1100.0, ElevationAt(p, 1100.0) + units::MradToRad(0.1));
+    Log(1500.0, ElevationAt(p, 1500.0) - units::MradToRad(6.0));
+    const DsfResult r = ComputeDsf(db_, profile_);
+    ASSERT_TRUE(r.ok) << r.error;
+    ASSERT_EQ(r.shots.size(), 2u);
+    ASSERT_GT(r.shots[0].mach - r.shots[1].mach, kDsfMinMachStep);  // two points
+    EXPECT_FALSE(r.shots[0].limited);
+    EXPECT_NEAR(r.shots[0].predicted_after_rad, r.shots[0].observed_rad, kDsfMissTolerance);
+    EXPECT_TRUE(r.shots[1].limited);
+}
+
 // More elevation than any reachable factor gives, at the end of the flight:
 // twice the drag stops the bullet short, so the fit has nothing to start
 // from and the shot stays unexplained.

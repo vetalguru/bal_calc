@@ -320,11 +320,13 @@ std::optional<std::pair<double, double>> PredictWithMach(const storage::LoadedPr
 // transonic shot, with a mild penalty on jumps between neighbouring points:
 // 0.1 of factor weighs like a 0.01 mrad miss.
 void RefineDsf(const storage::LoadedProfile& bare, const std::vector<DopeRecord>& log,
-               const std::vector<DsfShot>& shots, std::vector<DsfPoint>& points) {
+               const std::vector<DsfShot>& shots, const std::vector<Id>& left_out,
+               std::vector<DsfPoint>& points) {
     constexpr double kSmooth = 1e-4;  // rad per unit of factor difference
     std::vector<const DopeRecord*> used;
     for (const DsfShot& s : shots) {
-        if (s.mach < kDsfMaxMach) {
+        if (s.mach < kDsfMaxMach &&
+            std::find(left_out.begin(), left_out.end(), s.shot_id) == left_out.end()) {
             for (const DopeRecord& d : log) {
                 if (d.id == s.shot_id) {
                     used.push_back(&d);
@@ -333,7 +335,21 @@ void RefineDsf(const storage::LoadedProfile& bare, const std::vector<DopeRecord>
         }
     }
     // points[0] is the anchor; the rest are in fitting order (Mach falling).
-    const std::size_t n = points.size() - 1;
+    // The points of the hits left out stay where the sequential fit put them.
+    std::vector<std::size_t> free;
+    for (std::size_t k = 1; k < points.size(); ++k) {
+        const bool fixed = std::any_of(shots.begin(), shots.end(), [&](const DsfShot& s) {
+            return s.mach == points[k].mach &&
+                   std::find(left_out.begin(), left_out.end(), s.shot_id) != left_out.end();
+        });
+        if (!fixed) {
+            free.push_back(k);
+        }
+    }
+    const std::size_t n = free.size();
+    if (n == 0) {
+        return;
+    }
     auto residuals = [&](const std::vector<DsfPoint>& pts, std::vector<double>& r) {
         storage::LoadedProfile p = bare;
         p.profile.dsf = pts;
@@ -367,7 +383,7 @@ void RefineDsf(const storage::LoadedProfile& bare, const std::vector<DopeRecord>
         std::vector<std::vector<double>> jac(n);
         for (std::size_t j = 0; j < n; ++j) {
             std::vector<DsfPoint> q = points;
-            q[j + 1].factor += kH;
+            q[free[j]].factor += kH;
             std::vector<double> rq;
             if (!residuals(q, rq)) {
                 return;
@@ -424,8 +440,8 @@ void RefineDsf(const storage::LoadedProfile& bare, const std::vector<DopeRecord>
             }
             std::vector<DsfPoint> trial = points;
             for (std::size_t j = 0; j < n; ++j) {
-                trial[j + 1].factor = std::clamp(points[j + 1].factor + m[j][n] / m[j][j],
-                                                 kDsfMinFactor, kDsfMaxFactor);
+                trial[free[j]].factor = std::clamp(points[free[j]].factor + m[j][n] / m[j][j],
+                                                   kDsfMinFactor, kDsfMaxFactor);
             }
             std::vector<double> rt;
             double c2 = 0.0;
@@ -500,6 +516,9 @@ DsfResult ComputeDsf(storage::Database& db, Id profile_id) {
               [&](std::size_t a, std::size_t b) { return out.shots[a].mach > out.shots[b].mach; });
 
     std::vector<DsfPoint> points = {{kDsfAnchorMach, 1.0}};
+    // Hits no factor can explain: their points stay at the limit, and they are
+    // kept out of the joint fit, where their misses would pull the others off.
+    std::vector<Id> unexplained;
     for (std::size_t i : order) {
         DsfShot& s = out.shots[i];
         if (points.back().mach - s.mach < kDsfMinMachStep) {
@@ -520,10 +539,16 @@ DsfResult ComputeDsf(storage::Database& db, Id profile_id) {
             return pred ? pred->first - s.observed_rad : 0.0;
         };
         double lo = kDsfMinFactor, hi = kDsfMaxFactor;
-        if (miss(lo) >= 0.0) {
-            hi = lo;  // a start for the joint fit; judged after it
-        } else if (miss(hi) <= 0.0) {
+        const double at_lo = miss(lo);
+        const double at_hi = miss(hi);
+        if (at_lo >= 0.0) {
+            hi = lo;  // the limit gets closest
+        } else if (at_hi <= 0.0) {
             lo = hi;
+        }
+        if ((at_lo >= 0.0 && at_lo > kDsfMissTolerance) ||
+            (at_hi <= 0.0 && -at_hi > kDsfMissTolerance)) {
+            unexplained.push_back(s.shot_id);
         }
         for (int k = 0; k < 60 && hi - lo > 1e-6; ++k) {
             const double mid = 0.5 * (lo + hi);
@@ -532,7 +557,7 @@ DsfResult ComputeDsf(storage::Database& db, Id profile_id) {
         points.push_back({s.mach, 0.5 * (lo + hi)});
         s.used = true;
     }
-    RefineDsf(bare, shots.value(), out.shots, points);
+    RefineDsf(bare, shots.value(), out.shots, unexplained, points);
     std::sort(points.begin(), points.end(),
               [](const DsfPoint& a, const DsfPoint& b) { return a.mach < b.mach; });
 
