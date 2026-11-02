@@ -62,11 +62,11 @@ fun LogShotDialog(model: AppModel, rangeGuess: Double, elevationGuess: Double, o
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(Res.string.log_note), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberField(stringResource(Res.string.distance), range, { range = it }, Modifier.fillMaxWidth(), stringResource(Res.string.unit_m), 0, 10.0, 3000.0)
+                NumberField(stringResource(Res.string.distance), range, { range = it }, Modifier.fillMaxWidth(), stringResource(Res.string.unit_m), 0, 10.0, 3000.0, tag = "hitRange")
                 NumberField(stringResource(Res.string.elevation_hit), elevation, { elevation = it }, Modifier.fillMaxWidth(), unit, 2, -100.0, 200.0, tag = "hitElevation")
                 SwitchRow(stringResource(Res.string.also_windage), withWindage, { withWindage = it })
                 if (withWindage) {
-                    NumberField(stringResource(Res.string.windage_hit), windage, { windage = it }, Modifier.fillMaxWidth(), unit, 2, -100.0, 100.0)
+                    NumberField(stringResource(Res.string.windage_hit), windage, { windage = it }, Modifier.fillMaxWidth(), unit, 2, -100.0, 100.0, tag = "hitWindage")
                 }
                 TextInput(stringResource(Res.string.notes_hint), notes, { notes = it }, tag = "hitNotes")
                 error?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error) }
@@ -139,7 +139,7 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
                         Fields(
                             wide,
                             { m -> NumberField(stringResource(Res.string.poi_up), pair.offsetUpCm, { set(it, pair.offsetRightCm) }, m, cm, from = -100.0, to = 100.0, tag = "offsetUp") },
-                            { m -> NumberField(stringResource(Res.string.poi_right), pair.offsetRightCm, { set(pair.offsetUpCm, it) }, m, cm, from = -100.0, to = 100.0) },
+                            { m -> NumberField(stringResource(Res.string.poi_right), pair.offsetRightCm, { set(pair.offsetUpCm, it) }, m, cm, from = -100.0, to = 100.0, tag = "offsetRight") },
                         )
                         offsetError?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error) }
                     }

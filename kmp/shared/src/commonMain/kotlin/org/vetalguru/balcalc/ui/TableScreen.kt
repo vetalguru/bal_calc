@@ -185,9 +185,9 @@ fun TableScreen(model: AppModel, onRangeChosen: () -> Unit) {
             Tab(tab == 2, { tab = 2 }, text = { Text(stringResource(Res.string.tab_hit)) }, modifier = Modifier.testTag("hitTab"))
         }
         Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            NumberField(stringResource(Res.string.from), st.tableFromM, { span("tableFromM", it) }, Modifier.weight(1f), m, 0, 0.0, 3000.0)
-            NumberField(stringResource(Res.string.to), st.tableToM, { span("tableToM", it) }, Modifier.weight(1f), m, 0, 10.0, 3000.0)
-            NumberField(stringResource(Res.string.step), st.tableStepM, { span("tableStepM", it) }, Modifier.weight(1f), m, 0, 5.0, 500.0)
+            NumberField(stringResource(Res.string.from), st.tableFromM, { span("tableFromM", it) }, Modifier.weight(1f), m, 0, 0.0, 3000.0, tag = "tableFrom")
+            NumberField(stringResource(Res.string.to), st.tableToM, { span("tableToM", it) }, Modifier.weight(1f), m, 0, 10.0, 3000.0, tag = "tableTo")
+            NumberField(stringResource(Res.string.step), st.tableStepM, { span("tableStepM", it) }, Modifier.weight(1f), m, 0, 5.0, 500.0, tag = "tableStep")
         }
         if (!table.ok && !tableLoading && tab == 0) {
             Text(coreText(table.error), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(12.dp))

@@ -63,6 +63,9 @@ android {
 
     buildFeatures { compose = true }
 
+    // Robolectric tests (src/test) read the app's resources and seed assets.
+    testOptions { unitTests.isIncludeAndroidResources = true }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -93,4 +96,19 @@ tasks.named("preBuild") { dependsOn(seedAssets) }
 dependencies {
     implementation(project(":shared"))
     implementation(libs.androidx.activity.compose)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.ext.junit)
+}
+
+tasks.withType<Test>().configureEach {
+    // SeedTest compares the packed assets with the repository's data/seed.
+    systemProperty("balcalc.seed", repoRoot.resolve("data/seed").path)
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        events("failed")
+    }
 }

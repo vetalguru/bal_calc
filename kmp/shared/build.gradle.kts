@@ -16,6 +16,8 @@ kotlin {
         minSdk = libs.versions.android.minSdk.get().toInt()
         // Compose resources (strings) travel in the APK only with this on.
         androidResources.enable = true
+        // Robolectric host tests (androidHostTest) need the merged resources.
+        withHostTest { isIncludeAndroidResources = true }
     }
     jvm("desktop")
 
@@ -36,6 +38,15 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.zxing.core)
             implementation(libs.zxing.android.embedded) // camera scanning, asks for the camera then
+        }
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.kotlinx.coroutines.test)
+            }
         }
         getByName("desktopMain") {
             dependencies {
@@ -68,6 +79,14 @@ tasks.named<Test>("desktopTest") {
     systemProperty("balcalc.screenshots", layout.buildDirectory.dir("screenshots").get().asFile.path)
     // The tests look for English texts: the system language must not matter.
     jvmArgs("-Duser.language=en", "-Duser.country=US")
+}
+
+// Android code on the JVM under Robolectric (sensors, pickers, bitmaps).
+tasks.withType<Test>().matching { it.name == "testAndroidHostTest" }.configureEach {
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        events("failed")
+    }
 }
 
 compose.resources {
