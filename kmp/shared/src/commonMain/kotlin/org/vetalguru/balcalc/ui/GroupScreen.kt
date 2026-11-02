@@ -51,6 +51,7 @@ import org.vetalguru.balcalc.AppModel
 import org.vetalguru.balcalc.LocalPlatform
 import org.vetalguru.balcalc.PhotoPoint
 import org.vetalguru.balcalc.analyzeGroup
+import org.vetalguru.balcalc.coreText
 import org.vetalguru.balcalc.fixed
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
@@ -78,7 +79,9 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
     val holes = remember { mutableStateListOf<PhotoPoint>() }
     var scaleCm by remember { mutableDoubleStateOf(10.0) }
     var rangeM by remember { mutableDoubleStateOf(st.currentPair?.zeroRangeM ?: st.conditions.targetRangeM) }
+    // What the last Save did: saved, or the core's refusal; any change of the group clears it.
     var saved by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
 
     val stats = aim?.let { a ->
         if (scale.size == 2) analyzeGroup(holes.toList(), a, scale[0], scale[1], scaleCm, rangeM) else null
@@ -99,7 +102,7 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
                 scope.launch {
                     val bytes = files.openImage() ?: return@launch
                     photo = runCatching { bytes.decodeToImageBitmap() }.getOrNull()
-                    scale.clear(); holes.clear(); aim = null; mode = Marking.Scale; saved = false
+                    scale.clear(); holes.clear(); aim = null; mode = Marking.Scale; saved = false; error = null
                 }
             }, modifier = Modifier.testTag("groupPhoto")) { Text(stringResource(Res.string.group_photo)) }
             Text(stringResource(Res.string.group_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -117,13 +120,13 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
                         Marking.Aim -> aim = null
                         Marking.Holes -> holes.removeLastOrNull()
                     }
-                    saved = false
+                    saved = false; error = null
                 }) { Text(stringResource(Res.string.group_undo)) }
             }
 
             photo?.let { img ->
                 TargetPhoto(img, scale, aim, holes, stats?.let { s -> s.centreRightCm to s.centreUpCm }, scaleCm) { p ->
-                    saved = false
+                    saved = false; error = null
                     when (mode) {
                         Marking.Scale -> {
                             if (scale.size == 2) scale.clear()
@@ -138,9 +141,9 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
 
             Fields(
                 false,
-                { m -> NumberField(stringResource(Res.string.group_scale_cm), scaleCm, { scaleCm = it }, m,
+                { m -> NumberField(stringResource(Res.string.group_scale_cm), scaleCm, { scaleCm = it; saved = false; error = null }, m,
                     stringResource(Res.string.unit_cm), decimals = 1, from = 0.1, to = 500.0, tag = "groupScaleCm") },
-                { m -> NumberField(stringResource(Res.string.distance), rangeM, { rangeM = it }, m,
+                { m -> NumberField(stringResource(Res.string.distance), rangeM, { rangeM = it; saved = false; error = null }, m,
                     stringResource(Res.string.unit_m), decimals = 0, from = 5.0, to = 3000.0, tag = "groupRange") },
             )
 
@@ -168,16 +171,24 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
                     Text(stringResource(Res.string.group_zero_hint, pair.zeroRangeM.roundToInt()),
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                     OutlinedButton(onClick = {
-                        scope.launch { saved = model.truing.setZeroOffset(stats.centreUpCm, stats.centreRightCm) == null }
+                        scope.launch {
+                            error = model.truing.setZeroOffset(stats.centreUpCm, stats.centreRightCm)
+                            saved = error == null
+                        }
                     }, modifier = Modifier.testTag("groupZero")) { Text(stringResource(Res.string.group_zero)) }
                 }
                 OutlinedButton(onClick = {
-                    scope.launch { saved = runCatching { model.truing.setRiflePrecision(stats.equivalentFiveShotMoa) }.isSuccess }
+                    scope.launch {
+                        val r = runCatching { model.truing.setRiflePrecision(stats.equivalentFiveShotMoa) }
+                        error = r.exceptionOrNull()?.let { it.message ?: it.toString() }
+                        saved = r.isSuccess
+                    }
                 }, modifier = Modifier.testTag("groupWez")) {
                     Text(stringResource(Res.string.group_wez, stats.equivalentFiveShotMoa.fixed(2)))
                 }
                 if (saved) Text(stringResource(Res.string.group_saved), color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.testTag("groupSaved"))
+                error?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("groupError")) }
             }
         }
     }

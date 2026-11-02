@@ -437,7 +437,7 @@ class ToolsUiTest {
         waitUntil(timeoutMillis = 10_000) { exists("logHit") }
     }
 
-    /** The zero shift and the precision reach the core; a centre more than 1 m off is refused (nothing saved). */
+    /** The zero shift and the precision reach the core; a centre more than 1 m off is refused, and says so. */
     @Test
     fun groupSavedToTheCore() = runDesktopComposeUiTest(412, 1000) {
         val app = startApp(platform = FakePlatform().apply { image = blankPng() })
@@ -465,11 +465,17 @@ class ToolsUiTest {
             abs(settings.num("groupMoa") - moa) < 0.006
         }
 
-        // The scale points said to be 500 cm apart: the centre is metres off, the core refuses it.
+        // A changed scale is not saved yet.
         type("groupScaleCm", "500")
+        assertTrue(!exists("groupSaved"))
+        // 500 cm apart: the centre is metres off, the core refuses it and the screen says so.
         onNodeWithTag("groupZero").performScrollTo().performClick()
-        waitUntil(timeoutMillis = 10_000) { !exists("groupSaved") }
+        waitUntil(timeoutMillis = 10_000) { exists("groupError") }
+        assertTrue(!exists("groupSaved"))
         assertEquals(up.toDouble(), app.pair().num("offsetUpCm"), 0.05)
+        // Back to the right scale: the refusal goes with the change.
+        type("groupScaleCm", "20")
+        assertTrue(!exists("groupError"))
     }
 
     // ---- Range card -------------------------------------------------------------
