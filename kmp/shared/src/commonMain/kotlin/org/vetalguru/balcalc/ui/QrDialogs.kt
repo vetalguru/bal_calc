@@ -81,7 +81,9 @@ fun QrImportDialog(model: AppModel, onImported: () -> Unit, onClose: () -> Unit)
     val camera = LocalPlatform.current.camera
     val scope = rememberCoroutineScope()
     val collector = remember { QrShare.Collector() }
+    // The collector's counts as state: the progress line follows them.
     var have by remember { mutableIntStateOf(0) }
+    var total by remember { mutableIntStateOf(0) }
     var error by remember { mutableStateOf<String?>(null) }
     val notFound = stringResource(Res.string.qr_not_found)
 
@@ -93,6 +95,7 @@ fun QrImportDialog(model: AppModel, onImported: () -> Unit, onClose: () -> Unit)
         }
         error = null
         have = collector.have
+        total = collector.total
         if (collector.complete) {
             scope.launch {
                 try {
@@ -111,8 +114,8 @@ fun QrImportDialog(model: AppModel, onImported: () -> Unit, onClose: () -> Unit)
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(Res.string.qr_import_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                if (collector.total > 1) {
-                    Text(stringResource(Res.string.qr_progress, have, collector.total), modifier = Modifier.testTag("qrProgress"))
+                if (total > 1) {
+                    Text(stringResource(Res.string.qr_progress, have, total), modifier = Modifier.testTag("qrProgress"))
                 }
                 if (camera != null) {
                     Button(onClick = { scope.launch { take(camera.scanQr()) } }, modifier = Modifier.testTag("qrScan")) {
