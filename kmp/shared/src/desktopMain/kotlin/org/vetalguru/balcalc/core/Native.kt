@@ -17,9 +17,12 @@ internal object Native {
  * The packaged app's resources (Compose Desktop sets the property for both
  * `run` and installed packages); BALCALC_RESOURCES overrides it for tests.
  */
-fun resourcesDir(): File = File(
-    System.getenv("BALCALC_RESOURCES")
-        ?: System.getProperty("compose.application.resources.dir")
+fun resourcesDir(
+    env: (String) -> String? = System::getenv,
+    property: (String) -> String? = System::getProperty,
+): File = File(
+    env("BALCALC_RESOURCES")
+        ?: property("compose.application.resources.dir")
         ?: error("compose.application.resources.dir is not set"),
 )
 
@@ -32,14 +35,18 @@ fun desktopEngine(): Engine {
  * The app's data folder (%APPDATA% on Windows, XDG_DATA_HOME on Linux), in
  * vetalguru/Holdmark; HOLDMARK_DB (or the older BALCALC_DB) overrides.
  */
-fun desktopDatabasePath(): String {
-    (System.getenv("HOLDMARK_DB") ?: System.getenv("BALCALC_DB"))?.let { return it }
-    val windows = System.getProperty("os.name").startsWith("Windows")
+fun desktopDatabasePath(
+    env: (String) -> String? = System::getenv,
+    property: (String) -> String? = System::getProperty,
+): String {
+    (env("HOLDMARK_DB") ?: env("BALCALC_DB"))?.let { return it }
+    val windows = property("os.name").orEmpty().startsWith("Windows")
     val base = if (windows) {
-        File(System.getenv("APPDATA"))
+        File(env("APPDATA"))
     } else {
-        System.getenv("XDG_DATA_HOME")?.let(::File)
-            ?: File(System.getProperty("user.home"), ".local/share")
+        // XDG: unset, empty or relative means the default.
+        env("XDG_DATA_HOME")?.let(::File)?.takeIf { it.isAbsolute }
+            ?: File(property("user.home"), ".local/share")
     }
     return databaseIn(base)
 }

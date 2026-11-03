@@ -123,7 +123,7 @@ jobs:
 
       - name: Desktop UI tests (the C++ core through JNI)
         working-directory: kmp
-        run: ./gradlew :shared:desktopTest
+        run: ./gradlew :shared:desktopTest :desktopApp:test
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -133,6 +133,7 @@ jobs:
           path: |
             kmp/shared/build/screenshots/*.png
             kmp/shared/build/reports/tests/
+            kmp/desktopApp/build/reports/tests/
 
   desktop-tests-windows:
     name: "Kotlin: desktop UI tests (Windows)"
@@ -145,7 +146,7 @@ jobs:
 
       - name: Desktop UI tests (the C++ core through JNI)
         working-directory: kmp
-        run: ./gradlew.bat :shared:desktopTest
+        run: ./gradlew.bat :shared:desktopTest :desktopApp:test
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -155,6 +156,7 @@ jobs:
           path: |
             kmp/shared/build/screenshots/*.png
             kmp/shared/build/reports/tests/
+            kmp/desktopApp/build/reports/tests/
 
   android-lint:
     name: "Kotlin: Android lint"
@@ -239,6 +241,13 @@ jobs:
       - name: Build the DEB
         working-directory: kmp
         run: ./gradlew :desktopApp:packageDeb
+
+      # Its files, its menu entry, and the app started from it (on a virtual display).
+      - name: Check the DEB
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb xauth
+          kmp/desktopApp/check-deb.sh kmp/desktopApp/build/compose/binaries/main/deb/*.deb .
 
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'workflow_dispatch'
