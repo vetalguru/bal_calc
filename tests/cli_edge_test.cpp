@@ -51,7 +51,7 @@ class TempDb {
     TempDb(const TempDb&) = delete;
     TempDb& operator=(const TempDb&) = delete;
 
-    const std::string& path() const { return path_; }
+    [[nodiscard]] const std::string& path() const { return path_; }
 
     // Runs SQL on the (created and migrated) database: to damage it.
     void Execute(const std::string& sql) const {

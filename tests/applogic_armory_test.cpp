@@ -106,7 +106,7 @@ class AppArmory : public ::testing::Test {
 
     ProfileRecord Profile(Id id) { return *Repository<ProfileRecord>(db_).Get(id).value(); }
 
-    Id LibraryBullet(BulletForm b = Bullet()) { return SaveBulletForm(db_, b).value(); }
+    Id LibraryBullet(const BulletForm& b = Bullet()) { return SaveBulletForm(db_, b).value(); }
 
     storage::Database db_;
 };

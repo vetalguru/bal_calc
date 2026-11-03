@@ -648,17 +648,17 @@ class ToolsUiTest {
                     step = 15.0, from = 0.0, to = 360.0, tag = "dir", wrap = true, decimals = 0)
             }
         }
-        onNodeWithTag("speedPlus").performClick()
+        onNodeWithTag("speedPlus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 5_000) { shown("speed") == "10" }
-        onNodeWithTag("speedPlus").performClick() // at the end: stays
+        onNodeWithTag("speedPlus", useUnmergedTree = true).performClick() // at the end: stays
         announce()
         assertEquals(10.0, speed.doubleValue)
-        onNodeWithTag("speedMinus").performClick()
+        onNodeWithTag("speedMinus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 5_000) { shown("speed") == "9" }
 
-        onNodeWithTag("dirPlus").performClick()
+        onNodeWithTag("dirPlus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 5_000) { shown("dir") == "0" }
-        onNodeWithTag("dirMinus").performClick()
+        onNodeWithTag("dirMinus", useUnmergedTree = true).performClick()
         waitUntil(timeoutMillis = 5_000) { shown("dir") == "345" }
     }
 

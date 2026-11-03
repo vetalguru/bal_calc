@@ -18,6 +18,7 @@
 #include <fstream>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace ballistics::storage {
@@ -38,7 +39,7 @@ class TempDbFile {
         fs::remove(path_);
         fs::remove(path_.string() + "-journal");
     }
-    std::string path() const { return path_.string(); }
+    [[nodiscard]] std::string path() const { return path_.string(); }
 
    private:
     fs::path path_;
@@ -49,7 +50,8 @@ class TempDbFile {
 // starts, a progress handler then aborts it.
 class StepFault {
    public:
-    StepFault(Database& db, std::string needle) : db_(db.connection().raw()), needle_(needle) {
+    StepFault(Database& db, std::string needle)
+        : db_(db.connection().raw()), needle_(std::move(std::move(needle))) {
         sqlite3_trace_v2(db_, SQLITE_TRACE_STMT, &StepFault::OnStatement, this);
         sqlite3_progress_handler(db_, 1, &StepFault::OnProgress, this);
     }
@@ -177,8 +179,8 @@ struct Traits<CartridgeRecord> {
     static constexpr bool kHasName = true;
     static CartridgeRecord Make(Database& db) { return SampleCartridge(db); }
     static std::string& Label(CartridgeRecord& r) { return r.notes; }
-    static void AddChild(CartridgeRecord& r) { r.velocity_points.push_back({288.15, 790.0}); }
-    static void AddBadChild(CartridgeRecord& r) { r.velocity_points.push_back({300.0, 0.0}); }
+    static void AddChild(CartridgeRecord& r) { r.velocity_points.emplace_back(288.15, 790.0); }
+    static void AddBadChild(CartridgeRecord& r) { r.velocity_points.emplace_back(300.0, 0.0); }
     static std::size_t Children(const CartridgeRecord& r) { return r.velocity_points.size(); }
 };
 
@@ -282,7 +284,7 @@ class StorageRepositoryAllTypes : public ::testing::Test {
 using AllRecordTypes =
     ::testing::Types<DragCurveRecord, BulletRecord, CartridgeRecord, RifleRecord, ReticleRecord,
                      ScopeRecord, ProfileRecord, ConditionsRecord, DopeRecord>;
-TYPED_TEST_SUITE(StorageRepositoryAllTypes, AllRecordTypes);
+TYPED_TEST_SUITE(StorageRepositoryAllTypes, AllRecordTypes, );
 
 TYPED_TEST(StorageRepositoryAllTypes, SaveGetUpdateListRemove) {
     using T = TypeParam;
@@ -463,7 +465,7 @@ class StorageRepositoryChildren : public StorageRepositoryAllTypes<T> {};
 
 using RecordTypesWithChildren = ::testing::Types<DragCurveRecord, BulletRecord, CartridgeRecord,
                                                  ProfileRecord, ConditionsRecord>;
-TYPED_TEST_SUITE(StorageRepositoryChildren, RecordTypesWithChildren);
+TYPED_TEST_SUITE(StorageRepositoryChildren, RecordTypesWithChildren, );
 
 TYPED_TEST(StorageRepositoryChildren, ChildRowsAreReplacedAndListed) {
     using T = TypeParam;

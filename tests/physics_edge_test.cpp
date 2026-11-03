@@ -85,7 +85,8 @@ TEST(PhysicsEdgeDrag, EndSlopeIsLimitedToKeepTheEndSegmentMonotone) {
     EXPECT_NEAR((c.Cd(0.5 + eps) - c.Cd(0.5)) / eps, 0.6, 1e-5);
     // No overshoot: rising and inside [0.2, 0.4] across the first segment.
     double prev = c.Cd(0.5);
-    for (double m = 0.51; m <= 1.5; m += 0.01) {
+    for (int i = 51; i <= 150; ++i) {
+        const double m = i / 100.0;
         const double cd = c.Cd(m);
         EXPECT_GE(cd, prev - 1e-15) << m;
         EXPECT_GE(cd, 0.2) << m;
@@ -106,9 +107,9 @@ TEST(PhysicsEdgeDrag, RejectsNonPhysicalModels) {
     EXPECT_THROW(DragModel::FromCurve(g7, m, d, 0.0), std::invalid_argument);
     EXPECT_THROW(DragModel::FromCurve({{1.0, 0.3}}, m, d, 1.0), std::invalid_argument);
     const DragModel model = DragModel::FromBc(DragTableId::kG7, 0.243);
-    EXPECT_THROW(model.Scaled(0.0), std::invalid_argument);
-    EXPECT_THROW(model.Scaled(-1.0), std::invalid_argument);
-    EXPECT_THROW(model.WithMachScale({{-0.1, 1.0}}), std::invalid_argument);
+    EXPECT_THROW(static_cast<void>(model.Scaled(0.0)), std::invalid_argument);
+    EXPECT_THROW(static_cast<void>(model.Scaled(-1.0)), std::invalid_argument);
+    EXPECT_THROW(static_cast<void>(model.WithMachScale({{-0.1, 1.0}})), std::invalid_argument);
 }
 
 // --- Spin and powder --------------------------------------------------------
@@ -418,8 +419,10 @@ TEST(PhysicsEdgeWez, TargetsWithNoAreaAreNeverHit) {
     EXPECT_DOUBLE_EQ(HitProbability(s, {Target::Kind::kRectangle, 0.5, 0.0}), 0.0);
     EXPECT_DOUBLE_EQ(HitProbability(s, {Target::Kind::kEllipse, 0.5, 0.0}), 0.0);
     EXPECT_NEAR(HitProbability(s, {Target::Kind::kRectangle, 0.0, 0.5}), 0.0, 1e-12);
-    // A shape this build does not know covers nothing.
-    EXPECT_DOUBLE_EQ(HitProbability(s, {static_cast<Target::Kind>(7), 0.5, 0.5}), 0.0);
+    // A shape this build does not know (a newer one's) covers nothing.
+    const auto unknown =
+        static_cast<Target::Kind>(7);  // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
+    EXPECT_DOUBLE_EQ(HitProbability(s, {unknown, 0.5, 0.5}), 0.0);
 }
 
 }  // namespace
