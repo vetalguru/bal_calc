@@ -97,7 +97,7 @@ if(TARGET bal-cli)
         CODE 0 OUT "Range m +Elev MRAD +Wind MRAD" NO_ERR)
     bal_cli_test(quick_csv
         ARGS quick --bc 0.243 --v0 800 --to 200 --csv --units moa
-        CODE 0 OUT "^V0 800\\.0 m/s, .*\nRange m,Elev MOA,Wind MOA,Drop cm,[^\n]*\n0,-,-,[^\n]*\n100,[^\n]*\n200," NO_ERR)
+        CODE 0 OUT "^V0 800\\.0 m/s, [^\n]*zero elevation [0-9.]+ MOA[^\n]*\n\nRange m,Elev MOA,Wind MOA,Drop cm,[^\n]*\n0,-,-,[^\n]*\n100,[^\n]*\n200," NO_ERR)
     bal_cli_test(quick_bad_number ARGS quick --bc fast --v0 800
         CODE 2 ERR "^--bc: not a number: fast\n" NO_OUT)
     bal_cli_test(quick_bad_wind ARGS quick --bc 0.3 --v0 800 --wind 4

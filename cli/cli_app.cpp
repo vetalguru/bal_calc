@@ -274,12 +274,13 @@ void PrintTable(const Trajectory& traj, const TableSpec& spec, const bs::ScopeRe
 }
 
 void PrintSummary(const Shot& shot, const Trajectory& traj, const ballistics::ZeroResult& zero,
-                  std::ostream& out) {
+                  const TableSpec& spec, std::ostream& out) {
     out << "V0 " << Fixed(shot.muzzle_velocity_mps, 1) << " m/s, air "
         << Fixed(u::KToC(shot.atmosphere.temperature_k), 1) << " C "
         << Fixed(shot.atmosphere.pressure_pa / 100.0, 1) << " hPa "
         << Fixed(shot.atmosphere.humidity * 100.0, 0) << " %, zero elevation "
-        << Fixed(u::RadToMrad(zero.elevation_rad), 3) << " MRAD";
+        << Fixed(spec.moa ? u::RadToMoa(zero.elevation_rad) : u::RadToMrad(zero.elevation_rad), 3)
+        << (spec.moa ? " MOA" : " MRAD");
     if (traj.stability() > 0.0) {
         out << ", Sg " << Fixed(traj.stability(), 2);
         if (traj.stability() < 1.0) {
@@ -333,7 +334,7 @@ int CmdTable(const Args& a, std::ostream& out, std::ostream& err) {
         return 1;
     }
     out << loaded.value().rifle.name << " / " << loaded.value().cartridge.name << "\n";
-    PrintSummary(sol.value().shot, sol.value().trajectory, sol.value().zero, out);
+    PrintSummary(sol.value().shot, sol.value().trajectory, sol.value().zero, spec, out);
     const std::optional<bs::ScopeRecord>& scope = loaded.value().scope;
     PrintTable(sol.value().trajectory, spec, scope ? &*scope : nullptr, a.csv, out);
     return 0;
@@ -379,7 +380,7 @@ int CmdQuick(const Args& a, std::ostream& out, std::ostream& err) {
         err << sol.error().message << "\n";
         return 1;
     }
-    PrintSummary(sol.value().shot, sol.value().trajectory, sol.value().zero, out);
+    PrintSummary(sol.value().shot, sol.value().trajectory, sol.value().zero, spec, out);
     PrintTable(sol.value().trajectory, spec, nullptr, a.csv, out);
     return 0;
 }

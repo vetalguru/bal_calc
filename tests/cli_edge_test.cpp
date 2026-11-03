@@ -180,6 +180,23 @@ TEST(CliEdgeQuick, DefaultsAreG7AndMrad) {
     EXPECT_NE(plain, g1);
 }
 
+TEST(CliEdgeQuick, SummaryInTheTablesUnits) {
+    std::string mrad, moa, err;
+    ASSERT_EQ(RunCli(Quick({"--to", "100"}), mrad, err), 0) << err;
+    ASSERT_EQ(RunCli(Quick({"--to", "100", "--units", "moa"}), moa, err), 0) << err;
+    auto zero = [](const std::string& out, const std::string& unit) {
+        const std::string key = "zero elevation ";
+        const auto at = out.find(key);
+        EXPECT_NE(at, std::string::npos) << out;
+        const auto end = out.find(' ', at + key.size());
+        EXPECT_EQ(out.substr(end + 1, unit.size()), unit) << out;
+        return std::stod(out.substr(at + key.size(), end - at - key.size()));
+    };
+    EXPECT_NEAR(zero(moa, "MOA"),
+                ballistics::units::RadToMoa(ballistics::units::MradToRad(zero(mrad, "MRAD"))),
+                0.002);
+}
+
 TEST(CliEdgeQuick, BadTableSpec) {
     std::string out, err;
     const std::string msg = "need 0 < --step and --from <= --to <= 5000\n";
