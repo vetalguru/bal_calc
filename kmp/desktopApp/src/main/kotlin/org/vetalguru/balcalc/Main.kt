@@ -3,6 +3,7 @@ package org.vetalguru.balcalc
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -16,10 +17,15 @@ import org.vetalguru.balcalc.core.desktopEngine
 import org.vetalguru.balcalc.core.desktopSeed
 import org.vetalguru.balcalc.core.resourcesDir
 
+/** The window icon from the app's resources; none if it is missing or unreadable. */
+fun windowIcon(resources: File): Painter? =
+    File(resources, "balcalc.png").takeIf { it.isFile }?.let { file ->
+        runCatching { BitmapPainter(Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()) }.getOrNull()
+    }
+
 fun main() {
     val core = Api(desktopEngine())
-    val icon = File(resourcesDir(), "balcalc.png").takeIf { it.isFile }
-        ?.let { BitmapPainter(Image.makeFromEncoded(it.readBytes()).toComposeImageBitmap()) }
+    val icon = windowIcon(resourcesDir())
     application {
         Window(
             onCloseRequest = ::exitApplication,
@@ -30,7 +36,7 @@ fun main() {
             BalCalcApp(
                 api = core,
                 startup = { start(desktopDatabasePath()) { desktopSeed() } },
-                platform = remember { DesktopPlatform { window } },
+                platform = remember { DesktopPlatform(owner = { window }) },
                 dark = isSystemInDarkTheme(),
             )
         }

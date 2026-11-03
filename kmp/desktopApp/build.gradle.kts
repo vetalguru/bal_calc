@@ -15,6 +15,16 @@ dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutines.swing)
+    testImplementation(libs.kotlin.test)
+}
+
+tasks.test {
+    // The icon the packages ship.
+    systemProperty("balcalc.icon", repoRoot.resolve("kmp/icons/balcalc.png").path)
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        events("failed")
+    }
 }
 
 // libbalcalc_jni for this OS, built from the repository's CMake project.
@@ -92,7 +102,8 @@ compose.desktop {
             linux {
                 iconFile.set(repoRoot.resolve("kmp/icons/balcalc.png"))
                 packageName = "holdmark"
-                menuGroup = "Science;Engineering"
+                // The menu entry's Categories, a list that ends in ";" (freedesktop.org).
+                menuGroup = "Science;Engineering;"
                 appCategory = "science"
                 shortcut = true
             }

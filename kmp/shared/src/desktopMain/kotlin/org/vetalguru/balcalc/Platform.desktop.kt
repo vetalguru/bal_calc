@@ -14,65 +14,84 @@ import org.vetalguru.balcalc.core.NamedText
 @Composable
 actual fun BackHandler(enabled: Boolean, onBack: () -> Unit) = Unit
 
-/** Native file dialogs and the system clipboard. */
-class DesktopPlatform(private val owner: () -> Frame?) : Platform, Files, Clipboard {
+/** Where to save or what to open: the native file dialog, or a stand-in in tests. */
+interface FileChooser {
+    /** The file to save to, or null when cancelled. */
+    fun save(suggestedName: String): File?
+
+    /** The files chosen (none when cancelled); [accept] filters by file name. */
+    fun open(multiple: Boolean, accept: ((String) -> Boolean)?): List<File>
+}
+
+/** The native file dialog (GTK or Windows), on the UI thread. */
+class AwtFileChooser(private val owner: () -> Frame?) : FileChooser {
+    override fun save(suggestedName: String): File? =
+        FileDialog(owner(), null, FileDialog.SAVE).run {
+            file = suggestedName
+            isVisible = true
+            if (file == null) null else File(directory, file)
+        }
+
+    override fun open(multiple: Boolean, accept: ((String) -> Boolean)?): List<File> =
+        FileDialog(owner(), null, FileDialog.LOAD).run {
+            isMultipleMode = multiple
+            if (accept != null) setFilenameFilter { _, name -> accept(name) }
+            isVisible = true
+            files.toList()
+        }
+}
+
+/** Whether a file name ends in one of [extensions] (without the dot), any case. */
+fun hasExtension(name: String, extensions: List<String>): Boolean =
+    extensions.any { name.lowercase().endsWith(".${it.lowercase()}") }
+
+/** The pictures the group screen reads. */
+val imageExtensions = listOf("jpg", "jpeg", "png", "webp", "bmp")
+
+/**
+ * Native file dialogs and the system clipboard. [systemClipboard] is the
+ * system's unless given (tests pass their own: a headless system has none).
+ */
+class DesktopPlatform(
+    owner: () -> Frame?,
+    private val chooser: FileChooser = AwtFileChooser(owner),
+    private val systemClipboard: java.awt.datatransfer.Clipboard? = null,
+) : Platform, Files, Clipboard {
     override val files: Files get() = this
     override val clipboard: Clipboard get() = this
 
-    override suspend fun saveText(suggestedName: String, text: String): Boolean {
-        val file = withContext(Dispatchers.Main) {
-            FileDialog(owner(), null, FileDialog.SAVE).run {
-                file = suggestedName
-                isVisible = true
-                if (file == null) null else File(directory, file)
-            }
-        } ?: return false
-        withContext(Dispatchers.IO) { file.writeText(text) }
+    private suspend fun saveTo(suggestedName: String, write: (File) -> Unit): Boolean {
+        val file = withContext(Dispatchers.Main) { chooser.save(suggestedName) } ?: return false
+        withContext(Dispatchers.IO) { write(file) }
         return true
     }
 
-    override suspend fun saveBytes(suggestedName: String, mimeType: String, bytes: ByteArray): Boolean {
-        val file = withContext(Dispatchers.Main) {
-            FileDialog(owner(), null, FileDialog.SAVE).run {
-                file = suggestedName
-                isVisible = true
-                if (file == null) null else File(directory, file)
-            }
-        } ?: return false
-        withContext(Dispatchers.IO) { file.writeBytes(bytes) }
-        return true
-    }
+    override suspend fun saveText(suggestedName: String, text: String): Boolean =
+        saveTo(suggestedName) { it.writeText(text) }
+
+    override suspend fun saveBytes(suggestedName: String, mimeType: String, bytes: ByteArray): Boolean =
+        saveTo(suggestedName) { it.writeBytes(bytes) }
 
     override suspend fun openTexts(extensions: List<String>, multiple: Boolean): List<NamedText> {
         val files = withContext(Dispatchers.Main) {
-            FileDialog(owner(), null, FileDialog.LOAD).run {
-                isMultipleMode = multiple
-                if (extensions.isNotEmpty()) {
-                    setFilenameFilter { _, name -> extensions.any { name.lowercase().endsWith(".$it") } }
-                }
-                isVisible = true
-                this.files.toList()
-            }
+            chooser.open(multiple, if (extensions.isEmpty()) null else { name -> hasExtension(name, extensions) })
         }
         return withContext(Dispatchers.IO) { files.map { NamedText(it.name, it.readText()) } }
     }
 
     override suspend fun openImage(): ByteArray? {
         val file = withContext(Dispatchers.Main) {
-            FileDialog(owner(), null, FileDialog.LOAD).run {
-                setFilenameFilter { _, name -> listOf(".jpg", ".jpeg", ".png", ".webp", ".bmp").any { name.lowercase().endsWith(it) } }
-                isVisible = true
-                this.files.firstOrNull()
-            }
+            chooser.open(false) { name -> hasExtension(name, imageExtensions) }.firstOrNull()
         } ?: return null
         return withContext(Dispatchers.IO) { file.readBytes() }
     }
 
-    override suspend fun copyText(text: String) =
-        Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
+    private val system get() = systemClipboard ?: Toolkit.getDefaultToolkit().systemClipboard
+
+    override suspend fun copyText(text: String) = system.setContents(StringSelection(text), null)
 
     override suspend fun pasteText(): String? = runCatching {
-        Toolkit.getDefaultToolkit().systemClipboard.getData(DataFlavor.stringFlavor) as String
+        system.getData(DataFlavor.stringFlavor) as String
     }.getOrNull()
 }
 
