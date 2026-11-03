@@ -158,6 +158,28 @@ TEST(CliEdgeQuick, MalformedNumbersAreNamed) {
     }
 }
 
+TEST(CliEdgeQuick, NeedsBothBcAndVelocity) {
+    std::string out, err;
+    EXPECT_EQ(RunCli({"quick", "--bc", "0.243"}, out, err), 2);
+    EXPECT_EQ(err, "quick needs --bc and --v0\n");
+    EXPECT_EQ(RunCli({"quick", "--v0", "800"}, out, err), 2);
+    EXPECT_EQ(err, "quick needs --bc and --v0\n");
+    EXPECT_TRUE(out.empty());
+}
+
+TEST(CliEdgeQuick, DefaultsAreG7AndMrad) {
+    std::string plain, explicit_, err;
+    ASSERT_EQ(RunCli({"quick", "--bc", "0.243", "--v0", "800", "--csv"}, plain, err), 0) << err;
+    ASSERT_EQ(RunCli(Quick({"--units", "mrad", "--csv"}), explicit_, err), 0) << err;
+    EXPECT_EQ(plain, explicit_);
+    EXPECT_TRUE(Has(plain, "Elev MRAD")) << plain;
+    // A G1 BC of the same number is another bullet.
+    std::string g1;
+    ASSERT_EQ(RunCli({"quick", "--bc", "0.243", "--drag", "G1", "--v0", "800", "--csv"}, g1, err),
+              0);
+    EXPECT_NE(plain, g1);
+}
+
 TEST(CliEdgeQuick, BadTableSpec) {
     std::string out, err;
     const std::string msg = "need 0 < --step and --from <= --to <= 5000\n";
@@ -404,6 +426,38 @@ TEST(CliEdgeDb, TableWithPowderTemperatureAndCsvClicks) {
     EXPECT_EQ(CsvRow(out, "0")[3], "-");
 }
 
+TEST(CliEdgeDb, TableIdsMustBeNumbers) {
+    TempDb db("table_ids");
+    std::string out, err;
+    EXPECT_EQ(RunCli({"--db", db.path(), "table", "--rifle", "one", "--cartridge", "1"}, out, err),
+              2);
+    EXPECT_EQ(err, "--rifle: not a number: one\n");
+    EXPECT_EQ(RunCli({"--db", db.path(), "table", "--rifle", "1", "--cartridge", "x"}, out, err),
+              2);
+    EXPECT_EQ(err, "--cartridge: not a number: x\n");
+    EXPECT_TRUE(out.empty());
+}
+
+TEST(CliEdgeDb, ProfilesLeaveOutBrokenPairs) {
+    TempDb db("dangling_pair");
+    std::string out, err;
+    ASSERT_EQ(RunCli({"--db", db.path(), "demo"}, out, err), 0) << err;
+    ASSERT_EQ(RunCli({"--db", db.path(), "profiles"}, out, err), 0) << err;
+    EXPECT_EQ(out, "1  M24 (demo) / M118LR (demo)  (rifle 1, cartridge 1)\n");
+    // Another app's file: the pair outlives its rifle or its cartridge, or
+    // the rifles cannot be read at all. The pair is left out, quietly.
+    for (const char* damage : {"PRAGMA foreign_keys = OFF; DELETE FROM rifle",
+                               "PRAGMA foreign_keys = OFF; DELETE FROM cartridge",
+                               "PRAGMA foreign_keys = OFF; DROP TABLE rifle"}) {
+        TempDb broken("dangling_pair_broken");
+        ASSERT_EQ(RunCli({"--db", broken.path(), "demo"}, out, err), 0) << err;
+        broken.Execute(damage);
+        EXPECT_EQ(RunCli({"--db", broken.path(), "profiles"}, out, err), 0) << damage << err;
+        EXPECT_TRUE(out.empty()) << damage << out;
+        EXPECT_TRUE(err.empty()) << damage << err;
+    }
+}
+
 TEST(CliEdgeDb, DamagedDatabaseLists) {
     std::string out, err;
     for (const auto& [command, table] : std::vector<std::pair<std::string, std::string>>{
@@ -474,6 +528,29 @@ TEST(CliEdgeSeed, ArgumentsAndEmptyDirectories) {
     fs::remove_all(dir);
     EXPECT_EQ(RunCli({"--db", db.path(), "seed", dir.string()}, out, err), 1);
     EXPECT_EQ(err, dir.string() + ": no data files found\n");
+}
+
+TEST(CliEdgeSeed, UnreadableFilesAreLeftOut) {
+    TempDb db("seed_unreadable");
+    const fs::path dir = fs::temp_directory_path() / "balcalc_cli_edge_seed_unreadable";
+    fs::remove_all(dir);
+    fs::create_directories(dir);
+    fs::copy_file(fs::path(BALLISTICS_SEED_DIR) / "reticle" / "mildot.reticle",
+                  dir / "mildot.reticle");
+    std::ofstream(dir / "locked.ammo") << "<ammo-info-ex name=\"x\" />";
+    fs::permissions(dir / "locked.ammo", fs::perms::none);
+    if (std::ifstream(dir / "locked.ammo")) {
+        fs::permissions(dir / "locked.ammo", fs::perms::owner_all);
+        fs::remove_all(dir);
+        GTEST_SKIP() << "permissions do not lock files here (root or Windows)";
+    }
+    std::string out, err;
+    EXPECT_EQ(RunCli({"--db", db.path(), "seed", dir.string()}, out, err), 0) << err;
+    // Only the readable reticle: the locked file is neither imported nor a problem.
+    EXPECT_EQ(out, "1 imported, 0 skipped\n");
+    EXPECT_TRUE(err.empty()) << err;
+    fs::permissions(dir / "locked.ammo", fs::perms::owner_all);
+    fs::remove_all(dir);
 }
 
 TEST(CliEdgeSeed, SecondRunSkipsWhatIsThere) {
