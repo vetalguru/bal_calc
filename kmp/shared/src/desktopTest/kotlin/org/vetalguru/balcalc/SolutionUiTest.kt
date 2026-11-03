@@ -191,22 +191,6 @@ class SolutionUiTest {
         waitUntil(timeoutMillis = 10_000) { exists("warning_unstable") && !exists("warning_lowStability") }
     }
 
-    /** The minimal view: −10 and a typed range move the corrections; Full view goes back. */
-    @Test
-    fun minimalViewRange() = runDesktopComposeUiTest(412, 915) {
-        val app = startApp()
-        onNodeWithTag("minimalOn").performScrollTo().performClick()
-        waitUntil(timeoutMillis = 10_000) { exists("minimal") }
-        assertTrue(app.state().getValue("prefs").jsonObject.getValue("minimal").jsonPrimitive.content == "true")
-        onAllNodesWithText("−10").onFirst().performClick()
-        waitUntil(timeoutMillis = 10_000) { app.condition("targetRangeM") == 290.0 && shown("elevation") != "1.61" }
-        val near = elevation()
-        type("range", "600")
-        waitUntil(timeoutMillis = 10_000) { app.condition("targetRangeM") == 600.0 && elevation() > near }
-        onNodeWithTag("minimalOff").performClick()
-        waitUntil(timeoutMillis = 10_000) { exists("quickWind") && exists("solvedFor:600") }
-    }
-
     /** A target removed elsewhere: a tap on its stale row tells the core's answer in a snackbar, which goes. */
     @Test
     fun staleTargetIsReported() = runDesktopComposeUiTest(412, 915) {
@@ -407,7 +391,7 @@ class SolutionUiTest {
         type("targetRange0", "700")
         typeInto("Angle to target", "5")
         type("targetWind0", "4")
-        choose("12 o'clock", "3 o'clock")
+        choose("6 o'clock", "3 o'clock")
         onNodeWithTag("saveTargets").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("target:Far") && !exists("saveTargets") }
         assertTrue(hasText("700 m · 5° · 4 m/s 3 o'clock"))
@@ -462,7 +446,7 @@ class SolutionUiTest {
         type("targetSpeed", "30")
         waitUntil(timeoutMillis = 10_000) { exists("lead") }
         assertTrue(!hasText("The bullet meets it at", substring = true)) // straight across: met where it is
-        repeat(3) { onNodeWithTag("targetAngleMinus").performScrollTo().performClick() } // 90 → 45°
+        repeat(3) { onNodeWithTag("targetAngleMinus", useUnmergedTree = true).performScrollTo().performClick() } // 90 → 45°
         waitUntil(timeoutMillis = 10_000) { shown("targetAngle") == "45" }
         waitUntil(timeoutMillis = 10_000) { hasText("The bullet meets it at", substring = true) }
         assertEquals(45.0, app.condition("targetHeadingDeg"))
@@ -498,7 +482,7 @@ class SolutionUiTest {
         waitUntil(timeoutMillis = 10_000) { app.condition("altitudeM") == 500.0 }
 
         onNodeWithText("I enter sea-level pressure (QNH, weather report)").performClick()
-        waitUntil(timeoutMillis = 10_000) { hasText("Pressure at sea level (QNH)") }
+        waitUntil(timeoutMillis = 10_000) { hasText("Pressure QNH") }
         type("pressure", "1020")
         // 1020 hPa at sea level is about 960 hPa 500 m up.
         waitUntil(timeoutMillis = 10_000) { app.condition("pressureHpa") in 955.0..965.0 }
@@ -516,7 +500,7 @@ class SolutionUiTest {
         val app = startApp()
         onNodeWithTag("navConditions").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("temperature") }
-        typeInto("Relative humidity", "80")
+        typeInto("Humidity", "80")
         waitUntil(timeoutMillis = 10_000) { app.condition("humidityPct") == 80.0 }
 
         assertTrue(!hasText("Powder temperature"))

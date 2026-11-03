@@ -194,7 +194,7 @@ TEST_F(ProfileIo, RifleWithScopeAndReticleRoundTrips) {
     EXPECT_EQ(im.cartridge_id, 0);
     EXPECT_EQ(im.profile_id, 0);
 
-    const RifleRecord copy = Load<RifleRecord>(im.rifle_id);
+    const auto copy = Load<RifleRecord>(im.rifle_id);
     EXPECT_EQ(copy.name, "Tikka (2)");
     EXPECT_EQ(copy.caliber, ".308 Win");
     EXPECT_DOUBLE_EQ(copy.barrel_length_m, 0.61);
@@ -212,7 +212,7 @@ TEST_F(ProfileIo, RifleWithScopeAndReticleRoundTrips) {
     ASSERT_TRUE(copy.scope_id.has_value());
     EXPECT_EQ(Count<ScopeRecord>(), 2U);
     EXPECT_EQ(Count<ReticleRecord>(), 2U);
-    const ScopeRecord s = Load<ScopeRecord>(*copy.scope_id);
+    const auto s = Load<ScopeRecord>(*copy.scope_id);
     EXPECT_EQ(s.name, "PMII");
     EXPECT_EQ(s.click_units, "moa");
     EXPECT_DOUBLE_EQ(s.click_vertical_rad, 0.0001);
@@ -223,7 +223,7 @@ TEST_F(ProfileIo, RifleWithScopeAndReticleRoundTrips) {
     EXPECT_EQ(s.focal_plane, "sfp");
     EXPECT_DOUBLE_EQ(s.sfp_reference_magnification, 25.0);
     ASSERT_TRUE(s.reticle_id.has_value());
-    const ReticleRecord t = Load<ReticleRecord>(*s.reticle_id);
+    const auto t = Load<ReticleRecord>(*s.reticle_id);
     EXPECT_EQ(t.name, "Mil-Dot");
     EXPECT_EQ(t.units, "moa");
     EXPECT_EQ(t.focal_plane, "sfp");
@@ -246,7 +246,7 @@ TEST_F(ProfileIo, ScopeWithoutReticleRoundTrips) {
     const std::string text = ExportRifleJson(db_, rifle).value();
     EXPECT_TRUE(json::parse(text).at("scope").at("reticle").is_null());
     const Imported im = ImportShareJson(db_, text).value();
-    const ScopeRecord s = Load<ScopeRecord>(*Load<RifleRecord>(im.rifle_id).scope_id);
+    const auto s = Load<ScopeRecord>(*Load<RifleRecord>(im.rifle_id).scope_id);
     EXPECT_FALSE(s.reticle_id.has_value());
     EXPECT_EQ(Count<ReticleRecord>(), 0U);
 }
@@ -309,7 +309,7 @@ TEST_F(ProfileIo, CartridgeWithBandsAndVelocityPointsRoundTripsAndReusesTheBulle
     const Imported im = ImportShareJson(db_, ExportCartridgeJson(db_, cartridge).value()).value();
     ASSERT_NE(im.cartridge_id, 0);
     EXPECT_EQ(im.rifle_id, 0);
-    const CartridgeRecord copy = Load<CartridgeRecord>(im.cartridge_id);
+    const auto copy = Load<CartridgeRecord>(im.cartridge_id);
     EXPECT_EQ(copy.name, "Match load (2)");
     EXPECT_EQ(copy.caliber, ".308 Win");
     EXPECT_DOUBLE_EQ(copy.muzzle_velocity_mps, 790.0);
@@ -333,7 +333,7 @@ TEST_F(ProfileIo, BulletWithOtherBandsIsNotReused) {
     json doc = json::parse(ExportCartridgeJson(db_, Store(Cartridge(bullet))).value());
     doc["bullet"]["bc_bands"] = json::parse("[[800.0, 0.25], [600.0, 0.23]]");
     const Imported im = ImportShareJson(db_, doc.dump()).value();
-    const BulletRecord copy = Load<BulletRecord>(Load<CartridgeRecord>(im.cartridge_id).bullet_id);
+    const auto copy = Load<BulletRecord>(Load<CartridgeRecord>(im.cartridge_id).bullet_id);
     EXPECT_NE(copy.id, bullet);
     EXPECT_EQ(Count<BulletRecord>(), 2U);
     ASSERT_EQ(copy.bc_bands.size(), 2U);
@@ -391,13 +391,13 @@ TEST_F(ProfileIo, CurveBulletRoundTripsAsACopyOfBulletAndCurve) {
     EXPECT_EQ(jcurve.at("points"), json::parse("[[0.5, 0.2], [1.0, 0.4], [2.0, 0.3]]"));
 
     const Imported im = ImportShareJson(db_, text).value();
-    const BulletRecord copy = Load<BulletRecord>(Load<CartridgeRecord>(im.cartridge_id).bullet_id);
+    const auto copy = Load<BulletRecord>(Load<CartridgeRecord>(im.cartridge_id).bullet_id);
     // Curves are compared by id only: the import always brings its own.
     EXPECT_NE(copy.id, bullet);
     EXPECT_EQ(copy.drag_kind, "curve");
     ASSERT_TRUE(copy.curve_id.has_value());
     EXPECT_NE(*copy.curve_id, *b.curve_id);
-    const DragCurveRecord curve_copy = Load<DragCurveRecord>(*copy.curve_id);
+    const auto curve_copy = Load<DragCurveRecord>(*copy.curve_id);
     EXPECT_EQ(curve_copy.name, "Radar 175");
     EXPECT_EQ(curve_copy.source, "import:drg");
     ASSERT_EQ(curve_copy.points.size(), 3U);
@@ -421,6 +421,7 @@ TEST_F(ProfileIo, ImportedLibrarySourceBecomesTheUsers) {
 TEST_F(ProfileIo, TakenNamesGetTheNextFreeSuffix) {
     const std::string text = ExportRifleJson(db_, Store(Rifle(std::nullopt))).value();
     std::vector<std::string> names;
+    names.reserve(3);
     for (int i = 0; i < 3; ++i) {
         names.push_back(Load<RifleRecord>(ImportShareJson(db_, text).value().rifle_id).name);
     }
@@ -493,18 +494,18 @@ TEST_F(ProfileIo, MinimalFilesTakeTheDefaults) {
         "scope": {"name": "S", "click_vertical_rad": 0.0001, "click_horizontal_rad": 0.0001,
                   "reticle": {"name": "T"}}})")
                                .value();
-    const RifleRecord r = Load<RifleRecord>(rifle.rifle_id);
+    const auto r = Load<RifleRecord>(rifle.rifle_id);
     EXPECT_EQ(r.caliber, "");
     EXPECT_DOUBLE_EQ(r.barrel_length_m, 0.0);
     EXPECT_DOUBLE_EQ(r.twist_m, 0.0);
     EXPECT_EQ(r.notes, "");
     // Powder at the air temperature of the zero.
     EXPECT_DOUBLE_EQ(r.zero_powder_temp_k, 290.0);
-    const ScopeRecord s = Load<ScopeRecord>(*r.scope_id);
+    const auto s = Load<ScopeRecord>(*r.scope_id);
     EXPECT_EQ(s.click_units, "mrad");
     EXPECT_EQ(s.focal_plane, "ffp");
     EXPECT_DOUBLE_EQ(s.max_magnification, 0.0);
-    const ReticleRecord t = Load<ReticleRecord>(*s.reticle_id);
+    const auto t = Load<ReticleRecord>(*s.reticle_id);
     EXPECT_EQ(t.units, "mrad");
     EXPECT_EQ(t.focal_plane, "ffp");
     EXPECT_EQ(t.definition, "");
@@ -516,12 +517,12 @@ TEST_F(ProfileIo, MinimalFilesTakeTheDefaults) {
                    "drag_kind": "bc", "bc": 0.2,
                    "curve": null}})")
                               .value();
-    const CartridgeRecord c = Load<CartridgeRecord>(cart.cartridge_id);
+    const auto c = Load<CartridgeRecord>(cart.cartridge_id);
     EXPECT_EQ(c.caliber, ".224");  // from the bullet
     EXPECT_DOUBLE_EQ(c.reference_powder_temp_k, 288.15);
     EXPECT_DOUBLE_EQ(c.powder_sensitivity_per_k, 0.0);
     EXPECT_TRUE(c.velocity_points.empty());
-    const BulletRecord b = Load<BulletRecord>(c.bullet_id);
+    const auto b = Load<BulletRecord>(c.bullet_id);
     EXPECT_EQ(b.drag_table, "G7");
     EXPECT_DOUBLE_EQ(b.form_factor, 1.0);
     EXPECT_DOUBLE_EQ(b.length_m, 0.0);
@@ -535,7 +536,7 @@ TEST_F(ProfileIo, CurveWithoutANameIsNamedAfterTheBullet) {
                    "drag_kind": "curve", "drag_table": "",
                    "curve": {"points": [[0.5, 0.2], [1.0, 0.4]]}}})")
                             .value();
-    const BulletRecord b = Load<BulletRecord>(Load<CartridgeRecord>(im.cartridge_id).bullet_id);
+    const auto b = Load<BulletRecord>(Load<CartridgeRecord>(im.cartridge_id).bullet_id);
     EXPECT_FALSE(b.bc.has_value());
     EXPECT_EQ(Load<DragCurveRecord>(*b.curve_id).name, "Radar B");
     EXPECT_EQ(Load<DragCurveRecord>(*b.curve_id).source, "");
@@ -554,7 +555,7 @@ TEST_F(ProfileIo, LegacyProfileWithoutRifleCaliberTakesTheBullets) {
     ASSERT_NE(im.profile_id, 0);
     EXPECT_EQ(Load<CartridgeRecord>(im.cartridge_id).caliber, "6.5mm");
     EXPECT_FALSE(Load<RifleRecord>(im.rifle_id).scope_id.has_value());
-    const ProfileRecord p = Load<ProfileRecord>(im.profile_id);
+    const auto p = Load<ProfileRecord>(im.profile_id);
     EXPECT_EQ(p.rifle_id, im.rifle_id);
     EXPECT_EQ(p.cartridge_id, im.cartridge_id);
     EXPECT_EQ(p.name, "");
@@ -569,7 +570,7 @@ TEST_F(ProfileIo, NotAShareFileIsRefusedWithAReason) {
         const char* text;
         const char* reason;
     };
-    const Case cases[] = {
+    const std::vector<Case> cases = {
         {"", "it is not JSON"},
         {"[1, 2]", "it is not JSON"},
         {"42", "it is not JSON"},
@@ -770,10 +771,15 @@ TEST(ImportParse, AmmoLengthUnits) {
     };
     for (const auto& [length, m] : cases) {
         SCOPED_TRACE(length);
-        const auto a = ParseAmmo(Ammo(R"(name="x" bc="0.3" bullet-weight="10g"
-            muzzle-velocity="800m/s" bullet-diameter=")" +
-                                      length + R"(" bullet-length=")" + length +
-                                      R"(" barrel-length=")" + length + "\""));
+        std::string attrs = R"(name="x" bc="0.3" bullet-weight="10g"
+            muzzle-velocity="800m/s" bullet-diameter=")";
+        attrs += length;
+        attrs += R"(" bullet-length=")";
+        attrs += length;
+        attrs += R"(" barrel-length=")";
+        attrs += length;
+        attrs += "\"";
+        const auto a = ParseAmmo(Ammo(attrs));
         ASSERT_TRUE(a.ok()) << a.error().message;
         EXPECT_NEAR(a.value().bullet.diameter_m, m, 1e-12);
         EXPECT_NEAR(a.value().bullet.length_m, m, 1e-12);
@@ -878,7 +884,7 @@ TEST(ImportParse, AmmoFieldsAndRequiredValues) {
         std::string xml;
         std::string message;
     };
-    const Case cases[] = {
+    const std::vector<Case> cases = {
         {"<ammo-info-ex name=", "Not an .ammo file: invalid XML."},
         {"", "Not an .ammo file: invalid XML."},
         {"<reticle/>", "Not an .ammo file: no <ammo-info-ex> element."},
@@ -1080,7 +1086,7 @@ const char* const kDrg =
 TEST_F(Importers, AmmoStoresTheBulletAndItsCartridge) {
     const auto id = ImportAmmo(db_, kAmmo);
     ASSERT_TRUE(id.ok()) << id.error().message;
-    const BulletRecord b = Load<BulletRecord>(id.value());
+    const auto b = Load<BulletRecord>(id.value());
     EXPECT_EQ(b.name, "Gold Medal");
     EXPECT_DOUBLE_EQ(b.bc.value(), 0.475);
     const auto carts = Repository<CartridgeRecord>(db_).List().value();
@@ -1106,7 +1112,7 @@ TEST_F(Importers, AmmoFailuresLeaveNothing) {
 TEST_F(Importers, DrgStoresTheCurveAndItsBullet) {
     const auto id = ImportDrg(db_, kDrg);
     ASSERT_TRUE(id.ok()) << id.error().message;
-    const BulletRecord b = Load<BulletRecord>(id.value());
+    const auto b = Load<BulletRecord>(id.value());
     EXPECT_EQ(b.name, ".224 Lapua Scenar 4.5g");
     EXPECT_EQ(b.manufacturer, "Lapua");
     EXPECT_EQ(b.caliber, ".224");  // from 5.7 mm
@@ -1117,7 +1123,7 @@ TEST_F(Importers, DrgStoresTheCurveAndItsBullet) {
     EXPECT_EQ(b.drag_table, "");
     EXPECT_EQ(b.source, kSourceDrgFile);
     EXPECT_EQ(b.notes, "Doppler radar drag curve (3 points)");
-    const DragCurveRecord c = Load<DragCurveRecord>(*b.curve_id);
+    const auto c = Load<DragCurveRecord>(*b.curve_id);
     EXPECT_EQ(c.name, b.name);
     EXPECT_EQ(c.notes, "CFM radar drag function");
     EXPECT_EQ(c.source, kSourceDrgFile);
@@ -1237,7 +1243,7 @@ TEST_F(Importers, PublishedBulletListVariants) {
 }
 
 TEST_F(Importers, MalformedPublishedBulletListIsRefused) {
-    const char* const cases[] = {
+    const std::vector<const char*> cases = {
         R"({"format":"balcalc-bullets"})",
         R"({"format":"balcalc-bullets","bullets":[{"weight_gr":55,"diameter_in":0.224,"g1":0.25}]})",
         R"({"format":"balcalc-bullets","bullets":[{"name":"x","diameter_in":0.224,"g1":0.25}]})",
@@ -1252,7 +1258,7 @@ TEST_F(Importers, MalformedPublishedBulletListIsRefused) {
         const auto r = ImportFile(db_, "b.json", text);
         ASSERT_FALSE(r.ok());
         EXPECT_EQ(r.error().code, ErrorCode::kFormat);
-        EXPECT_TRUE(Contains(r.error().message, "Bullet list: ")) << r.error().message;
+        EXPECT_TRUE(Contains(r.error().message, "Library list: ")) << r.error().message;
     }
     // The database refuses a weightless bullet.
     const auto weightless = ImportFile(db_, "b.json", R"({"format":"balcalc-bullets","bullets":[

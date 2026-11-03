@@ -162,35 +162,42 @@ TEST_F(BridgeApi, SettingsIgnoreWhatTheyDoNotKnow) {
     EXPECT_NEAR(Ok("stationPressure", {{"qnhHpa", 1013.25}}).get<double>(), 1013.25, 1e-6);
 }
 
-// Every condition the app sets survives a restart (all but the wind's
-// direction, which starts from 12 o'clock).
+// Every condition the app sets survives a restart, but the wind: a start
+// is a new day, calm from 6 o'clock, without gusts or zones.
 TEST_F(BridgeApiFile, ConditionsAndSettingsSurviveARestart) {
     Sample();
     const json zones = json::array(
         {{{"speedMps", 3}, {"fromDeg", 45}, {"untilM", 600}}, {{"speedMps", 7}, {"untilM", 900}}});
-    Ok("setConditions", {{"temperatureC", -5},
-                         {"pressureHpa", 950},
-                         {"altitudeM", 400},
-                         {"humidityPct", 80},
-                         {"windSpeed", 2},
-                         {"windFromDeg", 270},
-                         {"windUntilM", 300},
-                         {"windZones", zones},
-                         {"windGustMps", 4},
-                         {"targetSpeedMps", 3},
-                         {"targetHeadingDeg", 270},
-                         {"targetSpeedUnit", "mph"},
-                         {"lookAngleDeg", -10},
-                         {"cantDeg", 2},
-                         {"coriolis", true},
-                         {"latitudeDeg", 60},
-                         {"useAzimuth", true},
-                         {"azimuthDeg", 45},
-                         {"targetRangeM", 750},
-                         {"magnification", 12},
-                         {"useDensityAltitude", true},
-                         {"densityAltitudeM", 1500},
-                         {"targetHeightCm", 40}});
+    const json set = Ok("setConditions", {{"temperatureC", -5},
+                                          {"pressureHpa", 950},
+                                          {"altitudeM", 400},
+                                          {"humidityPct", 80},
+                                          {"windSpeed", 2},
+                                          {"windFromDeg", 270},
+                                          {"windUntilM", 300},
+                                          {"windZones", zones},
+                                          {"windGustMps", 4},
+                                          {"targetSpeedMps", 3},
+                                          {"targetHeadingDeg", 270},
+                                          {"targetSpeedUnit", "mph"},
+                                          {"lookAngleDeg", -10},
+                                          {"cantDeg", 2},
+                                          {"coriolis", true},
+                                          {"latitudeDeg", 60},
+                                          {"useAzimuth", true},
+                                          {"azimuthDeg", 45},
+                                          {"targetRangeM", 750},
+                                          {"magnification", 12},
+                                          {"useDensityAltitude", true},
+                                          {"densityAltitudeM", 1500},
+                                          {"targetHeightCm", 40}});
+    // The zones as the core took them: a missing direction is from the
+    // right, the last zone goes to the end.
+    ASSERT_EQ(set.at("windZones").size(), 2U);
+    EXPECT_EQ(set.at("windZones")[0].at("fromDeg"), 45.0);
+    EXPECT_EQ(set.at("windZones")[0].at("untilM"), 600.0);
+    EXPECT_EQ(set.at("windZones")[1].at("fromDeg"), 90.0);
+    EXPECT_EQ(Ok("solution").at("hasGust"), true);
     Ok("setSettings", {{"tableFromM", 50}, {"tableToM", 1500}, {"tableStepM", 10}});
 
     Reopen();
@@ -202,15 +209,11 @@ TEST_F(BridgeApiFile, ConditionsAndSettingsSurviveARestart) {
     EXPECT_EQ(c.at("humidityPct"), 80.0);
     EXPECT_TRUE(c.at("powderFollowsAir").get<bool>());
     EXPECT_EQ(c.at("powderC"), -5.0);  // follows the air
-    EXPECT_EQ(c.at("windSpeed"), 2.0);
-    EXPECT_EQ(c.at("windFromDeg"), 0.0);  // every start: from 12 o'clock
-    EXPECT_EQ(c.at("windUntilM"), 300.0);
-    ASSERT_EQ(c.at("windZones").size(), 2U);
-    EXPECT_EQ(c.at("windZones")[0].at("fromDeg"), 45.0);
-    EXPECT_EQ(c.at("windZones")[0].at("untilM"), 600.0);
-    EXPECT_EQ(c.at("windZones")[1].at("fromDeg"), 90.0);  // missing: from the right
-    EXPECT_EQ(c.at("windZones")[1].at("untilM"), 0.0);    // the last goes to the end
-    EXPECT_EQ(c.at("windGustMps"), 4.0);
+    EXPECT_EQ(c.at("windSpeed"), 0.0);
+    EXPECT_EQ(c.at("windFromDeg"), 180.0);
+    EXPECT_EQ(c.at("windUntilM"), 0.0);
+    EXPECT_TRUE(c.at("windZones").empty());
+    EXPECT_EQ(c.at("windGustMps"), 0.0);
     EXPECT_EQ(c.at("targetSpeedMps"), 3.0);
     EXPECT_EQ(c.at("targetHeadingDeg"), 270.0);
     EXPECT_EQ(c.at("targetSpeedUnit"), "mph");
@@ -246,7 +249,7 @@ TEST_F(BridgeApiFile, DamagedSettingsFallBackToTheDefaults) {
     Setting("ui.prefs", "[1, 2]");
     Setting("ui.current_rifle", "rifle");
     Setting("ui.current_cartridge", "x");
-    Setting("ui.targets", "{\"not\": \"a list\"}");
+    Setting("ui.targets", R"({"not": "a list"})");
     Setting("ui.situations", "not json");
     Reopen();
     const json st = Ok("state");
@@ -829,7 +832,7 @@ TEST_F(BridgeApi, PhotoLimitsAndKinds) {
 }
 
 TEST_F(BridgeApi, ExportFileNamesAreSafe) {
-    const int rifle = SaveRifle({{"name", "A/B: \"long\" <*>?|\\"}, {"caliber", ".308 Win"}});
+    const int rifle = SaveRifle({{"name", R"(A/B: "long" <*>?|\)"}, {"caliber", ".308 Win"}});
     EXPECT_EQ(Ok("exportJson", {{"kind", "rifle"}, {"id", rifle}}).at("fileName"),
               "A_B_ _long_ ______.holdmark.json");
     // A factory load of the library is not in the list: a generic name.
@@ -857,9 +860,9 @@ TEST_F(BridgeApi, SeedWithoutFilesOrWithBrokenCatalogs) {
     EXPECT_EQ(Ok("seedVersion").at("version"), 3);
     // A catalog that does not parse is taken (not imported) and leaves the list empty.
     const json bad = {{"name", "published_scopes.json"},
-                      {"content", "{\"format\": \"balcalc-scopes\", \"scopes\": [oops"}};
+                      {"content", R"({"format": "balcalc-scopes", "scopes": [oops)"}};
     const json other = {{"name", "published_rifles.json"},
-                        {"content", "{\"format\": \"balcalc-rifles\", \"rifles\": {}}"}};
+                        {"content", R"({"format": "balcalc-rifles", "rifles": {}})"}};
     EXPECT_EQ(Ok("seed", {{"version", 4}, {"files", {bad, other}}}).at("imported"), 0);
     EXPECT_TRUE(Ok("libraryScopes").empty());
     EXPECT_TRUE(Ok("libraryRifles").empty());
@@ -965,7 +968,7 @@ TEST_F(BridgeApiFile, DamagedTargetEntry) {
         Setting("ui.targets", json::array({{{"name", "A"}, {"rangeM", 300}, {key, "x"}}}).dump());
         t = Ok("targets");
         ASSERT_EQ(t.size(), 1U) << key;
-        EXPECT_EQ(t[0].at(key), 0.0) << key;
+        EXPECT_EQ(t[0].at(key), std::string(key) == "windFromDeg" ? 180.0 : 0.0) << key;
         EXPECT_TRUE(t[0].at("ok").get<bool>()) << key;
     }
     Setting("ui.targets", R"([{"name": "A"}])");  // no range: the session's

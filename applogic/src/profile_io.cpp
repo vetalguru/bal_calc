@@ -70,7 +70,7 @@ class ImportScope {
     ImportScope(const ImportScope&) = delete;
     ImportScope& operator=(const ImportScope&) = delete;
 
-    const std::optional<Error>& error() const { return error_; }
+    [[nodiscard]] const std::optional<Error>& error() const { return error_; }
     Status Commit() {
         if (!savepoint_) {
             return txn_.Commit();
