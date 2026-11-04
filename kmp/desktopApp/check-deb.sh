@@ -21,7 +21,8 @@ field() { dpkg-deb -f "$deb" "$1"; }
 
 # --- Control data -------------------------------------------------------------
 [ "$(field Package)" = holdmark ] || fail "package is $(field Package), not holdmark"
-[ "$(field Version)" = "$version" ] || fail "version is $(field Version), the sources say $version"
+# Some JDKs' jpackage adds a Debian revision (1.0.0-1).
+[ "$(field Version | cut -d- -f1)" = "$version" ] || fail "version is $(field Version), the sources say $version"
 [ "$(field Architecture)" = amd64 ] || fail "architecture is $(field Architecture)"
 case "$(basename "$deb")" in
 Holdmark-"$version"-linux-amd64-release.deb) ;;
