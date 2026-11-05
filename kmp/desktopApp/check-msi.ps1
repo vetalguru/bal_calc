@@ -208,7 +208,7 @@ try {
 # matters is that it finds the installed one through the fixed upgradeUuid.
 $parsed = [version]$version
 $newer = "$($parsed.Major).$($parsed.Minor).$($parsed.Build + 1)"
-$newerMsi = Join-Path $work 'newer.msi'
+$newerMsi = [string](Join-Path $work 'newer.msi') # A COM call does not take a cmdlet's wrapped string.
 Copy-Item $Msi $newerMsi
 
 $transact = 1
@@ -234,6 +234,10 @@ $summary.GetType().InvokeMember('Property', 'SetProperty', $null, $summary, @([i
 [void](Call $edit 'Commit' $null)
 [void][Runtime.InteropServices.Marshal]::ReleaseComObject($summary)
 [void][Runtime.InteropServices.Marshal]::ReleaseComObject($edit)
+# The file stays locked until its last COM object is collected, views included.
+$edit = $summary = $null
+[GC]::Collect()
+[GC]::WaitForPendingFinalizers()
 
 Msiexec @('/i', "`"$newerMsi`"") 'upgrade'
 $entries = @(Installed)
