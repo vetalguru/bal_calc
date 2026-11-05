@@ -87,7 +87,7 @@ function Msiexec($arguments, $what) {
 }
 function Installed {
     $keys = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
-    @(Get-ItemProperty $keys -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -eq 'Holdmark' })
+    Get-ItemProperty $keys -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -eq 'Holdmark' }
 }
 
 if ($NoInstall) {
@@ -96,11 +96,11 @@ if ($NoInstall) {
     $root = Join-Path $unpacked 'Holdmark'
 } else {
     # Never over the developer's own copy.
-    if ((Installed).Count -ne 0) { Fail 'Holdmark is already installed on this machine' }
+    if (@(Installed).Count -ne 0) { Fail 'Holdmark is already installed on this machine' }
     Msiexec @('/i', "`"$Msi`"") 'install'
     $root = Join-Path $env:ProgramFiles 'Holdmark'
 
-    $entries = Installed
+    $entries = @(Installed)
     if ($entries.Count -ne 1) { Fail "$($entries.Count) entries in Apps & Features after installing" }
     if ($entries[0].DisplayVersion -ne $version) { Fail "installed as version $($entries[0].DisplayVersion)" }
 }
@@ -236,14 +236,14 @@ $summary.GetType().InvokeMember('Property', 'SetProperty', $null, $summary, @([i
 [void][Runtime.InteropServices.Marshal]::ReleaseComObject($edit)
 
 Msiexec @('/i', "`"$newerMsi`"") 'upgrade'
-$entries = Installed
+$entries = @(Installed)
 if ($entries.Count -ne 1) { Fail "$($entries.Count) entries in Apps & Features after upgrading: the old version stayed" }
 if ($entries[0].DisplayVersion -ne $newer) { Fail "upgraded to version $($entries[0].DisplayVersion), not $newer" }
 if (-not (Test-Path $exe)) { Fail 'no Holdmark.exe after upgrading' }
 
 # --- Uninstall ----------------------------------------------------------------
 Msiexec @('/x', "`"$productCode`"") 'uninstall'
-if ((Installed).Count -ne 0) { Fail 'still in Apps & Features after uninstalling' }
+if (@(Installed).Count -ne 0) { Fail 'still in Apps & Features after uninstalling' }
 foreach ($path in $exe, $startMenu, $desktop) {
     if (Test-Path $path) { Fail "$path is still there after uninstalling" }
 }
