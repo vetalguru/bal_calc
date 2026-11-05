@@ -12,8 +12,10 @@ runs:
     - uses: actions/cache@v4
       with:
         path: .cmake-downloads
-        key: cmake-downloads-${{ runner.os }}-${{ hashFiles('applogic/CMakeLists.txt', 'tests/CMakeLists.txt') }}
-        restore-keys: cmake-downloads-${{ runner.os }}-
+        # Per job: jobs that do not build the tests never fetch GoogleTest, and a
+        # shared key would let one of them save a cache without it for all.
+        key: cmake-downloads-${{ runner.os }}-${{ github.job }}-${{ hashFiles('applogic/CMakeLists.txt', 'tests/CMakeLists.txt') }}
+        restore-keys: cmake-downloads-${{ runner.os }}-${{ github.job }}-
 
     - name: Point CMake at the archives
       shell: bash
