@@ -54,11 +54,7 @@ fun TargetCard(model: AppModel, targets: List<TargetItem>, unit: String) {
     Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("targetCard")) {
         Column(Modifier.padding(vertical = 8.dp)) {
             if (targets.isEmpty()) {
-                Text(
-                    stringResource(Res.string.targets_empty),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                )
+                EmptyState(Res.drawable.ic_adjust, stringResource(Res.string.targets_empty))
             }
             targets.forEachIndexed { i, t ->
                 val current = abs(t.rangeM - c.targetRangeM) < 0.5 && abs(t.lookAngleDeg - c.lookAngleDeg) < 0.05 &&

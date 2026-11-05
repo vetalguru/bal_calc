@@ -53,7 +53,7 @@ internal fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
         onCancel = onDone,
         onSave = { scope.launch { error = model.armory.saveRifle(f, route.photoChange); if (error == null) onDone() } },
     ) { wide ->
-        Section(stringResource(Res.string.rifle)) {
+        Section(stringResource(Res.string.rifle), icon = Res.drawable.ic_rifle) {
             LibraryButton("rifleFromLibrary") {
                 nav.push(Route.LibraryRifles { r, barrel -> f = f.withRifle(r, barrel) })
             }
@@ -72,7 +72,7 @@ internal fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
             SwitchRow(stringResource(Res.string.left_twist), f.twistLeft, { f = f.copy(twistLeft = it) })
             StabilityLine(stability, partnerName)
         }
-        Section(stringResource(Res.string.scope)) {
+        Section(stringResource(Res.string.scope), icon = Res.drawable.ic_scope) {
             LibraryButton("scopeFromLibrary") {
                 nav.push(Route.LibraryScopes { s, c -> f = f.withScope(s, c) })
             }
@@ -112,7 +112,7 @@ internal fun RifleEditor(model: AppModel, route: Route.Rifle, nav: ArmoryNav) {
                 NumberField(stringResource(Res.string.sfp_reference), f.sfpReferenceMagnification, { f = f.copy(sfpReferenceMagnification = it) }, unit = x, from = 0.0, to = 100.0)
             }
         }
-        Section(stringResource(Res.string.zero)) {
+        Section(stringResource(Res.string.zero), icon = Res.drawable.ic_my_location) {
             Text(stringResource(Res.string.zero_note), color = MaterialTheme.colorScheme.onSurfaceVariant)
             Fields(
                 wide,

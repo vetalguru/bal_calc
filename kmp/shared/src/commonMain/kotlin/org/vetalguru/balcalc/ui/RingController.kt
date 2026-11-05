@@ -1,5 +1,8 @@
 package org.vetalguru.balcalc.ui
 
+import androidx.compose.material3.Icon
+import org.jetbrains.compose.resources.vectorResource
+import org.jetbrains.compose.resources.DrawableResource
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -99,19 +102,19 @@ internal fun Controller(model: AppModel, size: Dp, onWeather: () -> Unit = {}) {
             // The air in the corners the ring leaves free; a tap opens the conditions.
             if (!compact) {
                 val deg = stringResource(Res.string.unit_c)
-                Weather(stringResource(Res.string.weather_temperature), "${formatNumber(c.temperatureC, 1)} $deg",
+                Weather(Res.drawable.ic_thermostat, stringResource(Res.string.weather_temperature), "${formatNumber(c.temperatureC, 1)} $deg",
                     Alignment.TopStart, "weatherTemperature", onWeather)
                 if (c.useDensityAltitude) {
-                    Weather(stringResource(Res.string.weather_density_altitude), "${c.densityAltitudeM.roundToInt()} $m",
+                    Weather(Res.drawable.ic_landscape, stringResource(Res.string.weather_density_altitude), "${c.densityAltitudeM.roundToInt()} $m",
                         Alignment.TopEnd, "weatherPressure", onWeather)
                 } else {
-                    Weather(stringResource(Res.string.weather_pressure),
+                    Weather(Res.drawable.ic_compress, stringResource(Res.string.weather_pressure),
                         pressureText(c.pressureHpa, PressureUnit.of(model.state.prefs.pressureUnit)),
                         Alignment.TopEnd, "weatherPressure", onWeather)
                 }
-                Weather(stringResource(Res.string.weather_humidity), "${c.humidityPct.roundToInt()} %",
+                Weather(Res.drawable.ic_humidity_percentage, stringResource(Res.string.weather_humidity), "${c.humidityPct.roundToInt()} %",
                     Alignment.BottomStart, "weatherHumidity", onWeather)
-                Weather(stringResource(Res.string.weather_altitude), "${c.altitudeM.roundToInt()} $m",
+                Weather(Res.drawable.ic_landscape, stringResource(Res.string.weather_altitude), "${c.altitudeM.roundToInt()} $m",
                     Alignment.BottomEnd, "weatherAltitude", onWeather)
             }
             // The wheels sit inside the ring's band; they take their own touches.
@@ -153,6 +156,7 @@ internal fun Controller(model: AppModel, size: Dp, onWeather: () -> Unit = {}) {
                     header = { WheelHeader("°") },
                     label = stringResource(Res.string.look_angle_short),
                     hint = stringResource(Res.string.shot_angle),
+                    hintPicture = { LookAnglePicture() },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -201,7 +205,7 @@ internal fun Controller(model: AppModel, size: Dp, onWeather: () -> Unit = {}) {
             model.updateConditions { it.copy(windSpeed = v / windUnit.perMps) }
         }
         "lookAngle" -> WheelEditDialog(stringResource(Res.string.look_angle_short), c.lookAngleDeg, "°", 1, -60.0, 60.0,
-            "lookAngle", hint = stringResource(Res.string.shot_angle_hint), onDone = { editing = null }) { v ->
+            "lookAngle", hint = stringResource(Res.string.shot_angle_hint), hintPicture = { LookAnglePicture() }, onDone = { editing = null }) { v ->
             model.updateConditions { it.copy(lookAngleDeg = v) }
         }
     }
@@ -209,13 +213,16 @@ internal fun Controller(model: AppModel, size: Dp, onWeather: () -> Unit = {}) {
 
 /** One of the air's values in a corner of the ring's square: a small name over the value. */
 @Composable
-private fun BoxScope.Weather(label: String, value: String, corner: Alignment, tag: String, onClick: () -> Unit) {
+private fun BoxScope.Weather(icon: DrawableResource, label: String, value: String, corner: Alignment, tag: String, onClick: () -> Unit) {
     val end = corner == Alignment.TopEnd || corner == Alignment.BottomEnd
     Column(
         Modifier.align(corner).clickable(onClick = onClick).padding(4.dp).testTag(tag),
         horizontalAlignment = if (end) Alignment.End else Alignment.Start,
     ) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            Icon(vectorResource(icon), contentDescription = null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+        }
         Text(value, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 1)
     }
 }
@@ -331,6 +338,7 @@ private fun Wheel(
     label: String,
     modifier: Modifier = Modifier,
     hint: String? = null,
+    hintPicture: (@Composable () -> Unit)? = null,
     compact: Boolean = false,
 ) {
     val current by rememberUpdatedState(value)
@@ -401,7 +409,7 @@ private fun Wheel(
                 textAlign = TextAlign.Center, modifier = Modifier.width(80.dp),
             )
         }
-        if (hint != null) Hint(hint, Modifier.testTag("${tag}Hint")) { labelText() } else labelText()
+        if (hint != null) Hint(hint, Modifier.testTag("${tag}Hint"), hintPicture) { labelText() } else labelText()
     }
 }
 
@@ -416,6 +424,7 @@ private fun WheelEditDialog(
     to: Double,
     tag: String,
     hint: String? = null,
+    hintPicture: (@Composable () -> Unit)? = null,
     onDone: () -> Unit,
     onValue: (Double) -> Unit,
 ) {
@@ -434,7 +443,7 @@ private fun WheelEditDialog(
         text = {
             NumberField(
                 title, value, { v -> if (!cancelled) onValue(v) }, Modifier.fillMaxWidth().focusRequester(field), unit,
-                decimals, from, to, "${tag}Input", hint = hint, onCommitted = { if (!cancelled) onDone() },
+                decimals, from, to, "${tag}Input", hint = hint, hintPicture = hintPicture, onCommitted = { if (!cancelled) onDone() },
             )
         },
         // Losing the focus commits the field, which closes the dialog.

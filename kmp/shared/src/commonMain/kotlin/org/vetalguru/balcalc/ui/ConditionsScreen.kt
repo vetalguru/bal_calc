@@ -55,7 +55,7 @@ fun ConditionsScreen(model: AppModel) {
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Section(stringResource(Res.string.atmosphere)) {
+            Section(stringResource(Res.string.atmosphere), icon = Res.drawable.ic_thermostat) {
                 val pressureUnit = PressureUnit.of(model.state.prefs.pressureUnit)
                 val setPressureUnit = { u: PressureUnit -> model.setPrefs { it.copy(pressureUnit = u.key) } }
                 CompactFields(
@@ -139,7 +139,7 @@ fun ConditionsScreen(model: AppModel) {
                 }
             }
 
-            Section(stringResource(Res.string.powder)) {
+            Section(stringResource(Res.string.powder), icon = Res.drawable.ic_cartridge) {
                 SwitchRow(
                     stringResource(Res.string.powder_follows_air), c.powderFollowsAir,
                     { on -> model.updateConditions { it.copy(powderFollowsAir = on) } },
@@ -153,7 +153,7 @@ fun ConditionsScreen(model: AppModel) {
                 }
             }
 
-            Section(stringResource(Res.string.wind)) {
+            Section(stringResource(Res.string.wind), icon = Res.drawable.ic_air) {
                 val windUnit = WindUnit.of(model.state.prefs.windUnit)
                 val setWindUnit = { u: WindUnit -> model.setPrefs { it.copy(windUnit = u.key) } }
                 val zoned = c.windZones.isNotEmpty()
@@ -269,7 +269,7 @@ fun ConditionsScreen(model: AppModel) {
                 }
             }
 
-            Section(stringResource(Res.string.angles)) {
+            Section(stringResource(Res.string.angles), icon = Res.drawable.ic_straighten) {
                 Fields(
                     wide,
                     { m ->
@@ -277,7 +277,7 @@ fun ConditionsScreen(model: AppModel) {
                             stringResource(Res.string.look_angle_short), c.lookAngleDeg,
                             { v -> model.updateConditions { it.copy(lookAngleDeg = v) } },
                             m, deg, from = -60.0, to = 60.0, tag = "lookAngle", fieldMaxWidth = FIELD_MAX,
-                            hint = stringResource(Res.string.shot_angle_hint),
+                            hint = stringResource(Res.string.shot_angle_hint), hintPicture = { LookAnglePicture() },
                         )
                     },
                     { m ->
@@ -292,7 +292,7 @@ fun ConditionsScreen(model: AppModel) {
                 TiltButton(model)
             }
 
-            Section(stringResource(Res.string.target_section)) {
+            Section(stringResource(Res.string.target_section), icon = Res.drawable.ic_adjust) {
                 NumberField(
                     stringResource(Res.string.target_height), c.targetHeightCm,
                     { v -> model.updateConditions { it.copy(targetHeightCm = v) } },
@@ -302,7 +302,7 @@ fun ConditionsScreen(model: AppModel) {
                 )
             }
 
-            Section(stringResource(Res.string.coriolis_section)) {
+            Section(stringResource(Res.string.coriolis_section), icon = Res.drawable.ic_explore) {
                 SwitchRow(
                     stringResource(Res.string.coriolis_on), c.coriolis,
                     { on -> model.updateConditions { it.copy(coriolis = on) } },
@@ -312,7 +312,7 @@ fun ConditionsScreen(model: AppModel) {
                         stringResource(Res.string.latitude), c.latitudeDeg,
                         { v -> model.updateConditions { it.copy(latitudeDeg = v) } },
                         Modifier.width(COMPACT_FIELD), deg, from = -90.0, to = 90.0, tag = "latitude",
-                        hint = stringResource(Res.string.latitude_hint),
+                        hint = stringResource(Res.string.latitude_hint), hintPicture = { LatitudePicture() },
                     )
                     SwitchRow(
                         stringResource(Res.string.known_direction), c.useAzimuth,
@@ -324,7 +324,7 @@ fun ConditionsScreen(model: AppModel) {
                             stringResource(Res.string.azimuth), c.azimuthDeg,
                             { v -> model.updateConditions { it.copy(azimuthDeg = v % 360) } },
                             Modifier.width(COMPACT_FIELD), deg, decimals = 0, from = 0.0, to = 360.0, tag = "azimuth",
-                            hint = stringResource(Res.string.azimuth_hint),
+                            hint = stringResource(Res.string.azimuth_hint), hintPicture = { AzimuthPicture() },
                         )
                     }
                 }
@@ -339,13 +339,13 @@ private val COMPACT_FIELD = 150.dp
 /**
  * Number fields two side by side, as wide as their values need: the left
  * column (temperature, pressure with a unit to choose) up to 150 dp, the
- * right one (altitude, humidity) 100 dp; the left narrows on a small phone
+ * right one (altitude, humidity) 120 dp, for "2500 m" with its hint; the left narrows on a small phone
  * so that two still fit in a row.
  */
 @Composable
 private fun CompactFields(vararg fields: @Composable (Modifier) -> Unit) {
     BoxWithConstraints {
-        val right = 100.dp
+        val right = 120.dp
         val left = (maxWidth - 12.dp - right).coerceIn(120.dp, COMPACT_FIELD)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             fields.forEachIndexed { i, field -> field(Modifier.width(if (i % 2 == 0) left else right)) }
@@ -362,7 +362,8 @@ private fun DirectionField(fromDeg: Double, onDeg: (Double) -> Unit, modifier: M
     StepperField(
         stringResource(Res.string.wind_from), fromDeg, { v -> onDeg(v % 360) }, modifier,
         "°·" + stringResource(Res.string.wind_clock_short, clockHour(fromDeg)),
-        step = 15.0, from = 0.0, to = 360.0, tag = tag, fieldMaxWidth = FIELD_MAX,
-        hint = stringResource(Res.string.wind_direction_hint), wrap = true, decimals = 0,
+        // Wider than the others: its unit is long, and the number must still show ("345°·11 o'clock").
+        step = 15.0, from = 0.0, to = 360.0, tag = tag, fieldMaxWidth = FIELD_MAX + 48.dp,
+        hint = stringResource(Res.string.wind_direction_hint), hintPicture = { WindClockPicture() }, wrap = true, decimals = 0,
     )
 }

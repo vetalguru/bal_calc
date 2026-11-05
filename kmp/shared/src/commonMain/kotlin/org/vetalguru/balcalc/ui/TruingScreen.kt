@@ -142,16 +142,17 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
                         fun set(up: Double, right: Double) = scope.launch { offsetError = model.truing.setZeroOffset(up, right) }
                         Fields(
                             wide,
-                            { m -> NumberField(stringResource(Res.string.poi_up), pair.offsetUpCm, { set(it, pair.offsetRightCm) }, m, cm, from = -100.0, to = 100.0, tag = "offsetUp") },
-                            { m -> NumberField(stringResource(Res.string.poi_right), pair.offsetRightCm, { set(pair.offsetUpCm, it) }, m, cm, from = -100.0, to = 100.0, tag = "offsetRight") },
+                            { m -> NumberField(stringResource(Res.string.poi_up), pair.offsetUpCm, { set(it, pair.offsetRightCm) }, m, cm, from = -100.0, to = 100.0, tag = "offsetUp",
+                                hint = stringResource(Res.string.poi_hint), hintPicture = { ZeroOffsetPicture() }) },
+                            { m -> NumberField(stringResource(Res.string.poi_right), pair.offsetRightCm, { set(pair.offsetUpCm, it) }, m, cm, from = -100.0, to = 100.0, tag = "offsetRight",
+                                hint = stringResource(Res.string.poi_hint), hintPicture = { ZeroOffsetPicture() }) },
                         )
                         offsetError?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error) }
                     }
                 }
 
                 if (shotList.isEmpty()) {
-                    Text(stringResource(Res.string.no_shots), textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth().padding(12.dp))
+                    EmptyState(Res.drawable.ic_adjust, stringResource(Res.string.no_shots))
                 }
                 shotList.forEach { s ->
                     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp).testTag("shotRow"), verticalAlignment = Alignment.CenterVertically) {

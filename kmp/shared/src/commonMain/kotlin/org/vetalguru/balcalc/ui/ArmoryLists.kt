@@ -1,5 +1,10 @@
 package org.vetalguru.balcalc.ui
 
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import org.jetbrains.compose.resources.vectorResource
+import org.jetbrains.compose.resources.DrawableResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,7 +23,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Tab
+import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -98,7 +103,10 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = { nav.push(Route.Bullets(null)) }) { Text(stringResource(Res.string.bullets)) }
+                TextButton(onClick = { nav.push(Route.Bullets(null)) }) {
+                    ButtonIcon(Res.drawable.ic_bullet)
+                    Text(stringResource(Res.string.bullets))
+                }
                 Box {
                     TextButton(onClick = { importMenu = true }) {
                         ButtonIcon(Res.drawable.ic_file_open)
@@ -147,13 +155,14 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                 }
             }
             PrimaryTabRow(selectedTabIndex = nav.tab) {
-                Tab(nav.tab == 0, { nav.tab = 0 }, text = { Text(stringResource(Res.string.rifles_count, st.rifles.size)) },
-                    modifier = Modifier.testTag("riflesTab"))
-                Tab(nav.tab == 1, { nav.tab = 1 }, text = { Text(stringResource(Res.string.cartridges_count, st.cartridges.size)) },
-                    modifier = Modifier.testTag("cartridgesTab"))
+                LeadingIconTab(nav.tab == 0, { nav.tab = 0 }, text = { Text(stringResource(Res.string.rifles_count, st.rifles.size)) },
+                    icon = { Icon(vectorResource(Res.drawable.ic_rifle), contentDescription = null) }, modifier = Modifier.testTag("riflesTab"))
+                LeadingIconTab(nav.tab == 1, { nav.tab = 1 }, text = { Text(stringResource(Res.string.cartridges_count, st.cartridges.size)) },
+                    icon = { Icon(vectorResource(Res.drawable.ic_cartridge), contentDescription = null) }, modifier = Modifier.testTag("cartridgesTab"))
             }
             if (nav.tab == 0) {
                 ItemList(
+                    icon = Res.drawable.ic_rifle,
                     empty = stringResource(Res.string.no_rifles_hint),
                     items = st.rifles.map { Row4(it.id, it.name, it.caliber, true, it.id == st.currentRifleId) },
                     kind = "rifle",
@@ -171,6 +180,7 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                 val mps = stringResource(Res.string.mps_value, "%s")
                 val barrel = stringResource(Res.string.barrel_value, "%s")
                 ItemList(
+                    icon = Res.drawable.ic_cartridge,
                     empty = stringResource(Res.string.no_cartridges_hint),
                     items = st.cartridges.map { c ->
                         Row4(
@@ -226,6 +236,7 @@ private class Row4(val id: Long, val title: String, val subtitle: String, val br
 
 @Composable
 private fun ItemList(
+    icon: DrawableResource,
     empty: String,
     items: List<Row4>,
     kind: String,
@@ -238,8 +249,8 @@ private fun ItemList(
     onShotLog: ((Long) -> Unit)? = null,
 ) {
     if (items.isEmpty()) {
-        Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-            Text(empty, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Box(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.Center) {
+            EmptyState(icon, empty)
         }
         return
     }
@@ -255,7 +266,15 @@ private fun ItemList(
                     .testTag("$kind:${item.title}"),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                thumbs[item.id]?.let { Thumbnail(it, 44.dp, Modifier.padding(end = 12.dp).testTag("thumb:${item.title}")) }
+                val thumb = thumbs[item.id]
+                if (thumb != null) {
+                    Thumbnail(thumb, 44.dp, Modifier.padding(end = 12.dp).testTag("thumb:${item.title}"))
+                } else {
+                    Box(
+                        Modifier.padding(end = 12.dp).size(44.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center,
+                    ) { Icon(vectorResource(icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
                 Column(Modifier.weight(1f).alpha(if (item.bright) 1f else 0.55f)) {
                     Text(item.title, fontSize = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (item.subtitle.isNotEmpty()) {

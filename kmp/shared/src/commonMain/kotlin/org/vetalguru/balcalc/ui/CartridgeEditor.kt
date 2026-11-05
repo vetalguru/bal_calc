@@ -65,12 +65,12 @@ internal fun CartridgeEditor(model: AppModel, route: Route.Cartridge, nav: Armor
         onCancel = nav::back,
         onSave = { scope.launch { error = model.armory.saveCartridge(f, route.photoChange); if (error == null) nav.back() } },
     ) { wide ->
-        Section(stringResource(Res.string.cartridge)) {
+        Section(stringResource(Res.string.cartridge), icon = Res.drawable.ic_cartridge) {
             TextInput(stringResource(Res.string.cartridge_name_hint), f.name, { f = f.copy(name = it) }, tag = "cartridgeName")
             TextInput(stringResource(Res.string.caliber_hint), f.caliber, { f = f.copy(caliber = it) }, tag = "cartridgeCaliber")
             PhotoRow(photo, route::change)
         }
-        Section(stringResource(Res.string.bullet)) {
+        Section(stringResource(Res.string.bullet), icon = Res.drawable.ic_bullet) {
             // The bullet's name on its own line: beside the buttons a long one
             // was squeezed to a letter column on phones.
             Text(
