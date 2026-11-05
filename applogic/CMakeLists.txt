@@ -5,6 +5,7 @@ FetchContent_Declare(
     URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
     URL_HASH SHA256=d6c65aca6b1ed68e7a182f4757257b107ae403032760ed6ef121c9d55e81757d
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    ${ballistics_download_dir}
 )
 set(JSON_Install OFF CACHE INTERNAL "")
 FetchContent_MakeAvailable(nlohmann_json)
@@ -16,6 +17,7 @@ FetchContent_Declare(
     URL https://github.com/leethomason/tinyxml2/archive/refs/tags/10.0.0.tar.gz
     URL_HASH SHA256=3bdf15128ba16686e69bce256cc468e76c7b94ff2c7f391cc5ec09e40bff3839
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    ${ballistics_download_dir}
     SOURCE_SUBDIR no-cmake
 )
 FetchContent_MakeAvailable(tinyxml2)

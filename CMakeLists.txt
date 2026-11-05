@@ -39,6 +39,15 @@ target_compile_options(ballistics_warnings INTERFACE
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /utf-8>
 )
 
+# Where the archives of the fetched dependencies are kept, when set: CI restores
+# them from its cache, so an outage of the download host cannot fail a build.
+# A kept archive is still checked against its URL_HASH. FetchContent ignores
+# DOWNLOAD_DIR under policy CMP0168 NEW (cmake_minimum_required 3.30 or later).
+if(DEFINED ENV{BALLISTICS_DOWNLOADS})
+    file(TO_CMAKE_PATH "$ENV{BALLISTICS_DOWNLOADS}" ballistics_downloads)
+    set(ballistics_download_dir DOWNLOAD_DIR "${ballistics_downloads}")
+endif()
+
 # SQLite + the sqlite_manager C++ wrapper (library only when embedded)
 add_subdirectory(third_party/sqlite_manager EXCLUDE_FROM_ALL)
 
