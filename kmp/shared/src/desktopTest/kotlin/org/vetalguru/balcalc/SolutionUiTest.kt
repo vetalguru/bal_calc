@@ -28,7 +28,9 @@ import kotlin.math.sin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import java.io.File
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.JsonArray
@@ -41,6 +43,10 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import org.vetalguru.balcalc.core.Api
+import org.vetalguru.balcalc.core.Engine
+import org.vetalguru.balcalc.core.desktopEngine
+import org.vetalguru.balcalc.core.desktopSeed
 
 /*
  * The solution side of the app control by control: the pickers, the pages
@@ -576,6 +582,37 @@ class SolutionUiTest {
         waitUntil(timeoutMillis = 10_000) {
             stored().let { it.getValue("azimuthDeg").jsonPrimitive.double == 20.0 && it.getValue("latitudeDeg").jsonPrimitive.double == 2.0 }
         }
+    }
+
+    /** Two fields changed while the hit chance is still being computed: neither change is lost. */
+    @Test
+    fun hitChanceKeepsEditsMadeWhileComputing() = runDesktopComposeUiTest(412, 915) {
+        val db = File.createTempFile("balcalc-test", ".db").apply { delete(); deleteOnExit() }
+        val engine = desktopEngine()
+        val api = Api(Engine { method, args ->
+            if (method == "wez") Thread.sleep(300) // a slow phone
+            engine.call(method, args)
+        })
+        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform()) }
+        waitUntil(timeoutMillis = 30_000) { exists("sample") }
+        onNodeWithTag("sample").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("elevation") }
+        onNodeWithTag("navConditions").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("temperature") }
+        onNodeWithText("Account for Earth rotation").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("latitude") }
+        onNodeWithTag("navTable").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("hitTab") }
+        onNodeWithTag("hitTab").performClick()
+        waitUntil(timeoutMillis = 20_000) { exists("hitChance") }
+
+        typeInto("Azimuth", "20")
+        typeInto("Latitude", "2") // the first change is still with the core
+        fun stored() = runBlocking { api.call("wez", buildJsonObject { put("toM", 300.0); put("stepM", 50.0) }) }
+            .jsonObject.getValue("settings").jsonObject
+        waitUntil(timeoutMillis = 10_000) { stored().getValue("latitudeDeg").jsonPrimitive.double == 2.0 }
+        assertEquals(20.0, stored().getValue("azimuthDeg").jsonPrimitive.double)
+        db.delete()
     }
 
     /** The hit chance's target: an ellipse and a narrower one are hit less often. */
