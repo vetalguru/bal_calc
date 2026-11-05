@@ -11,6 +11,8 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: ./.github/actions/cache-downloads
+
     - uses: actions/setup-java@v4
       with:
         distribution: temurin

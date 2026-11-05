@@ -1,0 +1,20 @@
+name: Cache the C++ dependency archives
+description: >
+  Keeps the archives CMake fetches (JSON, tinyxml2, GoogleTest) between runs, so
+  an outage of the download host does not fail the build. CMake checks each
+  kept archive against its URL_HASH. Run it after the checkout.
+
+runs:
+  using: composite
+  steps:
+    # The directory is in the workspace: a container job sees `github.workspace`
+    # under another path, and a Windows job's bash under another form of it.
+    - uses: actions/cache@v4
+      with:
+        path: .cmake-downloads
+        key: cmake-downloads-${{ runner.os }}-${{ hashFiles('applogic/CMakeLists.txt', 'tests/CMakeLists.txt') }}
+        restore-keys: cmake-downloads-${{ runner.os }}-
+
+    - name: Point CMake at the archives
+      shell: bash
+      run: echo "BALLISTICS_DOWNLOADS=$GITHUB_WORKSPACE/.cmake-downloads" >> "$GITHUB_ENV"

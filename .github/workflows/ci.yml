@@ -38,6 +38,8 @@ jobs:
         with:
           submodules: recursive
 
+      - uses: ./.github/actions/cache-downloads
+
       - name: Configure (Debug)
         run: cmake -S . -B build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
 
@@ -54,6 +56,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - uses: ./.github/actions/cache-downloads
 
       - name: Configure
         run: cmake --preset windows-msvc
@@ -102,6 +106,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - uses: ./.github/actions/cache-downloads
 
       # .clang-tidy makes every warning an error: the build fails on any.
       - name: Build with clang-tidy
@@ -190,6 +196,14 @@ jobs:
       - uses: ./.github/actions/setup-kotlin
         with:
           android: "true"
+
+      # Robolectric fetches its Android SDK jars from Maven Central while the
+      # tests run, past Gradle's cache; Central may answer 429 to a runner.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ hashFiles('kmp/gradle/libs.versions.toml') }}
+          restore-keys: robolectric-
 
       # The Android code on the JVM: sensors, pickers, camera, QR, pictures,
       # the widget and the seed assets. The core (an arm64 .so) is not loaded.
