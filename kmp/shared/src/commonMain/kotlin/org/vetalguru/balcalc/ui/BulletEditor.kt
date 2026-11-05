@@ -94,17 +94,20 @@ fun BulletEditor(model: AppModel, initial: BulletForm, onDone: () -> Unit) {
                                 NumberField(stringResource(Res.string.bc_short), band.bc,
                                     { v -> f = f.copy(bands = f.bands.toMutableList().also { it[i] = band.copy(bc = v) }) },
                                     Modifier.weight(1f), decimals = 3, from = 0.0, to = 2.0, tag = "bandBc$i")
-                                TextButton(onClick = {
+                                ActionIcon(Res.drawable.ic_close, stringResource(Res.string.remove_item)) {
                                     val rest = f.bands.toMutableList().also { it.removeAt(i) }
                                     f = f.copy(bands = rest)
                                     if (rest.isEmpty()) banded = false
-                                }) { Text("✕") }
+                                }
                             }
                         }
                         TextButton(onClick = {
                             val last = f.bands.lastOrNull() ?: BcBand(800.0, 0.3)
                             f = f.copy(bands = f.bands + BcBand(maxOf(100.0, last.velocity - 200), last.bc))
-                        }, modifier = Modifier.testTag("addBand")) { Text(stringResource(Res.string.add_band)) }
+                        }, modifier = Modifier.testTag("addBand")) {
+                            ButtonIcon(Res.drawable.ic_add)
+                            Text(stringResource(Res.string.add_band))
+                        }
                     }
                 }
                 Section("") {
@@ -121,7 +124,10 @@ fun BulletEditor(model: AppModel, initial: BulletForm, onDone: () -> Unit) {
                                 error = model.library.deleteBullet(f.id)
                                 if (error == null) onDone()
                             }
-                        }) { Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error) }
+                        }) {
+                        ButtonIcon(Res.drawable.ic_delete, MaterialTheme.colorScheme.error)
+                        Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
+                    }
                     }
                     Spacer(Modifier.weight(1f))
                     Button(onClick = { save() }) { Text(stringResource(Res.string.save)) }

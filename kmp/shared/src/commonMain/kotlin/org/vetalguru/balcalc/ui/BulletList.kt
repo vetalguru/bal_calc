@@ -58,7 +58,10 @@ internal fun <T> SearchList(
     LaunchedEffect(filter, reloadKey) { items = loadOr(emptyList()) { load(filter) } }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
+            TextButton(onClick = onBack) {
+                ButtonIcon(Res.drawable.ic_arrow_back)
+                Text(stringResource(Res.string.back))
+            }
             Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             actions()
         }
@@ -141,8 +144,14 @@ fun BulletList(model: AppModel, picker: Boolean, onBack: () -> Unit, onEdit: (Lo
                             r.problems.map { "${it.file}: ${it.message}" }).joinToString("\n")
                     }
                 }
-            }) { Text(stringResource(Res.string.import_action)) }
-            Button(onClick = { onEdit(0) }, modifier = Modifier.testTag("newBullet")) { Text(stringResource(Res.string.new_action)) }
+            }) {
+                ButtonIcon(Res.drawable.ic_file_open)
+                Text(stringResource(Res.string.import_action))
+            }
+            Button(onClick = { onEdit(0) }, modifier = Modifier.testTag("newBullet")) {
+                ButtonIcon(Res.drawable.ic_add)
+                Text(stringResource(Res.string.new_action))
+            }
         },
     ) { b ->
         Row(verticalAlignment = Alignment.CenterVertically) {

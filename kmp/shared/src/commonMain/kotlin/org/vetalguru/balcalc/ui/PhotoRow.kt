@@ -66,15 +66,18 @@ fun PhotoRow(photo: ByteArray?, onPhoto: (ByteArray?) -> Unit) {
         if (image != null) Thumbnail(image, 96.dp, Modifier.testTag("photo"))
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             OutlinedButton(onClick = { scope.launch { take(files.openImage()) } }, modifier = Modifier.testTag("photoChoose")) {
+                ButtonIcon(Res.drawable.ic_image)
                 Text(stringResource(Res.string.photo_choose))
             }
             if (camera != null) {
                 OutlinedButton(onClick = { scope.launch { take(camera.takePhoto()) } }) {
+                    ButtonIcon(Res.drawable.ic_photo_camera)
                     Text(stringResource(Res.string.photo_take))
                 }
             }
             if (photo != null) {
                 TextButton(onClick = { onPhoto(null) }, modifier = Modifier.testTag("photoRemove")) {
+                    ButtonIcon(Res.drawable.ic_delete)
                     Text(stringResource(Res.string.photo_remove))
                 }
             }

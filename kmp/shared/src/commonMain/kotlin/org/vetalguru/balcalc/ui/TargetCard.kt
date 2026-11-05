@@ -96,6 +96,7 @@ fun TargetCard(model: AppModel, targets: List<TargetItem>, unit: String) {
             }
             Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(onClick = { editing = true }, modifier = Modifier.testTag("editTargets")) {
+                    ButtonIcon(Res.drawable.ic_edit)
                     Text(stringResource(Res.string.targets_edit))
                 }
             }
@@ -124,7 +125,7 @@ private fun TargetsDialog(model: AppModel, initial: List<TargetItem>, onClose: (
                             singleLine = true,
                             modifier = Modifier.weight(1f).testTag("targetName$i"),
                         )
-                        TextButton(onClick = { rows.removeAt(i) }, modifier = Modifier.testTag("targetRemove$i")) { Text("✕") }
+                        ActionIcon(Res.drawable.ic_close, stringResource(Res.string.remove_item), Modifier.testTag("targetRemove$i")) { rows.removeAt(i) }
                     }
                     Fields(
                         false,
@@ -155,7 +156,10 @@ private fun TargetsDialog(model: AppModel, initial: List<TargetItem>, onClose: (
                                 windSpeed = c.windSpeed, windFromDeg = c.windFromDeg,
                             ),
                         )
-                    }, modifier = Modifier.testTag("addTarget")) { Text(stringResource(Res.string.target_add)) }
+                    }, modifier = Modifier.testTag("addTarget")) {
+                        ButtonIcon(Res.drawable.ic_add)
+                        Text(stringResource(Res.string.target_add))
+                    }
                 }
                 error?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("targetsError")) }
             }

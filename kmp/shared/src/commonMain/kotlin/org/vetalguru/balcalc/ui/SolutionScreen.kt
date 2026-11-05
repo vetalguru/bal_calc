@@ -205,6 +205,7 @@ private fun Viewer(
                                     modifier = Modifier.weight(1f),
                                 )
                                 OutlinedButton(onClick = onLogHit, modifier = Modifier.testTag("logHitSolution")) {
+                                    ButtonIcon(Res.drawable.ic_adjust)
                                     Text(stringResource(Res.string.log_hit))
                                 }
                             }
@@ -216,6 +217,7 @@ private fun Viewer(
                         // Saved situations live by the targets: both switch what is shot at.
                         if (st.rifles.isNotEmpty()) {
                             OutlinedButton(onClick = onSituations, modifier = Modifier.padding(horizontal = 12.dp).testTag("situations")) {
+                                ButtonIcon(Res.drawable.ic_bookmarks)
                                 Text(stringResource(Res.string.situations))
                             }
                         }

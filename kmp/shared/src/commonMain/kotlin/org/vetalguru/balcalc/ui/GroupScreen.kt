@@ -90,7 +90,10 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
 
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
+            TextButton(onClick = onBack) {
+                ButtonIcon(Res.drawable.ic_arrow_back)
+                Text(stringResource(Res.string.back))
+            }
             Text(stringResource(Res.string.group_title), style = MaterialTheme.typography.titleLarge, maxLines = 1,
                 overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         }
@@ -121,7 +124,10 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
                         Marking.Holes -> holes.removeLastOrNull()
                     }
                     saved = false; error = null
-                }) { Text(stringResource(Res.string.group_undo)) }
+                }) {
+                    ButtonIcon(Res.drawable.ic_undo)
+                    Text(stringResource(Res.string.group_undo))
+                }
             }
 
             photo?.let { img ->

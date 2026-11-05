@@ -569,4 +569,13 @@
     <string name="barrel_velocity_line">In the %1$s″ barrel of %2$s: %3$s m/s</string>
     <string name="barrel_value">barrel %1$s″</string>
     <string name="core_40">Barrel length must be 0 (unknown) or 4 to 40 inches.</string>
+    <string name="remove_item">Remove</string>
+    <string name="previous_part">Previous part</string>
+    <string name="next_part">Next part</string>
+    <string name="more_actions">More actions</string>
+    <string name="more_info">More information</string>
+    <string name="step_up">Increase</string>
+    <string name="step_down">Decrease</string>
+    <string name="zoom_in">Zoom in</string>
+    <string name="zoom_out">Zoom out</string>
 </resources>

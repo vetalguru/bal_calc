@@ -234,15 +234,19 @@ private fun RangeCard(model: AppModel, table: RangeTable, onColumns: () -> Unit,
         }
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = onColumns, modifier = Modifier.testTag("tableColumns")) { Text(stringResource(Res.string.table_columns)) }
+                TextButton(onClick = onColumns, modifier = Modifier.testTag("tableColumns")) {
+                    ButtonIcon(Res.drawable.ic_view_column)
+                    Text(stringResource(Res.string.table_columns))
+                }
                 Box {
                     TextButton(onClick = { exportMenu = true }, enabled = table.ok, modifier = Modifier.testTag("tableExport")) {
+                        ButtonIcon(Res.drawable.ic_ios_share)
                         Text(stringResource(Res.string.table_export))
                     }
                     DropdownMenu(exportMenu, { exportMenu = false }) {
-                        DropdownMenuItem({ Text(stringResource(Res.string.export_csv)) }, onClick = { exportMenu = false; export(png = false) },
+                        DropdownMenuItem({ Text(stringResource(Res.string.export_csv)) }, leadingIcon = { MenuIcon(Res.drawable.ic_ios_share) }, onClick = { exportMenu = false; export(png = false) },
                             modifier = Modifier.testTag("exportCsv"))
-                        DropdownMenuItem({ Text(stringResource(Res.string.export_png)) }, onClick = { exportMenu = false; export(png = true) },
+                        DropdownMenuItem({ Text(stringResource(Res.string.export_png)) }, leadingIcon = { MenuIcon(Res.drawable.ic_image) }, onClick = { exportMenu = false; export(png = true) },
                             modifier = Modifier.testTag("exportPng"))
                     }
                 }

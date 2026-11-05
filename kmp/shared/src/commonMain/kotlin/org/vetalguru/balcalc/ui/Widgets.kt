@@ -1,5 +1,13 @@
 package org.vetalguru.balcalc.ui
 
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import org.jetbrains.compose.resources.vectorResource
+import org.jetbrains.compose.resources.DrawableResource
 import androidx.compose.foundation.layout.Arrangement
 import kotlinx.coroutines.delay
 import androidx.compose.ui.input.pointer.pointerInput
@@ -56,6 +64,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.vetalguru.balcalc.fixed
+import org.jetbrains.compose.resources.stringResource
+import org.vetalguru.balcalc.res.Res
+import org.vetalguru.balcalc.res.*
 
 /** Text of a number with up to [decimals] digits, trailing zeros dropped. */
 fun formatNumber(v: Double, decimals: Int): String {
@@ -125,7 +136,10 @@ fun NumberField(
                 }
                 if (hint != null) {
                     Hint(hint, Modifier.padding(start = 4.dp).testTag("${tag}Info"), hintPicture) {
-                        Text("ⓘ", color = MaterialTheme.colorScheme.primary)
+                        Icon(
+                            vectorResource(Res.drawable.ic_info), stringResource(Res.string.more_info),
+                            Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary,
+                        )
                     }
                 }
             }
@@ -144,8 +158,8 @@ fun NumberField(
 }
 
 /**
- * A field's spin button: as tall as the box, split across into ▲ (a step
- * up) and ▼ (a step down). A press steps once; held, it keeps stepping.
+ * A field's spin button: as tall as the box, split across into an up arrow
+ * (a step up) and a down arrow (a step down). A press steps once; held, it keeps stepping.
  */
 @Composable
 private fun SpinButtons(tag: String?, onSpin: (Int) -> Unit) {
@@ -153,15 +167,15 @@ private fun SpinButtons(tag: String?, onSpin: (Int) -> Unit) {
     Row(Modifier.height(56.dp)) {
         VerticalDivider(color = line)
         Column(Modifier.width(36.dp).fillMaxHeight()) {
-            SpinHalf("▲", +1, onSpin, Modifier.weight(1f).fillMaxWidth().testTag("${tag}Plus"))
+            SpinHalf(Res.drawable.ic_arrow_drop_up, stringResource(Res.string.step_up), +1, onSpin, Modifier.weight(1f).fillMaxWidth().testTag("${tag}Plus"))
             HorizontalDivider(color = line)
-            SpinHalf("▼", -1, onSpin, Modifier.weight(1f).fillMaxWidth().testTag("${tag}Minus"))
+            SpinHalf(Res.drawable.ic_arrow_drop_down, stringResource(Res.string.step_down), -1, onSpin, Modifier.weight(1f).fillMaxWidth().testTag("${tag}Minus"))
         }
     }
 }
 
 @Composable
-private fun SpinHalf(arrow: String, dir: Int, onSpin: (Int) -> Unit, modifier: Modifier) {
+private fun SpinHalf(icon: DrawableResource, description: String, dir: Int, onSpin: (Int) -> Unit, modifier: Modifier) {
     val spin by rememberUpdatedState(onSpin)
     val scope = rememberCoroutineScope()
     Box(
@@ -182,9 +196,30 @@ private fun SpinHalf(arrow: String, dir: Int, onSpin: (Int) -> Unit, modifier: M
         },
         contentAlignment = Alignment.Center,
     ) {
-        Text(arrow, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(vectorResource(icon), description, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
+
+/** A button's icon, before its text: the text says what it does. */
+@Composable
+internal fun ButtonIcon(icon: DrawableResource, tint: Color = LocalContentColor.current) {
+    Icon(vectorResource(icon), contentDescription = null, Modifier.size(ButtonDefaults.IconSize), tint = tint)
+    Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+}
+
+/** A menu entry's icon: its text says what it does. */
+@Composable
+internal fun MenuIcon(icon: DrawableResource) = Icon(vectorResource(icon), contentDescription = null)
+
+/** A button that is only an icon: [description] is what a screen reader says. */
+@Composable
+internal fun ActionIcon(
+    icon: DrawableResource,
+    description: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) = IconButton(onClick, modifier, enabled) { Icon(vectorResource(icon), description) }
 
 /** Units a field can switch between: (key, label) pairs; [onPick] gets the key. */
 class UnitMenu(val options: List<Pair<String, String>>, val onPick: (String) -> Unit)
@@ -247,7 +282,7 @@ fun Hint(
 }
 
 /**
- * A number field with a spin button at its right end: ▲/▼ step by [step]
+ * A number field with a spin button at its right end: its arrows step by [step]
  * (held, they keep stepping); typing still works.
  */
 @Composable

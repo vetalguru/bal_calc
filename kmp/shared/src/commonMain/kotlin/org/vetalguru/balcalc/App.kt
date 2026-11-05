@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
@@ -32,7 +33,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.jetbrains.compose.resources.stringResource
 import org.vetalguru.balcalc.core.Api
 import org.vetalguru.balcalc.res.Res
@@ -46,14 +49,14 @@ import org.vetalguru.balcalc.ui.TableScreen
 import org.vetalguru.balcalc.ui.clicksText
 import org.vetalguru.balcalc.ui.correctionTexts
 
-private class Page(val title: StringResource, val short: StringResource, val tag: String)
+private class Page(val title: StringResource, val short: StringResource, val icon: DrawableResource, val tag: String)
 
 private val pages = listOf(
-    Page(Res.string.nav_solution, Res.string.nav_solution_short, "navSolution"),
-    Page(Res.string.nav_table, Res.string.nav_table_short, "navTable"),
-    Page(Res.string.nav_conditions, Res.string.nav_conditions_short, "navConditions"),
-    Page(Res.string.nav_armory, Res.string.nav_armory_short, "navArmory"),
-    Page(Res.string.nav_settings, Res.string.nav_settings_short, "navSettings"),
+    Page(Res.string.nav_solution, Res.string.nav_solution_short, Res.drawable.ic_my_location, "navSolution"),
+    Page(Res.string.nav_table, Res.string.nav_table_short, Res.drawable.ic_table_chart, "navTable"),
+    Page(Res.string.nav_conditions, Res.string.nav_conditions_short, Res.drawable.ic_air, "navConditions"),
+    Page(Res.string.nav_armory, Res.string.nav_armory_short, Res.drawable.ic_inventory_2, "navArmory"),
+    Page(Res.string.nav_settings, Res.string.nav_settings_short, Res.drawable.ic_settings, "navSettings"),
 )
 
 /**
@@ -96,7 +99,7 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
                                 NavigationBarItem(
                                     selected = page == i,
                                     onClick = { page = i },
-                                    icon = {},
+                                    icon = { Icon(vectorResource(p.icon), contentDescription = null) }, // the label names it
                                     label = { Text(stringResource(p.short), fontSize = 12.sp, maxLines = 1) },
                                     modifier = Modifier.testTag(p.tag),
                                 )
@@ -117,7 +120,7 @@ fun BalCalcApp(api: Api, startup: suspend Api.() -> Unit, platform: Platform, da
                                 NavigationRailItem(
                                     selected = page == i,
                                     onClick = { page = i },
-                                    icon = {},
+                                    icon = { Icon(vectorResource(p.icon), contentDescription = null) }, // the label names it
                                     label = { Text(stringResource(p.title), textAlign = TextAlign.Center) },
                                     modifier = Modifier.testTag(p.tag),
                                 )

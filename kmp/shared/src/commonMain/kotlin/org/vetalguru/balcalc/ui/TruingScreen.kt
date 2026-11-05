@@ -115,10 +115,14 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
         val wide = maxWidth >= 560.dp
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
+                TextButton(onClick = onBack) {
+                    ButtonIcon(Res.drawable.ic_arrow_back)
+                    Text(stringResource(Res.string.back))
+                }
                 Text(stringResource(Res.string.shot_log), style = MaterialTheme.typography.titleLarge, maxLines = 1,
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                 Button(onClick = { logging = true }, enabled = st.hasPair, modifier = Modifier.testTag("logHit")) {
+                    ButtonIcon(Res.drawable.ic_adjust)
                     Text(stringResource(Res.string.log_hit))
                 }
             }
@@ -164,16 +168,18 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
                                 color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             )
                         }
-                        TextButton(onClick = { model.truing.deleteShot(s.id) }) { Text("✕") }
+                        ActionIcon(Res.drawable.ic_delete, stringResource(Res.string.delete)) { model.truing.deleteShot(s.id) }
                     }
                 }
 
                 Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { scope.launch { result = runCatching { model.truing.computeTruing() }.getOrNull() } },
                         enabled = shotList.isNotEmpty(), modifier = Modifier.testTag("computeTruing")) {
+                        ButtonIcon(Res.drawable.ic_calculate)
                         Text(stringResource(Res.string.calculate_truing))
                     }
                     TextButton(onClick = { model.truing.resetTruing() }, enabled = trued, modifier = Modifier.testTag("resetTruing")) {
+                        ButtonIcon(Res.drawable.ic_restart_alt)
                         Text(stringResource(Res.string.reset_truing))
                     }
                 }
@@ -191,6 +197,7 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
 
                 if (st.hasPair) {
                     OutlinedButton(onClick = onGroup, modifier = Modifier.padding(horizontal = 12.dp).testTag("openGroup")) {
+                        ButtonIcon(Res.drawable.ic_scatter_plot)
                         Text(stringResource(Res.string.group_title))
                     }
                 }
@@ -198,6 +205,7 @@ fun TruingScreen(model: AppModel, onBack: () -> Unit, onGroup: () -> Unit = {}) 
 
                 if (st.hasPair) {
                     OutlinedButton(onClick = { bcCalc = true }, modifier = Modifier.padding(horizontal = 12.dp).testTag("bcCalc")) {
+                        ButtonIcon(Res.drawable.ic_calculate)
                         Text(stringResource(Res.string.bc_calc))
                     }
                 }

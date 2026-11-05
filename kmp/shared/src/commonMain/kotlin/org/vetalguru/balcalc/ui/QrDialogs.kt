@@ -59,9 +59,9 @@ fun QrShowDialog(title: String, parts: List<String>, onClose: () -> Unit) {
                 }
                 if (parts.size > 1) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        TextButton(onClick = { part-- }, enabled = part > 0) { Text("‹") }
+                        ActionIcon(Res.drawable.ic_chevron_left, stringResource(Res.string.previous_part), enabled = part > 0) { part-- }
                         Text(stringResource(Res.string.qr_part, part + 1, parts.size), modifier = Modifier.testTag("qrPart"))
-                        TextButton(onClick = { part++ }, enabled = part < parts.lastIndex, modifier = Modifier.testTag("qrNext")) { Text("›") }
+                        ActionIcon(Res.drawable.ic_chevron_right, stringResource(Res.string.next_part), Modifier.testTag("qrNext"), part < parts.lastIndex) { part++ }
                     }
                 }
                 Text(stringResource(Res.string.qr_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -119,6 +119,7 @@ fun QrImportDialog(model: AppModel, onImported: () -> Unit, onClose: () -> Unit)
                 }
                 if (camera != null) {
                     Button(onClick = { scope.launch { take(camera.scanQr()) } }, modifier = Modifier.testTag("qrScan")) {
+                        ButtonIcon(Res.drawable.ic_qr_code_scanner)
                         Text(stringResource(Res.string.qr_scan))
                     }
                 }
@@ -127,7 +128,10 @@ fun QrImportDialog(model: AppModel, onImported: () -> Unit, onClose: () -> Unit)
                         val image = files.openImage() ?: return@launch
                         take(decodeQrImage(image) ?: "")
                     }
-                }, modifier = Modifier.testTag("qrPicture")) { Text(stringResource(Res.string.qr_picture)) }
+                }, modifier = Modifier.testTag("qrPicture")) {
+                    ButtonIcon(Res.drawable.ic_image)
+                    Text(stringResource(Res.string.qr_picture))
+                }
                 error?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("qrError")) }
             }
         },
