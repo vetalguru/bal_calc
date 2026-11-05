@@ -72,7 +72,8 @@ fun WezPanel(model: AppModel, toM: Double, modifier: Modifier) {
     }
     val r = result
     val s = r?.settings ?: WezSettings()
-    fun change(f: (WezSettings) -> WezSettings) { edit = f(s) }
+    // On top of the last change: the result may not have caught up with it yet.
+    fun change(f: (WezSettings) -> WezSettings) { edit = f(edit ?: s) }
     val cm = stringResource(Res.string.unit_cm)
     val deg = stringResource(Res.string.unit_deg)
     val coriolis = model.state.conditions.coriolis
