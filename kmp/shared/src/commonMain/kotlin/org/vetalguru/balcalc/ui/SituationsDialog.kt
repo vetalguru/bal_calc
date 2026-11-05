@@ -80,7 +80,10 @@ fun SituationsDialog(model: AppModel, onClose: () -> Unit) {
                         }
                         TextButton(onClick = {
                             scope.launch { list = runCatching { model.targets.deleteSituation(s.name) }.getOrDefault(list) }
-                        }, modifier = Modifier.testTag("deleteSituation:${s.name}")) { Text(stringResource(Res.string.delete)) }
+                        }, modifier = Modifier.testTag("deleteSituation:${s.name}")) {
+                            ButtonIcon(Res.drawable.ic_delete)
+                            Text(stringResource(Res.string.delete))
+                        }
                     }
                 }
                 HorizontalDivider()

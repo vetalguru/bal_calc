@@ -100,9 +100,12 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                 )
                 TextButton(onClick = { nav.push(Route.Bullets(null)) }) { Text(stringResource(Res.string.bullets)) }
                 Box {
-                    TextButton(onClick = { importMenu = true }) { Text(stringResource(Res.string.import_action)) }
+                    TextButton(onClick = { importMenu = true }) {
+                        ButtonIcon(Res.drawable.ic_file_open)
+                        Text(stringResource(Res.string.import_action))
+                    }
                     DropdownMenu(importMenu, { importMenu = false }) {
-                        DropdownMenuItem({ Text(stringResource(Res.string.from_file)) }, onClick = {
+                        DropdownMenuItem({ Text(stringResource(Res.string.from_file)) }, leadingIcon = { MenuIcon(Res.drawable.ic_file_open) }, onClick = {
                             importMenu = false
                             model.act {
                                 platform.files.openTexts(listOf("json"), multiple = false).firstOrNull()?.let {
@@ -111,14 +114,14 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                                 }
                             }
                         })
-                        DropdownMenuItem({ Text(stringResource(Res.string.from_clipboard)) }, onClick = {
+                        DropdownMenuItem({ Text(stringResource(Res.string.from_clipboard)) }, leadingIcon = { MenuIcon(Res.drawable.ic_content_paste) }, onClick = {
                             importMenu = false
                             model.act {
                                 model.armory.importShared(platform.clipboard.pasteText().orEmpty())
                                 model.message = imported
                             }
                         }, modifier = Modifier.testTag("importClipboard"))
-                        DropdownMenuItem({ Text(stringResource(Res.string.qr_show)) }, onClick = {
+                        DropdownMenuItem({ Text(stringResource(Res.string.qr_show)) }, leadingIcon = { MenuIcon(Res.drawable.ic_qr_code_2) }, onClick = {
                             importMenu = false
                             qrImport = true
                         }, modifier = Modifier.testTag("importQr"))
@@ -127,7 +130,10 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                 Box {
                     Button(onClick = {
                         if (nav.tab == 0) model.act { nav.push(Route.Rifle(model.armory.rifleForm(0))) } else newMenu = true
-                    }, modifier = Modifier.testTag("new")) { Text(stringResource(Res.string.new_action)) }
+                    }, modifier = Modifier.testTag("new")) {
+                        ButtonIcon(Res.drawable.ic_add)
+                        Text(stringResource(Res.string.new_action))
+                    }
                     DropdownMenu(newMenu, { newMenu = false }) {
                         DropdownMenuItem({ Text(stringResource(Res.string.empty_cartridge)) }, onClick = {
                             newMenu = false
@@ -258,27 +264,27 @@ private fun ItemList(
                 }
                 TextButton(onClick = { onEdit(item.id) }) { Text(stringResource(Res.string.edit)) }
                 Box {
-                    TextButton(onClick = { menu = true }, modifier = Modifier.testTag("more:${item.title}")) { Text("⋮", fontSize = 18.sp) }
+                    ActionIcon(Res.drawable.ic_more_vert, stringResource(Res.string.more_actions), Modifier.testTag("more:${item.title}")) { menu = true }
                     DropdownMenu(menu, { menu = false }) {
                         if (onShotLog != null) {
-                            DropdownMenuItem({ Text(stringResource(Res.string.shot_log)) }, onClick = {
+                            DropdownMenuItem({ Text(stringResource(Res.string.shot_log)) }, leadingIcon = { MenuIcon(Res.drawable.ic_adjust) }, onClick = {
                                 menu = false
                                 onShotLog(item.id)
                             }, modifier = Modifier.testTag("shotLog"))
                         }
-                        DropdownMenuItem({ Text(stringResource(Res.string.export_file)) }, onClick = {
+                        DropdownMenuItem({ Text(stringResource(Res.string.export_file)) }, leadingIcon = { MenuIcon(Res.drawable.ic_ios_share) }, onClick = {
                             menu = false
                             onShare(kind, item.id, true)
                         })
-                        DropdownMenuItem({ Text(stringResource(Res.string.copy_clipboard)) }, onClick = {
+                        DropdownMenuItem({ Text(stringResource(Res.string.copy_clipboard)) }, leadingIcon = { MenuIcon(Res.drawable.ic_content_paste) }, onClick = {
                             menu = false
                             onShare(kind, item.id, false)
                         }, modifier = Modifier.testTag("copy"))
-                        DropdownMenuItem({ Text(stringResource(Res.string.qr_show)) }, onClick = {
+                        DropdownMenuItem({ Text(stringResource(Res.string.qr_show)) }, leadingIcon = { MenuIcon(Res.drawable.ic_qr_code_2) }, onClick = {
                             menu = false
                             onQr(kind, item.id, item.title)
                         }, modifier = Modifier.testTag("showQr"))
-                        DropdownMenuItem({ Text(stringResource(Res.string.delete)) }, onClick = {
+                        DropdownMenuItem({ Text(stringResource(Res.string.delete)) }, leadingIcon = { MenuIcon(Res.drawable.ic_delete) }, onClick = {
                             menu = false
                             onDelete(item.id, item.title)
                         }, modifier = Modifier.testTag("delete"))

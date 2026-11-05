@@ -59,16 +59,20 @@ fun DsfSection(model: AppModel, hasShots: Boolean, unit: String) {
                     Modifier.weight(1f), decimals = 2, from = 0.0, to = 5.0, tag = "dsfMach$i")
                 NumberField(stringResource(Res.string.dsf_factor), p.factor, { v -> change { it.copy(factor = v) } },
                     Modifier.weight(1f), decimals = 3, from = 0.5, to = 2.0, tag = "dsfFactor$i")
-                TextButton(onClick = { rows = rows.filterIndexed { j, _ -> j != i } }) { Text("✕") }
+                ActionIcon(Res.drawable.ic_close, stringResource(Res.string.remove_item)) { rows = rows.filterIndexed { j, _ -> j != i } }
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
                 onClick = { rows = rows + DsfPointIn(mach = ((rows.minOfOrNull { it.mach } ?: 1.2) - 0.1).coerceAtLeast(0.5), factor = 1.0) },
                 modifier = Modifier.testTag("dsfAdd"),
-            ) { Text(stringResource(Res.string.dsf_add)) }
+            ) {
+                ButtonIcon(Res.drawable.ic_add)
+                Text(stringResource(Res.string.dsf_add))
+            }
             if (edited) {
                 Button(onClick = { scope.launch { error = model.truing.applyDsf(rows) } }, modifier = Modifier.testTag("dsfSave")) {
+                    ButtonIcon(Res.drawable.ic_save)
                     Text(stringResource(Res.string.dsf_save))
                 }
             }
@@ -78,8 +82,12 @@ fun DsfSection(model: AppModel, hasShots: Boolean, unit: String) {
             Button(
                 onClick = { scope.launch { fit = runCatching { model.truing.computeDsf() }.getOrNull() } },
                 enabled = hasShots, modifier = Modifier.testTag("dsfFit"),
-            ) { Text(stringResource(Res.string.dsf_fit)) }
+            ) {
+                ButtonIcon(Res.drawable.ic_calculate)
+                Text(stringResource(Res.string.dsf_fit))
+            }
             TextButton(onClick = { model.truing.resetDsf(); fit = null }, enabled = stored.isNotEmpty(), modifier = Modifier.testTag("dsfReset")) {
+                ButtonIcon(Res.drawable.ic_restart_alt)
                 Text(stringResource(Res.string.dsf_reset))
             }
         }

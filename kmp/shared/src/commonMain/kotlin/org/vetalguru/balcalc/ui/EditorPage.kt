@@ -43,7 +43,10 @@ internal fun EditorPage(
                     Text(coreText(error), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 16.dp).testTag("formError"))
                 }
                 content(wide)
-                Button(onClick = onSave, modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 24.dp)) { Text(save) }
+                Button(onClick = onSave, modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 24.dp)) {
+                ButtonIcon(Res.drawable.ic_save)
+                Text(save)
+            }
             }
         }
     }

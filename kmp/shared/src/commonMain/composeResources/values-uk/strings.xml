@@ -539,4 +539,13 @@
     <string name="barrel_velocity_line">У стволі %1$s″ гвинтівки «%2$s»: %3$s м/с</string>
     <string name="barrel_value">ствол %1$s″</string>
     <string name="core_40">Довжина ствола: 0 (невідомо) або від 4 до 40 дюймів.</string>
+    <string name="remove_item">Прибрати</string>
+    <string name="previous_part">Попередня частина</string>
+    <string name="next_part">Наступна частина</string>
+    <string name="more_actions">Інші дії</string>
+    <string name="more_info">Докладніше</string>
+    <string name="step_up">Більше</string>
+    <string name="step_down">Менше</string>
+    <string name="zoom_in">Наблизити</string>
+    <string name="zoom_out">Віддалити</string>
 </resources>

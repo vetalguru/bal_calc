@@ -1,5 +1,7 @@
 package org.vetalguru.balcalc.ui
 
+import androidx.compose.material3.Icon
+import org.jetbrains.compose.resources.vectorResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,7 +48,7 @@ internal fun DetailsLine(sol: Solution, onMore: () -> Unit) {
             maxLines = 2,
             modifier = Modifier.weight(1f),
         )
-        Text("›", fontSize = 22.sp, color = MaterialTheme.colorScheme.primary)
+        Icon(vectorResource(Res.drawable.ic_chevron_right), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
     }
 }
 

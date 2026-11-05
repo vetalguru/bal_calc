@@ -17,6 +17,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText as withText
 import androidx.compose.ui.test.isToggleable
@@ -103,9 +104,9 @@ class ToolsUiTest {
         waitUntil(timeoutMillis = 10_000) { exists("logHit") }
     }
 
-    /** The checkbox and the ✕ of the shot rows, in the order shown. */
+    /** The checkbox and the delete button of the shot rows, in the order shown. */
     private fun ComposeUiTest.shotChecks() = onAllNodes(isToggleable() and hasAnyAncestor(hasTestTag("shotRow")))
-    private fun ComposeUiTest.shotDeletes() = onAllNodes(withText("✕") and hasAnyAncestor(hasTestTag("shotRow")))
+    private fun ComposeUiTest.shotDeletes() = onAllNodes(hasContentDescription("Delete") and hasAnyAncestor(hasTestTag("shotRow")))
 
     /** A blank 400 x 400 picture, the photo of the target. */
     private fun blankPng(): ByteArray = ByteArrayOutputStream().also { out ->
@@ -164,7 +165,7 @@ class ToolsUiTest {
         waitUntil(timeoutMillis = 10_000) { !exists("logHit") && count("more:") > 0 }
     }
 
-    /** A shot's checkbox leaves it out of the truing (none left: the core says so); its ✕ deletes it. */
+    /** A shot's checkbox leaves it out of the truing (none left: the core says so); its delete button deletes it. */
     @Test
     fun shotsLeftOutAndDeleted() = runDesktopComposeUiTest(1100, 1000) {
         val app = startApp()
@@ -259,7 +260,7 @@ class ToolsUiTest {
 
     // ---- DSF ------------------------------------------------------------------
 
-    /** Points added, edited, removed by ✕; two at the same Mach are refused with the core's sentence. */
+    /** Points added, edited, removed by their cross; two at the same Mach are refused with the core's sentence. */
     @Test
     fun dsfRowsEditedAndRefused() = runDesktopComposeUiTest(1100, 1000) {
         val app = startApp()
@@ -279,7 +280,7 @@ class ToolsUiTest {
         assertEquals(emptyList(), stored())
 
         // The second row away: one point, saved.
-        onAllNodes(withText("✕")).onLast().performClick()
+        onAllNodes(hasContentDescription("Remove")).onLast().performClick()
         waitUntil(timeoutMillis = 10_000) { !exists("dsfMach1") }
         type("dsfFactor0", "1.05")
         onNodeWithTag("dsfSave").performScrollTo().performClick()

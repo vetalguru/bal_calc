@@ -222,7 +222,10 @@ fun ConditionsScreen(model: AppModel) {
                                 }
                             },
                             modifier = Modifier.testTag("removeZone$i"),
-                        ) { Text(stringResource(Res.string.remove_zone)) }
+                        ) {
+                            ButtonIcon(Res.drawable.ic_delete)
+                            Text(stringResource(Res.string.remove_zone))
+                        }
                     }
                     Fields(
                         wide,
@@ -259,7 +262,10 @@ fun ConditionsScreen(model: AppModel) {
                             }
                         },
                         modifier = Modifier.testTag("addZone"),
-                    ) { Text(stringResource(Res.string.add_zone)) }
+                    ) {
+                        ButtonIcon(Res.drawable.ic_add)
+                        Text(stringResource(Res.string.add_zone))
+                    }
                 }
             }
 

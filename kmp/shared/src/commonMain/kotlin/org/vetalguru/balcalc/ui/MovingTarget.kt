@@ -102,6 +102,7 @@ fun MovingTargetCard(model: AppModel, sol: Solution, unit: String) {
                 hintPicture = { HeadingPicture(right) }, decimals = 0,
             )
             OutlinedButton(onClick = { timing = true }, modifier = Modifier.testTag("stopwatch")) {
+                ButtonIcon(Res.drawable.ic_timer)
                 Text(stringResource(Res.string.stopwatch))
             }
 

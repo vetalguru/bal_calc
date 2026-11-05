@@ -13,7 +13,9 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText as withText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
@@ -291,9 +293,9 @@ class ArmoryUiTest {
         assertEquals("Part 1 of $total", shown("qrPart"))
         onNodeWithTag("qrNext").performClick()
         waitUntil(timeoutMillis = 10_000) { shown("qrPart") == "Part 2 of $total" }
-        onNodeWithText("‹").performClick()
+        onNodeWithContentDescription("Previous part").performClick()
         waitUntil(timeoutMillis = 10_000) { shown("qrPart") == "Part 1 of $total" }
-        onNodeWithText("‹").assertIsNotEnabled() // the first part: nothing before it
+        onNodeWithContentDescription("Previous part").assertIsNotEnabled() // the first part: nothing before it
         onNodeWithText("Close").performClick()
         waitUntil(timeoutMillis = 10_000) { !exists("qrCode") }
 
@@ -763,7 +765,7 @@ class ArmoryUiTest {
 
     private fun assertNotNullId(id: Long?): Long = kotlin.test.assertNotNull(id)
 
-    /** BC bands: the switch adds one, ✕ removes one, removing the last turns banding off. */
+    /** BC bands: the switch adds one, its cross removes one, removing the last turns banding off. */
     @Test
     fun bulletBandsAddAndRemove() = runDesktopComposeUiTest(412, 915) {
         val app = startApp()
@@ -788,7 +790,7 @@ class ArmoryUiTest {
         type("bandBc2", "0.48")
 
         // The middle band out: the last moves up.
-        onAllNodesWithText("✕")[1].press()
+        onAllNodesWithContentDescription("Remove")[1].press()
         waitUntil(timeoutMillis = 10_000) { !exists("bandBc2") }
         assertEquals("0.48", shown("bandBc1"))
         onNodeWithTag("save").performClick()
@@ -801,8 +803,8 @@ class ArmoryUiTest {
         findBullet("Band test 175")
         onNodeWithTag("bullet:Band test 175").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("bandBc1") }
-        onAllNodesWithText("✕").onLast().press()
-        onAllNodesWithText("✕").onLast().press()
+        onAllNodesWithContentDescription("Remove").onLast().press()
+        onAllNodesWithContentDescription("Remove").onLast().press()
         waitUntil(timeoutMillis = 10_000) { exists("bulletBc") }
         onNodeWithText(banded).assertIsOff()
         type("bulletBc", "0.47")

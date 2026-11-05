@@ -1,5 +1,8 @@
 package org.vetalguru.balcalc.ui
 
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.size
+import org.jetbrains.compose.resources.vectorResource
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -124,7 +127,10 @@ fun ChartPanel(model: AppModel, curve: RangeTable, loading: Boolean, maxRangeM: 
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ChoiceField(stringResource(Res.string.chart_show), quantities.map { it.key to it.title }, q.key, { key = it }, Modifier.weight(1f).testTag("chartQuantity"))
             if (pairs.size < 2) {
-                OutlinedButton(onClick = { choosing = true }, modifier = Modifier.testTag("compare")) { Text(stringResource(Res.string.compare)) }
+                OutlinedButton(onClick = { choosing = true }, modifier = Modifier.testTag("compare")) {
+                    ButtonIcon(Res.drawable.ic_compare_arrows)
+                    Text(stringResource(Res.string.compare))
+                }
             }
         }
         if (pairs.isNotEmpty()) {
@@ -133,7 +139,8 @@ fun ChartPanel(model: AppModel, curve: RangeTable, loading: Boolean, maxRangeM: 
                     InputChip(
                         selected = true,
                         onClick = { pairs.removeAll { it == t.rifleId to t.cartridgeId } },
-                        label = { Text("● " + t.label + "  ✕", color = appColors.series[(i + 1) % appColors.series.size], maxLines = 1) },
+                        label = { Text("● " + t.label, color = appColors.series[(i + 1) % appColors.series.size], maxLines = 1) },
+                        trailingIcon = { Icon(vectorResource(Res.drawable.ic_close), stringResource(Res.string.remove_item), Modifier.size(18.dp)) },
                         modifier = Modifier.testTag("compared$i"),
                     )
                 }

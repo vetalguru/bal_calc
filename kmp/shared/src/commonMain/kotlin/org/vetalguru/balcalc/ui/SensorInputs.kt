@@ -58,7 +58,10 @@ fun AirSensorButtons(model: AppModel, onPressure: () -> Unit) {
                     }
                 },
                 modifier = Modifier.testTag("fromBarometer"),
-            ) { Text(stringResource(Res.string.sensor_barometer)) }
+            ) {
+                ButtonIcon(Res.drawable.ic_speed)
+                Text(stringResource(Res.string.sensor_barometer))
+            }
         }
         if (sensors.hasLocation) {
             OutlinedButton(
@@ -82,7 +85,10 @@ fun AirSensorButtons(model: AppModel, onPressure: () -> Unit) {
                     }
                 },
                 modifier = Modifier.testTag("myLocation"),
-            ) { Text(stringResource(Res.string.sensor_location)) }
+            ) {
+                ButtonIcon(Res.drawable.ic_my_location)
+                Text(stringResource(Res.string.sensor_location))
+            }
         }
     }
     if (busy) Text(stringResource(Res.string.sensor_reading), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -108,6 +114,7 @@ fun TiltButton(model: AppModel) {
     if (sensors == null || !sensors.hasTilt) return
     var open by remember { mutableStateOf(false) }
     OutlinedButton(onClick = { open = true }, modifier = Modifier.testTag("measureAngles")) {
+        ButtonIcon(Res.drawable.ic_straighten)
         Text(stringResource(Res.string.sensor_angles))
     }
     if (!open) return
@@ -156,6 +163,7 @@ fun CompassButton(model: AppModel) {
     if (sensors == null || !sensors.hasCompass) return
     var open by remember { mutableStateOf(false) }
     OutlinedButton(onClick = { open = true }, modifier = Modifier.testTag("fromCompass")) {
+        ButtonIcon(Res.drawable.ic_explore)
         Text(stringResource(Res.string.sensor_compass))
     }
     if (!open) return

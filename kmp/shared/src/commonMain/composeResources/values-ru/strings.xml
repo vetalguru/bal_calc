@@ -539,4 +539,13 @@
     <string name="barrel_velocity_line">В стволе %1$s″ винтовки «%2$s»: %3$s м/с</string>
     <string name="barrel_value">ствол %1$s″</string>
     <string name="core_40">Длина ствола: 0 (неизвестно) или от 4 до 40 дюймов.</string>
+    <string name="remove_item">Убрать</string>
+    <string name="previous_part">Предыдущая часть</string>
+    <string name="next_part">Следующая часть</string>
+    <string name="more_actions">Другие действия</string>
+    <string name="more_info">Подробнее</string>
+    <string name="step_up">Больше</string>
+    <string name="step_down">Меньше</string>
+    <string name="zoom_in">Приблизить</string>
+    <string name="zoom_out">Отдалить</string>
 </resources>

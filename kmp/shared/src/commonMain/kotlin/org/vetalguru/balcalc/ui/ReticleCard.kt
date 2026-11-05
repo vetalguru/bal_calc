@@ -1,5 +1,7 @@
 package org.vetalguru.balcalc.ui
 
+import androidx.compose.material3.Icon
+import org.jetbrains.compose.resources.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.rememberTransformableState
@@ -137,6 +139,7 @@ internal fun ReticleCard(
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { fullscreen = true }, modifier = Modifier.testTag("reticleFullscreen")) {
+                    ButtonIcon(Res.drawable.ic_fullscreen)
                     Text(stringResource(Res.string.reticle_fullscreen))
                 }
             }
@@ -203,9 +206,13 @@ private fun ReticleFullscreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                FilledTonalButton(onClick = { zoom = (zoom / 1.5f).coerceAtLeast(0.5f) }, modifier = Modifier.testTag("reticleZoomOut")) { Text("−") }
+                FilledTonalButton(onClick = { zoom = (zoom / 1.5f).coerceAtLeast(0.5f) }, modifier = Modifier.testTag("reticleZoomOut")) {
+                    Icon(vectorResource(Res.drawable.ic_remove), stringResource(Res.string.zoom_out))
+                }
                 Text("×${zoom.toDouble().fixed(1)}", modifier = Modifier.testTag("reticleZoom"))
-                FilledTonalButton(onClick = { zoom = (zoom * 1.5f).coerceAtMost(8f) }, modifier = Modifier.testTag("reticleZoomIn")) { Text("+") }
+                FilledTonalButton(onClick = { zoom = (zoom * 1.5f).coerceAtMost(8f) }, modifier = Modifier.testTag("reticleZoomIn")) {
+                    Icon(vectorResource(Res.drawable.ic_add), stringResource(Res.string.zoom_in))
+                }
                 Button(onClick = onClose, modifier = Modifier.testTag("reticleClose")) { Text(stringResource(Res.string.close)) }
             }
         }

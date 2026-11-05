@@ -83,3 +83,6 @@ bal-cli quick --bc 0.243 --drag G7 --v0 800 --to 1000 --step 100
 
 GPL-3.0 (see `LICENSE`). Bundled data keep their own licences
 (`data/seed/README.md`).
+
+The UI icons are from [Material Symbols](https://github.com/google/material-design-icons)
+(Apache-2.0, see `kmp/icons/LICENSE-material-symbols.txt`).

@@ -24,7 +24,10 @@ import org.vetalguru.balcalc.res.*
 @Composable
 internal fun LibraryButton(tag: String, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(onClick = onClick, modifier = Modifier.testTag(tag)) { Text(stringResource(Res.string.from_library)) }
+        TextButton(onClick = onClick, modifier = Modifier.testTag(tag)) {
+            ButtonIcon(Res.drawable.ic_library_books)
+            Text(stringResource(Res.string.from_library))
+        }
     }
 }
 
