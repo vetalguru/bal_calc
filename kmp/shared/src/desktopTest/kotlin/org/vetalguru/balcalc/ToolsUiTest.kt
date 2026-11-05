@@ -1,5 +1,6 @@
 package org.vetalguru.balcalc
 
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
@@ -104,7 +105,28 @@ class ToolsUiTest {
         waitUntil(timeoutMillis = 10_000) { exists("logHit") }
     }
 
-    /** The checkbox and the delete button of the shot rows, in the order shown. */
+    /**
+     * Compares a cartridge, in the picker. Add is enabled once the list has loaded: a tap on the
+     * field before that opens no menu. The field shows a cartridge too, so only a node with that
+     * text and no field value is the menu's entry; an open menu would take the tap on Add.
+     */
+    private fun ComposeUiTest.compareWith(cartridge: String) {
+        onNodeWithTag("compare").performClick()
+        waitUntil(timeoutMillis = 10_000) {
+            announce()
+            onAllNodes(hasTestTag("compareAdd") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+        }
+        onNodeWithTag("compareCartridge").performClick()
+        val entry = SemanticsMatcher("the menu's $cartridge") { node ->
+            node.config.getOrNull(SemanticsProperties.Text)?.any { it.text == cartridge } == true
+        }
+        waitUntil(timeoutMillis = 10_000) { announce(); onAllNodes(entry).fetchSemanticsNodes().isNotEmpty() }
+        onNode(entry).performClick()
+        waitUntil(timeoutMillis = 10_000) { announce(); onAllNodes(entry).fetchSemanticsNodes().isEmpty() }
+        onNodeWithTag("compareAdd").performClick()
+    }
+
+
     private fun ComposeUiTest.shotChecks() = onAllNodes(isToggleable() and hasAnyAncestor(hasTestTag("shotRow")))
     private fun ComposeUiTest.shotDeletes() = onAllNodes(hasContentDescription("Delete") and hasAnyAncestor(hasTestTag("shotRow")))
 
@@ -590,21 +612,11 @@ class ToolsUiTest {
         assertFalse(exists("compared0"))
 
         // The cold load, picked from the list.
-        onNodeWithTag("compare").performClick()
-        waitUntil(timeoutMillis = 10_000) { exists("compareCartridge") }
-        onNodeWithTag("compareCartridge").performClick()
-        waitUntil(timeoutMillis = 10_000) { hasText("Cold load") }
-        onAllNodesWithText("Cold load").onLast().performClick()
-        onNodeWithTag("compareAdd").performClick()
+        compareWith("Cold load")
         waitUntil(timeoutMillis = 10_000) { exists("compared0") && shown("compared0").contains("Cold load") }
 
         // The hot one: two compared, no more.
-        onNodeWithTag("compare").performClick()
-        waitUntil(timeoutMillis = 10_000) { exists("compareCartridge") }
-        onNodeWithTag("compareCartridge").performClick()
-        waitUntil(timeoutMillis = 10_000) { hasText("Hot load") }
-        onAllNodesWithText("Hot load").onLast().performClick()
-        onNodeWithTag("compareAdd").performClick()
+        compareWith("Hot load")
         waitUntil(timeoutMillis = 10_000) { exists("compared1") }
         assertFalse(exists("compare"))
 
