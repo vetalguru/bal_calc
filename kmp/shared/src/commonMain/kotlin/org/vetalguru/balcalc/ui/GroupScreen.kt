@@ -58,9 +58,9 @@ import org.vetalguru.balcalc.res.*
 
 private enum class Marking { Scale, Aim, Holes }
 
-private val ScaleColor = Color(0xFF1E88E5)
-private val AimColor = Color(0xFF43A047)
-private val HoleColor = Color(0xFFE53935)
+internal val GroupScaleColor = Color(0xFF1E88E5)
+internal val GroupAimColor = Color(0xFF43A047)
+internal val GroupHoleColor = Color(0xFFE53935)
 
 /**
  * A group shot at a target, measured on its photo: the spread, where its
@@ -109,6 +109,7 @@ fun GroupScreen(model: AppModel, onBack: () -> Unit) {
                 }
             }, modifier = Modifier.testTag("groupPhoto")) { Text(stringResource(Res.string.group_photo)) }
             Text(stringResource(Res.string.group_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (photo == null) GroupMarkingPicture()
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 FilterChip(mode == Marking.Scale, { mode = Marking.Scale }, { Text(stringResource(Res.string.mode_scale)) },
@@ -227,14 +228,14 @@ private fun TargetPhoto(
         fun at(p: PhotoPoint) = Offset((p.x * k).toFloat(), (p.y * k).toFloat())
         val r = 6.dp.toPx()
         val stroke = Stroke(width = 2.dp.toPx())
-        scale.forEach { drawCircle(ScaleColor, r, at(it), style = stroke) }
-        if (scale.size == 2) drawLine(ScaleColor, at(scale[0]), at(scale[1]), strokeWidth = 2.dp.toPx())
+        scale.forEach { drawCircle(GroupScaleColor, r, at(it), style = stroke) }
+        if (scale.size == 2) drawLine(GroupScaleColor, at(scale[0]), at(scale[1]), strokeWidth = 2.dp.toPx())
         aim?.let {
             val c = at(it)
-            drawLine(AimColor, c - Offset(3 * r, 0f), c + Offset(3 * r, 0f), strokeWidth = 2.dp.toPx())
-            drawLine(AimColor, c - Offset(0f, 3 * r), c + Offset(0f, 3 * r), strokeWidth = 2.dp.toPx())
+            drawLine(GroupAimColor, c - Offset(3 * r, 0f), c + Offset(3 * r, 0f), strokeWidth = 2.dp.toPx())
+            drawLine(GroupAimColor, c - Offset(0f, 3 * r), c + Offset(0f, 3 * r), strokeWidth = 2.dp.toPx())
         }
-        holes.forEach { drawCircle(HoleColor, r, at(it), style = stroke) }
+        holes.forEach { drawCircle(GroupHoleColor, r, at(it), style = stroke) }
         // The centre of the group, from the aim point and the scale.
         if (aim != null && centreCm != null && scale.size == 2) {
             val px = kotlin.math.hypot(scale[1].x - scale[0].x, scale[1].y - scale[0].y) / scaleCm

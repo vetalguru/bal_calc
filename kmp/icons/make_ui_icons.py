@@ -4,6 +4,8 @@
     python make_ui_icons.py
 
 Add an icon's name to ICONS and run this again; only stdlib is needed.
+Material Symbols has no firearms: ic_rifle, ic_scope, ic_cartridge and
+ic_bullet are drawn by hand for this app, and this script leaves them alone.
 """
 
 import re
@@ -29,6 +31,8 @@ ICONS = [
     "save", "scatter_plot", "timer", "undo", "view_column",
     # Sensors.
     "explore", "speed", "straighten",
+    # The air, in the ring's corners.
+    "thermostat", "compress", "humidity_percentage", "landscape",
     # In place of symbols from the font.
     "arrow_drop_down", "arrow_drop_up", "chevron_left", "chevron_right", "content_paste", "info",
 ]

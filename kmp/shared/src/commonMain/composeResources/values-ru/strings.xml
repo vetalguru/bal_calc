@@ -548,4 +548,5 @@
     <string name="step_down">Меньше</string>
     <string name="zoom_in">Приблизить</string>
     <string name="zoom_out">Отдалить</string>
+    <string name="poi_hint">Куда попадает этот патрон на дистанции пристрелки, от точки прицеливания: выше и правее +, ниже и левее −</string>
 </resources>

@@ -1,5 +1,6 @@
 package org.vetalguru.balcalc.ui
 
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ButtonDefaults
@@ -200,6 +201,24 @@ private fun SpinHalf(icon: DrawableResource, description: String, dir: Int, onSp
     }
 }
 
+/** Nothing here yet: a large faint icon of what would be here, and what to do about it. */
+@Composable
+internal fun EmptyState(icon: DrawableResource, text: String?, modifier: Modifier = Modifier) {
+    Column(
+        modifier.fillMaxWidth().padding(16.dp).testTag("emptyState"),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Icon(
+            vectorResource(icon), contentDescription = null, Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+        )
+        if (text != null) {
+            Text(text, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
 /** A button's icon, before its text: the text says what it does. */
 @Composable
 internal fun ButtonIcon(icon: DrawableResource, tint: Color = LocalContentColor.current) {
@@ -333,15 +352,25 @@ fun SwitchRow(text: String, checked: Boolean, onChange: (Boolean) -> Unit, modif
 
 /** A titled card of fields. */
 @Composable
-fun Section(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+fun Section(
+    title: String,
+    modifier: Modifier = Modifier,
+    icon: DrawableResource? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Card(modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (title.isNotEmpty()) Text(
-                title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            if (title.isNotEmpty()) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (icon != null) {
+                    Icon(vectorResource(icon), contentDescription = null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                }
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             content()
         }
     }

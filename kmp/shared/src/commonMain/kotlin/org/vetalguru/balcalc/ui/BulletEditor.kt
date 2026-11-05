@@ -60,7 +60,7 @@ fun BulletEditor(model: AppModel, initial: BulletForm, onDone: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 error?.let { Text(coreText(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 16.dp).testTag("formError")) }
-                Section(stringResource(Res.string.bullet)) {
+                Section(stringResource(Res.string.bullet), icon = Res.drawable.ic_bullet) {
                     TextInput(stringResource(Res.string.bullet_name_hint), f.name, { f = f.copy(name = it) }, tag = "bulletEditName")
                     Fields(
                         wide,

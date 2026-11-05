@@ -181,6 +181,10 @@ private fun Viewer(
                             )
                         }
                         if (model.ready && (st.rifles.isEmpty() || st.cartridges.isEmpty())) {
+                            // Above the ring of a small phone the buttons below need the room.
+                            if (pageHeight >= 240.dp) {
+                                EmptyState(if (st.rifles.isEmpty()) Res.drawable.ic_rifle else Res.drawable.ic_cartridge, text = null)
+                            }
                             EmptyActions(
                                 wide = wide,
                                 addLabel = stringResource(
