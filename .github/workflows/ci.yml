@@ -284,6 +284,11 @@ jobs:
         working-directory: kmp
         run: ./gradlew.bat :desktopApp:packageMsi
 
+      # Installs it on the runner, starts the app, upgrades it and uninstalls it.
+      - name: Check the MSI
+        shell: powershell
+        run: kmp/desktopApp/check-msi.ps1 -Msi (Get-Item kmp/desktopApp/build/compose/binaries/main/msi/*.msi).FullName -Repo .
+
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'workflow_dispatch'
         with:
