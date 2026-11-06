@@ -6,12 +6,14 @@
 set -eu
 
 deb=$(realpath "$1")
-entry=/usr/share/applications/holdmark-Holdmark.desktop
+# xdg-desktop-menu puts it in the first writable applications folder of these.
+entries="/usr/local/share/applications/holdmark-Holdmark.desktop /usr/share/applications/holdmark-Holdmark.desktop"
 
 fail() {
     echo "check-deb-install: $*" >&2
     exit 1
 }
+entry() { for e in $entries; do [ -f "$e" ] && echo "$e"; done; true; }
 installed() { [ "$(dpkg-query -W -f '${Status}' holdmark 2>/dev/null)" = "install ok installed" ]; }
 
 installed && fail "holdmark is already installed on this machine"
@@ -31,8 +33,9 @@ sudo mkdir -p /usr/share/desktop-directories /etc/xdg/menus
 trap 'sudo rmdir /usr/share/desktop-directories /etc/xdg/menus 2>/dev/null || true' EXIT
 sudo apt-get install -y "$deb"
 installed || fail "on a desktop: not installed"
-[ -f "$entry" ] || fail "on a desktop: no menu entry $entry"
+entry=$(entry)
+[ -n "$entry" ] || fail "on a desktop: no menu entry in $entries"
 sudo apt-get remove -y holdmark
-[ -e "$entry" ] && fail "on a desktop: the menu entry stayed after removing"
+[ -e "$entry" ] && fail "on a desktop: the menu entry $entry stayed after removing"
 
-echo "check-deb-install: $(basename "$deb") installs and removes with and without a desktop menu"
+echo "check-deb-install: $(basename "$deb") installs and removes with and without a desktop menu ($entry)"
