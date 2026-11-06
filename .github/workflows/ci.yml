@@ -263,6 +263,10 @@ jobs:
           sudo apt-get install -y --no-install-recommends xvfb xauth
           kmp/desktopApp/check-deb.sh kmp/desktopApp/build/compose/binaries/main/deb/*.deb .
 
+      # With apt, as users do: a runner has no desktop menu, as on a server.
+      - name: Install and remove the DEB
+        run: kmp/desktopApp/check-deb-install.sh kmp/desktopApp/build/compose/binaries/main/deb/*.deb
+
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'workflow_dispatch'
         with:

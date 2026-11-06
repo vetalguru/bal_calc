@@ -133,6 +133,21 @@ for ((task, ext, platform) in listOf(
     }
 }
 
+// jpackage's DEB does not install where there is no desktop menu (a server,
+// WSL): fix-deb.sh lets its scripts skip the menu entry there.
+tasks.matching { it.name == "packageDeb" }.configureEach {
+    val script = repoRoot.resolve("kmp/desktopApp/fix-deb.sh")
+    inputs.file(script)
+    val dir = layout.buildDirectory.dir("compose/binaries/main/deb")
+    val scriptPath = script.path
+    doLast {
+        dir.get().asFile.listFiles { f -> f.extension == "deb" }?.forEach { deb ->
+            val code = ProcessBuilder("sh", scriptPath, deb.path).inheritIO().start().waitFor()
+            check(code == 0) { "fix-deb.sh failed on $deb" }
+        }
+    }
+}
+
 tasks.matching { it.name in setOf("prepareAppResources", "run", "createDistributable") }
     .configureEach { dependsOn(stageResources) }
 
