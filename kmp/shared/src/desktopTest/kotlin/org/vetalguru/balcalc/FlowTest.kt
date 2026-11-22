@@ -82,7 +82,7 @@ class FlowTest {
         val api = Api(desktopEngine())
         setContent {
             CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
-                BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform())
+                BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform(), greeting = false)
             }
         }
 
@@ -141,7 +141,7 @@ class FlowTest {
     fun armory() = runDesktopComposeUiTest(400, 820) {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val platform = FakePlatform()
-        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform, greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
 
         // A rifle through its editor.
@@ -221,7 +221,7 @@ class FlowTest {
     private fun ComposeUiTest.startWithSample(): File {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val api = Api(desktopEngine()).also { testApi = it }
-        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform()) }
+        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform(), greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }
@@ -240,7 +240,7 @@ class FlowTest {
     @Test
     fun rifleAndScopeFromTheLibrary() = runDesktopComposeUiTest(412, 915) {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
-        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform()) }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform(), greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
         onNodeWithTag("navArmory").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("new") }
@@ -279,7 +279,7 @@ class FlowTest {
     fun rifleThroughAQrCode() = runDesktopComposeUiTest(412, 915) {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val platform = FakePlatform()
-        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform, greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }
@@ -318,7 +318,7 @@ class FlowTest {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val platform = FakePlatform().apply { image = pngOf(1600, 1200) }
         val api = Api(desktopEngine())
-        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = platform, greeting = false) }
         waitUntil("sample button", 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil("first solution", 10_000) { exists("elevation") }
@@ -489,7 +489,7 @@ class FlowTest {
     fun rangeCardColumnsWindsAndExport() = runDesktopComposeUiTest(412, 915) {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val platform = FakePlatform()
-        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform, greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }
@@ -525,7 +525,7 @@ class FlowTest {
     fun widgetLines() = runDesktopComposeUiTest(412, 915) {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val platform = FakePlatform()
-        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform, greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }
@@ -917,7 +917,7 @@ class FlowTest {
         }.toByteArray()
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val platform = FakePlatform().apply { image = png }
-        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = platform, greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }
@@ -962,7 +962,7 @@ class FlowTest {
     fun phoneSensors() = runDesktopComposeUiTest(412, 915) {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
         val sensors = FakeSensors()
-        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform(sensors = sensors)) }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform(sensors = sensors), greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }
@@ -1231,7 +1231,7 @@ class FlowTest {
     @Test
     fun chartWithoutRifleExplains() = runDesktopComposeUiTest(412, 915) {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete() }
-        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform()) }
+        setContent { BalCalcApp(Api(desktopEngine()), startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform(), greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("navTable") }
         onNodeWithTag("navTable").performClick()
         onNodeWithTag("chartTab").performClick()

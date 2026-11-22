@@ -22,6 +22,7 @@ class MainActivity : ComponentActivity() {
                 startup = { start(androidDatabasePath(app)) { androidSeed(app) } },
                 platform = platform,
                 dark = isSystemInDarkTheme(),
+                onQuit = ::finish,
             )
         }
     }

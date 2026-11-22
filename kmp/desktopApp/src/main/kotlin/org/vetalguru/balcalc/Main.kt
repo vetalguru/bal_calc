@@ -38,6 +38,7 @@ fun main() {
                 startup = { start(desktopDatabasePath()) { desktopSeed() } },
                 platform = remember { DesktopPlatform(owner = { window }) },
                 dark = isSystemInDarkTheme(),
+                onQuit = ::exitApplication,
             )
         }
     }

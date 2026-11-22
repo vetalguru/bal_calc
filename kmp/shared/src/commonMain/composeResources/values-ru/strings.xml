@@ -2,6 +2,10 @@
 <!-- Ported from app/i18n/balcalc_ru.ts; see values/strings.xml. -->
 <resources>
     <string name="app_name">Holdmark</string>
+    <!-- Start: the same Ukrainian words in every language -->
+    <string name="greeting_call">Слава Україні!</string>
+    <string name="greeting_answer">Героям слава!</string>
+    <string name="quit_app">Закрыть приложение</string>
     <string name="nav_solution">Решение</string>
     <string name="nav_solution_short">Решение</string>
     <string name="nav_table">Таблица дистанций</string>
