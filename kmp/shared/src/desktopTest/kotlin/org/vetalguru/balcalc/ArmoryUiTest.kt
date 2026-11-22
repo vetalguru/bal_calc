@@ -129,7 +129,7 @@ class ArmoryUiTest {
     private fun ComposeUiTest.startWith(platform: CameraPlatform): TestApp {
         val db = File.createTempFile("balcalc-test", ".db").apply { delete(); deleteOnExit() }
         val api = Api(desktopEngine())
-        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = platform, greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }

@@ -593,7 +593,7 @@ class SolutionUiTest {
             if (method == "wez") Thread.sleep(300) // a slow phone
             engine.call(method, args)
         })
-        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform()) }
+        setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = FakePlatform(), greeting = false) }
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
         onNodeWithTag("sample").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("elevation") }

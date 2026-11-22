@@ -35,7 +35,7 @@ class TestApp(val api: Api, val db: File, val platform: FakePlatform) {
 fun ComposeUiTest.startApp(sample: Boolean = true, platform: FakePlatform = FakePlatform()): TestApp {
     val db = File.createTempFile("balcalc-test", ".db").apply { delete(); deleteOnExit() }
     val api = Api(desktopEngine())
-    setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = platform) }
+    setContent { BalCalcApp(api, startup = { start(db.path) { desktopSeed() } }, platform = platform, greeting = false) }
     waitUntil(timeoutMillis = 30_000) { exists("navSolution") }
     if (sample) {
         waitUntil(timeoutMillis = 30_000) { exists("sample") }
