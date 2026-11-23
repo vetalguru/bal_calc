@@ -149,7 +149,15 @@ json ToJson(const al::CartridgeForm& f) {
             {"muzzleVelocity", f.muzzle_velocity_mps},
             {"barrelIn", f.barrel_in},
             {"powderReferenceC", f.powder_reference_c},
-            {"powderSensitivity", f.powder_sensitivity_pct_per_c}};
+            {"powderSensitivity", f.powder_sensitivity_pct_per_c},
+            {"powder", f.powder},
+            {"chargeGr", f.charge_gr},
+            {"primer", f.primer},
+            {"brass", f.brass},
+            {"coalIn", f.coal_in},
+            {"cbtoIn", f.cbto_in},
+            {"velocitySd", f.velocity_sd_mps},
+            {"velocityEs", f.velocity_es_mps}};
 }
 
 al::CartridgeForm CartridgeFrom(const json& m) {
@@ -169,6 +177,14 @@ al::CartridgeForm CartridgeFrom(const json& m) {
     f.barrel_in = Num(m, "barrelIn");
     f.powder_reference_c = Num(m, "powderReferenceC", f.powder_reference_c);
     f.powder_sensitivity_pct_per_c = Num(m, "powderSensitivity");
+    f.powder = Str(m, "powder");
+    f.charge_gr = Num(m, "chargeGr");
+    f.primer = Str(m, "primer");
+    f.brass = Str(m, "brass");
+    f.coal_in = Num(m, "coalIn");
+    f.cbto_in = Num(m, "cbtoIn");
+    f.velocity_sd_mps = Num(m, "velocitySd");
+    f.velocity_es_mps = Num(m, "velocityEs");
     return f;
 }
 

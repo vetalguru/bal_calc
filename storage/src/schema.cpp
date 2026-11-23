@@ -251,7 +251,9 @@ BEGIN DELETE FROM photo WHERE kind = 'cartridge' AND owner_id = OLD.id; END;
         // shot: the rail (base) slope, the turrets' travel and the point-of-
         // impact shifts of the muzzle device and of the suppressor (each when
         // it is on and the zero was shot without it, or the other way round);
-        // the rest is for the owner (maker, model, rifling, rings, tube).
+        // the rest is for the owner (maker, model, rifling, rings, tube). A
+        // handloaded cartridge's recipe and its chronograph spread, also
+        // for the owner.
         // Empty text and 0 mean "not stated".
         {6, R"sql(
 ALTER TABLE rifle ADD COLUMN maker TEXT NOT NULL DEFAULT '';
@@ -279,6 +281,14 @@ ALTER TABLE rifle ADD COLUMN suppressor_poi_units TEXT NOT NULL DEFAULT 'moa'
     CHECK (suppressor_poi_units IN ('moa', 'mrad'));
 ALTER TABLE rifle ADD COLUMN suppressor_on INTEGER NOT NULL DEFAULT 1;
 ALTER TABLE rifle ADD COLUMN zeroed_with_suppressor INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE cartridge ADD COLUMN powder TEXT NOT NULL DEFAULT '';
+ALTER TABLE cartridge ADD COLUMN charge_kg REAL NOT NULL DEFAULT 0 CHECK (charge_kg >= 0);
+ALTER TABLE cartridge ADD COLUMN primer TEXT NOT NULL DEFAULT '';
+ALTER TABLE cartridge ADD COLUMN brass TEXT NOT NULL DEFAULT '';
+ALTER TABLE cartridge ADD COLUMN coal_m REAL NOT NULL DEFAULT 0 CHECK (coal_m >= 0);
+ALTER TABLE cartridge ADD COLUMN cbto_m REAL NOT NULL DEFAULT 0 CHECK (cbto_m >= 0);
+ALTER TABLE cartridge ADD COLUMN velocity_sd_mps REAL NOT NULL DEFAULT 0 CHECK (velocity_sd_mps >= 0);
+ALTER TABLE cartridge ADD COLUMN velocity_es_mps REAL NOT NULL DEFAULT 0 CHECK (velocity_es_mps >= 0);
 ALTER TABLE scope ADD COLUMN maker TEXT NOT NULL DEFAULT '';
 ALTER TABLE scope ADD COLUMN model TEXT NOT NULL DEFAULT '';
 ALTER TABLE scope ADD COLUMN tube_diameter_m REAL NOT NULL DEFAULT 0 CHECK (tube_diameter_m >= 0);

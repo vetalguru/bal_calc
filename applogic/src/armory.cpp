@@ -473,6 +473,12 @@ std::string Validate(const CartridgeForm& f) {
     if (f.length_in < 0.0) {
         return "Bullet length and twist cannot be negative.";
     }
+    if (!(f.charge_gr >= 0.0 && f.charge_gr <= 300.0) || !(f.coal_in >= 0.0 && f.coal_in <= 7.0) ||
+        !(f.cbto_in >= 0.0 && f.cbto_in <= 7.0) ||
+        !(f.velocity_sd_mps >= 0.0 && f.velocity_sd_mps <= 200.0) ||
+        !(f.velocity_es_mps >= 0.0 && f.velocity_es_mps <= 400.0)) {
+        return "Check the handload: charge, lengths and velocity spread.";
+    }
     return {};
 }
 
@@ -558,6 +564,14 @@ Result<CartridgeForm> LoadCartridgeForm(Database& db, Id cartridge_id) {
     f.barrel_in = BarrelInches(c.barrel_length_m);
     f.powder_reference_c = units::KToC(c.reference_powder_temp_k);
     f.powder_sensitivity_pct_per_c = c.powder_sensitivity_per_k * 100.0;
+    f.powder = c.powder;
+    f.charge_gr = Rounded(units::KgToGrain(c.charge_kg));
+    f.primer = c.primer;
+    f.brass = c.brass;
+    f.coal_in = Rounded(units::MToInch(c.coal_m));
+    f.cbto_in = Rounded(units::MToInch(c.cbto_m));
+    f.velocity_sd_mps = c.velocity_sd_mps;
+    f.velocity_es_mps = c.velocity_es_mps;
     return f;
 }
 
@@ -634,6 +648,14 @@ Result<Id> SaveCartridgeForm(Database& db, const CartridgeForm& f) {
     }
     c.reference_powder_temp_k = units::CToK(f.powder_reference_c);
     c.powder_sensitivity_per_k = f.powder_sensitivity_pct_per_c / 100.0;
+    c.powder = f.powder;
+    c.charge_kg = units::GrainToKg(f.charge_gr);
+    c.primer = f.primer;
+    c.brass = f.brass;
+    c.coal_m = units::InchToM(f.coal_in);
+    c.cbto_m = units::InchToM(f.cbto_in);
+    c.velocity_sd_mps = f.velocity_sd_mps;
+    c.velocity_es_mps = f.velocity_es_mps;
     if (auto id = Repository<CartridgeRecord>(db).Save(c); !id) {
         return id.error();
     }

@@ -142,6 +142,17 @@ struct CartridgeForm {
     double barrel_in = 0.0;
     double powder_reference_c = 15.0;
     double powder_sensitivity_pct_per_c = 0.0;  // % of V0 per C
+
+    // A handload's recipe and its chronograph spread, for the owner; empty
+    // and 0 are "not stated".
+    std::string powder;
+    double charge_gr = 0.0;
+    std::string primer;
+    std::string brass;
+    double coal_in = 0.0;  // overall length
+    double cbto_in = 0.0;  // case base to ogive
+    double velocity_sd_mps = 0.0;
+    double velocity_es_mps = 0.0;
 };
 
 struct CartridgeSummary {

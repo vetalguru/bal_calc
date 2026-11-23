@@ -315,6 +315,15 @@ Result<Id> ReadCartridge(Database& db, const json& jc, Id bullet_id,
         c.source = kSourceUser;  // shared with the user: theirs, not the library's
     }
     c.notes = jc.value("notes", "");
+    // Newer than the first files: absent (or below 0) means not stated.
+    c.powder = jc.value("powder", "");
+    c.charge_kg = std::max(0.0, jc.value("charge_kg", 0.0));
+    c.primer = jc.value("primer", "");
+    c.brass = jc.value("brass", "");
+    c.coal_m = std::max(0.0, jc.value("coal_m", 0.0));
+    c.cbto_m = std::max(0.0, jc.value("cbto_m", 0.0));
+    c.velocity_sd_mps = std::max(0.0, jc.value("velocity_sd_mps", 0.0));
+    c.velocity_es_mps = std::max(0.0, jc.value("velocity_es_mps", 0.0));
     for (const json& vp : jc.value("velocity_points", json::array())) {
         c.velocity_points.emplace_back(vp.at(0).get<double>(), vp.at(1).get<double>());
     }
@@ -545,7 +554,15 @@ Result<std::string> ExportCartridgeJson(Database& db, Id cartridge_id) {
                         {"barrel_length_m", cr.barrel_length_m},
                         {"source", cr.source},
                         {"notes", cr.notes},
-                        {"velocity_points", velocity_points}};
+                        {"velocity_points", velocity_points},
+                        {"powder", cr.powder},
+                        {"charge_kg", cr.charge_kg},
+                        {"primer", cr.primer},
+                        {"brass", cr.brass},
+                        {"coal_m", cr.coal_m},
+                        {"cbto_m", cr.cbto_m},
+                        {"velocity_sd_mps", cr.velocity_sd_mps},
+                        {"velocity_es_mps", cr.velocity_es_mps}};
     doc["bullet"] = std::move(bullet).value();
     return doc.dump(2);
 }

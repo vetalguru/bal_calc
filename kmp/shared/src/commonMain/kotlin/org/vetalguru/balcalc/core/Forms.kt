@@ -80,6 +80,15 @@ data class CartridgeForm(
     val barrelIn: Double = 0.0,
     val powderReferenceC: Double = 15.0,
     val powderSensitivity: Double = 0.0,
+    /** A handload's recipe and its chronograph spread, for the owner ("" and 0: not stated). */
+    val powder: String = "",
+    val chargeGr: Double = 0.0,
+    val primer: String = "",
+    val brass: String = "",
+    val coalIn: Double = 0.0,
+    val cbtoIn: Double = 0.0,
+    val velocitySd: Double = 0.0,
+    val velocityEs: Double = 0.0,
 )
 
 @Serializable

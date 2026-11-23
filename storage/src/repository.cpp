@@ -309,7 +309,10 @@ const Table<CartridgeRecord>& TableOf() {
          Col("reference_powder_temp_k", &R::reference_powder_temp_k),
          Col("powder_sensitivity_per_k", &R::powder_sensitivity_per_k),
          Col("barrel_length_m", &R::barrel_length_m), Col("source", &R::source),
-         Col("notes", &R::notes)},
+         Col("notes", &R::notes), Col("powder", &R::powder), Col("charge_kg", &R::charge_kg),
+         Col("primer", &R::primer), Col("brass", &R::brass), Col("coal_m", &R::coal_m),
+         Col("cbto_m", &R::cbto_m), Col("velocity_sd_mps", &R::velocity_sd_mps),
+         Col("velocity_es_mps", &R::velocity_es_mps)},
         [](Database& db, const R& r) -> Status {
             if (Status s =
                     Exec(db, "DELETE FROM cartridge_velocity_point WHERE cartridge_id = ?", {r.id});

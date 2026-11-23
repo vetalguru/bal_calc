@@ -161,20 +161,24 @@ class FlowTest {
         // A cartridge with its own bullet.
         onNodeWithTag("cartridgesTab").performClick()
         onNodeWithTag("new").performClick()
-        onNodeWithTag("newEmptyCartridge").performClick()
+        onNodeWithTag("newCustomCartridge").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("cartridgeName") }
         type("cartridgeName", "Load")
         type("cartridgeCaliber", ".308 Win")
+        shot("armory-cartridge-wizard")
+        onNodeWithTag("wizardNext").performClick() // the bullet
+        waitUntil(timeoutMillis = 10_000) { exists("bulletName") }
         type("bulletName", "SMK 175")
         type("bc", "0,243") // a comma works too
         type("mass", "175")
         type("diameter", "0.308")
+        onNodeWithTag("part:Velocity").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("muzzleVelocity") }
         type("muzzleVelocity", "790")
         type("testBarrel", "24")
         // The velocity in Tikka's 20" barrel, as the solution will use it.
         waitUntil(timeoutMillis = 10_000) { exists("velocityInBarrel") }
         onNodeWithTag("velocityInBarrel").performScrollTo()
-        shot("armory-cartridge-editor")
         onNodeWithTag("save").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("cartridge:Load") }
         shot("armory-lists")
@@ -1038,6 +1042,8 @@ class FlowTest {
         onNodeWithTag("cartridgesTab").performClick()
         waitUntil(timeoutMillis = 10_000) { count("cartridge:") == 1 }
         onAllNodesWithText("Edit").onFirst().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("part:Bullet") }
+        onNodeWithTag("part:Bullet").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { exists("chooseBullet") }
         onNodeWithTag("chooseBullet").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("search") }
@@ -1111,7 +1117,7 @@ class FlowTest {
             onNodeWithTag("navArmory").performClick()
             onNodeWithTag("cartridgesTab").performClick()
             onNodeWithTag("new").performClick()
-            onNodeWithTag("newEmptyCartridge").performClick()
+            onNodeWithTag("newCustomCartridge").performClick()
             waitUntil(timeoutMillis = 10_000) { exists("save") }
             onNodeWithTag("save").performClick()
             waitUntil(timeoutMillis = 10_000) { exists("formError") }

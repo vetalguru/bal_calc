@@ -62,6 +62,17 @@ struct CartridgeRecord {
     std::string notes;
     // Measured (powder temperature K, velocity m/s); overrides the coefficient.
     std::vector<std::pair<double, double>> velocity_points;
+    // A handload's recipe and its chronograph spread (v6), for the owner;
+    // empty and 0 are "not stated". COAL: overall length; CBTO: case base
+    // to ogive.
+    std::string powder;
+    double charge_kg = 0.0;
+    std::string primer;
+    std::string brass;
+    double coal_m = 0.0;
+    double cbto_m = 0.0;
+    double velocity_sd_mps = 0.0;
+    double velocity_es_mps = 0.0;
 };
 
 struct RifleRecord {

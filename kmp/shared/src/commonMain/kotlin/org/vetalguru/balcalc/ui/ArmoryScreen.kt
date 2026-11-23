@@ -30,8 +30,11 @@ internal sealed interface Route {
     /** The published scope or rifle catalogs; a pick fills the rifle form. */
     class LibraryScopes(val pick: (LibraryScope, ScopeClick) -> Unit) : Route
     class LibraryRifles(val pick: (LibraryRifle, Double) -> Unit) : Route
-    class Cartridge(form: CartridgeForm) : Route, WithPhoto() {
+    /** A cartridge on its drawing, part by part; one being edited has every part done already. */
+    class CartridgeWizard(form: CartridgeForm) : Route, WithPhoto() {
         var form by mutableStateOf(form)
+        var step by mutableStateOf(0)
+        var visited by mutableStateOf(if (form.cartridgeId > 0) CartridgeStep.entries.toSet() else emptySet())
     }
     class Factory : Route
     /** The bullet library; [pick] set: choose one for a cartridge. */
@@ -83,10 +86,10 @@ fun ArmoryScreen(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
         is Route.RifleWizard -> RifleWizard(model, r, nav)
         is Route.LibraryScopes -> LibraryScopes(model, onBack = nav::back) { s, c -> nav.back(); r.pick(s, c) }
         is Route.LibraryRifles -> LibraryRifles(model, onBack = nav::back) { rifle, barrel -> nav.back(); r.pick(rifle, barrel) }
-        is Route.Cartridge -> CartridgeEditor(model, r, nav)
+        is Route.CartridgeWizard -> CartridgeWizard(model, r, nav)
         is Route.Factory -> FactoryCartridges(model, onBack = nav::back) { id ->
             nav.back()
-            model.act { nav.push(Route.Cartridge(model.library.cartridgeFormFromFactory(id))) }
+            model.act { nav.push(Route.CartridgeWizard(model.library.cartridgeFormFromFactory(id))) }
         }
         is Route.Bullets -> BulletList(
             model,

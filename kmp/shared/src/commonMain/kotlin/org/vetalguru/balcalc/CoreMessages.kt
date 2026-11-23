@@ -58,6 +58,7 @@ private val coreMessages: Map<String, StringResource> = mapOf(
     "Turret travel must be between 0 and 100 MRAD (340 MOA)." to Res.string.core_44,
     "Check the rings, the scope tube and the objective." to Res.string.core_45,
     "A muzzle device's or suppressor's shift must be within 10 MRAD (34 MOA)." to Res.string.core_46,
+    "Check the handload: charge, lengths and velocity spread." to Res.string.core_47,
 )
 
 /** A message from the core in the app's language (unknown ones as they are). */

@@ -143,10 +143,10 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                         Text(stringResource(Res.string.new_action))
                     }
                     DropdownMenu(newMenu, { newMenu = false }) {
-                        DropdownMenuItem({ Text(stringResource(Res.string.empty_cartridge)) }, onClick = {
+                        DropdownMenuItem({ Text(stringResource(Res.string.custom_cartridge)) }, onClick = {
                             newMenu = false
-                            model.act { nav.push(Route.Cartridge(model.armory.cartridgeForm(0))) }
-                        }, modifier = Modifier.testTag("newEmptyCartridge"))
+                            model.act { nav.push(Route.CartridgeWizard(model.armory.cartridgeForm(0))) }
+                        }, modifier = Modifier.testTag("newCustomCartridge"))
                         DropdownMenuItem({ Text(stringResource(Res.string.copy_factory)) }, onClick = {
                             newMenu = false
                             nav.push(Route.Factory())
@@ -200,7 +200,7 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                         model.selectCartridge(id)
                         onChosen()
                     },
-                    onEdit = { id -> model.act { nav.push(Route.Cartridge(model.armory.cartridgeForm(id))) } },
+                    onEdit = { id -> model.act { nav.push(Route.CartridgeWizard(model.armory.cartridgeForm(id))) } },
                     onShare = ::share,
                     onQr = ::showQr,
                     thumbs = thumbList,
