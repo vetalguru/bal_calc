@@ -162,7 +162,7 @@ class CartridgeWizardUiTest {
         onNodeWithTag("newFactoryCartridge").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("search") }
         onNodeWithTag("search").performTextReplacement("GP11")
-        waitUntil(timeoutMillis = 30_000) { count("factory:") >= 1 } // the library's first search, slow on a cold Windows runner
+        waitUntil(timeoutMillis = 10_000) { count("factory:") >= 1 }
         onAllNodes(androidx.compose.ui.test.SemanticsMatcher("factory") {
             it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("factory:") == true
         }).onFirst().performClick()
