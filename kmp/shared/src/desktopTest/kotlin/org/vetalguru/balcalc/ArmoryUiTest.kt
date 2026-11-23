@@ -606,22 +606,25 @@ class ArmoryUiTest {
 
         onAllNodesWithText("Edit").onFirst().performClick()
         waitUntil(timeoutMillis = 10_000) { exists("cartridgeName") }
+        assertTrue(hasText("Edit cartridge"))
+        type("cartridgeName", "Edited load")
+        type("cartridgeCaliber", ".308 Winchester")
         // The sample's bullet is the library's: "Edit as own" first.
+        part("Bullet", "bulletSource")
         assertTrue(shown("bulletSource").startsWith("From the library: "), shown("bulletSource"))
         onNodeWithText("Edit as own").press()
         waitUntil(timeoutMillis = 10_000) { shown("bulletSource") == "Own bullet of this cartridge" }
-        type("cartridgeName", "Edited load")
-        type("cartridgeCaliber", ".308 Winchester")
         type("bulletName", "Own 168")
         choose("Drag model", "G1")
         type("bc", "0.462")
         type("mass", "168")
         type("diameter", "0.308")
         typeInto("Length (for spin drift)", "1.215")
+        part("Velocity", "muzzleVelocity")
         type("muzzleVelocity", "800")
         typeInto("Measured at powder temperature", "20")
         typeInto("Powder sensitivity", "0.1")
-        onAllNodesWithText("Save").onLast().press()
+        onNodeWithTag("save").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("cartridge:Edited load") }
 
         val f = app.form("cartridgeForm", id)
@@ -655,7 +658,7 @@ class ArmoryUiTest {
         waitUntil(timeoutMillis = 10_000) { exists("cartridge:$sampleCartridge") }
         val id = app.state().long("currentCartridgeId")
         onAllNodesWithText("Edit").onFirst().performClick()
-        waitUntil(timeoutMillis = 10_000) { exists("chooseBullet") }
+        part("Bullet", "chooseBullet")
 
         // The picker: Edit edits, Cancel comes back to the picker, a tap chooses.
         onNodeWithTag("chooseBullet").press()
@@ -848,7 +851,7 @@ class ArmoryUiTest {
         onNodeWithTag("cartridgesTab").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("cartridge:$sampleCartridge") }
         onAllNodesWithText("Edit").onFirst().performClick()
-        waitUntil(timeoutMillis = 10_000) { exists("chooseBullet") }
+        part("Bullet", "chooseBullet")
         onNodeWithTag("chooseBullet").press()
         findBullet("Used test 150")
         onNodeWithTag("bullet:Used test 150").performClick()

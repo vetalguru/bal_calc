@@ -40,15 +40,21 @@ import org.vetalguru.balcalc.core.RifleForm
 import org.vetalguru.balcalc.res.Res
 import org.vetalguru.balcalc.res.*
 
-/** The wizard's steps, in order; the last one is the summary. */
-internal enum class WizardStep(val title: StringResource, val icon: DrawableResource?, val note: StringResource?) {
+/** The rifle's parts, in order; the last one is the summary. */
+internal enum class WizardStep(
+    override val title: StringResource,
+    override val icon: DrawableResource?,
+    override val note: StringResource?,
+) : PagePart {
     Rifle(Res.string.rifle, Res.drawable.ic_rifle, Res.string.wizard_rifle_note),
     Barrel(Res.string.barrel_section, null, Res.string.wizard_barrel_note),
     Suppressor(Res.string.suppressor_section, null, Res.string.wizard_suppressor_note),
     Scope(Res.string.scope, Res.drawable.ic_scope, Res.string.wizard_scope_note),
     Mount(Res.string.mount_section, Res.drawable.ic_straighten, Res.string.wizard_mount_note),
     Zero(Res.string.zero, Res.drawable.ic_my_location, null),
-    Summary(Res.string.summary, null, null),
+    Summary(Res.string.summary, null, null);
+
+    override val isSummary get() = this == Summary
 }
 
 /**
@@ -69,86 +75,39 @@ internal fun RifleWizard(model: AppModel, route: Route.RifleWizard, nav: ArmoryN
     val reticleList = reticles
     val (stability, partnerName) = rememberStability(model, f.twistIn)
     val scope = rememberCoroutineScope()
-    val steps = WizardStep.entries
-    val current = steps[step]
+    val current = WizardStep.entries[step]
     LaunchedEffect(current) { route.visited = route.visited + current }
     val done = route.visited
     val set: (RifleForm) -> Unit = { f = it }
-    val save: () -> Unit = {
-        scope.launch {
-            error = model.armory.saveRifle(f, route.photoChange)
-            if (error == null) nav.back() else if (f.name.isBlank()) step = 0
-        }
-    }
-    BackHandler(enabled = step > 0) { step -= 1 }
-
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val wide = maxWidth >= 640.dp
-        Column(Modifier.fillMaxSize()) {
-            EditorBar(
-                stringResource(if (f.rifleId > 0) Res.string.edit_rifle else Res.string.new_rifle),
-                stringResource(Res.string.cancel), stringResource(Res.string.save), nav::back, save,
-            )
-            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                RifleDiagram(
-                    f, current, done, { step = it.ordinal },
-                    Modifier.widthIn(max = 560.dp).padding(horizontal = 12.dp),
-                )
-                PartChips(current, done) { step = it.ordinal }
-                Text(
-                    stringResource(Res.string.wizard_step, step + 1, steps.size) + " · " + stringResource(current.title),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 2.dp).testTag("wizardStep"),
-                )
+    PartsPage(
+        title = stringResource(if (f.rifleId > 0) Res.string.edit_rifle else Res.string.new_rifle),
+        parts = WizardStep.entries,
+        step = step,
+        onStep = { step = it },
+        done = done,
+        error = error,
+        onCancel = nav::back,
+        onSave = {
+            scope.launch {
+                error = model.armory.saveRifle(f, route.photoChange)
+                if (error == null) nav.back() else if (f.name.isBlank()) step = 0
             }
-            Column(
-                Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                if (!error.isNullOrEmpty()) {
-                    Text(coreText(error!!), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 16.dp).testTag("formError"))
-                }
-                if (current == WizardStep.Summary) {
-                    WizardSummary(f, reticleList) { step = it.ordinal }
-                } else {
-                    Section(stringResource(current.title), icon = current.icon) {
-                        current.note?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                        when (current) {
-                            WizardStep.Rifle -> RifleIdentityFields(f, set, wide, photo, route::change) {
-                                nav.push(Route.LibraryRifles { r, barrel -> f = f.withRifle(r, barrel) })
-                            }
-                            WizardStep.Barrel -> BarrelFields(f, set, wide, stability, partnerName)
-                            WizardStep.Suppressor -> SuppressorFields(f, set, wide)
-                            WizardStep.Scope -> ScopeFields(f, set, wide, reticleList) {
-                                nav.push(Route.LibraryScopes { s, c -> f = f.withScope(s, c) })
-                            }
-                            WizardStep.Mount -> MountFields(f, set, wide)
-                            WizardStep.Zero -> ZeroFields(f, set, wide, model)
-                            WizardStep.Summary -> Unit
-                        }
-                    }
-                }
+        },
+        drawing = { mod -> RifleDiagram(f, current, done, { step = it.ordinal }, mod) },
+        summary = { WizardSummary(f, reticleList) { step = it.ordinal } },
+    ) { part, wide ->
+        when (part) {
+            WizardStep.Rifle -> RifleIdentityFields(f, set, wide, photo, route::change) {
+                nav.push(Route.LibraryRifles { r, barrel -> f = f.withRifle(r, barrel) })
             }
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                OutlinedButton(onClick = { step -= 1 }, enabled = step > 0, modifier = Modifier.testTag("wizardBack")) {
-                    Text(stringResource(Res.string.back))
-                }
-                Spacer(Modifier.weight(1f))
-                if (current == WizardStep.Summary) {
-                    Button(onClick = save, modifier = Modifier.testTag("wizardFinish")) {
-                        ButtonIcon(Res.drawable.ic_save)
-                        Text(stringResource(Res.string.save))
-                    }
-                } else {
-                    Button(onClick = { step += 1 }, modifier = Modifier.testTag("wizardNext")) {
-                        Text(stringResource(Res.string.next))
-                    }
-                }
+            WizardStep.Barrel -> BarrelFields(f, set, wide, stability, partnerName)
+            WizardStep.Suppressor -> SuppressorFields(f, set, wide)
+            WizardStep.Scope -> ScopeFields(f, set, wide, reticleList) {
+                nav.push(Route.LibraryScopes { s, c -> f = f.withScope(s, c) })
             }
+            WizardStep.Mount -> MountFields(f, set, wide)
+            WizardStep.Zero -> ZeroFields(f, set, wide, model)
+            WizardStep.Summary -> Unit
         }
     }
 }
@@ -212,18 +171,5 @@ private fun WizardSummary(f: RifleForm, reticles: List<ReticleItem>, onChange: (
             stringResource(Res.string.zero_temperature) to "${n(f.zeroTemperatureC, 0)} ${stringResource(Res.string.unit_c)}",
         ),
     )
-    parts.forEach { (step, rows) ->
-        Section(stringResource(step.title), icon = step.icon) {
-            if (rows.isEmpty()) Text(stringResource(Res.string.not_stated), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            rows.forEach { (label, value) ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                    Text(value, modifier = Modifier.weight(1.4f))
-                }
-            }
-            TextButton(onClick = { onChange(step) }, modifier = Modifier.align(Alignment.End).testTag("summaryChange:${step.name}")) {
-                Text(stringResource(Res.string.change))
-            }
-        }
-    }
+    PartsSummary(parts, onChange)
 }

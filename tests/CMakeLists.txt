@@ -12,6 +12,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(core_tests
     applogic_armory_test.cpp
+    applogic_handload_test.cpp
     applogic_import_test.cpp
     applogic_library_test.cpp
     applogic_profile_io_test.cpp

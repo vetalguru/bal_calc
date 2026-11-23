@@ -800,6 +800,10 @@ TEST(StorageDatabaseErrors, MigrationBlockedByReaderCanBeRetried) {
                               "zeroed_with_suppressor"}) {
             undo += std::string("ALTER TABLE rifle DROP COLUMN ") + c + ";";
         }
+        for (const char* c : {"powder", "charge_kg", "primer", "brass", "coal_m", "cbto_m",
+                              "velocity_sd_mps", "velocity_es_mps"}) {
+            undo += std::string("ALTER TABLE cartridge DROP COLUMN ") + c + ";";
+        }
         for (const char* c : {"maker", "model", "tube_diameter_m", "objective_m",
                               "elevation_travel_rad", "windage_travel_rad"}) {
             undo += std::string("ALTER TABLE scope DROP COLUMN ") + c + ";";

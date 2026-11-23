@@ -207,33 +207,3 @@ internal fun RifleDiagram(
         label(zeroText, 0.95f, 0.07f, ink(WizardStep.Zero), center = true)
     }
 }
-
-/** The parts as chips under the drawing (the summary too): ✓ on the ones done, the current one selected. */
-@Composable
-internal fun PartChips(selected: WizardStep, done: Set<WizardStep>, onSelect: (WizardStep) -> Unit) {
-    // Every chip is there (a screen reader finds them all); the selected
-    // one scrolls into view (after a tap on the drawing, Next).
-    val row = rememberScrollState()
-    val starts = remember { mutableMapOf<WizardStep, Int>() }
-    LaunchedEffect(selected) { starts[selected]?.let { row.animateScrollTo((it - 48).coerceAtLeast(0)) } }
-    Row(
-        Modifier.fillMaxWidth().horizontalScroll(row).padding(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        WizardStep.entries.forEach { step ->
-            FilterChip(
-                selected = step == selected,
-                onClick = { onSelect(step) },
-                label = { Text(stringResource(step.title)) },
-                leadingIcon = if (step in done && step != WizardStep.Summary) {
-                    { Icon(vectorResource(Res.drawable.ic_check), contentDescription = null, Modifier.size(16.dp)) }
-                } else {
-                    null
-                },
-                modifier = Modifier.widthIn(min = 48.dp).testTag("part:${step.name}")
-                    .onGloballyPositioned { starts[step] = it.positionInParent().x.toInt() },
-            )
-        }
-    }
-}
-
