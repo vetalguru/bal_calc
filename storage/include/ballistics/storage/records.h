@@ -78,6 +78,35 @@ struct RifleRecord {
     double zero_range_m = 100.0;
     Atmosphere zero_atmosphere = StandardAtmosphere(0.0);
     double zero_powder_temp_k = 288.15;
+    // Description (v6); empty and 0 are "not stated".
+    std::string maker;
+    std::string model;
+    int rifling_grooves = 0;
+    std::string rifling_type;   // "" | "conventional" | "polygonal" | "5r" | "other"
+    std::string muzzle_device;  // "" | "none" | "brake" | "compensator" | "flash_hider"
+    // The rail (base) slope, nose down: adds that much to the elevation the
+    // turret has left above the zero. Its units are only for showing it.
+    double rail_slope_rad = 0.0;
+    std::string rail_slope_units = "moa";  // "moa" | "mrad"
+    double ring_height_m = 0.0;
+    // Where the muzzle device moves the point of impact (up and right
+    // positive) compared with the rifle without it; its units only for
+    // showing it. It counts when the device is on now but was off at the
+    // zero, or the other way round.
+    double muzzle_poi_up_rad = 0.0;
+    double muzzle_poi_right_rad = 0.0;
+    std::string muzzle_poi_units = "moa";  // "moa" | "mrad"
+    bool muzzle_device_on = true;
+    bool zeroed_with_device = false;
+    // The suppressor, on its own (it may go over the muzzle device): the
+    // same shift, on now, on at the zero.
+    bool has_suppressor = false;
+    std::string suppressor_name;
+    double suppressor_poi_up_rad = 0.0;
+    double suppressor_poi_right_rad = 0.0;
+    std::string suppressor_poi_units = "moa";  // "moa" | "mrad"
+    bool suppressor_on = true;
+    bool zeroed_with_suppressor = false;
 };
 
 struct ReticleRecord {
@@ -104,6 +133,14 @@ struct ScopeRecord {
     // `sfp_reference_magnification` (usually the maximum).
     std::string focal_plane = "ffp";  // "ffp" | "sfp"
     double sfp_reference_magnification = 0.0;
+    // Description (v6); 0 is "not stated". The travel is each turret's full
+    // range, end to end.
+    std::string maker;
+    std::string model;
+    double tube_diameter_m = 0.0;
+    double objective_m = 0.0;
+    double elevation_travel_rad = 0.0;
+    double windage_travel_rad = 0.0;
 };
 
 // A rifle + cartridge pair: what a solution is computed for. Holds what

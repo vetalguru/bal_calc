@@ -247,6 +247,45 @@ BEGIN DELETE FROM photo WHERE kind = 'rifle' AND owner_id = OLD.id; END;
 CREATE TRIGGER cartridge_photo_gone AFTER DELETE ON cartridge
 BEGIN DELETE FROM photo WHERE kind = 'cartridge' AND owner_id = OLD.id; END;
 )sql"},
+        // v6: a fuller description of a rifle and its scope. What changes the
+        // shot: the rail (base) slope, the turrets' travel and the point-of-
+        // impact shifts of the muzzle device and of the suppressor (each when
+        // it is on and the zero was shot without it, or the other way round);
+        // the rest is for the owner (maker, model, rifling, rings, tube).
+        // Empty text and 0 mean "not stated".
+        {6, R"sql(
+ALTER TABLE rifle ADD COLUMN maker TEXT NOT NULL DEFAULT '';
+ALTER TABLE rifle ADD COLUMN model TEXT NOT NULL DEFAULT '';
+ALTER TABLE rifle ADD COLUMN rifling_grooves INTEGER NOT NULL DEFAULT 0 CHECK (rifling_grooves >= 0);
+ALTER TABLE rifle ADD COLUMN rifling_type TEXT NOT NULL DEFAULT ''
+    CHECK (rifling_type IN ('', 'conventional', 'polygonal', '5r', 'other'));
+ALTER TABLE rifle ADD COLUMN muzzle_device TEXT NOT NULL DEFAULT ''
+    CHECK (muzzle_device IN ('', 'none', 'brake', 'compensator', 'flash_hider'));
+ALTER TABLE rifle ADD COLUMN rail_slope_rad REAL NOT NULL DEFAULT 0;
+ALTER TABLE rifle ADD COLUMN rail_slope_units TEXT NOT NULL DEFAULT 'moa'
+    CHECK (rail_slope_units IN ('moa', 'mrad'));
+ALTER TABLE rifle ADD COLUMN ring_height_m REAL NOT NULL DEFAULT 0 CHECK (ring_height_m >= 0);
+ALTER TABLE rifle ADD COLUMN muzzle_poi_up_rad REAL NOT NULL DEFAULT 0;
+ALTER TABLE rifle ADD COLUMN muzzle_poi_right_rad REAL NOT NULL DEFAULT 0;
+ALTER TABLE rifle ADD COLUMN muzzle_poi_units TEXT NOT NULL DEFAULT 'moa'
+    CHECK (muzzle_poi_units IN ('moa', 'mrad'));
+ALTER TABLE rifle ADD COLUMN muzzle_device_on INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE rifle ADD COLUMN zeroed_with_device INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE rifle ADD COLUMN has_suppressor INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE rifle ADD COLUMN suppressor_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE rifle ADD COLUMN suppressor_poi_up_rad REAL NOT NULL DEFAULT 0;
+ALTER TABLE rifle ADD COLUMN suppressor_poi_right_rad REAL NOT NULL DEFAULT 0;
+ALTER TABLE rifle ADD COLUMN suppressor_poi_units TEXT NOT NULL DEFAULT 'moa'
+    CHECK (suppressor_poi_units IN ('moa', 'mrad'));
+ALTER TABLE rifle ADD COLUMN suppressor_on INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE rifle ADD COLUMN zeroed_with_suppressor INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE scope ADD COLUMN maker TEXT NOT NULL DEFAULT '';
+ALTER TABLE scope ADD COLUMN model TEXT NOT NULL DEFAULT '';
+ALTER TABLE scope ADD COLUMN tube_diameter_m REAL NOT NULL DEFAULT 0 CHECK (tube_diameter_m >= 0);
+ALTER TABLE scope ADD COLUMN objective_m REAL NOT NULL DEFAULT 0 CHECK (objective_m >= 0);
+ALTER TABLE scope ADD COLUMN elevation_travel_rad REAL NOT NULL DEFAULT 0 CHECK (elevation_travel_rad >= 0);
+ALTER TABLE scope ADD COLUMN windage_travel_rad REAL NOT NULL DEFAULT 0 CHECK (windage_travel_rad >= 0);
+)sql"},
     };
     return migrations;
 }

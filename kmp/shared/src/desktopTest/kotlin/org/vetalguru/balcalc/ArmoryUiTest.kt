@@ -113,6 +113,12 @@ class ArmoryUiTest {
         waitForIdle()
     }
 
+    /** Opens a part of the rifle's page by its chip and waits for one of its fields. */
+    private fun ComposeUiTest.part(name: String, field: String) {
+        onNodeWithTag("part:$name").press()
+        waitUntil(timeoutMillis = 10_000) { exists(field) }
+    }
+
     /** The armory lists (rifles shown). */
     private fun ComposeUiTest.openArmory() {
         onNodeWithTag("navArmory").performClick()
@@ -451,10 +457,13 @@ class ArmoryUiTest {
 
         type("rifleName", "Edited rifle")
         type("rifleCaliber", "6.5 Creedmoor")
+        part("Mount", "sightHeight")
         typeInto("Sight height over bore", "4.5")
+        part("Barrel", "twist")
         type("twist", "8")
         onNodeWithText("Left-hand twist").press()
         onNodeWithText("Left-hand twist").assertIsOn()
+        part("Scope", "clickValue")
         choose("Turret units", "MOA")
         type("clickValue", "0.25")
         val reticles = app.call("reticles").jsonArray.map { it.jsonObject }
@@ -465,14 +474,14 @@ class ArmoryUiTest {
         type("magTo", "25")
         waitUntil(timeoutMillis = 10_000) { hasText("SFP: marks are true at") } // only for SFP
         typeInto("SFP: marks are true at", "20")
+        part("Zero", "zeroRange")
         type("zeroRange", "200")
         typeInto("Temperature when zeroed", "5")
         typeInto("Station pressure when zeroed", "950")
         typeInto("Altitude when zeroed", "500")
         typeInto("Humidity when zeroed", "80")
 
-        // The Save at the bottom of the page.
-        onAllNodesWithText("Save").onLast().press()
+        onNodeWithTag("save").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("rifle:Edited rifle") }
         val f = app.form("rifleForm", 1)
         assertEquals("Edited rifle", f.str("name"))
@@ -527,6 +536,8 @@ class ArmoryUiTest {
         startApp()
         openArmory()
         onNodeWithTag("new").performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("part:Scope") }
+        onNodeWithTag("part:Scope").press()
         waitUntil(timeoutMillis = 10_000) { exists("scopeFromLibrary") }
 
         // A scope without a stated reference: true at its highest power.
@@ -559,6 +570,8 @@ class ArmoryUiTest {
         assertEquals("0.25", shown("clickValue"))
 
         // The same from the rifles: the form is untouched.
+        onNodeWithTag("part:Rifle").press()
+        waitUntil(timeoutMillis = 10_000) { exists("rifleFromLibrary") }
         onNodeWithTag("rifleFromLibrary").press()
         waitUntil(timeoutMillis = 10_000) { exists("search") }
         onNodeWithText("Back").performClick()

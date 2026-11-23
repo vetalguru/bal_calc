@@ -74,6 +74,19 @@ inline constexpr const char* kWarnTransonic = "transonic";        // Mach < 1.2 
 inline constexpr const char* kWarnZeroTemperature = "zeroTemperature";  // value = C off the zero
 inline constexpr const char* kWarnZeroPressure = "zeroPressure";        // value = hPa off the zero
 inline constexpr const char* kWarnStaleWeather = "staleWeather";  // value = hours since entered
+// The turret cannot dial the correction; value = what is left to hold on
+// the reticle, in the chosen unit.
+inline constexpr const char* kWarnElevationTravel = "elevationTravel";
+inline constexpr const char* kWarnWindageTravel = "windageTravel";
+
+// How far the turrets go from the zero, rad (0 = travel not stated). The
+// zero is taken near the middle of the travel; a sloped rail adds its slope
+// above it.
+struct TurretReach {
+    double up_rad = 0.0;
+    double side_rad = 0.0;
+};
+TurretReach Reach(const storage::RifleRecord& rifle, const storage::ScopeRecord& scope);
 
 // Thresholds of the warnings (one place, see Summarize).
 inline constexpr double kMarginalStability = 1.3;

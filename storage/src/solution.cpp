@@ -201,11 +201,31 @@ Result<Solution> Solve(const LoadedProfile& p, const ConditionsRecord& condition
     if (conditions.latitude_rad) {
         shot.gravity_mps2 = LocalGravity(*conditions.latitude_rad, shot.atmosphere.altitude_m);
     }
-    shot.elevation_rad = zero.elevation_rad;
-    shot.windage_rad = zero.windage_rad;
+    // A muzzle device or a suppressor on now but not at the zero (or the
+    // other way round) throws the shot off where the zero put it.
+    const PoiShift device = MuzzleDeviceShift(p.rifle);
+    shot.elevation_rad = zero.elevation_rad + device.up_rad;
+    shot.windage_rad = zero.windage_rad + device.right_rad;
 
     Trajectory traj = Fly(shot, max_range_m, options);
     return Solution{std::move(shot), zero, std::move(traj)};
+}
+
+PoiShift MuzzleDeviceShift(const RifleRecord& rifle) {
+    PoiShift out;
+    // Off now but on at the zero: back by the shift.
+    auto add = [&out](bool stated, bool on, bool at_zero, double up, double right) {
+        if (stated && on != at_zero) {
+            const double sign = on ? 1.0 : -1.0;
+            out.up_rad += sign * up;
+            out.right_rad += sign * right;
+        }
+    };
+    add(!rifle.muzzle_device.empty() && rifle.muzzle_device != "none", rifle.muzzle_device_on,
+        rifle.zeroed_with_device, rifle.muzzle_poi_up_rad, rifle.muzzle_poi_right_rad);
+    add(rifle.has_suppressor, rifle.suppressor_on, rifle.zeroed_with_suppressor,
+        rifle.suppressor_poi_up_rad, rifle.suppressor_poi_right_rad);
+    return out;
 }
 
 double ToClicks(double angle_rad, double click_rad, bool round) {

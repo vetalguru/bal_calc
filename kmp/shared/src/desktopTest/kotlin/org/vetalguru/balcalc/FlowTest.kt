@@ -151,8 +151,10 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("rifleName") }
         type("rifleName", "Tikka")
         type("rifleCaliber", ".308 Win")
+        shot("armory-rifle-wizard")
+        onNodeWithTag("wizardNext").performClick() // the barrel
+        waitUntil(timeoutMillis = 10_000) { exists("barrel") }
         type("barrel", "20")
-        shot("armory-rifle-editor")
         onNodeWithTag("save").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("rifle:Tikka") }
 
@@ -256,8 +258,13 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("rifleName") }
         assertEquals("Tikka T3x CTR 6.5 Creedmoor", shown("rifleName"))
         assertEquals("6.5 Creedmoor", shown("rifleCaliber"))
+        assertEquals("Tikka", shown("rifleMaker"))
+        onNodeWithTag("wizardNext").performClick() // the barrel
+        waitUntil(timeoutMillis = 10_000) { exists("twist") }
         assertEquals("8", shown("twist"))
         assertEquals("24", shown("barrel"))
+        onNodeWithTag("part:Scope").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("scopeFromLibrary") }
 
         onNodeWithTag("scopeFromLibrary").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { exists("search") }
@@ -268,6 +275,9 @@ class FlowTest {
         waitUntil(timeoutMillis = 10_000) { exists("clickValue") }
         assertEquals("0.1", shown("clickValue"))
         assertEquals("35", shown("magTo"))
+        assertEquals("Nightforce", shown("scopeMaker"))
+        onNodeWithTag("part:Rifle").performScrollTo().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("rifleName") }
         assertEquals("Tikka T3x CTR 6.5 Creedmoor", shown("rifleName")) // the rifle part kept
 
         onNodeWithTag("save").performClick()
@@ -334,7 +344,7 @@ class FlowTest {
 
         onAllNodesWithText("Edit").onFirst().performClick()
         waitUntil("rifle editor", 10_000) { exists("photoChoose") }
-        onNodeWithTag("photoChoose").performClick()
+        onNodeWithTag("photoChoose").performScrollTo().performClick() // below the rifle's drawing
         waitUntil("picture in the editor", 10_000) { exists("photo") }
         shot("photo-editor")
         onNodeWithTag("save").performClick()
@@ -358,7 +368,7 @@ class FlowTest {
         // Opened again: the picture is there; removed: gone from the list too.
         onAllNodesWithText("Edit").onFirst().performClick()
         waitUntil("editor with the picture again", 10_000) { exists("photoRemove") }
-        onNodeWithTag("photoRemove").performClick()
+        onNodeWithTag("photoRemove").performScrollTo().performClick()
         onNodeWithTag("save").performClick()
         waitUntil("thumbnail gone", 10_000) { exists("rifle:$name") && !thumb() }
         db.delete()
@@ -419,6 +429,8 @@ class FlowTest {
         onNodeWithTag("navArmory").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("rifle:Sample .308 Win") }
         onAllNodesWithText("Edit").onFirst().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("part:Barrel") }
+        onNodeWithTag("part:Barrel").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { exists("stabilityLine") }
         val good = shown("stabilityLine")
         assertTrue(good.contains("stable"), good)

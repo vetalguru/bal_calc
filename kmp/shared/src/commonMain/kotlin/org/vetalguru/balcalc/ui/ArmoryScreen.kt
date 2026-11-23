@@ -18,8 +18,14 @@ import org.vetalguru.balcalc.res.*
 /** Inner pages of the Rifles tab, as a stack. */
 internal sealed interface Route {
     data object Lists : Route
-    class Rifle(form: RifleForm) : Route, WithPhoto() {
+    /**
+     * A rifle on its drawing, part by part; the draft lives while it is open.
+     * A rifle being edited has every part done already.
+     */
+    class RifleWizard(form: RifleForm) : Route, WithPhoto() {
         var form by mutableStateOf(form)
+        var step by mutableStateOf(0)
+        var visited by mutableStateOf(if (form.rifleId > 0) WizardStep.entries.toSet() else emptySet())
     }
     /** The published scope or rifle catalogs; a pick fills the rifle form. */
     class LibraryScopes(val pick: (LibraryScope, ScopeClick) -> Unit) : Route
@@ -74,7 +80,7 @@ fun ArmoryScreen(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
     BackHandler(nav.canGoBack) { nav.back() }
     when (val r = nav.top) {
         Route.Lists -> Lists(model, nav, onChosen)
-        is Route.Rifle -> RifleEditor(model, r, nav)
+        is Route.RifleWizard -> RifleWizard(model, r, nav)
         is Route.LibraryScopes -> LibraryScopes(model, onBack = nav::back) { s, c -> nav.back(); r.pick(s, c) }
         is Route.LibraryRifles -> LibraryRifles(model, onBack = nav::back) { rifle, barrel -> nav.back(); r.pick(rifle, barrel) }
         is Route.Cartridge -> CartridgeEditor(model, r, nav)

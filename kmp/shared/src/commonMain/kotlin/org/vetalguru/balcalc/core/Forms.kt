@@ -14,8 +14,42 @@ data class RifleForm(
     val twistIn: Double = 10.0,
     val twistLeft: Boolean = false,
     val barrelIn: Double = 0.0,
+    val maker: String = "",
+    val model: String = "",
+    val riflingGrooves: Int = 0,
+    /** "" | "conventional" | "polygonal" | "5r" | "other" */
+    val riflingType: String = "",
+    /** "" | "none" | "brake" | "compensator" | "flash_hider" */
+    val muzzleDevice: String = "",
+    /** Where the device moves the point of impact, up and right positive, in [muzzlePoiUnits]. */
+    val muzzlePoiUp: Double = 0.0,
+    val muzzlePoiRight: Double = 0.0,
+    val muzzlePoiUnits: String = "moa",
+    /** It counts when the device is on now but was off at the zero, or the other way round. */
+    val muzzleDeviceOn: Boolean = true,
+    val zeroedWithDevice: Boolean = false,
+    /** The suppressor, its own part (it may go over the muzzle device), with the same kind of shift. */
+    val hasSuppressor: Boolean = false,
+    val suppressorName: String = "",
+    val suppressorPoiUp: Double = 0.0,
+    val suppressorPoiRight: Double = 0.0,
+    val suppressorPoiUnits: String = "moa",
+    val suppressorOn: Boolean = true,
+    val zeroedWithSuppressor: Boolean = false,
+    val railSlope: Double = 0.0,
+    val railSlopeUnits: String = "moa",
+    val ringHeightMm: Double = 0.0,
     val clickUnits: String = "mrad",
     val clickValue: Double = 0.1,
+    /** 0 = as the vertical click. */
+    val clickValueHorizontal: Double = 0.0,
+    /** Each turret's full travel, in the click units (0 = not stated). */
+    val elevationTravel: Double = 0.0,
+    val windageTravel: Double = 0.0,
+    val scopeMaker: String = "",
+    val scopeModel: String = "",
+    val tubeDiameterMm: Double = 0.0,
+    val objectiveMm: Double = 0.0,
     val reticleId: Long = 0,
     val focalPlane: String = "ffp",
     val sfpReferenceMagnification: Double = 0.0,

@@ -197,7 +197,7 @@ private fun Viewer(
                         if (sol.ok) {
                             Corrections(sol, st)
                             DetailsLine(sol) { scope.launch { pager.animateScrollToPage(viewPages.lastIndex) } }
-                            Warnings(sol.warnings)
+                            Warnings(sol.warnings, stringResource(if (model.state.moa) Res.string.unit_moa else Res.string.unit_mrad))
                             Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     if (sol.velocityScale != 1.0 || sol.dragScale != 1.0) {

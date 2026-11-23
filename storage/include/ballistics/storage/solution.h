@@ -23,6 +23,15 @@ struct LoadedProfile {
 
 Result<LoadedProfile> LoadProfile(Database& db, Id profile_id);
 
+// The point-of-impact shift that applies now, rad: the muzzle device's and
+// the suppressor's, each when it is on now but was off at the zero (back by
+// it in the other case); 0 for one not stated or as it was at the zero.
+struct PoiShift {
+    double up_rad = 0.0;
+    double right_rad = 0.0;
+};
+PoiShift MuzzleDeviceShift(const RifleRecord& rifle);
+
 // Drag model of a bullet (curve required for kDragKindCurve). Fails on
 // inconsistent data (unknown table, missing BC, bad curve).
 Result<DragModel> MakeDragModel(const BulletRecord& bullet, const DragCurveRecord* curve);

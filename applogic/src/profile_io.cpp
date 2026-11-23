@@ -4,7 +4,9 @@
 #include <sqlite_manager/connection.h>
 #include <sqlite_manager/transaction.h>
 
+#include <algorithm>
 #include <cmath>
+#include <initializer_list>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <set>
@@ -176,6 +178,16 @@ std::string UniqueName(Database& db, const std::string& name) {
     }
 }
 
+// `v` if it is one of `known`, else "" (not stated).
+std::string Known(const std::string& v, std::initializer_list<const char*> known) {
+    for (const char* k : known) {
+        if (v == k) {
+            return v;
+        }
+    }
+    return {};
+}
+
 // ---- Export ---------------------------------------------------------------
 
 Result<json> ScopeJson(Database& db, Id scope_id) {
@@ -193,6 +205,12 @@ Result<json> ScopeJson(Database& db, Id scope_id) {
                 {"notes", sr.notes},
                 {"focal_plane", sr.focal_plane},
                 {"sfp_reference_magnification", sr.sfp_reference_magnification},
+                {"maker", sr.maker},
+                {"model", sr.model},
+                {"tube_diameter_m", sr.tube_diameter_m},
+                {"objective_m", sr.objective_m},
+                {"elevation_travel_rad", sr.elevation_travel_rad},
+                {"windage_travel_rad", sr.windage_travel_rad},
                 {"reticle", nullptr}};
     if (sr.reticle_id) {
         auto ret = Require<ReticleRecord>(db, *sr.reticle_id, "reticle");
@@ -321,6 +339,13 @@ Result<std::optional<Id>> ReadScope(Database& db, const json& doc) {
     s.notes = js.value("notes", "");
     s.focal_plane = js.value("focal_plane", "ffp");
     s.sfp_reference_magnification = js.value("sfp_reference_magnification", 0.0);
+    // Newer than the first files: absent means not stated.
+    s.maker = js.value("maker", "");
+    s.model = js.value("model", "");
+    s.tube_diameter_m = std::max(0.0, js.value("tube_diameter_m", 0.0));
+    s.objective_m = std::max(0.0, js.value("objective_m", 0.0));
+    s.elevation_travel_rad = std::max(0.0, js.value("elevation_travel_rad", 0.0));
+    s.windage_travel_rad = std::max(0.0, js.value("windage_travel_rad", 0.0));
     if (js.contains("reticle") && !js.at("reticle").is_null()) {
         const json& jt = js.at("reticle");
         ReticleRecord t;
@@ -351,6 +376,30 @@ Result<Id> ReadRifle(Database& db, const json& jr, const json& zero, std::option
     r.twist_m = jr.value("twist_m", 0.0);
     r.sight_height_m = jr.at("sight_height_m").get<double>();
     r.notes = jr.value("notes", "");
+    // Newer than the first files: absent means not stated.
+    r.maker = jr.value("maker", "");
+    r.model = jr.value("model", "");
+    // A value this version does not know is taken as not stated.
+    r.rifling_grooves = std::max(0, jr.value("rifling_grooves", 0));
+    r.rifling_type =
+        Known(jr.value("rifling_type", ""), {"conventional", "polygonal", "5r", "other"});
+    r.muzzle_device =
+        Known(jr.value("muzzle_device", ""), {"none", "brake", "compensator", "flash_hider"});
+    r.rail_slope_rad = std::max(0.0, jr.value("rail_slope_rad", 0.0));
+    r.rail_slope_units = jr.value("rail_slope_units", "moa") == "mrad" ? "mrad" : "moa";
+    r.ring_height_m = std::max(0.0, jr.value("ring_height_m", 0.0));
+    r.muzzle_poi_up_rad = std::clamp(jr.value("muzzle_poi_up_rad", 0.0), -0.01, 0.01);
+    r.muzzle_poi_right_rad = std::clamp(jr.value("muzzle_poi_right_rad", 0.0), -0.01, 0.01);
+    r.muzzle_poi_units = jr.value("muzzle_poi_units", "moa") == "mrad" ? "mrad" : "moa";
+    r.muzzle_device_on = jr.value("muzzle_device_on", true);
+    r.zeroed_with_device = jr.value("zeroed_with_device", false);
+    r.has_suppressor = jr.value("has_suppressor", false);
+    r.suppressor_name = jr.value("suppressor_name", "");
+    r.suppressor_poi_up_rad = std::clamp(jr.value("suppressor_poi_up_rad", 0.0), -0.01, 0.01);
+    r.suppressor_poi_right_rad = std::clamp(jr.value("suppressor_poi_right_rad", 0.0), -0.01, 0.01);
+    r.suppressor_poi_units = jr.value("suppressor_poi_units", "moa") == "mrad" ? "mrad" : "moa";
+    r.suppressor_on = jr.value("suppressor_on", true);
+    r.zeroed_with_suppressor = jr.value("zeroed_with_suppressor", false);
     r.scope_id = scope_id;
     r.zero_range_m = zero.at("zero_range_m").get<double>();
     r.zero_atmosphere = AtmosphereFrom(zero.at("zero_atmosphere"));
@@ -439,7 +488,27 @@ Result<std::string> ExportRifleJson(Database& db, Id rifle_id) {
                     {"notes", rr.notes},
                     {"zero_range_m", rr.zero_range_m},
                     {"zero_atmosphere", ToJson(rr.zero_atmosphere)},
-                    {"zero_powder_temp_k", rr.zero_powder_temp_k}};
+                    {"zero_powder_temp_k", rr.zero_powder_temp_k},
+                    {"maker", rr.maker},
+                    {"model", rr.model},
+                    {"rifling_grooves", rr.rifling_grooves},
+                    {"rifling_type", rr.rifling_type},
+                    {"muzzle_device", rr.muzzle_device},
+                    {"rail_slope_rad", rr.rail_slope_rad},
+                    {"rail_slope_units", rr.rail_slope_units},
+                    {"ring_height_m", rr.ring_height_m},
+                    {"muzzle_poi_up_rad", rr.muzzle_poi_up_rad},
+                    {"muzzle_poi_right_rad", rr.muzzle_poi_right_rad},
+                    {"muzzle_poi_units", rr.muzzle_poi_units},
+                    {"muzzle_device_on", rr.muzzle_device_on},
+                    {"zeroed_with_device", rr.zeroed_with_device},
+                    {"has_suppressor", rr.has_suppressor},
+                    {"suppressor_name", rr.suppressor_name},
+                    {"suppressor_poi_up_rad", rr.suppressor_poi_up_rad},
+                    {"suppressor_poi_right_rad", rr.suppressor_poi_right_rad},
+                    {"suppressor_poi_units", rr.suppressor_poi_units},
+                    {"suppressor_on", rr.suppressor_on},
+                    {"zeroed_with_suppressor", rr.zeroed_with_suppressor}};
     doc["scope"] = nullptr;
     if (rr.scope_id) {
         auto scope = ScopeJson(db, *rr.scope_id);
