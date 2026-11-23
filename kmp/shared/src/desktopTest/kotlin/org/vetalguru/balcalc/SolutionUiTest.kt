@@ -111,6 +111,8 @@ class SolutionUiTest {
         onNodeWithTag("navArmory").performClick()
         waitUntil(timeoutMillis = 10_000) { exists("rifle:Sample .308 Win") }
         onAllNodesWithText("Edit").onFirst().performClick()
+        waitUntil(timeoutMillis = 10_000) { exists("part:Barrel") }
+        onNodeWithTag("part:Barrel").performScrollTo().performClick()
         waitUntil(timeoutMillis = 10_000) { exists("twist") }
         type("twist", twist)
         onNodeWithTag("save").performClick()

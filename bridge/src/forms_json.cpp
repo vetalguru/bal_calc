@@ -40,8 +40,35 @@ json ToJson(const al::RifleForm& f) {
             {"twistIn", f.twist_in},
             {"twistLeft", f.twist_left},
             {"barrelIn", f.barrel_in},
+            {"maker", f.maker},
+            {"model", f.model},
+            {"riflingGrooves", f.rifling_grooves},
+            {"riflingType", f.rifling_type},
+            {"muzzleDevice", f.muzzle_device},
+            {"muzzlePoiUp", f.muzzle_poi_up},
+            {"muzzlePoiRight", f.muzzle_poi_right},
+            {"muzzlePoiUnits", f.muzzle_poi_units},
+            {"muzzleDeviceOn", f.muzzle_device_on},
+            {"zeroedWithDevice", f.zeroed_with_device},
+            {"hasSuppressor", f.has_suppressor},
+            {"suppressorName", f.suppressor_name},
+            {"suppressorPoiUp", f.suppressor_poi_up},
+            {"suppressorPoiRight", f.suppressor_poi_right},
+            {"suppressorPoiUnits", f.suppressor_poi_units},
+            {"suppressorOn", f.suppressor_on},
+            {"zeroedWithSuppressor", f.zeroed_with_suppressor},
+            {"railSlope", f.rail_slope},
+            {"railSlopeUnits", f.rail_slope_units},
+            {"ringHeightMm", f.ring_height_mm},
             {"clickUnits", f.click_units},
             {"clickValue", f.click_value},
+            {"clickValueHorizontal", f.click_value_horizontal},
+            {"elevationTravel", f.elevation_travel},
+            {"windageTravel", f.windage_travel},
+            {"scopeMaker", f.scope_maker},
+            {"scopeModel", f.scope_model},
+            {"tubeDiameterMm", f.tube_diameter_mm},
+            {"objectiveMm", f.objective_mm},
             {"reticleId", f.reticle_id},
             {"focalPlane", f.focal_plane},
             {"sfpReferenceMagnification", f.sfp_reference_magnification},
@@ -64,8 +91,35 @@ al::RifleForm RifleFrom(const json& m) {
     f.twist_in = Num(m, "twistIn", f.twist_in);
     f.twist_left = Bool(m, "twistLeft");
     f.barrel_in = Num(m, "barrelIn");
+    f.maker = Str(m, "maker");
+    f.model = Str(m, "model");
+    f.rifling_grooves = static_cast<int>(Num(m, "riflingGrooves"));
+    f.rifling_type = Str(m, "riflingType");
+    f.muzzle_device = Str(m, "muzzleDevice");
+    f.muzzle_poi_up = Num(m, "muzzlePoiUp");
+    f.muzzle_poi_right = Num(m, "muzzlePoiRight");
+    f.muzzle_poi_units = Str(m, "muzzlePoiUnits", f.muzzle_poi_units);
+    f.muzzle_device_on = Bool(m, "muzzleDeviceOn", true);
+    f.zeroed_with_device = Bool(m, "zeroedWithDevice");
+    f.has_suppressor = Bool(m, "hasSuppressor");
+    f.suppressor_name = Str(m, "suppressorName");
+    f.suppressor_poi_up = Num(m, "suppressorPoiUp");
+    f.suppressor_poi_right = Num(m, "suppressorPoiRight");
+    f.suppressor_poi_units = Str(m, "suppressorPoiUnits", f.suppressor_poi_units);
+    f.suppressor_on = Bool(m, "suppressorOn", true);
+    f.zeroed_with_suppressor = Bool(m, "zeroedWithSuppressor");
+    f.rail_slope = Num(m, "railSlope");
+    f.rail_slope_units = Str(m, "railSlopeUnits", f.rail_slope_units);
+    f.ring_height_mm = Num(m, "ringHeightMm");
     f.click_units = Str(m, "clickUnits", f.click_units);
     f.click_value = Num(m, "clickValue", f.click_value);
+    f.click_value_horizontal = Num(m, "clickValueHorizontal");
+    f.elevation_travel = Num(m, "elevationTravel");
+    f.windage_travel = Num(m, "windageTravel");
+    f.scope_maker = Str(m, "scopeMaker");
+    f.scope_model = Str(m, "scopeModel");
+    f.tube_diameter_mm = Num(m, "tubeDiameterMm");
+    f.objective_mm = Num(m, "objectiveMm");
     f.reticle_id = IdOf(m, "reticleId");
     f.focal_plane = Str(m, "focalPlane", "ffp");
     f.sfp_reference_magnification = Num(m, "sfpReferenceMagnification");

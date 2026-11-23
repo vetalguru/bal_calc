@@ -52,6 +52,12 @@ private val coreMessages: Map<String, StringResource> = mapOf(
     "Enter a name for each target." to Res.string.core_37,
     "A target range must be between 10 and 3000 m." to Res.string.core_38,
     "At most 20 targets." to Res.string.core_39,
+    "Check the horizontal click value." to Res.string.core_41,
+    "Check the rifling and the muzzle device." to Res.string.core_42,
+    "Rail slope must be between 0 and 60 MOA (17.5 MRAD)." to Res.string.core_43,
+    "Turret travel must be between 0 and 100 MRAD (340 MOA)." to Res.string.core_44,
+    "Check the rings, the scope tube and the objective." to Res.string.core_45,
+    "A muzzle device's or suppressor's shift must be within 10 MRAD (34 MOA)." to Res.string.core_46,
 )
 
 /** A message from the core in the app's language (unknown ones as they are). */

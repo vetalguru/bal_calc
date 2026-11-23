@@ -43,10 +43,46 @@ struct RifleForm {
     bool twist_left = false;
     // Barrel length: factory velocities are recalculated for it (0 = unknown).
     double barrel_in = 0.0;
+    // Description; empty and 0 are "not stated".
+    std::string maker;
+    std::string model;
+    int rifling_grooves = 0;
+    std::string rifling_type;   // "" | "conventional" | "polygonal" | "5r" | "other"
+    std::string muzzle_device;  // "" | "none" | "brake" | "compensator" | "flash_hider"
+    // Where the device moves the point of impact, up and right positive, in
+    // its units; it counts when the device is on now but was off at the
+    // zero, or the other way round.
+    double muzzle_poi_up = 0.0;
+    double muzzle_poi_right = 0.0;
+    std::string muzzle_poi_units = kClickMoa;  // "moa" | "mrad"
+    bool muzzle_device_on = true;
+    bool zeroed_with_device = false;
+    // The suppressor, on its own (it may go over the muzzle device), with
+    // the same kind of shift.
+    bool has_suppressor = false;
+    std::string suppressor_name;
+    double suppressor_poi_up = 0.0;
+    double suppressor_poi_right = 0.0;
+    std::string suppressor_poi_units = kClickMoa;  // "moa" | "mrad"
+    bool suppressor_on = true;
+    bool zeroed_with_suppressor = false;
+
+    // Mount: the rail (base) slope in its own units, and the rings.
+    double rail_slope = 0.0;
+    std::string rail_slope_units = kClickMoa;  // "moa" | "mrad"
+    double ring_height_mm = 0.0;
 
     // Scope
     std::string click_units = kClickMrad;
-    double click_value = 0.1;
+    double click_value = 0.1;             // vertical
+    double click_value_horizontal = 0.0;  // 0 = as the vertical one
+    // Each turret's full travel, in the click units (0 = not stated).
+    double elevation_travel = 0.0;
+    double windage_travel = 0.0;
+    std::string scope_maker;
+    std::string scope_model;
+    double tube_diameter_mm = 0.0;
+    double objective_mm = 0.0;
     Id reticle_id = 0;                // 0 = none
     std::string focal_plane = "ffp";  // "ffp" | "sfp"
     double sfp_reference_magnification = 0.0;

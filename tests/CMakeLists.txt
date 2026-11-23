@@ -16,6 +16,7 @@ add_executable(core_tests
     applogic_library_test.cpp
     applogic_profile_io_test.cpp
     applogic_reticle_test.cpp
+    applogic_rifle_details_test.cpp
     applogic_session_test.cpp
     applogic_test.cpp
     applogic_truing_test.cpp

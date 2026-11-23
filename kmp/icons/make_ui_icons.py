@@ -25,7 +25,7 @@ ICONS = [
     # Navigation.
     "my_location", "table_chart", "air", "inventory_2", "settings",
     # Actions.
-    "add", "adjust", "arrow_back", "bookmarks", "calculate", "close", "compare_arrows",
+    "add", "adjust", "arrow_back", "bookmarks", "calculate", "check", "close", "compare_arrows",
     "delete", "edit", "file_open", "fullscreen", "image", "ios_share", "library_books",
     "more_vert", "photo_camera", "qr_code_2", "qr_code_scanner", "remove", "restart_alt",
     "save", "scatter_plot", "timer", "undo", "view_column",

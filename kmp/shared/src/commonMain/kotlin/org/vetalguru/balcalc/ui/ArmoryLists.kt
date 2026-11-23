@@ -137,7 +137,7 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                 }
                 Box {
                     Button(onClick = {
-                        if (nav.tab == 0) model.act { nav.push(Route.Rifle(model.armory.rifleForm(0))) } else newMenu = true
+                        if (nav.tab == 0) model.act { nav.push(Route.RifleWizard(model.armory.rifleForm(0))) } else newMenu = true
                     }, modifier = Modifier.testTag("new")) {
                         ButtonIcon(Res.drawable.ic_add)
                         Text(stringResource(Res.string.new_action))
@@ -170,7 +170,7 @@ internal fun Lists(model: AppModel, nav: ArmoryNav, onChosen: () -> Unit) {
                         model.selectRifle(id)
                         nav.tab = 1 // now the cartridge
                     },
-                    onEdit = { id -> model.act { nav.push(Route.Rifle(model.armory.rifleForm(id))) } },
+                    onEdit = { id -> model.act { nav.push(Route.RifleWizard(model.armory.rifleForm(id))) } },
                     onShare = ::share,
                     onQr = ::showQr,
                     thumbs = thumbList,

@@ -199,6 +199,15 @@ double FromRad(double rad, AngleUnit unit) {
     return unit == AngleUnit::kMoa ? units::RadToMoa(rad) : units::RadToMrad(rad);
 }
 
+TurretReach Reach(const storage::RifleRecord& rifle, const storage::ScopeRecord& scope) {
+    TurretReach r;
+    if (scope.elevation_travel_rad > 0.0) {
+        r.up_rad = scope.elevation_travel_rad / 2.0 + rifle.rail_slope_rad;
+    }
+    r.side_rad = scope.windage_travel_rad / 2.0;
+    return r;
+}
+
 SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionConditions& s,
                           AngleUnit unit, double now_unix) {
     SolutionSummary out;
@@ -327,6 +336,17 @@ SolutionSummary Summarize(const storage::LoadedProfile& profile, const SessionCo
     const double dp = (air.pressure_pa - zero.pressure_pa) / 100.0;
     if (std::abs(dp) > kZeroPressureLimitHpa) {
         out.warnings.push_back({kWarnZeroPressure, dp});
+    }
+    if (profile.scope) {
+        const TurretReach reach = Reach(profile.rifle, *profile.scope);
+        const double up_short = pt->hold_elevation_rad - reach.up_rad;
+        if (reach.up_rad > 0.0 && up_short > 0.0) {
+            out.warnings.push_back({kWarnElevationTravel, FromRad(up_short, unit)});
+        }
+        const double side_short = std::abs(pt->hold_windage_rad) - reach.side_rad;
+        if (reach.side_rad > 0.0 && side_short > 0.0) {
+            out.warnings.push_back({kWarnWindageTravel, FromRad(side_short, unit)});
+        }
     }
     if (now_unix > 0.0 && s.weather_at_unix > 0.0) {
         const double hours = (now_unix - s.weather_at_unix) / 3600.0;

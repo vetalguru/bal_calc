@@ -106,7 +106,7 @@ internal fun Details(sol: Solution, targetHeightCm: Double, wide: Boolean) {
 
 /** What the shooter should know before trusting the numbers; nothing when all is well. */
 @Composable
-internal fun Warnings(warnings: List<Warning>) {
+internal fun Warnings(warnings: List<Warning>, unit: String) {
     if (warnings.isEmpty()) return
     Card(
         Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("warnings"),
@@ -117,7 +117,7 @@ internal fun Warnings(warnings: List<Warning>) {
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             warnings.forEach { w ->
-                val text = warningText(w) ?: return@forEach
+                val text = warningText(w, unit) ?: return@forEach
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("⚠", fontWeight = FontWeight.Bold)
                     Text(text, modifier = Modifier.testTag("warning_${w.code}"))
@@ -128,7 +128,7 @@ internal fun Warnings(warnings: List<Warning>) {
 }
 
 @Composable
-private fun warningText(w: Warning): String? {
+private fun warningText(w: Warning, unit: String): String? {
     val signed = { v: Double, d: Int -> (if (v > 0) "+" else "") + v.fixed(d) }
     return when (w.code) {
         "unstable" -> stringResource(Res.string.warn_unstable, w.value.fixed(2))
@@ -138,6 +138,8 @@ private fun warningText(w: Warning): String? {
         "zeroTemperature" -> stringResource(Res.string.warn_zero_temperature, signed(w.value, 0))
         "zeroPressure" -> stringResource(Res.string.warn_zero_pressure, signed(w.value, 0))
         "staleWeather" -> stringResource(Res.string.warn_stale_weather, w.value.roundToInt())
+        "elevationTravel" -> stringResource(Res.string.warn_elevation_travel, w.value.fixed(1), unit)
+        "windageTravel" -> stringResource(Res.string.warn_windage_travel, w.value.fixed(1), unit)
         else -> null // a newer core: not known to this app yet
     }
 }

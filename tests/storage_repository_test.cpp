@@ -775,10 +775,37 @@ TEST(StorageDatabaseErrors, MigrationBlockedByReaderCanBeRetried) {
     {
         Database db;
         ASSERT_TRUE(db.Open(file.path()).ok());
-        // Back to the previous version: undo the last migration (photos).
+        // Back to the previous version: undo the last migration (the rifle
+        // and scope description).
+        std::string undo;
+        for (const char* c : {"maker",
+                              "model",
+                              "rifling_grooves",
+                              "rifling_type",
+                              "muzzle_device",
+                              "rail_slope_rad",
+                              "rail_slope_units",
+                              "ring_height_m",
+                              "muzzle_poi_up_rad",
+                              "muzzle_poi_right_rad",
+                              "muzzle_poi_units",
+                              "muzzle_device_on",
+                              "zeroed_with_device",
+                              "has_suppressor",
+                              "suppressor_name",
+                              "suppressor_poi_up_rad",
+                              "suppressor_poi_right_rad",
+                              "suppressor_poi_units",
+                              "suppressor_on",
+                              "zeroed_with_suppressor"}) {
+            undo += std::string("ALTER TABLE rifle DROP COLUMN ") + c + ";";
+        }
+        for (const char* c : {"maker", "model", "tube_diameter_m", "objective_m",
+                              "elevation_travel_rad", "windage_travel_rad"}) {
+            undo += std::string("ALTER TABLE scope DROP COLUMN ") + c + ";";
+        }
         ASSERT_TRUE(db.connection()
-                        .Execute("DROP TRIGGER rifle_photo_gone; DROP TRIGGER cartridge_photo_gone;"
-                                 "DROP TABLE photo; PRAGMA user_version = " +
+                        .Execute(undo + "PRAGMA user_version = " +
                                  std::to_string(Database::LatestSchemaVersion() - 1))
                         .ok());
     }
@@ -797,7 +824,8 @@ TEST(StorageDatabaseErrors, MigrationBlockedByReaderCanBeRetried) {
     Database db;
     ASSERT_TRUE(db.Open(file.path()).ok());
     EXPECT_EQ(db.SchemaVersion().value(), Database::LatestSchemaVersion());
-    EXPECT_TRUE(PhotoOwners(db, "rifle").ok());
+    EXPECT_TRUE(Repository<RifleRecord>(db).List().ok());  // the new columns are back
+    EXPECT_TRUE(Repository<ScopeRecord>(db).List().ok());
 }
 
 // --- Solution ----------------------------------------------------------------

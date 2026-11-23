@@ -34,6 +34,8 @@ internal fun LibraryButton(tag: String, onClick: () -> Unit) {
 /** A library rifle into the form: its twist, caliber and barrel, and its name if none yet. */
 internal fun RifleForm.withRifle(r: LibraryRifle, barrelIn: Double) = copy(
     name = name.ifBlank { "${r.maker} ${r.model} ${r.caliber}" },
+    maker = r.maker,
+    model = r.model,
     caliber = r.caliber,
     twistIn = r.twistIn,
     barrelIn = barrelIn,
@@ -47,6 +49,8 @@ private data class RifleChoice(val rifle: LibraryRifle, val barrelIn: Double)
  * highest power unless the maker states another.
  */
 internal fun RifleForm.withScope(s: LibraryScope, click: ScopeClick) = copy(
+    scopeMaker = s.maker,
+    scopeModel = s.model,
     clickUnits = click.units,
     clickValue = click.value,
     focalPlane = s.focalPlane,

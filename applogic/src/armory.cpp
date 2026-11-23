@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <initializer_list>
 #include <utility>
 
 namespace ballistics::applogic {
@@ -40,6 +41,35 @@ Result<T> Require(Database& db, Id id, const char* what) {
 }
 
 Error Invalid(const std::string& problem) { return {ErrorCode::kConstraint, 0, problem}; }
+
+bool OneOf(const std::string& v, std::initializer_list<const char*> allowed) {
+    return std::any_of(allowed.begin(), allowed.end(), [&](const char* a) { return v == a; });
+}
+
+// ClickToRad and RadToClick for a signed value (a shift down or left).
+double SignedRad(const std::string& units, double v) {
+    return v < 0.0 ? -ClickToRad(units, -v) : ClickToRad(units, v);
+}
+double SignedClick(const std::string& units, double rad) {
+    return rad < 0.0 ? -RadToClick(units, -rad) : RadToClick(units, rad);
+}
+
+// A value read back from radians, without the float noise (20 MOA, not 19.9999999).
+double Rounded(double v) { return std::round(v * 1e6) / 1e6; }
+
+// 60 MOA: steeper rails and bases are not made.
+constexpr double kMaxRailSlopeRad = 60.0 * units::kPi / (180.0 * 60.0) + 1e-9;
+// 10 MRAD: a muzzle device that throws the shot further is broken.
+constexpr double kMaxPoiShiftRad = 0.01 + 1e-9;
+// 100 MRAD: no scope turret goes further.
+constexpr double kMaxTravelRad = 0.1 + 1e-9;
+
+// A muzzle device's or suppressor's shift: known units, within kMaxPoiShiftRad.
+bool ShiftOk(const std::string& units, double up, double right) {
+    return OneOf(units, {kClickMoa, kClickMrad}) &&
+           std::fabs(SignedRad(units, up)) <= kMaxPoiShiftRad &&
+           std::fabs(SignedRad(units, right)) <= kMaxPoiShiftRad;
+}
 
 // Cartridges brought in from files belong to the library, not the user.
 bool IsLibraryCartridge(const CartridgeRecord& c) { return c.source.rfind("import:", 0) == 0; }
@@ -189,6 +219,34 @@ std::string Validate(const RifleForm& f) {
     if (!(ClickToRad(f.click_units, f.click_value) > 0.0)) {
         return "Enter the scope click value.";
     }
+    if (f.click_value_horizontal < 0.0 ||
+        (f.click_value_horizontal > 0.0 &&
+         !(ClickToRad(f.click_units, f.click_value_horizontal) > 0.0))) {
+        return "Check the horizontal click value.";
+    }
+    if (!OneOf(f.rifling_type, {"", "conventional", "polygonal", "5r", "other"}) ||
+        !OneOf(f.muzzle_device, {"", "none", "brake", "compensator", "flash_hider"}) ||
+        f.rifling_grooves < 0 || f.rifling_grooves > 16) {
+        return "Check the rifling and the muzzle device.";
+    }
+    if (!ShiftOk(f.muzzle_poi_units, f.muzzle_poi_up, f.muzzle_poi_right) ||
+        !ShiftOk(f.suppressor_poi_units, f.suppressor_poi_up, f.suppressor_poi_right)) {
+        return "A muzzle device's or suppressor's shift must be within 10 MRAD (34 MOA).";
+    }
+    if (!OneOf(f.rail_slope_units, {kClickMoa, kClickMrad}) || f.rail_slope < 0.0 ||
+        ClickToRad(f.rail_slope_units, f.rail_slope) > kMaxRailSlopeRad) {
+        return "Rail slope must be between 0 and 60 MOA (17.5 MRAD).";
+    }
+    if (f.elevation_travel < 0.0 || f.windage_travel < 0.0 ||
+        ClickToRad(f.click_units, f.elevation_travel) > kMaxTravelRad ||
+        ClickToRad(f.click_units, f.windage_travel) > kMaxTravelRad) {
+        return "Turret travel must be between 0 and 100 MRAD (340 MOA).";
+    }
+    if (!(f.ring_height_mm >= 0.0 && f.ring_height_mm <= 100.0) ||
+        !(f.tube_diameter_mm >= 0.0 && f.tube_diameter_mm <= 50.0) ||
+        !(f.objective_mm >= 0.0 && f.objective_mm <= 100.0)) {
+        return "Check the rings, the scope tube and the objective.";
+    }
     if (f.min_magnification < 0.0 || f.max_magnification < 0.0 ||
         (f.max_magnification > 0.0 && f.min_magnification > f.max_magnification)) {
         return "Check the scope magnification range.";
@@ -228,6 +286,27 @@ Result<RifleForm> LoadRifleForm(Database& db, Id rifle_id) {
     f.twist_in = units::MToInch(std::fabs(r.twist_m));
     f.twist_left = r.twist_m < 0.0;
     f.barrel_in = BarrelInches(r.barrel_length_m);
+    f.maker = r.maker;
+    f.model = r.model;
+    f.rifling_grooves = r.rifling_grooves;
+    f.rifling_type = r.rifling_type;
+    f.muzzle_device = r.muzzle_device;
+    f.rail_slope_units = r.rail_slope_units;
+    f.rail_slope = Rounded(RadToClick(r.rail_slope_units, r.rail_slope_rad));
+    f.ring_height_mm = r.ring_height_m * 1000.0;
+    f.muzzle_poi_units = r.muzzle_poi_units;
+    f.muzzle_poi_up = Rounded(SignedClick(r.muzzle_poi_units, r.muzzle_poi_up_rad));
+    f.muzzle_poi_right = Rounded(SignedClick(r.muzzle_poi_units, r.muzzle_poi_right_rad));
+    f.muzzle_device_on = r.muzzle_device_on;
+    f.zeroed_with_device = r.zeroed_with_device;
+    f.has_suppressor = r.has_suppressor;
+    f.suppressor_name = r.suppressor_name;
+    f.suppressor_poi_units = r.suppressor_poi_units;
+    f.suppressor_poi_up = Rounded(SignedClick(r.suppressor_poi_units, r.suppressor_poi_up_rad));
+    f.suppressor_poi_right =
+        Rounded(SignedClick(r.suppressor_poi_units, r.suppressor_poi_right_rad));
+    f.suppressor_on = r.suppressor_on;
+    f.zeroed_with_suppressor = r.zeroed_with_suppressor;
     if (r.scope_id) {
         auto scope = Require<ScopeRecord>(db, *r.scope_id, "scope");
         if (!scope) {
@@ -236,6 +315,15 @@ Result<RifleForm> LoadRifleForm(Database& db, Id rifle_id) {
         const ScopeRecord& s = scope.value();
         f.click_units = s.click_units;
         f.click_value = RadToClick(f.click_units, s.click_vertical_rad);
+        if (std::fabs(s.click_horizontal_rad - s.click_vertical_rad) > 1e-12) {
+            f.click_value_horizontal = Rounded(RadToClick(f.click_units, s.click_horizontal_rad));
+        }
+        f.elevation_travel = Rounded(RadToClick(f.click_units, s.elevation_travel_rad));
+        f.windage_travel = Rounded(RadToClick(f.click_units, s.windage_travel_rad));
+        f.scope_maker = s.maker;
+        f.scope_model = s.model;
+        f.tube_diameter_mm = s.tube_diameter_m * 1000.0;
+        f.objective_mm = s.objective_m * 1000.0;
         f.reticle_id = s.reticle_id.value_or(0);
         f.focal_plane = s.focal_plane;
         f.sfp_reference_magnification = s.sfp_reference_magnification;
@@ -278,7 +366,16 @@ Result<Id> SaveRifleForm(Database& db, const RifleForm& f) {
 
     s.name = f.name;
     s.click_units = f.click_units;
-    s.click_vertical_rad = s.click_horizontal_rad = ClickToRad(f.click_units, f.click_value);
+    s.click_vertical_rad = ClickToRad(f.click_units, f.click_value);
+    s.click_horizontal_rad = f.click_value_horizontal > 0.0
+                                 ? ClickToRad(f.click_units, f.click_value_horizontal)
+                                 : s.click_vertical_rad;
+    s.elevation_travel_rad = ClickToRad(f.click_units, f.elevation_travel);
+    s.windage_travel_rad = ClickToRad(f.click_units, f.windage_travel);
+    s.maker = f.scope_maker;
+    s.model = f.scope_model;
+    s.tube_diameter_m = f.tube_diameter_mm / 1000.0;
+    s.objective_m = f.objective_mm / 1000.0;
     s.reticle_id = f.reticle_id != 0 ? std::optional<Id>(f.reticle_id) : std::nullopt;
     s.focal_plane = f.focal_plane == "sfp" ? "sfp" : "ffp";
     s.sfp_reference_magnification = f.sfp_reference_magnification;
@@ -295,6 +392,26 @@ Result<Id> SaveRifleForm(Database& db, const RifleForm& f) {
     if (f.barrel_in != BarrelInches(r.barrel_length_m)) {  // unchanged: keep the stored length
         r.barrel_length_m = units::InchToM(f.barrel_in);
     }
+    r.maker = f.maker;
+    r.model = f.model;
+    r.rifling_grooves = f.rifling_grooves;
+    r.rifling_type = f.rifling_type;
+    r.muzzle_device = f.muzzle_device;
+    r.rail_slope_units = f.rail_slope_units;
+    r.rail_slope_rad = ClickToRad(f.rail_slope_units, f.rail_slope);
+    r.ring_height_m = f.ring_height_mm / 1000.0;
+    r.muzzle_poi_units = f.muzzle_poi_units;
+    r.muzzle_poi_up_rad = SignedRad(f.muzzle_poi_units, f.muzzle_poi_up);
+    r.muzzle_poi_right_rad = SignedRad(f.muzzle_poi_units, f.muzzle_poi_right);
+    r.muzzle_device_on = f.muzzle_device_on;
+    r.zeroed_with_device = f.zeroed_with_device;
+    r.has_suppressor = f.has_suppressor;
+    r.suppressor_name = f.suppressor_name;
+    r.suppressor_poi_units = f.suppressor_poi_units;
+    r.suppressor_poi_up_rad = SignedRad(f.suppressor_poi_units, f.suppressor_poi_up);
+    r.suppressor_poi_right_rad = SignedRad(f.suppressor_poi_units, f.suppressor_poi_right);
+    r.suppressor_on = f.suppressor_on;
+    r.zeroed_with_suppressor = f.zeroed_with_suppressor;
     r.scope_id = s.id;
     r.zero_range_m = f.zero_range_m;
     r.zero_atmosphere = {f.zero_altitude_m, f.zero_pressure_hpa * 100.0,
