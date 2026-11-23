@@ -48,6 +48,8 @@ internal fun <T> SearchList(
     empty: String,
     load: suspend (String) -> List<T>,
     onBack: () -> Unit,
+    /** The core has started (the starter library is in); a search before then would come back empty. */
+    ready: Boolean,
     reloadKey: Any? = null,
     header: @Composable () -> Unit = {},
     actions: @Composable () -> Unit = {},
@@ -55,7 +57,7 @@ internal fun <T> SearchList(
 ) {
     var filter by rememberSaveable { mutableStateOf("") }
     var items by remember { mutableStateOf(emptyList<T>()) }
-    LaunchedEffect(filter, reloadKey) { items = loadOr(emptyList()) { load(filter) } }
+    LaunchedEffect(filter, reloadKey, ready) { if (ready) items = loadOr(emptyList()) { load(filter) } }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) {
@@ -102,6 +104,7 @@ internal fun FactoryCartridges(model: AppModel, onBack: () -> Unit, onPick: (Lon
         stringResource(Res.string.no_factory),
         model.library::factoryCartridges,
         onBack,
+        model.ready,
     ) { c ->
         TwoLines(
             c.name,
@@ -133,6 +136,7 @@ fun BulletList(model: AppModel, picker: Boolean, onBack: () -> Unit, onEdit: (Lo
         stringResource(Res.string.library_empty),
         model.library::bullets,
         onBack,
+        model.ready,
         reloadKey = model.revision,
         actions = {
             TextButton(onClick = {

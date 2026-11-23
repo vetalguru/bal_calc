@@ -72,6 +72,7 @@ internal fun LibraryRifles(model: AppModel, onBack: () -> Unit, onPick: (Library
         stringResource(Res.string.catalog_empty),
         { filter -> model.library.rifles(filter).flatMap { r -> r.barrelsIn.ifEmpty { listOf(0.0) }.map { RifleChoice(r, it) } } },
         onBack,
+        model.ready,
         header = { LibraryNote() },
     ) { (r, barrel) ->
         TwoLines(
@@ -95,6 +96,7 @@ internal fun LibraryScopes(model: AppModel, onBack: () -> Unit, onPick: (Library
         stringResource(Res.string.catalog_empty),
         { filter -> model.library.scopes(filter).flatMap { s -> s.clicks.map { s to it } } },
         onBack,
+        model.ready,
         header = { LibraryNote() },
     ) { (s, c) ->
         TwoLines(
